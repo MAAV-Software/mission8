@@ -1,1 +1,6 @@
-build
+build/
+lib/
+bin/
+datasets/
+CMakeFiles
+CMakeCache.txt
