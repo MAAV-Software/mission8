@@ -1,3 +1,3 @@
-[submodule "third_party/Sophus"]
-	path = third_party/Sophus
+[submodule "Thirdparty/Sophus"]
+	path = Thirdparty/Sophus
 	url = https://github.com/strasdat/Sophus.git
