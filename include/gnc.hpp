@@ -1,5 +1,4 @@
-#ifndef GNC_HPP
-#define GNC_HPP
+#pragma once
 
 #include <string>
 
@@ -32,5 +31,3 @@ class Localizer {
 
 }  // namespace gnc
 }  // namespace maav
-
-#endif
