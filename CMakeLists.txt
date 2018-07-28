@@ -32,7 +32,7 @@ endif()
 add_subdirectory(Thirdparty)
 set(G2O_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/g2o)
 set(DBOW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2)
-set(SOPHUS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus/sophus)
+set(SOPHUS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus)
 
 # Build submodules
 add_subdirectory(src)
@@ -59,6 +59,7 @@ add_library(maav-gnc SHARED
 
 target_link_libraries(maav-gnc 
     maav-slam
+    maav-state
 )
 
 
