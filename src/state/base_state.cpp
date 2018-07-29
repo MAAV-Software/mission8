@@ -1,38 +1,48 @@
 #include "base_state.hpp"
+#include "constants.hpp"
 
 namespace maav {
 namespace gnc {
 namespace state {
 
-BaseState::BaseState() {}
+BaseState::BaseState(uint64_t time_usec) : _time_usec(time_usec) {}
 
-BaseState BaseState::zero() {
-    BaseState new_state;
+BaseState BaseState::zero(uint64_t time_usec) {
+    BaseState new_state(time_usec);
+    new_state.attitude() = Sophus::SO3d(Eigen::Quaterniond::Identity());
+    new_state.angular_velocity() = Eigen::Vector3d::Zero();
+    new_state.position() = Eigen::Vector3d::Zero();
+    new_state.velocity() = Eigen::Vector3d::Zero();
+    new_state.acceleration() = Eigen::Vector3d::Zero();
     return new_state;
 }
 
-const Sophus::SO3d& BaseState::get_attitude() const { return attitude; }
+const Sophus::SO3d& BaseState::attitude() const { return _attitude; }
 
-Sophus::SO3d& BaseState::get_attitude() { return attitude; }
+Sophus::SO3d& BaseState::attitude() { return _attitude; }
 
-const Eigen::Vector3d& BaseState::get_angular_velocity() const {
-    return angular_velocity;
+const Eigen::Vector3d& BaseState::angular_velocity() const {
+    return _angular_velocity;
 }
-Eigen::Vector3d& BaseState::get_angular_velocity() { return angular_velocity; }
 
-const Eigen::Vector3d& BaseState::get_position() const { return position; }
+Eigen::Vector3d& BaseState::angular_velocity() { return _angular_velocity; }
 
-Eigen::Vector3d& BaseState::get_position() { return position; }
+const Eigen::Vector3d& BaseState::position() const { return _position; }
 
-const Eigen::Vector3d& BaseState::get_velocity() const { return velocity; }
+Eigen::Vector3d& BaseState::position() { return _position; }
 
-Eigen::Vector3d& BaseState::get_velocity() { return velocity; }
+const Eigen::Vector3d& BaseState::velocity() const { return _velocity; }
 
-uint64_t BaseState::get_time_usec() const { return time_usec; }
+Eigen::Vector3d& BaseState::velocity() { return _velocity; }
 
-double BaseState::get_time_sec() const {
-    constexpr double USEC_PER_SEC = 1000000.0;
-    return static_cast<double>(time_usec) / USEC_PER_SEC;
+const Eigen::Vector3d& BaseState::acceleration() const { return _acceleration; }
+
+Eigen::Vector3d& BaseState::acceleration() { return _acceleration; }
+
+uint64_t BaseState::time_usec() const { return _time_usec; }
+
+double BaseState::time_sec() const {
+    return static_cast<double>(_time_usec) * constants::USEC_TO_SEC;
 }
 
 }  // namespace state

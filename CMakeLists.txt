@@ -34,11 +34,12 @@ set(G2O_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/g2o)
 set(DBOW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2)
 set(SOPHUS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus)
 
+set(GNC_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+
 # Build submodules
 add_subdirectory(src)
 
 set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-set(GNC_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(GNC_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 # Build libmaav-gnc
@@ -60,6 +61,7 @@ add_library(maav-gnc SHARED
 target_link_libraries(maav-gnc 
     maav-slam
     maav-state
+    maav-kalman
 )
 
 

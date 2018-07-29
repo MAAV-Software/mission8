@@ -18,47 +18,52 @@ class BaseState {
     /**
      * Create a state with uninitialized members
      */
-    BaseState();
+    BaseState(uint64_t time_usec);
 
     /**
      * Initialize the state to identity values
      */
-    static BaseState zero();
+    static BaseState zero(uint64_t time_usec);
 
     /**
      * Returns a constant reference to the rotation matrix
      */
-    const Sophus::SO3d& get_attitude() const;
+    const Sophus::SO3d& attitude() const;
     /**
      * Returns a mutable reference to the rotation matrix
      */
-    Sophus::SO3d& get_attitude();
+    Sophus::SO3d& attitude();
 
-    const Eigen::Vector3d& get_angular_velocity() const;
-    Eigen::Vector3d& get_angular_velocity();
+    const Eigen::Vector3d& angular_velocity() const;
+    Eigen::Vector3d& angular_velocity();
 
-    const Eigen::Vector3d& get_position() const;
-    Eigen::Vector3d& get_position();
+    const Eigen::Vector3d& position() const;
+    Eigen::Vector3d& position();
 
-    const Eigen::Vector3d& get_velocity() const;
-    Eigen::Vector3d& get_velocity();
+    const Eigen::Vector3d& velocity() const;
+    Eigen::Vector3d& velocity();
 
-    uint64_t get_time_usec() const;
-    double get_time_sec() const;
+    const Eigen::Vector3d& acceleration() const;
+    Eigen::Vector3d& acceleration();
+
+    uint64_t time_usec() const;
+    double time_sec() const;
 
    protected:
-    uint64_t time_usec;
+    uint64_t _time_usec;
 
     /**
      * Orientation of the vehicle represented as a member of SO3
      */
-    Sophus::SO3d attitude;
+    Sophus::SO3d _attitude;
 
-    Eigen::Vector3d angular_velocity;
+    Eigen::Vector3d _angular_velocity;
 
-    Eigen::Vector3d position;
+    Eigen::Vector3d _position;
 
-    Eigen::Vector3d velocity;
+    Eigen::Vector3d _velocity;
+
+    Eigen::Vector3d _acceleration;
 };
 
 }  // namespace state
