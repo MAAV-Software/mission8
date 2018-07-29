@@ -1,5 +1,7 @@
 configure_file(config.h.in ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/g2o/config.h)
 
+set(g2o_SOURCE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/g2o)
+
 # Include the subdirectories
 include_directories(
   ${g2o_SOURCE_DIR}/core
