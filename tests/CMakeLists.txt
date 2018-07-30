@@ -1,34 +1,42 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+project(tests)
+enable_testing()
+ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK) 
 
-include_directories(    
+
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+
+include_directories(
     ${GNC_INCLUDE_DIR}
     ${GNC_SRC_DIR}
+    ${GNC_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
 )
 
-# Manual handheld D415 run
-set(LIBREALSENSE_INCLUDE_DIR /usr/local/include/librealsense2)
-set(LIBREALSENSE_LIBRARY_DIR /usr/local/lib/librealsense2.so)
-if(EXISTS ${LIBREALSENSE_LIBRARY_DIR})
-    message("Found librealsense2")
-    include_directories(${LIBREALSENSE_INCLUDE_DIR})
-    
-    add_executable(manual
-        manual/main.cpp
-    )
+file(GLOB TEST_SRCS ${GNC_TEST_DIR}/*.cpp)
+foreach(testSrc ${TEST_SRCS})
+        #Extract the filename without an extension (NAME_WE)
+        get_filename_component(testName ${testSrc} NAME_WE)
 
-    target_link_libraries(manual
-        ${LIBREALSENSE_LIBRARY_DIR}
-        ${OpenCV_LIBS}
+        #Add compile target
+        add_executable(${testName} ${testSrc})
+
+        #link to Boost libraries AND your targets and dependencies
+        target_link_libraries(${testName} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        maav-state
         maav-gnc
-    )   
-endif()
+        maav-kalman
+     )
 
-add_executable(tums
-    tums/main.cpp
-)
+        set(TEST_BIN_DIR ${CMAKE_SOURCE_DIR}/testBin)
 
-target_link_libraries(tums
-    maav-gnc
-    maav-slam
-)
-   
+        #I like to move testing binaries into a testBin directory
+        set_target_properties(${testName} PROPERTIES 
+            RUNTIME_OUTPUT_DIRECTORY  ${TEST_BIN_DIR})
+
+        #Finally add it to test execution - 
+        #Notice the WORKING_DIRECTORY and COMMAND
+        add_test(NAME ${testName} 
+                 WORKING_DIRECTORY ${TEST_BIN_DIR}
+                 COMMAND ${TEST_BIN_DIR}/${testName} )
+endforeach(testSrc)

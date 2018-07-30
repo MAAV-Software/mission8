@@ -41,6 +41,7 @@ add_subdirectory(src)
 
 set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set(GNC_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+set(GNC_TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
 
 # Build libmaav-gnc
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GNC_LIB_DIR})
@@ -65,8 +66,10 @@ target_link_libraries(maav-gnc
 )
 
 
-# Build tests
+# Build tests and examples
+enable_testing() 
 add_subdirectory(tests)
+add_subdirectory(examples)
 
 # TODO: expose shared library and public headers
 

@@ -13,10 +13,12 @@ KalmanState KalmanState::zero(uint64_t time_usec) {
     new_state.angular_velocity() = Eigen::Vector3d::Zero();
     new_state.position() = Eigen::Vector3d::Zero();
     new_state.velocity() = Eigen::Vector3d::Zero();
+    new_state.acceleration() = Eigen::Vector3d::Zero();
     new_state.gyro_bias() = Eigen::Vector3d::Zero();
     new_state.accel_bias() = Eigen::Vector3d::Zero();
     new_state.gravity_vector() = {0.0, 0.0, -constants::STANDARD_GRAVITY};
     new_state.magnetic_field_vector() = {1.0, 0.0, 0.0};
+    new_state.covariance() = CovarianceMatrix::Identity();
     return new_state;
 }
 
@@ -40,9 +42,11 @@ Eigen::Vector3d& KalmanState::magnetic_field_vector() {
     return _magnetic_field;
 }
 
-const CovarianceMatrix& KalmanState::covariance() const { return _covar; }
+const KalmanState::CovarianceMatrix& KalmanState::covariance() const {
+    return _covar;
+}
 
-CovarianceMatrix& KalmanState::covariance() { return _covar; }
+KalmanState::CovarianceMatrix& KalmanState::covariance() { return _covar; }
 
 }  // namespace kalman
 }  // namespace gnc

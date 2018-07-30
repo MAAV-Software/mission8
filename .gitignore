@@ -1,6 +1,8 @@
 build/
 lib/
 bin/
+testBin/
 datasets/
 CMakeFiles
 CMakeCache.txt
+Testing/

@@ -8,15 +8,6 @@ namespace maav {
 namespace gnc {
 namespace kalman {
 
-// TODO: Increase dimension as we add more estimated states
-constexpr size_t STATE_DIM = 16;
-constexpr size_t ERROR_STATE_DIM = STATE_DIM - 1;
-
-typedef Eigen::Matrix<double, ERROR_STATE_DIM, ERROR_STATE_DIM>
-    CovarianceMatrix;
-
-typedef Eigen::Matrix<double, ERROR_STATE_DIM, 1> ErrorStateVector;
-
 /**
  * Attitude: Represented as an element of SO3
  * Angular rate: 3D vector
@@ -31,9 +22,16 @@ typedef Eigen::Matrix<double, ERROR_STATE_DIM, 1> ErrorStateVector;
  */
 class KalmanState : public state::BaseState {
    public:
+    constexpr static size_t DIM = 16;
+    constexpr static size_t E_DIM = DIM - 1;
+
+    using CovarianceMatrix = Eigen::Matrix<double, E_DIM, E_DIM>;
+    using ErrorStateVector = Eigen::Matrix<double, E_DIM, 1>;
+
+   public:
     KalmanState(uint64_t time_usec);
 
-    KalmanState zero(uint64_t time_usec);
+    static KalmanState zero(uint64_t time_usec);
 
     const Eigen::Vector3d& gyro_bias() const;
     Eigen::Vector3d& gyro_bias();
