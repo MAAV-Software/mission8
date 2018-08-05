@@ -56,7 +56,10 @@ include_directories(
 )
 
 add_library(maav-gnc SHARED
-    ${GNC_SRC_DIR}/gnc.cpp
+    ${GNC_SRC_DIR}/localizer.cpp
+    ${GNC_SRC_DIR}/estimator.cpp
+    ${GNC_SRC_DIR}/planner.cpp
+    ${GNC_SRC_DIR}/controller.cpp
 )
 
 target_link_libraries(maav-gnc 

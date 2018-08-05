@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "GlobalUpdate.h"
-#include "Imu.h"
-#include "Lidar.h"
-#include "PlaneFit.h"
-#include "VisualOdometry.h"
+#include "measurements/GlobalUpdate.hpp"
+#include "measurements/Imu.hpp"
+#include "measurements/Lidar.hpp"
+#include "measurements/PlaneFit.hpp"
+#include "measurements/VisualOdometry.hpp"
 
 namespace maav {
 namespace gnc {
@@ -17,12 +17,12 @@ namespace measurements {
  * together (so, they all happened at the same time).
  */
 class Measurement {
-	std::shared_ptr<ImuMeasurement> imu;
-	std::shared_ptr<LidarMeasurement> lidar;
-	std::shared_ptr<PlaneFitMeasurement> plane_fit;
-	std::shared_ptr<VisualOdometryMeasurement> visual_odometry;
-	std::shared_ptr<GlobalUpdateMeasurement> global_update;
-}
+    std::shared_ptr<ImuMeasurement> imu;
+    std::shared_ptr<LidarMeasurement> lidar;
+    std::shared_ptr<PlaneFitMeasurement> plane_fit;
+    std::shared_ptr<VisualOdometryMeasurement> visual_odometry;
+    std::shared_ptr<GlobalUpdateMeasurement> global_update;
+};
 
 /*
  * The MeasurementSet class is the same as the Measurement class.
@@ -30,11 +30,11 @@ class Measurement {
  * purpose. Where the Measurement class is meant to represent all the
  * measurements that we have from a particular moment in time, the
  * MeasurementSet class is used to hold a collection of measurements that may
- * not have happened at the same moment, mostly for convenience so we don't 
+ * not have happened at the same moment, mostly for convenience so we don't
  * have to split up measurements into many arguments.
  */
 typedef Measurement MeasurementSet;
 
-}  // namespace kalman
+}  // namespace measurements
 }  // namespace gnc
 }  // namespace maav

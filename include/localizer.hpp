@@ -4,6 +4,7 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "measurements.hpp"
 #include "slam/System.h"
 
 namespace maav {
@@ -22,8 +23,10 @@ class Localizer {
 
     ~Localizer();
 
-    void dump_image(const cv::Mat& color, const cv::Mat& depth,
-                    uint64_t timestamp);
+    void add_image(const cv::Mat& color, const cv::Mat& depth,
+                   uint64_t timestamp);
+
+    void add_imu(const measurements::ImuMeasurement& imu);
 
    private:
     ORB_SLAM2::System slam;

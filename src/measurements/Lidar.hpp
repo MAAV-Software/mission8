@@ -8,10 +8,10 @@ namespace measurements {
  * Stores the necessary info we need from a lidar message.
  */
 struct LidarMeasurement {
-	double distance;
-	uint64_t time;
-}
+    double distance;
+    uint64_t time;
+};
 
-}  // namespace kalman
+}  // namespace measurements
 }  // namespace gnc
 }  // namespace maav
