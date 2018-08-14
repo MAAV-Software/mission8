@@ -23,7 +23,9 @@
 #include <opencv2/opencv.hpp>
 #include "Frame.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 // THIS IS THE INITIALIZER FOR MONOCULAR SLAM. NOT USED IN THE STEREO OR RGBD
 // CASE.
@@ -110,6 +112,8 @@ class Initializer {
     std::vector<vector<size_t> > mvSets;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // INITIALIZER_H

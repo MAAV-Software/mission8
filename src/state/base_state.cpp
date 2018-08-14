@@ -1,5 +1,5 @@
-#include "base_state.hpp"
-#include "constants.hpp"
+#include "gnc/state/base_state.hpp"
+#include "gnc/constants.hpp"
 
 namespace maav {
 namespace gnc {

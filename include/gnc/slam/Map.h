@@ -27,7 +27,9 @@
 
 #include <mutex>
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class MapPoint;
 class KeyFrame;
@@ -77,6 +79,8 @@ class Map {
     std::mutex mMutexMap;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // MAP_H

@@ -18,16 +18,18 @@
  * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "KeyFrameDatabase.h"
+#include <mutex>
 
 #include "DBoW2/BowVector.h"
-#include "KeyFrame.h"
 
-#include <mutex>
+#include "gnc/slam/KeyFrame.h"
+#include "gnc/slam/KeyFrameDatabase.h"
 
 using namespace std;
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 KeyFrameDatabase::KeyFrameDatabase(const ORBVocabulary& voc) : mpVoc(&voc) {
     mvInvertedFile.resize(voc.size());
@@ -297,4 +299,6 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame* F) {
     return vpRelocCandidates;
 }
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav

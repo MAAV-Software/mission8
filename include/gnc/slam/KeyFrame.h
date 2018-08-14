@@ -1,52 +1,51 @@
 /**
-* This file is part of ORB-SLAM2.
-*
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-*
-* ORB-SLAM2 is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM2 is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM2.
+ *
+ * Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University
+ * of Zaragoza) For more information see <https://github.com/raulmur/ORB_SLAM2>
+ *
+ * ORB-SLAM2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ORB-SLAM2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
-#include "MapPoint.h"
 #include "DBoW2/BowVector.h"
 #include "DBoW2/FeatureVector.h"
-#include "ORBVocabulary.h"
-#include "ORBextractor.h"
 #include "Frame.h"
 #include "KeyFrameDatabase.h"
+#include "MapPoint.h"
+#include "ORBVocabulary.h"
+#include "ORBextractor.h"
 
 #include <mutex>
 
-
-namespace ORB_SLAM2
-{
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class Map;
 class MapPoint;
 class Frame;
 class KeyFrameDatabase;
 
-class KeyFrame
-{
-public:
-    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+class KeyFrame {
+   public:
+    KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     // Pose functions
-    void SetPose(const cv::Mat &Tcw);
+    void SetPose(const cv::Mat& Tcw);
     cv::Mat GetPose();
     cv::Mat GetPoseInverse();
     cv::Mat GetCameraCenter();
@@ -58,14 +57,14 @@ public:
     void ComputeBoW();
 
     // Covisibility graph functions
-    void AddConnection(KeyFrame* pKF, const int &weight);
+    void AddConnection(KeyFrame* pKF, const int& weight);
     void EraseConnection(KeyFrame* pKF);
     void UpdateConnections();
     void UpdateBestCovisibles();
-    std::set<KeyFrame *> GetConnectedKeyFrames();
-    std::vector<KeyFrame* > GetVectorCovisibleKeyFrames();
-    std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int &N);
-    std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w);
+    std::set<KeyFrame*> GetConnectedKeyFrames();
+    std::vector<KeyFrame*> GetVectorCovisibleKeyFrames();
+    std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int& N);
+    std::vector<KeyFrame*> GetCovisiblesByWeight(const int& w);
     int GetWeight(KeyFrame* pKF);
 
     // Spanning tree functions
@@ -81,21 +80,22 @@ public:
     std::set<KeyFrame*> GetLoopEdges();
 
     // MapPoint observation functions
-    void AddMapPoint(MapPoint* pMP, const size_t &idx);
-    void EraseMapPointMatch(const size_t &idx);
+    void AddMapPoint(MapPoint* pMP, const size_t& idx);
+    void EraseMapPointMatch(const size_t& idx);
     void EraseMapPointMatch(MapPoint* pMP);
-    void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
+    void ReplaceMapPointMatch(const size_t& idx, MapPoint* pMP);
     std::set<MapPoint*> GetMapPoints();
     std::vector<MapPoint*> GetMapPointMatches();
-    int TrackedMapPoints(const int &minObs);
-    MapPoint* GetMapPoint(const size_t &idx);
+    int TrackedMapPoints(const int& minObs);
+    MapPoint* GetMapPoint(const size_t& idx);
 
     // KeyPoint functions
-    std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const;
+    std::vector<size_t> GetFeaturesInArea(const float& x, const float& y,
+                                          const float& r) const;
     cv::Mat UnprojectStereo(int i);
 
     // Image
-    bool IsInImage(const float &x, const float &y) const;
+    bool IsInImage(const float& x, const float& y) const;
 
     // Enable/Disable bad flag changes
     void SetNotErase();
@@ -108,18 +108,15 @@ public:
     // Compute Scene Depth (q=2 median). Used in monocular.
     float ComputeSceneMedianDepth(const int q);
 
-    static bool weightComp( int a, int b){
-        return a>b;
+    static bool weightComp(int a, int b) { return a > b; }
+
+    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2) {
+        return pKF1->mnId < pKF2->mnId;
     }
 
-    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){
-        return pKF1->mnId<pKF2->mnId;
-    }
-
-
-    // The following variables are accesed from only 1 thread or never change (no mutex needed).
-public:
-
+    // The following variables are accesed from only 1 thread or never change
+    // (no mutex needed).
+   public:
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;
@@ -162,11 +159,11 @@ public:
     // KeyPoints, stereo coordinate and descriptors (all associated by an index)
     const std::vector<cv::KeyPoint> mvKeys;
     const std::vector<cv::KeyPoint> mvKeysUn;
-    const std::vector<float> mvuRight; // negative value for monocular points
-    const std::vector<float> mvDepth; // negative value for monocular points
+    const std::vector<float> mvuRight;  // negative value for monocular points
+    const std::vector<float> mvDepth;   // negative value for monocular points
     const cv::Mat mDescriptors;
 
-    //BoW
+    // BoW
     DBoW2::BowVector mBowVec;
     DBoW2::FeatureVector mFeatVec;
 
@@ -188,16 +185,15 @@ public:
     const int mnMaxY;
     const cv::Mat mK;
 
-
-    // The following variables need to be accessed trough a mutex to be thread safe.
-protected:
-
+    // The following variables need to be accessed trough a mutex to be thread
+    // safe.
+   protected:
     // SE3 Pose and camera center
     cv::Mat Tcw;
     cv::Mat Twc;
     cv::Mat Ow;
 
-    cv::Mat Cw; // Stereo middel point. Only for visualization
+    cv::Mat Cw;  // Stereo middel point. Only for visualization
 
     // MapPoints associated to keypoints
     std::vector<MapPoint*> mvpMapPoints;
@@ -207,9 +203,9 @@ protected:
     ORBVocabulary* mpORBvocabulary;
 
     // Grid over the image to speed up feature matching
-    std::vector< std::vector <std::vector<size_t> > > mGrid;
+    std::vector<std::vector<std::vector<size_t> > > mGrid;
 
-    std::map<KeyFrame*,int> mConnectedKeyFrameWeights;
+    std::map<KeyFrame*, int> mConnectedKeyFrameWeights;
     std::vector<KeyFrame*> mvpOrderedConnectedKeyFrames;
     std::vector<int> mvOrderedWeights;
 
@@ -222,9 +218,9 @@ protected:
     // Bad flags
     bool mbNotErase;
     bool mbToBeErased;
-    bool mbBad;    
+    bool mbBad;
 
-    float mHalfBaseline; // Only for visualization
+    float mHalfBaseline;  // Only for visualization
 
     Map* mpMap;
 
@@ -233,6 +229,8 @@ protected:
     std::mutex mMutexFeatures;
 };
 
-} //namespace ORB_SLAM
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
-#endif // KEYFRAME_H
+#endif  // KEYFRAME_H

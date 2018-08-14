@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "measurements/GlobalUpdate.hpp"
-#include "measurements/Imu.hpp"
-#include "measurements/Lidar.hpp"
-#include "measurements/PlaneFit.hpp"
-#include "measurements/VisualOdometry.hpp"
+#include "gnc/measurements/GlobalUpdate.hpp"
+#include "gnc/measurements/Imu.hpp"
+#include "gnc/measurements/Lidar.hpp"
+#include "gnc/measurements/PlaneFit.hpp"
+#include "gnc/measurements/VisualOdometry.hpp"
 
 namespace maav {
 namespace gnc {

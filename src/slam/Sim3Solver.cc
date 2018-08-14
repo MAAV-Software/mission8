@@ -18,18 +18,19 @@
  * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Sim3Solver.h"
-
 #include <cmath>
-#include <opencv2/core/core.hpp>
 #include <vector>
 
-#include "KeyFrame.h"
-#include "ORBmatcher.h"
-
+#include <opencv2/core/core.hpp>
 #include "DUtils/Random.h"
 
-namespace ORB_SLAM2 {
+#include "gnc/slam/KeyFrame.h"
+#include "gnc/slam/ORBmatcher.h"
+#include "gnc/slam/Sim3Solver.h"
+
+namespace maav {
+namespace gnc {
+namespace slam {
 
 Sim3Solver::Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2,
                        const vector<MapPoint*>& vpMatched12,
@@ -391,4 +392,6 @@ void Sim3Solver::FromCameraToImage(const vector<cv::Mat>& vP3Dc,
     }
 }
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav

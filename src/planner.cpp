@@ -1,4 +1,4 @@
-#include "planner.hpp"
+#include "gnc/planner.hpp"
 
 namespace maav {
 namespace gnc {

@@ -27,7 +27,9 @@
 #include "g2o/types/types_seven_dof_expmap.h"
 #include "g2o/types/types_six_dof_expmap.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class Converter {
    public:
@@ -51,6 +53,8 @@ class Converter {
     static std::vector<float> toQuaternion(const cv::Mat& M);
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // CONVERTER_H

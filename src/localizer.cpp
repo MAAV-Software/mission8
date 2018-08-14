@@ -1,4 +1,5 @@
-#include "localizer.hpp"
+#include "gnc/localizer.hpp"
+#include "gnc/state/base_state.hpp"
 
 using namespace cv;
 

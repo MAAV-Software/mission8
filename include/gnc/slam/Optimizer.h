@@ -29,7 +29,9 @@
 
 #include "g2o/types/types_seven_dof_expmap.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class LoopClosing;
 
@@ -64,6 +66,8 @@ class Optimizer {
                             const bool bFixScale);
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // OPTIMIZER_H

@@ -17,6 +17,9 @@ if(${CMAKE_BUILD_TYPE} MATCHES ${RELEASE})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 
+# Set library output directory
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GNC_LIB_DIR})
+
 # Find packages
 find_package (Eigen3 REQUIRED)
 find_package(Pangolin REQUIRED)
@@ -35,31 +38,29 @@ set(DBOW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2)
 set(SOPHUS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus)
 
 set(GNC_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(GNC_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+
 
 # Build submodules
 add_subdirectory(src)
 
-set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-set(GNC_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 set(GNC_TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
 
 # Build libmaav-gnc
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GNC_LIB_DIR})
-
-include_directories(
-    ${PROJECT_SOURCE_DIR}
-    ${GNC_SRC_DIR}
-    ${GNC_INCLUDE_DIR}
-    ${G2O_INCLUDE_DIR}
-    ${DBOW_INCLUDE_DIR}
-    ${SOPHUS_INCLUDE_DIR}
-)
 
 add_library(maav-gnc SHARED
     ${GNC_SRC_DIR}/localizer.cpp
     ${GNC_SRC_DIR}/estimator.cpp
     ${GNC_SRC_DIR}/planner.cpp
     ${GNC_SRC_DIR}/controller.cpp
+)
+
+target_include_directories(maav-gnc PUBLIC
+    ${GNC_INCLUDE_DIR}
+    ${G2O_INCLUDE_DIR}
+    ${DBOW_INCLUDE_DIR}
+    ${SOPHUS_INCLUDE_DIR}
 )
 
 target_link_libraries(maav-gnc 

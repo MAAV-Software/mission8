@@ -18,20 +18,18 @@
  * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LoopClosing.h"
-
-#include "Sim3Solver.h"
-
-#include "Converter.h"
-
-#include "Optimizer.h"
-
-#include "ORBmatcher.h"
-
 #include <mutex>
 #include <thread>
 
-namespace ORB_SLAM2 {
+#include "gnc/slam/Converter.h"
+#include "gnc/slam/LoopClosing.h"
+#include "gnc/slam/ORBmatcher.h"
+#include "gnc/slam/Optimizer.h"
+#include "gnc/slam/Sim3Solver.h"
+
+namespace maav {
+namespace gnc {
+namespace slam {
 
 LoopClosing::LoopClosing(Map* pMap, KeyFrameDatabase* pDB, ORBVocabulary* pVoc,
                          const bool bFixScale)
@@ -739,4 +737,6 @@ bool LoopClosing::isFinished() {
     return mbFinished;
 }
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav

@@ -57,7 +57,9 @@
 #include "Frame.h"
 #include "MapPoint.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class PnPsolver {
    public:
@@ -199,6 +201,8 @@ class PnPsolver {
     std::vector<float> mvMaxError;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // PNPSOLVER_H

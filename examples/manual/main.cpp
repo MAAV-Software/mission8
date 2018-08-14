@@ -87,7 +87,7 @@ bool profile_changed(const std::vector<rs2::stream_profile>& current,
 int main(int, char**) {
     maav::gnc::SlamInitializer slam_init{"../Vocabulary/ORBvoc.txt",
                                          "../config/slam-config.yaml",
-                                         ORB_SLAM2::System::RGBD, true};
+                                         maav::System::RGBD, true};
     maav::gnc::Localizer localizer(slam_init);
     // Declare RealSense pipeline, encapsulating the actual device and sensors
     rs2::pipeline pipe;

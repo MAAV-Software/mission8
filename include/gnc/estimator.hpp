@@ -1,7 +1,7 @@
 #pragma once
 
-#include "measurements.hpp"
-#include "state.hpp"
+#include "gnc/measurements/Measurement.hpp"
+#include "gnc/state.hpp"
 
 namespace maav {
 namespace gnc {

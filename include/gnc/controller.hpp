@@ -1,6 +1,6 @@
 #pragma once
 
-#include "state.hpp"
+#include "gnc/state.hpp"
 
 namespace maav {
 namespace gnc {

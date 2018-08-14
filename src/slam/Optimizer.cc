@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <mutex>
 
-#include "Optimizer.h"
-
+#include <Eigen/StdVector>
 #include "g2o/core/block_solver.h"
 #include "g2o/core/optimization_algorithm_levenberg.h"
 #include "g2o/core/robust_kernel_impl.h"
@@ -28,13 +28,12 @@
 #include "g2o/types/types_seven_dof_expmap.h"
 #include "g2o/types/types_six_dof_expmap.h"
 
-#include <Eigen/StdVector>
+#include "gnc/slam/Converter.h"
+#include "gnc/slam/Optimizer.h"
 
-#include "Converter.h"
-
-#include <mutex>
-
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 void Optimizer::GlobalBundleAdjustemnt(Map* pMap, int nIterations,
                                        bool* pbStopFlag,
@@ -1217,4 +1216,6 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
     return nIn;
 }
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav

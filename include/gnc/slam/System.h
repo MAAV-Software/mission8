@@ -36,7 +36,9 @@
 #include "Tracking.h"
 #include "Viewer.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class Viewer;
 class FrameDrawer;
@@ -179,6 +181,8 @@ class System {
     std::mutex mMutexState;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // SYSTEM_H

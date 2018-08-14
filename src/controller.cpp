@@ -1,4 +1,4 @@
-#include "controller.hpp"
+#include "gnc/controller.hpp"
 
 namespace maav {
 namespace gnc {

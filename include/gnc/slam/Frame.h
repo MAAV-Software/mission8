@@ -32,7 +32,10 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
+
 #define FRAME_GRID_ROWS 48
 #define FRAME_GRID_COLS 64
 
@@ -218,6 +221,8 @@ class Frame {
     cv::Mat mOw;  //==mtwc
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // FRAME_H

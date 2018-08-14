@@ -2,8 +2,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "kalman/kalman_state.hpp"
-#include "state/base_state.hpp"
+#include "gnc/kalman/kalman_state.hpp"
+#include "gnc/state/base_state.hpp"
 
 using namespace boost::unit_test;
 using namespace Eigen;

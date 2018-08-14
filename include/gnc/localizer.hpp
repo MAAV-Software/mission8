@@ -4,8 +4,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "measurements.hpp"
-#include "slam/System.h"
+#include "gnc/measurements/Imu.hpp"
+#include "gnc/slam/System.h"
 
 namespace maav {
 namespace gnc {
@@ -13,7 +13,7 @@ namespace gnc {
 struct SlamInitializer {
     std::string vocabulary_file;
     std::string config_file;
-    ORB_SLAM2::System::eSensor sensor;
+    slam::System::eSensor sensor;
     bool use_viewer = true;
 };
 
@@ -29,7 +29,7 @@ class Localizer {
     void add_imu(const measurements::ImuMeasurement& imu);
 
    private:
-    ORB_SLAM2::System slam;
+    slam::System slam;
 };
 
 }  // namespace gnc

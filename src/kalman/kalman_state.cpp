@@ -1,5 +1,5 @@
-#include "kalman_state.hpp"
-#include "constants.hpp"
+#include "gnc/kalman/kalman_state.hpp"
+#include "gnc/constants.hpp"
 
 namespace maav {
 namespace gnc {

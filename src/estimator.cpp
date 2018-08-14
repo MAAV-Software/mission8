@@ -1,4 +1,5 @@
-#include "estimator.hpp"
+#include "gnc/estimator.hpp"
+#include "gnc/state/base_state.hpp"
 
 using maav::gnc::measurements::MeasurementSet;
 

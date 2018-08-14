@@ -18,52 +18,55 @@
  * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FRAMEDRAWER_H
-#define FRAMEDRAWER_H
+#ifndef KEYFRAMEDATABASE_H
+#define KEYFRAMEDATABASE_H
 
-#include "Map.h"
-#include "MapPoint.h"
-#include "Tracking.h"
+#include <list>
+#include <set>
+#include <vector>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include "Frame.h"
+#include "KeyFrame.h"
+#include "ORBVocabulary.h"
 
 #include <mutex>
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
-class Tracking;
-class Viewer;
+class KeyFrame;
+class Frame;
 
-class FrameDrawer {
+class KeyFrameDatabase {
    public:
-    FrameDrawer(Map* pMap);
+    KeyFrameDatabase(const ORBVocabulary& voc);
 
-    // Update info from the last processed frame.
-    void Update(Tracking* pTracker);
+    void add(KeyFrame* pKF);
 
-    // Draw last processed frame.
-    cv::Mat DrawFrame();
+    void erase(KeyFrame* pKF);
+
+    void clear();
+
+    // Loop Detection
+    std::vector<KeyFrame*> DetectLoopCandidates(KeyFrame* pKF, float minScore);
+
+    // Relocalization
+    std::vector<KeyFrame*> DetectRelocalizationCandidates(Frame* F);
 
    protected:
-    void DrawTextInfo(cv::Mat& im, int nState, cv::Mat& imText);
+    // Associated vocabulary
+    const ORBVocabulary* mpVoc;
 
-    // Info of the frame to be drawn
-    cv::Mat mIm;
-    int N;
-    std::vector<cv::KeyPoint> mvCurrentKeys;
-    std::vector<bool> mvbMap, mvbVO;
-    bool mbOnlyTracking;
-    int mnTracked, mnTrackedVO;
-    std::vector<cv::KeyPoint> mvIniKeys;
-    std::vector<int> mvIniMatches;
-    int mState;
+    // Inverted file
+    std::vector<list<KeyFrame*> > mvInvertedFile;
 
-    Map* mpMap;
-
+    // Mutex
     std::mutex mMutex;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
-#endif  // FRAMEDRAWER_H
+#endif

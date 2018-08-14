@@ -33,7 +33,9 @@
 #include <thread>
 #include "g2o/types/types_seven_dof_expmap.h"
 
-namespace ORB_SLAM2 {
+namespace maav {
+namespace gnc {
+namespace slam {
 
 class Tracking;
 class LocalMapping;
@@ -142,6 +144,8 @@ class LoopClosing {
     bool mnFullBAIdx;
 };
 
-}  // namespace ORB_SLAM2
+}  // namespace slam
+}  // namespace gnc
+}  // namespace maav
 
 #endif  // LOOPCLOSING_H

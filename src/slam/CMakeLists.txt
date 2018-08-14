@@ -1,11 +1,3 @@
-include_directories(
-    ${PROJECT_SOURCE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-    ${Pangolin_INCLUDE_DIRS}
-    ${DBOW_INCLUDE_DIR}
-    ${G2O_INCLUDE_DIR}
-)
-
 add_library(maav-slam SHARED
     Converter.cc
     Frame.cc
@@ -26,6 +18,14 @@ add_library(maav-slam SHARED
     System.cc
     Tracking.cc
     Viewer.cc
+)
+
+target_include_directories(maav-slam PUBLIC
+    ${GNC_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
+    ${Pangolin_INCLUDE_DIRS}
+    ${DBOW_INCLUDE_DIR}
+    ${G2O_INCLUDE_DIR}
 )
 
 target_link_libraries(maav-slam
