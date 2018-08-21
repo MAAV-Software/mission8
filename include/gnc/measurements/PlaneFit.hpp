@@ -12,7 +12,7 @@ struct PlaneFitMeasurement {
     double vertical_speed;
     double roll;
     double pitch;
-    uint64_t time;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements

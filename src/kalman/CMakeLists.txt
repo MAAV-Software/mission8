@@ -1,5 +1,6 @@
 add_library(maav-kalman SHARED
     kalman_state.cpp
+    history.cpp
 )
 
 target_include_directories(maav-kalman PUBLIC

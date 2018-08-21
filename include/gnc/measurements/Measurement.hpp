@@ -16,12 +16,12 @@ namespace measurements {
  * The Measurement class holds a group of measurements that are meant to be
  * together (so, they all happened at the same time).
  */
-class Measurement {
-    std::shared_ptr<ImuMeasurement> imu;
-    std::shared_ptr<LidarMeasurement> lidar;
-    std::shared_ptr<PlaneFitMeasurement> plane_fit;
-    std::shared_ptr<VisualOdometryMeasurement> visual_odometry;
-    std::shared_ptr<GlobalUpdateMeasurement> global_update;
+struct Measurement {
+    std::shared_ptr<const ImuMeasurement> imu;
+    std::shared_ptr<const LidarMeasurement> lidar;
+    std::shared_ptr<const PlaneFitMeasurement> plane_fit;
+    std::shared_ptr<const VisualOdometryMeasurement> visual_odometry;
+    std::shared_ptr<const GlobalUpdateMeasurement> global_update;
 };
 
 /*

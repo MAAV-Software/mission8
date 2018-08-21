@@ -9,7 +9,7 @@ namespace measurements {
  */
 struct LidarMeasurement {
     double distance;
-    uint64_t time;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements
