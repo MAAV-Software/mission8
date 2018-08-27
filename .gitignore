@@ -6,3 +6,5 @@ datasets/
 CMakeFiles
 CMakeCache.txt
 Testing/
+Vocabulary/
+cmake-build-debug/

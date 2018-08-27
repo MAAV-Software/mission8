@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(HistorySimpleTest) {
                                                iter_pair.second);
     BOOST_REQUIRE_EQUAL(history_vec.size(), 2);
     // Initial disregards anthing but IMU, seconds has only IMU
-    BOOST_REQUIRE_EQUAL(history_vec[0].measurement.lidar, nullptr);
-    BOOST_REQUIRE_EQUAL(history_vec[1].measurement.lidar, nullptr);
+    BOOST_REQUIRE(history_vec[0].measurement.lidar == nullptr);
+    BOOST_REQUIRE(history_vec[1].measurement.lidar == nullptr);
     // Check tines
     BOOST_REQUIRE_EQUAL(history_vec[0].get_time(), 0);
     BOOST_REQUIRE_EQUAL(history_vec[1].get_time(), 10000);
@@ -118,9 +118,9 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance) {
     std::vector<History::Snapshot> history_vec1(iter_pair1.first,
                                                 iter_pair1.second);
     BOOST_REQUIRE_EQUAL(history_vec1.size(), 3);
-    BOOST_REQUIRE_EQUAL(history_vec1[0].measurement.lidar, nullptr);
-    BOOST_REQUIRE_NE(history_vec1[1].measurement.lidar, nullptr);
-    BOOST_REQUIRE_EQUAL(history_vec1[2].measurement.lidar, nullptr);
+    BOOST_REQUIRE(history_vec1[0].measurement.lidar == nullptr);
+    BOOST_REQUIRE(history_vec1[1].measurement.lidar != nullptr);
+    BOOST_REQUIRE(history_vec1[2].measurement.lidar == nullptr);
     BOOST_REQUIRE_EQUAL(history_vec1[1].measurement.lidar->time_usec, 30900);
 
     // Add set with lidar at 39900
@@ -137,9 +137,9 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance) {
     std::vector<History::Snapshot> history_vec2(iter_pair2.first,
                                                 iter_pair2.second);
     BOOST_REQUIRE_EQUAL(history_vec2.size(), 3);
-    BOOST_REQUIRE_NE(history_vec2[0].measurement.lidar, nullptr);
-    BOOST_REQUIRE_NE(history_vec2[1].measurement.lidar, nullptr);
-    BOOST_REQUIRE_EQUAL(history_vec2[2].measurement.lidar, nullptr);
+    BOOST_REQUIRE(history_vec2[0].measurement.lidar != nullptr);
+    BOOST_REQUIRE(history_vec2[1].measurement.lidar != nullptr);
+    BOOST_REQUIRE(history_vec2[2].measurement.lidar == nullptr);
     BOOST_REQUIRE_EQUAL(history_vec2[0].measurement.lidar->time_usec, 30900);
     BOOST_REQUIRE_EQUAL(history_vec2[1].measurement.lidar->time_usec, 39900);
 }
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest) {
     std::vector<History::Snapshot> history_vec3(it_pair3.first,
                                                 it_pair3.second);
 
-    BOOST_REQUIRE_EQUAL(set3.lidar, nullptr);
+    BOOST_REQUIRE(set3.lidar == nullptr);
     BOOST_REQUIRE_EQUAL(history_vec3[0].measurement.imu->time_usec, 10000);
     BOOST_REQUIRE_EQUAL(history_vec3[1].measurement.imu->time_usec, 20000);
     BOOST_REQUIRE_EQUAL(history_vec3[1].measurement.lidar->time_usec, 20500);
@@ -220,10 +220,10 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest) {
     auto it_pair4 = history.add_measurement(set4);
     std::vector<History::Snapshot> history_vec4(it_pair4.first,
                                                 it_pair4.second);
-    BOOST_REQUIRE_NE(set4.lidar, nullptr);
+    BOOST_REQUIRE(set4.lidar != nullptr);
     BOOST_REQUIRE_EQUAL(history_vec4[0].measurement.imu->time_usec, 20000);
     BOOST_REQUIRE_EQUAL(history_vec4[1].measurement.imu->time_usec, 30000);
-    BOOST_REQUIRE_EQUAL(history_vec4[1].measurement.lidar, nullptr);
+    BOOST_REQUIRE(history_vec4[1].measurement.lidar == nullptr);
 
     ImuMeasurement imu;
     imu.time_usec = 40000;
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest) {
     auto it_pair5 = history.add_measurement(set4);
     std::vector<History::Snapshot> history_vec5(it_pair5.first,
                                                 it_pair5.second);
-    BOOST_REQUIRE_EQUAL(set4.lidar, nullptr);
+    BOOST_REQUIRE(set4.lidar == nullptr);
     BOOST_REQUIRE_EQUAL(history_vec5.size(), 3);
     BOOST_REQUIRE_EQUAL(history_vec5[0].measurement.imu->time_usec, 30000);
     BOOST_REQUIRE_EQUAL(history_vec5[1].measurement.imu->time_usec, 34000);

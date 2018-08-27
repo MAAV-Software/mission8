@@ -19,7 +19,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include "localizer.hpp"
+#include <gnc/localizer.hpp>
 
 using namespace rs2;
 
@@ -87,7 +87,7 @@ bool profile_changed(const std::vector<rs2::stream_profile>& current,
 int main(int, char**) {
     maav::gnc::SlamInitializer slam_init{"../Vocabulary/ORBvoc.txt",
                                          "../config/slam-config.yaml",
-                                         maav::System::RGBD, true};
+                                         maav::gnc::slam::System::RGBD, true};
     maav::gnc::Localizer localizer(slam_init);
     // Declare RealSense pipeline, encapsulating the actual device and sensors
     rs2::pipeline pipe;
@@ -137,7 +137,7 @@ int main(int, char**) {
             std::chrono::system_clock::now().time_since_epoch() /
             std::chrono::microseconds(1);
 
-        localizer.dump_image(color, depth, tframe);
+        localizer.add_image(color, depth, tframe);
     }
 
     return EXIT_SUCCESS;

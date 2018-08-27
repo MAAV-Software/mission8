@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 project(maav-gnc)
 
 # Set a default build type if none was specified
@@ -61,6 +61,7 @@ target_include_directories(maav-gnc PUBLIC
     ${G2O_INCLUDE_DIR}
     ${DBOW_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
+    ${Eigen_INCLUDE_DIR}
 )
 
 target_link_libraries(maav-gnc 
