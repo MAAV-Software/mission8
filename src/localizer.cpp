@@ -19,7 +19,7 @@ void Localizer::add_image(const Mat& color, const Mat& depth,
     slam.TrackRGBD(color, depth, seconds);
 }
 
-void Localizer::add_imu(const measurements::ImuMeasurement& imu) {
+void Localizer::add_imu(/*const measurements::ImuMeasurement& imu*/) {
     // TODO: IMU frontend + On Manifold Preintegration + Bias
 }
 

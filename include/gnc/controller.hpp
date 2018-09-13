@@ -13,7 +13,7 @@ class Controller {
     void set_target(void);
 
     // TODO: return actuator controls
-    void add_state(const State& state);
+    void add_state(/*const State& state*/);
 };
 
 }  // namespace gnc

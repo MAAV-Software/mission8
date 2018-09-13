@@ -284,11 +284,12 @@ void Frame::AssignFeaturesToGrid() {
     }
 }
 
+// TODO: Add masking to ORB extractor
 void Frame::ExtractORB(int flag, const cv::Mat& im) {
     if (flag == 0)
-        (*mpORBextractorLeft)(im, cv::Mat(), mvKeys, mDescriptors);
+        (*mpORBextractorLeft)(im, /*cv::Mat(),*/ mvKeys, mDescriptors);
     else
-        (*mpORBextractorRight)(im, cv::Mat(), mvKeysRight, mDescriptorsRight);
+        (*mpORBextractorRight)(im, /*cv::Mat(),*/ mvKeysRight, mDescriptorsRight);
 }
 
 void Frame::SetPose(cv::Mat Tcw) {

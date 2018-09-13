@@ -11,7 +11,7 @@ class Planner {
 
     void set_target();
 
-    void add_state(const State& state);
+    void add_state(/*const State& state*/);
 
    private:
 };

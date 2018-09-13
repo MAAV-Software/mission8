@@ -16,8 +16,8 @@
 #include <fstream>
 #include <iostream>
 #include <librealsense2/rs.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <gnc/localizer.hpp>
 

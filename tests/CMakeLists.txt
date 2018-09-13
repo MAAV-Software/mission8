@@ -13,9 +13,18 @@ include_directories(
         ${EIGEN3_INCLUDE_DIR}
 )
 
+add_library(testhelper SHARED test_helpers.cpp)
+
+target_link_libraries(testhelper
+        maav-state
+        maav-gnc
+        maav-kalman)
+
 set(TEST_SRCS
         state_test.cpp
-        history_test.cpp)
+        history_test.cpp
+        unscented_transform_test.cpp)
+
 foreach (testSrc ${TEST_SRCS})
     #Extract the filename without an extension (NAME_WE)
     get_filename_component(testName ${testSrc} NAME_WE)
@@ -28,6 +37,7 @@ foreach (testSrc ${TEST_SRCS})
             maav-state
             maav-gnc
             maav-kalman
+            testhelper
             )
 
     set(TEST_BIN_DIR ${CMAKE_SOURCE_DIR}/testBin)

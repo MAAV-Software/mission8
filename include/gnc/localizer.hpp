@@ -26,7 +26,8 @@ class Localizer {
     void add_image(const cv::Mat& color, const cv::Mat& depth,
                    uint64_t timestamp);
 
-    void add_imu(const measurements::ImuMeasurement& imu);
+    // TODO: Add imu to graph
+    void add_imu(/*const measurements::ImuMeasurement& imu*/);
 
    private:
     slam::System slam;
