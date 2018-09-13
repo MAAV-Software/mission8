@@ -1,85 +1,57 @@
 cmake_minimum_required (VERSION 3.5)
-project(maav-gnc)
+project(maav-software)
 
-# Set a default build type if none was specified
-set(RELEASE Release)
-set(DEBUG Debug)
-set(DEFAULT_BUILD_TYPE ${RELEASE})
+# Add path to search for modules
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
-    set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})
+# Set C++ standard to C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS ON)
+
+# Add option to build modules
+option(BUILD_GNC "Build the GNC module" ON)
+option(BUILD_PERCEPTION "Build the perception module" ON)
+option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
+option(BUILD_GCS "Build the ground control station" OFF)
+option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
+option(BUILD_TESTS "Build test cases" OFF)
+
+# Set all compiled libraries to be placed in software/lib
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+
+# Set all compiled executables to be placed in software/bin
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
+# Set the build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+# Find headers
+include(CheckIncludeFiles)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror -Wextra -pedantic")
-if(${CMAKE_BUILD_TYPE} MATCHES ${RELEASE})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-endif()
+# Set global C++ flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
-# Set library output directory
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${GNC_LIB_DIR})
+# Set global debug flags
+# Helps with debugging memory and thread issues
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fsanitize=thread")
 
-# Find packages
-find_package (Eigen3 REQUIRED)
-find_package(Pangolin REQUIRED)
-find_package(OpenCV 3.0 QUIET)
-if(NOT OpenCV_FOUND)
-   find_package(OpenCV 2.4.3 QUIET)
-   if(NOT OpenCV_FOUND)
-      message(FATAL_ERROR "OpenCV > 2.4.3 not found.")
-   endif()
-endif()
+# Find all globally required libraries
+find_package(YAML REQUIRED)
+find_package(ZCM REQUIRED)
 
-# Build local packages
-add_subdirectory(Thirdparty)
-set(G2O_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/g2o)
-set(DBOW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2)
-set(SOPHUS_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus)
-
-set(GNC_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-set(GNC_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
-
-
-# Build submodules
+# Add source directory
 add_subdirectory(src)
-
-set(GNC_TEST_DIR ${PROJECT_SOURCE_DIR}/tests)
-
-# Build libmaav-gnc
-
-add_library(maav-gnc SHARED
-    ${GNC_SRC_DIR}/localizer.cpp
-    ${GNC_SRC_DIR}/estimator.cpp
-    ${GNC_SRC_DIR}/planner.cpp
-    ${GNC_SRC_DIR}/controller.cpp
-)
-
-target_include_directories(maav-gnc PUBLIC
-    ${GNC_INCLUDE_DIR}
-    ${G2O_INCLUDE_DIR}
-    ${DBOW_INCLUDE_DIR}
-    ${SOPHUS_INCLUDE_DIR}
-    ${Eigen_INCLUDE_DIR}
-)
-
-target_link_libraries(maav-gnc 
-    maav-slam
-    maav-state
-    maav-kalman
-)
-
-
-# Build tests and examples
-enable_testing() 
-add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(thirdparty)
 
-# TODO: expose shared library and public headers
+# Setup testing options
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
-# set_target_properties(maav-gnc PROPERTIES PUBLIC_HEADER
-#                       include/gnc.hpp)
-# target_include_directories(maav-gnc PRIVATE src)
-# target_include_directories(maav-gnc PRIVATE include)
-
+message(STATUS "")
+message(STATUS "Building a ${CMAKE_BUILD_TYPE} build")
+message(STATUS "")

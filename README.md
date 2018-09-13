@@ -1,8 +1,16 @@
-# MAAV GNC
+# MAAV Software
+
+---
+
+## Table Of Contents
+
+---
+
+## GNC
 
 Guidance, navigation, and control.
 
-## Setup and Running
+### Setup and Running
 
 `./bash/setup.sh`
 
@@ -26,3 +34,6 @@ extract into `datasets/`
 
 `./bin/tums Vocabulary/ORBvoc.txt tests/tums/TUM1.yaml datasets/rgbd_dataset_freiburg1_xyz tests/tums/associations/fr1_xyz.txt`
 
+---
+
+## Perception

@@ -1,26 +1,25 @@
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-
-include_directories(    
+include_directories(
     ${GNC_INCLUDE_DIR}
     ${GNC_SRC_DIR}
 )
 
 # Manual handheld D415 run
-set(LIBREALSENSE_INCLUDE_DIR /usr/local/include/librealsense2)
-set(LIBREALSENSE_LIBRARY_DIR /usr/local/lib/librealsense2.so)
-if(EXISTS ${LIBREALSENSE_LIBRARY_DIR})
-    message("Found librealsense2")
-    include_directories(${LIBREALSENSE_INCLUDE_DIR})
-    
+find_package(LibRealSense OPTIONAL)
+if(EXISTS ${LIBREALSENSE_LIBRARIES})
+    include_directories(
+        ${LIBREALSENSE_INCLUDE_DIRS}
+        ${OPENCV_INCLUDE_DIR}
+    )
+
     add_executable(manual
         manual/main.cpp
     )
 
     target_link_libraries(manual
-        ${LIBREALSENSE_LIBRARY_DIR}
+        ${LIBREALSENSE_LIBRARIES}
         ${OpenCV_LIBS}
         maav-gnc
-    )   
+    )
 endif()
 
 add_executable(tums
@@ -31,4 +30,4 @@ target_link_libraries(tums
     maav-gnc
     maav-slam
 )
-   
+
