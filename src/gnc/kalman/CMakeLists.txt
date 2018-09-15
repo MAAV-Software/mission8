@@ -5,7 +5,7 @@ add_library(maav-kalman SHARED
 )
 
 target_include_directories(maav-kalman PUBLIC
-    ${GNC_INCLUDE_DIR}
+    ${SW_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
 )

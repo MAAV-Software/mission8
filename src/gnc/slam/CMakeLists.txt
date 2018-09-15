@@ -21,7 +21,7 @@ add_library(maav-slam SHARED
 )
 
 target_include_directories(maav-slam PUBLIC
-    ${GNC_INCLUDE_DIR}
+    ${SW_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${Pangolin_INCLUDE_DIRS}
     ${DBOW_INCLUDE_DIR}

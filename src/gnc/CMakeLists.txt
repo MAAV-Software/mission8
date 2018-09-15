@@ -18,12 +18,6 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
-# Set useful directory aliases
-set(GNC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/gnc)
-set(GNC_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/gnc)
-set(GNC_TEST_DIR ${PROJECT_SOURCE_DIR}/tests/gnc)
-
-
 # Add source directories
 add_subdirectory(state)
 add_subdirectory(control)
@@ -39,7 +33,7 @@ add_library(maav-gnc SHARED
 )
 
 target_include_directories(maav-gnc PUBLIC
-    ${GNC_INCLUDE_DIR}
+    ${SW_INCLUDE_DIR}
     ${G2O_INCLUDE_DIR}
     ${DBOW_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}

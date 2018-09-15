@@ -1,6 +1,5 @@
 include_directories(
-    ${GNC_INCLUDE_DIR}
-    ${GNC_SRC_DIR}
+    ${SW_INCLUDE_DIR}
 )
 
 # Manual handheld D415 run
