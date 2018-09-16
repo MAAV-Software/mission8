@@ -1,0 +1,34 @@
+digraph G {
+    node [shape="box"];
+
+    arena [label="Arena"]
+    camdown [label="Down Camera", color=red]
+    camside [label="Side Cameras", color=blue]
+    ctrl [label="Controller"]
+    laser [label="Laser", color=green]
+    loc [label="Localizer", color=red]
+    obdet [label="ObstacleDetector", color=green]
+    planner [label="Planner"]
+    rdet [label="RoombaDetector", color=blue]
+
+    // obstacle detection path
+    laser -> obdet
+    obdet -> arena
+
+    // roomba detection path
+    camside -> rdet
+    rdet -> arena
+
+    // localization path
+    camdown -> loc
+    loc -> arena
+    loc -> ctrl
+
+    // update path
+    ctrl -> arena
+    arena -> loc
+
+    // planning path
+    arena -> planner
+    planner -> ctrl
+}
