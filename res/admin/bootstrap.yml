@@ -1,0 +1,93 @@
+- hosts: all
+  remote_user: maav
+  tasks:
+    - name: user maav
+      user:
+        comment: MAAV
+        groups: dialout,sudo
+        home: /home/maav
+        name: maav
+        shell: /bin/bash
+
+    - name: copy journald conf
+      copy:
+        dest: /etc/systemd/journald.conf
+        group: root
+        mode: 0644
+        owner: root
+        src: journald.conf
+      notify: restart journald
+
+    - name: copy install zcm script
+      copy:
+        dest: /home/maav/install-zcm.sh
+        group: root
+        mode: 0755
+        owner: root
+        src: ../../bash/install-zcm.sh
+
+    - name: copy install opencv3 script
+      copy:
+        dest: /home/maav/install-opencv3.sh
+        group: root
+        mode: 0755
+        owner: root
+        src: ../../bash/install-opencv3.sh
+
+    - name: copy install lcm script
+      copy:
+        dest: /home/maav/install-lcm.sh
+        group: root
+        mode: 0755
+        owner: root
+        src: ../../bash/install-lcm.sh
+
+    - name: updating cache (for apt-get)
+      apt:
+        update_cache: yes
+
+    - name: install cmake
+      apt:
+        pkg: cmake
+
+    - name: install ccmake
+      apt:
+        pkg: cmake-curses-gui
+
+    - name: install eigen
+      apt:
+        pkg: libeigen3-dev
+
+    - name: install JSON
+      apt:
+        pkg: libjson-c-dev
+
+    - name: install Libev
+      apt:
+        pkg: libev-dev
+
+    - name: install yaml-cpp
+      apt:
+        pkg: libyaml-cpp-dev
+
+    - name: install QT5
+      apt:
+        pkg: qtbase5-dev
+
+    - name: install Boost Program Options
+      apt:
+        pkg: libboost-program-options-dev
+
+    - name: add nav build script
+      copy:
+        dest: /usr/local/bin/nav_build_install
+        owner: root
+        mode: 0755
+        group: root
+        src: nav_build_install
+
+  handlers:
+    - name: restart journald
+      service:
+        name: systemd-journald
+        state: restarted
