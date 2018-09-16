@@ -13,27 +13,28 @@ SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 SOFTWARE_DIR="$(dirname "$SOFTWARE_DIR")"
 
 # Add MAAV software as upstream
-echo "Setting upstream to maav/software..."
-git remote add upstream git@gitlab.eecs.umich.edu:maav/software.git
+# echo "Setting upstream to maav/software..."
+# git remote add upstream git@gitlab.eecs.umich.edu:maav/software.git
 
 # Get submodules
-echo "Initializing submodules..."
-git submodule update --init --recursive
+# echo "Initializing submodules..."
+# git submodule update --init --recursive
 
 # Install dependencies
-sudo apt install cmake \
-                 cmake-curses-gui \
-                 clang-format \
-                 libyaml-cpp-dev \
-                 libopencv-dev \
-                 curl \
-                 libglew-dev \
-                 libboost-test-dev -y
+# sudo apt install cmake \
+#                  cmake-curses-gui \
+#                  clang-format \
+#                  libyaml-cpp-dev \
+#                  libopencv-dev \
+#                  curl \
+#                  libglew-dev \
+#                  libboost-test-dev -y
 
 # Install custom deps
-# ${GNC_DIR}/bash/install-g++7.sh
-# ${GNC_DIR}/bash/install-pangolin.sh
-# ${GNC_DIR}/bash/install-librealsense.sh
+# ${SOFTWARE_DIR}/scripts/install-g++7.sh
+# ${SOFTWARE_DIR}/scripts/install-pangolin.sh
+# ${SOFTWARE_DIR}/scripts/install-librealsense.sh
+# ${SOFTWARE_DIR}/scripts/install-zcm.sh
 #
 # # Get TUMS dataset
 # if ! [ -f $GNC_DIR/datasets/TUMS/rgbd_dataset_freiburg1_xyz.tgz ]; then
