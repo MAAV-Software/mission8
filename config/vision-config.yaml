@@ -1,0 +1,140 @@
+#Config file for vision
+#Config file for vision
+LineDetection:
+  PreProc:
+    ksize_x: 31
+    ksize_y: 31
+    sigma_x: 5
+    sigma_y: 5
+
+  Canny:
+    threshold1: 50  # low threshold for the hysteresis procedure.
+    threshold2: 110 # high threshold for the hysteresis procedure.
+    apertureSize: 3 # used in Sobel
+    L2Gradient: true
+
+  Hough:
+    rho: 1  # resolution of parameter in pixels
+    #- theta: %{CV_PI} / 180 / 10 #use eval(config[theta])
+    threshold: 40 # min num of intersections to detect a line
+    minLineLength: 100 # min number of points that can form a line
+    maxLineGap: 100 # maximum gap between two points to be considered a line
+
+  KMeans:
+    binNum: 45
+    convergenceThreshold: 0.001
+    maxIterations: 100
+    cos_sf: 450
+    sin_sf: 450
+    r_sf: 2
+
+  nav_threshold: 190 #threshold value for binary conversion
+
+  erosionSize: 3 #kernel size
+  dilationSize: 9 #kernel size
+
+  X_FOV: 0.941784512717328
+  Y_FOV: 0.729119299384690
+  LINE_SPACING: 1
+  CAM_ANGLE: 30 #convert from deg to rads in cpp
+
+  theta_harsh_threshold: 5  #in degrees
+  radii_harsh_threshold: 10 #in pixels
+
+  theta_generous_threshold: 30  #in degrees
+  radii_generous_threshold: 200 #in pixels
+
+  amount_color_line: 0.7  #how much of same color to determine it is white?
+  sample_points: 20 #how many points to sample to get color of line
+
+  #Adaptive Thresholding Stuff:
+  block_size: 101
+  constant:  -10
+
+  #Color Thresholds
+  saturation: 15
+  green_low_hue: 53
+  green_high_hue: 67
+  red_low_hue: 172   #note it is low - 180
+  red_high_hue: 8    #note it is 0 - high
+
+  #ForTESTINGONLY
+  testCameraID: 1
+  circleRadius: 30 #used for landmarks checks. Should be func(state)
+
+
+vision_driver:
+  type: 4 # int 0 or 1 whether uses camera inputs or video files 3 is pull from rgbd input 4 is the camera input class
+  filenames: [../../misc/videos/video5.avi,../../misc/videos/video1.avi,../../misc/videos/video2.avi,../../misc/videos/video3.avi,../../misc/videos/video4.avi]
+  #filenames: [../wr/v1.avi, ../wr/v2.avi, ../wr/v3.avi, ../wr/v4.avi, ../wr/v5.avi]
+  # filenames that are used when webcam is zero the filename used is determined
+  # by the int passed to Maav_Video_Capture in the vision_driver
+  reader_delay: 9 # Delay in ms between horizontal camera fires
+  bidx_control: 4 # How many cameras have to fire per bottom camera fire
+  is_test: true # Whether spawn object to catch and write results of executable
+  test_delay: 400 # How long writer threads sleep for before activating in test
+  draw_results: true # Whether the results of the detection algorithms are displayed
+  track_time: true # Whether the timestamps are written to file in DataCoordinator
+  line_thickness: 5 # The thickness of the lines that are drawn on the image
+  roomba_size: 13 # The size of the circle indicating roomba centroid on frame
+  useGCS: false # whether it will wait on GCS before performing certain actions
+  identifyCams: false # controls whether camera identification is performed
+  activeCams: 2 # Controls the number of cameras used in driver
+  writeSize: 100 # Controls the number of frames allowed in ImageFeed backlog
+  deleteSize: 100 # Controls the number of frames allowed in ImageFeed backlog
+  cameraIdThresh: 7 # Controls the max val in hsv so that camera is considered covered
+  run_roombas: true # Controls whether roomba detection will run when vision driver is run
+  run_lines: true # Controls whether line detection will run when vision driver is run
+  DataCoordType: 1 # 0 = write to video, other = write to image file
+
+RoombaDetection:
+  diagnol_check: 0.6 # Used in find_blobs to purge diagnol lines detected as roombas
+  diagnol_check_2: 0.7 # Used in find_blobs to purge diagnol lines detected as roombas
+  ratioThresh: 0.25 # Used in roomba body detection to check if is likely to be actual roomba body
+  tempImageRectScale: 0.25 # Used to create a temp image to run a small scale detection on temp img
+  baseDistThresh: 40 # Should be width of a roomba at a certain height
+  blurKernelSize: 10 # Controls how much dilation occurs for the green or red
+  blurKernelSizeWhite: 4 # Controls how much dilation occurs for the white
+  minBlobPixels: 400 # The minimum number of pixels for a blob to be added
+  diagnolCheckSizeCheck: 300 # min blob size for second round of diagnol check
+  min3DInliers: 40 # Minimum points in inlier point cloud for roomba plate
+  plateHeightMin: 0.06 # Roomba plate height off the ground in meters
+  plateHeightMax: 0.17 # Roomba plate height off the ground in meters
+  bodyHeightMin: 0.055 # Roomba body height off the ground in meters
+  bodyHeightMax: 0.12 # Roomba body height off the ground in meters
+  threshHeightMin: 0.04 # Minimum Height off ground plane to not mask out pixel
+  threshHeightMax: 0.18 # Maximum Height off the ground plane to not mask out pixel
+  roombaSize: 0.35 # Roomba diameter in meters
+  # The color thresholds are in HSV space
+  red_low:
+    - 171
+    - 100
+    - 102
+  red_high:
+    - 180
+    - 255
+    - 255
+  red_low2:
+    - 0
+    - 100
+    - 100
+  red_high2:
+    - 7
+    - 255
+    - 255
+  green_low:
+    - 41
+    - 70
+    - 90
+  green_high:
+    - 71
+    - 255
+    - 255
+  white_low:
+    - 0
+    - 0
+    - 166
+  white_high:
+    - 124
+    - 78
+    - 255

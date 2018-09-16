@@ -1,0 +1,13 @@
+---
+# Configuration file for the mission planner (maav-planner).
+
+maav-planner:
+  # URL that ZCM will use to transport. This should normally be "ipc"
+  url: "ipc"
+
+  # The frequency at which maav-planner should call getPath
+  # on its active strategy, in Hz.
+  update-frequency: 10
+
+  # Whether to use real-world time, or simulator time.
+  use-sim-time: true
