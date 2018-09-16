@@ -8,7 +8,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror -Wextra -pedant
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
 # Find packages
-find_package (Eigen3 REQUIRED)
+find_package(Eigen3 3.3.5)
+if(NOT EIGEN3_VERSION_OK)
+    message("You don't have the eigen submodule, prepare for a bad time.")
+    message("Don't compile with -Werror.")
+    message("Looking for an older version of Eigen (3.3.5 recommended)")
+    find_package(Eigen3 REQUIRED)
+endif()
 find_package(Pangolin REQUIRED)
 find_package(OpenCV 3.0 QUIET)
 if(NOT OpenCV_FOUND)
