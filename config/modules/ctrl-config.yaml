@@ -1,0 +1,31 @@
+# all PID gains are in the format [kp, ki, kd]
+pid-gains:
+  pos-ctrl:
+    x: [1.00, 0.00, 0.00]
+    y: [1.00, 0.00, 0.00]
+    z: [1.00, 0.00, 0.00]
+    yaw: [1.00, 0.00, 0.00]
+  rate-ctrl:
+    x: [1.00, 0.00, 0.00]
+    y: [1.00, 0.00, 0.00]
+    z: [1.00, 0.00, 0.00]
+
+# rate saturation limits for each position controller are in the format of [upper, lower]
+limits:
+  rate: # limits are m/s for x, y, z and rad/s for yaw
+    x: [5.0, -5.0]
+    y: [5.0, -5.0]
+    z: [5.0, -5.0]
+    yaw: [5.0, -5.0]
+  accel: # limits are m/s^2
+    x: [5.0, -5.0]
+    y: [5.0, -5.0]
+    z: [5.0, -5.0]
+  angle: # limits are in degrees
+    pitch: [10.0, -10.0]
+    roll: [10.0, -10.0]
+
+# vehicle params that won't be tuned
+mass: 3.0 # kg
+tol: 0.01 # convergence tolerance (norm of [x, y, z, yaw])
+min-fnorm: 0.001 # minimum allowed body-force norm (L2) on the vehicle: || [Fx, Fy, Fz] ||
