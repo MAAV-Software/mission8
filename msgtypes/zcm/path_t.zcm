@@ -1,0 +1,6 @@
+struct path_t
+{
+	int64_t utime; // timestamp
+	int16_t NUM_WAYPOINTS;
+	waypoint_t waypoints[NUM_WAYPOINTS];
+}

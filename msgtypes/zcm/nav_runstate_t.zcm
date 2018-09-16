@@ -1,0 +1,4 @@
+struct nav_runstate_t
+{
+	boolean running_mission;
+}

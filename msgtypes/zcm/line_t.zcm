@@ -1,0 +1,26 @@
+/////// zcmtypes/line_t.hpp
+struct line_t
+{
+    // actual message fields
+	double line_coords[4]; // [x1, y1, x2, y2]
+    int8_t color;
+    int8_t cameraId;
+ 
+	// line_coord indeces for convience
+	const int8_t X1 = 0;
+	const int8_t Y1 = 1;
+	const int8_t X2 = 2;
+	const int8_t Y2 = 3;
+
+	// color constants for convenience
+	const int8_t WHITE = 0;
+	const int8_t GREEN = 1;
+	const int8_t RED   = 2;
+
+ 	// camera ID values (constants for convenience)	
+	const int8_t BOTTOM_CAM = 0;
+	const int8_t FRONT_CAM  = 1;
+	const int8_t RIGHT_CAM  = 2;
+	const int8_t BACK_CAM   = 3;
+	const int8_t LEFT_CAM   = 4;
+}

@@ -1,0 +1,22 @@
+struct visual_landmark_t
+{
+	double px;  		// image frame x coordinate in pixels
+	double py;			// image frame y coordinate in pixels
+    int8_t label;		// landmark class label
+    int8_t cameraId;	// camera from which this landmark was observed
+	
+	// class label values
+	const int8_t GREEN_CORNER = 0;
+	const int8_t GREEN_EDGE   = 1;
+	const int8_t RED_CORNER   = 2;
+	const int8_t RED_EDGE     = 3;
+	const int8_t WHITE_EDGE   = 4;
+	const int8_t INTERIOR     = 5;
+	
+ 	// camera ID values (constants for convenience)	
+	const int8_t BOTTOM_CAM = 0;
+	const int8_t FRONT_CAM  = 1;
+	const int8_t RIGHT_CAM  = 2;
+	const int8_t BACK_CAM   = 3;
+	const int8_t LEFT_CAM   = 4;
+}

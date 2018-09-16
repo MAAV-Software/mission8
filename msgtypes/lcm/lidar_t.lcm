@@ -1,0 +1,8 @@
+struct lidar_t
+{
+	
+	float dist;
+	float vel;
+	int64_t time;
+	
+}

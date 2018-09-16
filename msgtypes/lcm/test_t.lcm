@@ -1,0 +1,6 @@
+package exlcm;
+
+struct test_t
+{
+	string letter;
+}

@@ -1,0 +1,31 @@
+/**
+ * mode can be ignored by anyone who isn't Path Planning
+ * PMode Key for planner:
+ *      0 - Autonomous
+ *      1 - Idle
+ *      2 - Takeoff
+ *      3 - Land
+ *      4 - Pose
+ *      5 - Exit Arena
+ * Mode key for controller:
+ *	1 - Pose info only
+ *	2 - Rate info only
+ *	3 - Both pose and rate info
+ */
+struct waypoint_t
+{
+	int8_t pmode;
+	int8_t mode;
+	double pose[4];
+	double rate[4];
+
+	const int8_t X   = 0;
+	const int8_t Y   = 1;
+	const int8_t Z   = 2;
+	const int8_t YAW = 3;
+
+	// Modes for controller
+	const int8_t POSE_ONLY = 1;
+	const int8_t RATE_ONLY = 2;
+	const int8_t COMBINED = 3;
+}

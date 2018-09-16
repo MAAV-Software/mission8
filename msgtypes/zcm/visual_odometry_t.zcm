@@ -1,0 +1,7 @@
+struct visual_odometry_t
+{
+	int64_t utime;
+	// given in the camera's local reference frame
+	double translation[3];	// cam. translation since last
+	double rotation[3][3];	// cam. rotation since last (row major 3x3 matrix)
+}

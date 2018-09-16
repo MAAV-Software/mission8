@@ -1,0 +1,11 @@
+struct ctrl_params_t
+{
+	int64_t utime;
+	pid_gains_t value[4];
+	pid_gains_t rate[3];
+
+	const int8_t X   = 0;
+	const int8_t Y   = 1;
+	const int8_t Z   = 2;
+	const int8_t YAW = 3;
+}

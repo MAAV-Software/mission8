@@ -1,0 +1,6 @@
+struct state_tracker_t
+{
+	int64_t utime;
+	int16_t NUM_STATES;
+	tracked_state_t states[NUM_STATES];
+}

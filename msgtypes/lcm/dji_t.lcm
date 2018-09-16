@@ -1,0 +1,9 @@
+struct dji_t
+{
+	
+	float roll;
+	float pitch;
+	float yaw;
+	float thrust;
+	
+}

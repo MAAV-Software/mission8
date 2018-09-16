@@ -1,0 +1,11 @@
+// How far the outer loop controller has progressed through its path.
+// Published from the outer loop controller to maav-planner.
+
+struct path_status_t
+{
+	int64_t utime;
+	int16_t waypoint_idx; // -1 if "done" with path, or if no path is active
+	waypoint_t cur_waypoint;
+
+	const int16_t DONE_INDEX = -1;
+}

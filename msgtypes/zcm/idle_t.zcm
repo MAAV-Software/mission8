@@ -1,0 +1,5 @@
+struct idle_t
+{
+	int64_t utime;
+	boolean idle; // if true, idle/arm quad; if false, do nothing
+}

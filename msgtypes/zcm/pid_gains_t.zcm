@@ -1,0 +1,5 @@
+struct pid_gains_t
+{
+	double p, i, d;
+}
+

@@ -1,0 +1,9 @@
+/**
+ * ZCM type for plane fitting information
+ */
+struct plane_fit_t
+{
+	int64_t utime;
+	double zdot;
+	double zdepth;
+}
