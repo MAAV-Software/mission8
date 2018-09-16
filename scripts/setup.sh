@@ -31,8 +31,8 @@ sudo apt install cmake \
                  libboost-test-dev -y
 
 # Install custom deps
-${SOFTWARE_DIR}/scripts/install-g++7.sh
-${SOFTWARE_DIR}/scripts/install-pangolin.sh
-${SOFTWARE_DIR}/scripts/install-librealsense.sh
-${SOFTWARE_DIR}/scripts/install-zcm.sh
+${SOFTWARE_DIR}/scripts/install/install-g++7.sh
+${SOFTWARE_DIR}/scripts/install/install-pangolin.sh
+${SOFTWARE_DIR}/scripts/install/install-librealsense.sh
+${SOFTWARE_DIR}/scripts/install/install-zcm.sh
 
