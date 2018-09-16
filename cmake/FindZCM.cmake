@@ -6,7 +6,7 @@ find_path(ZCM_INCLUDE_DIR zcm
           PATHS /usr/local/include /usr/include)
 
 if( NOT ZCM_INCLUDE_DIR )
-    message("Pkg-Config couldn't find it, so we're setting it to /usr/local/include/zcm")
+    message("-- Pkg-Config couldn't find it, so we're setting it to /usr/local/include/zcm")
     set(ZCM_INCLUDE_DIR /usr/local/include/zcm)
 endif()
 
