@@ -1,0 +1,38 @@
+Example code snippet from EECS 467
+
+You'll be using the C++ Class that wraps around this C library, but the arguments are exactly 
+the same (except the pointer to getopt_t). Look at the "add" and "get" functions for the pattern 
+of arguments you will need to use.
+=================================================================================================
+
+
+    getopt_t *gopt = getopt_create();
+    getopt_add_bool(gopt, 'h', "help", 0, "Show this help");
+	// in C++, replace the 0 (false) with the boolean keyword "false" 
+
+   getopt_add_string(gopt, 'd', "device", "/dev/ttyO1", "SAMA5 comms device");
+    getopt_add_int(gopt, 'b', "baud", "230400", "Baud rate");
+    getopt_add_int(gopt, '\0', "sync-interval", "499", "Interval between sync requests (ms)");
+    getopt_add_string(gopt, '\0', "sync-error-rate", "0.001", "Maximum rate at which SAMA5/host clock is assumed to drift");
+    getopt_add_int(gopt, '\0', "status-interval", "50", "Interval between status requests (ms)");
+    getopt_add_int(gopt, '\0', "encoders-interval", "20", "Interval between wheel encoder requests (ms)");
+    getopt_add_int(gopt, '\0', "imu-interval", "50", "Interval between imu requests (ms)");
+    getopt_add_int(gopt, '\0', "range-interval", "100", "Interval between rangefinder requests (ms)");
+    getopt_add_int(gopt, '\0', "line-sensors-interval", "100", "Interval between line sensor requests (ms)");
+
+    if (!getopt_parse(gopt, argc, argv, 1) || getopt_get_bool(gopt, "help")) {
+        printf("Usage: %s [options]", argv[0]);
+        getopt_do_usage(gopt); // this one is renamed to GetOpt::printHelp()
+        return 1;
+    }
+    state->gopt = gopt;
+
+    state->fd = serial_open(getopt_get_string(gopt, "device"),
+                            getopt_get_int(gopt, "baud"), 1);
+    if (state->fd < 0) {
+        printf("Could not open: %s\n", getopt_get_string(gopt, "device"));
+        return 1;
+    }
+
+
+
