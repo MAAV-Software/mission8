@@ -10,10 +10,11 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # Add option to build modules
 option(BUILD_GNC "Build the GNC module" ON)
-option(BUILD_PERCEPTION "Build the perception module" ON)
+option(BUILD_VISION "Build the vision module" ON)
 option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
 option(BUILD_GCS "Build the ground control station" OFF)
 option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
+option(BUILD_TANFAN "Build the Tiva Atom Network Forwarding Application (TANFAN)" ON)
 option(BUILD_TESTS "Build test cases" OFF)
 
 # Set all compiled libraries to be placed in software/lib
@@ -34,11 +35,13 @@ endif()
 include(CheckIncludeFiles)
 
 # Set global C++ flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
 
 # Set global debug flags
 # Helps with debugging memory and thread issues
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
 
 # Find all globally required libraries
 find_package(YAML REQUIRED)
