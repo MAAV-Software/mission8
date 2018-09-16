@@ -24,7 +24,7 @@ target_include_directories(maav-slam PUBLIC
     ${SW_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${Pangolin_INCLUDE_DIRS}
-    ${DBOW_INCLUDE_DIR}
+    ${DBOW2_INCLUDE_DIR}
     ${G2O_INCLUDE_DIR}
 )
 

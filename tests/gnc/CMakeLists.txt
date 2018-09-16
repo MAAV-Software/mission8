@@ -10,6 +10,7 @@ include_directories(
         ${GNC_SRC_DIR}
         ${Boost_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIR}
+        ${SOPHUS_INCLUDE_DIR}
 )
 
 add_library(testhelper SHARED test_helpers.cpp)
