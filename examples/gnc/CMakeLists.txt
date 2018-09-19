@@ -3,7 +3,7 @@ include_directories(
 )
 
 # Manual handheld D415 run
-find_package(LibRealSense OPTIONAL)
+find_package(LibRealSense)
 if(EXISTS ${LIBREALSENSE_LIBRARIES})
     include_directories(
         ${LIBREALSENSE_INCLUDE_DIRS}
@@ -29,4 +29,3 @@ target_link_libraries(tums
     maav-gnc
     maav-slam
 )
-

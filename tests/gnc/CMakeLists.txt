@@ -40,7 +40,7 @@ foreach (testSrc ${TEST_SRCS})
             testhelper
             )
 
-    set(TEST_BIN_DIR ${CMAKE_SOURCE_DIR}/testBin)
+    set(TEST_BIN_DIR ${CMAKE_SOURCE_DIR}/bin/test)
 
     #I like to move testing binaries into a testBin directory
     set_target_properties(${testName} PROPERTIES
