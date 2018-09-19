@@ -2,7 +2,7 @@
 
 # MAAV Software setup script
 # This script will set up Software for you. You only need to run it once
-# This script assumes it is in gnc/bash
+# This script assumes it is in software/scripts
 # DO NOT MOVE THIS SCRIPT
 # Should work for Ubuntu and Arch-like systems
 # Authors: Martin Deegan (mdeegan),
@@ -40,7 +40,7 @@ sudo apt install cmake \
                  libusb-1.0-0-dbg \
                  python3 \
                  python3-pip \
-                 sl # system libraries
+                 sl -y # system libraries
 
 # Install custom deps
 ${SOFTWARE_DIR}/scripts/install/install-cmake.sh

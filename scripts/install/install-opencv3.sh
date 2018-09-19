@@ -6,6 +6,7 @@
 # Get location of software
 SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 SOFTWARE_DIR="$(dirname "$SOFTWARE_DIR")"
+SOFTWARE_DIR="$(dirname "$SOFTWARE_DIR")"
 
 # Clone OpenCV and the contrib modules
 cd /tmp
@@ -13,7 +14,7 @@ git clone https://github.com/opencv/opencv.git
 git clone https://github.com/opencv/opencv_contrib.git
 
 # Checkout version 3.3.1
-cd opiencv_contrib
+cd opencv_contrib
 git checkout tags/3.3.1
 mv modules/dnn_modern/CMakeLists.txt \
    modules/dnn_modern/CMakeLists.txt.bak

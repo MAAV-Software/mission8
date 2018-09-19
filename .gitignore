@@ -30,3 +30,4 @@ compile_commands.json
 *.csv
 *.vscode
 *.idea
+thirdparty/opencv
