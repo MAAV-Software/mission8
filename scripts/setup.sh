@@ -25,14 +25,29 @@ sudo apt install cmake \
                  cmake-curses-gui \
                  clang-format \
                  libyaml-cpp-dev \
-                 libopencv-dev \
                  curl \
+                 ffmpeg \
                  libglew-dev \
-                 libboost-test-dev -y
+                 libboost-test-dev \
+                 libboost-program-options-dev \
+                 libev-dev \
+                 doxygen \
+                 libgtkmm-3.0-dev \
+                 libudev-dev \
+                 libglm-dev \
+                 libusb-1.0-0-dev \
+                 libusb-1.0-doc \
+                 libusb-1.0-0-dbg \
+                 python3 \
+                 python3-pip \
+                 sl # system libraries
 
 # Install custom deps
+${SOFTWARE_DIR}/scripts/install/install-cmake.sh
 ${SOFTWARE_DIR}/scripts/install/install-g++7.sh
+${SOFTWARE_DIR}/scripts/install/install-zcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-pangolin.sh
 ${SOFTWARE_DIR}/scripts/install/install-librealsense.sh
-${SOFTWARE_DIR}/scripts/install/install-zcm.sh
+${SOFTWARE_DIR}/scripts/install/install-pcl.sh
+${SOFTWARE_DIR}/scripts/install/install-opencv3.sh $1
 
