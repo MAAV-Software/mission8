@@ -31,3 +31,4 @@ compile_commands.json
 *.vscode
 *.idea
 thirdparty/opencv
+.syntastic_cpp_config
