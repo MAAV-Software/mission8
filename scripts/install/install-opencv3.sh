@@ -2,6 +2,7 @@
 #
 # Install OpenCV 3.3.1 on your machine
 
+sudo apt install libcurl4-openssl-dev
 
 # Get location of software
 SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
