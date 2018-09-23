@@ -1,5 +1,8 @@
+find_package(OpenCV REQUIRED)
+
 include_directories(
     ${EIGEN3_INCLUDE_DIR}
+	${OpenCV_INCLUDE_DIR}
 )
 
 add_library(maav-lidar SHARED
@@ -9,4 +12,5 @@ add_library(maav-lidar SHARED
 target_link_libraries(maav-lidar
     maav-math
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+	${OpenCV_LIBS}
 )

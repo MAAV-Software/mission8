@@ -40,10 +40,12 @@ target_include_directories(maav-gnc PUBLIC
     ${DBOW_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
     ${Eigen_INCLUDE_DIR}
+	${OpenCV_INCLUDE_DIR}
 )
 
 target_link_libraries(maav-gnc
     maav-slam
     maav-state
     maav-kalman
+	${OpenCV_LIBS}
 )

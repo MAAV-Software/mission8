@@ -1,13 +1,13 @@
 set(HDRS_DBOW2
   DBoW2/BowVector.h
-  DBoW2/FORB.h 
-  DBoW2/FClass.h       
+  DBoW2/FORB.h
+  DBoW2/FClass.h
   DBoW2/FeatureVector.h
-  DBoW2/ScoringObject.h   
+  DBoW2/ScoringObject.h
   DBoW2/TemplatedVocabulary.h)
 set(SRCS_DBOW2
   DBoW2/BowVector.cpp
-  DBoW2/FORB.cpp      
+  DBoW2/FORB.cpp
   DBoW2/FeatureVector.cpp
   DBoW2/ScoringObject.cpp)
 
@@ -25,7 +25,6 @@ if(NOT OpenCV_FOUND)
       message(FATAL_ERROR "OpenCV > 2.4.3 not found.")
    endif()
 endif()
-
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 add_library(DBoW2 SHARED ${SRCS_DBOW2} ${SRCS_DUTILS})

@@ -1,13 +1,39 @@
-find_package(PkgConfig)
-pkg_check_modules(PC_ZCM zcm)
+# find_package(PkgConfig)
+# pkg_check_modules(PC_OPENCV opencv)
 
 # Find include dirs
 
 if(NOT OpenCV_INCLUDE_DIR)
-    find_path(OpenCV_INCLUDE_DIR opencv/cv.h opencv/cv.hpp
+    find_path(OpenCV_INCLUDE_DIR opencv2/core.hpp
         PATH_SUFFIXES opencv opencv/include
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
+	SET(OPENCV_VERSION_FILE "${PROJECT_SOURCE_DIR}/thirdparty/opencv/include/opencv2/core/version.hpp")
+	file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
+
+	string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MAJOR "${OPENCV_VERSION_PARTS}")
+	string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MINOR "${OPENCV_VERSION_PARTS}")
+	string(REGEX REPLACE ".+CV_VERSION_REVISION[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_PATCH "${OPENCV_VERSION_PARTS}")
+	string(REGEX REPLACE ".+CV_VERSION_STATUS[ ]+\"([^\"]*)\".*" "\\1" OPENCV_VERSION_STATUS "${OPENCV_VERSION_PARTS}")
+
+	set(OPENCV_VERSION_PLAIN "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
+
+	set(OPENCV_VERSION "${OPENCV_VERSION_PLAIN}${OPENCV_VERSION_STATUS}")
+
+	set(OPENCV_SOVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}")
+	set(OPENCV_LIBVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
+
+	set(OpenCV_FOUND true CACHE STRING "")
+
+	set(OPENCV_INCLUDE_DIR ${OpenCV_INCLUDE_DIR} CACHE STRING "")
+	set(OPENCV_INCLUDE_DIRS ${OpenCV_INCLUDE_DIR} CACHE STRING "")
+	set(OpenCV_INCLUDE_DIRS ${OpenCV_INCLUDE_DIR} CACHE STRING "")
+	mark_as_advanced(OPENCV_INCLUDE_DIR OPENCV_INCLUDE_DIRS OpenCV_INCLUDE_DIR OpenCV_INCLUDE_DIRS)
+
+	message("OPENCV INCLUDE DIR: ${OpenCV_INCLUDE_DIRS}")
+	# create a dependency on the version file
+	# we never use the output of the following command but cmake will rerun automatically if the version file changes
+	configure_file("${OPENCV_VERSION_FILE}" "${CMAKE_BINARY_DIR}/junk/version.junk" COPYONLY)
 endif()
 
 if(NOT OpenCV_INCLUDE_DIR)
@@ -41,7 +67,7 @@ if(NOT OpenCV_LIBRARIES)
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
 
-    find_library(OpenCV_CALIB_LIBRARY NAMES opencv_calib libopencv_calib
+find_library(OpenCV_CCALIB_LIBRARY NAMES opencv_ccalib libopencv_ccalib
         PATH_SUFFIXES opencv opencv/lib
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
@@ -118,7 +144,7 @@ find_library(OpenCV_IMGPROC_LIBRARY NAMES opencv_imgproc libopencv_imgproc
     )
 
 find_library(OpenCV_LINE_DESCRIPTOR_LIBRARY
-        NAMES opencv_lline_descriptor libopencv_line_descriptor
+        NAMES opencv_line_descriptor libopencv_line_descriptor
         PATH_SUFFIXES opencv opencv/lib
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
@@ -240,7 +266,7 @@ find_library(OpenCV_XFEATURES2D_LIBRARY NAMES opencv_xfeatures2d libopencv_xfeat
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
 
-find_library(OpenCV_XIMPROC_LIBRARY NAMES opencv_ximproc libopencv_ximproc
+find_library(OpenCV_XIMGPROC_LIBRARY NAMES opencv_ximgproc libopencv_ximgproc
         PATH_SUFFIXES opencv opencv/lib
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
@@ -342,9 +368,10 @@ set(OPENCV_LIBRARIES
     ${OpenCV_XIMPROC_LIBRARY}
     ${OpenCV_XOBJDETECT_LIBRARY}
     ${OpenCV_XPHOTO_LIBRARY}
+	CACHE STRING ""
 )
 
-set(OpenCV_LIBS ${OPENCV_LIBRARIES})
+set(OpenCV_LIBS ${OPENCV_LIBRARIES} CACHE STRING "")
 
 mark_as_advanced(OpenCV_LIBS)
 mark_as_advanced(OPENCV_LIBRARIES)

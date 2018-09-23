@@ -26,6 +26,7 @@ target_include_directories(maav-slam PUBLIC
     ${Pangolin_INCLUDE_DIRS}
     ${DBOW2_INCLUDE_DIR}
     ${G2O_INCLUDE_DIR}
+	${OpenCV_INCLUDE_DIR}
 )
 
 target_link_libraries(maav-slam
