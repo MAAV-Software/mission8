@@ -49,5 +49,7 @@ ${SOFTWARE_DIR}/scripts/install/install-zcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-pangolin.sh
 ${SOFTWARE_DIR}/scripts/install/install-librealsense.sh
 ${SOFTWARE_DIR}/scripts/install/install-pcl.sh
-${SOFTWARE_DIR}/scripts/install/install-opencv3.sh $1
+${SOFTWARE_DIR}/scripts/install/install-opencv3.sh
+${SOFTWARE_DIR}/scripts/install/install-lcm.sh
+${SOFTWARE_DIR}/scripts/install/install-librealsense-legacy.sh
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs a newer version of CMake than shipped by Ubuntu
 # Mainly for Ubuntu users
-sudo apt-get purge cmake -y
+sudo apt-get remove cmake -y
 sudo apt install -y libncurses5-dev
 version=3.10
 build=3
