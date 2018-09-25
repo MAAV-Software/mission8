@@ -26,6 +26,7 @@ sudo apt install cmake \
                  clang-format \
                  libyaml-cpp-dev \
                  curl \
+                 libcurl4-openssl-dev \
                  ffmpeg \
                  libglew-dev \
                  libboost-test-dev \
