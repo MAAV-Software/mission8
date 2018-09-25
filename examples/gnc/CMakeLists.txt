@@ -4,9 +4,12 @@ include_directories(
 
 # Manual handheld D415 run
 find_package(LibRealSense)
+find_package(LibRealSense2)
+
 if(EXISTS ${LIBREALSENSE_LIBRARIES})
     include_directories(
         ${LIBREALSENSE_INCLUDE_DIRS}
+        ${LIBREALSENSE2_INCLUDE_DIRS}
         ${OPENCV_INCLUDE_DIR}
     )
 
@@ -16,6 +19,7 @@ if(EXISTS ${LIBREALSENSE_LIBRARIES})
 
     target_link_libraries(manual
         ${LIBREALSENSE_LIBRARIES}
+        ${LIBREALSENSE2_LIBRARIES}
         ${OpenCV_LIBS}
         maav-gnc
     )

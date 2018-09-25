@@ -4,7 +4,7 @@ find_package(GLM REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(LibRealSense REQUIRED)
-find_package(realsense2 REQUIRED)
+find_package(LibRealSense2 REQUIRED)
 
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
@@ -55,6 +55,7 @@ target_link_libraries(CameraInput
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(planeFitterIRLTest
@@ -75,12 +76,14 @@ target_link_libraries(record-data
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(data-log
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     realsense2
     CameraInput
 )
@@ -89,6 +92,7 @@ target_link_libraries(data-log-check
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(snapshot
@@ -97,18 +101,21 @@ target_link_libraries(snapshot
     ${EPOXY_LIBRARIES}
     ${GLFW3_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(RGBDGetterTest
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(CameraInputTest
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     realsense2
     CameraInput
 )
@@ -116,22 +123,26 @@ target_link_libraries(CameraInputTest
 target_link_libraries(PlaneFitterPCL
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(RGBDGetter
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(RGBDGetter
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(newCameraPractice
     ${OpenCV_LIBS}
+    ${LIBREALSENSE2_LIBRARIES}
     realsense2
 )
 
@@ -146,6 +157,7 @@ target_link_libraries(pcl_test
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(view_cloud
@@ -153,19 +165,23 @@ target_link_libraries(view_cloud
     ${GLFW3_LIBRARIES}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
 target_link_libraries(view_rgb
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     ${OpenCV_LIBS}
 )
 
 target_link_libraries(view_infrared
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     ${OpenCV_LIBS}
 )
 
 target_link_libraries(combined_view
     ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     ${OpenCV_LIBS}
 )

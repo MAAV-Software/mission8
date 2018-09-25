@@ -14,19 +14,19 @@ if(${CMAKE_VERSION} VERSION_LESS 2.8.2)
 endif()
 
 #add a hint so that it can find it without the pkg-config
-find_path(LIBREALSENSE_INCLUDE_DIR rs.hpp
+find_path(LIBREALSENSE2_INCLUDE_DIR rs.hpp
     HINTS /usr/local/include
     PATH_SUFFIXES librealsense2)
 #add a hint so that it can find it without the pkg-config
-find_library(LIBREALSENSE_LIBRARY
+find_library(LIBREALSENSE2_LIBRARY
     NAMES librealsense2.so
     HINTS /usr/local/lib )
 
-  set(LIBREALSENSE_INCLUDE_DIRS ${LIBREALSENSE_INCLUDE_DIR})
-  set(LIBREALSENSE_LIBRARIES ${LIBREALSENSE_LIBRARY})
+  set(LIBREALSENSE2_INCLUDE_DIRS ${LIBREALSENSE2_INCLUDE_DIR})
+  set(LIBREALSENSE2_LIBRARIES ${LIBREALSENSE2_LIBRARY})
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibRealSense DEFAULT_MSG
-  LIBREALSENSE_LIBRARY LIBREALSENSE_INCLUDE_DIR)
+  LIBREALSENSE2_LIBRARY LIBREALSENSE2_INCLUDE_DIR)
 
-mark_as_advanced(LIBREALSENSE_LIBRARY LIBREALSENSE_INCLUDE_DIR)
+mark_as_advanced(LIBREALSENSE2_LIBRARY LIBREALSENSE2_INCLUDE_DIR)
