@@ -1,3 +1,6 @@
+/**
+ * ZCM type for GNC state
+ */
 struct state_t
 {
 	int64_t utime;
