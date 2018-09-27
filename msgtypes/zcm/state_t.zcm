@@ -1,18 +1,19 @@
 struct state_t
 {
 	int64_t utime;
-	double state[10]; // [x, y, z, q0, q1, q2, q3, xdot, ydot, zdot]
-	double covar[10][10]; // cov[state, state] (mathematical notation)
-	
-	// convenience constants
-	const int8_t X    = 0;
-	const int8_t Y    = 1;
-	const int8_t Z    = 2;
-	const int8_t Q0   = 3;
-	const int8_t Q1   = 4;
-	const int8_t Q2   = 5;
-	const int8_t Q3   = 6;
-	const int8_t XDOT = 7;
-	const int8_t YDOT = 8;
-	const int8_t ZDOT = 9;
+
+	double covariance[15][15]
+
+	// State variables
+	double attitude[4];
+	double position[3];
+	double velocity[3];
+
+	// Control inputs
+	double angular_velocity[3];
+	double acceleration[3];
+
+	// Biases
+	double gyro_biases[3];
+	double accel_biases[3];
 }
