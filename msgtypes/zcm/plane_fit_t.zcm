@@ -4,6 +4,9 @@
 struct plane_fit_t
 {
 	int64_t utime;
-	double zdot;
-	double zdepth;
+	
+	double z;
+	double z_dot;
+	double roll;
+	double pitch;
 }
