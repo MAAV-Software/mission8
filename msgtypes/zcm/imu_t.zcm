@@ -1,0 +1,11 @@
+/**
+ * ZCM type for the IMU
+ */
+struct imu_t
+{
+	int64_t utime;
+
+	double angular_rates[3];
+    double acceleration[3];
+    double magnetometer[3];
+}
