@@ -1,0 +1,9 @@
+/**
+ * ZCM type for densified SLAM map
+ */
+struct map_t
+{
+	int64_t utime;
+
+    // TODO: Add map information
+}
