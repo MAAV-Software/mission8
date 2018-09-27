@@ -1,0 +1,9 @@
+/**
+ * ZCM type for downward lidar
+ */
+struct lidar_t
+{
+	int64_t utime;
+
+    double distance;
+}
