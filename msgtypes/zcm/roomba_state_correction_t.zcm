@@ -1,8 +1,0 @@
-struct roomba_state_correction_t
-{
-	int8_t roomba_id;// id of roomba that is being corrected
-	int8_t num_corrections;// number of timesteps being corrected
-	roomba_state_t future_pos_estimates[num_corrections];
-	float future_state_distribution[num_corrections][576];
-	float future_heading_distribution[num_corrections][576];
-}

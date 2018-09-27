@@ -1,4 +1,0 @@
-struct obstacle_t
-{
-	double x, y, yaw; // z is assumed to be 0 since obstacles don't fly
-}

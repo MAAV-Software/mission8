@@ -1,3 +1,4 @@
+// TODO: Remove if possible
 struct camera_disc_t
 {
 	int8_t numCameras;

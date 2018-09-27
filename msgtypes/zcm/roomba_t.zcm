@@ -1,5 +1,0 @@
-struct roomba_t
-{
-	double x, y, yaw;
-	int8_t camera;
-}

@@ -1,6 +1,0 @@
-struct roomba_state_t
-{
-	float x;
-	float y;
-	float yaw;
-}

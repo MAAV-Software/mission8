@@ -1,8 +1,0 @@
-struct dji_t
-{
-	int64_t utime;
-	double roll;
-	double pitch;
-	double yawRate;
-	double thrust;
-}

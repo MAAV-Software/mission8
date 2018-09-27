@@ -1,6 +1,0 @@
-struct roomba_list_t
-{
-	int64_t utime;
-	int16_t num_roombas;
-	roomba_t roombas[num_roombas];
-}

@@ -1,6 +1,0 @@
-struct obstacle_list_t
-{
-	int64_t utime;
-	int8_t num_obstacles;
-	obstacle_t obstacles[num_obstacles];
-}
