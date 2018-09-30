@@ -1,3 +1,8 @@
+if(NOT BUILD_OBSTACLES)
+    return()
+endif()
+
+
 find_package(ZCM REQUIRED)
 find_package(OpenCV REQUIRED)
 

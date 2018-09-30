@@ -14,9 +14,12 @@ option(BUILD_VISION "Build the vision module" OFF)
 option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
 option(BUILD_GCS "Build the ground control station" OFF)
 option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
-option(BUILD_TANFAN "Build the Tiva Atom Network Forwarding Application (TANFAN)" ON)
+option(BUILD_TANFAN "Build the Tiva Atom Network Forwarding Application (TANFAN)" OFF)
 option(BUILD_EXAMPLES "Build example executables" ON)
 option(BUILD_TESTS "Build test cases" ON)
+option(BUILD_OBSTACLES "Build obstacle detector" OFF)
+set(BUILD_TANFAN OFF)
+set(BUILD_OBSTACLES OFF)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
