@@ -5,7 +5,7 @@ struct state_t
 {
 	int64_t utime;
 
-	double covariance[15][15]
+	double covariance[15][15];
 
 	// State variables
 	double attitude[4];
