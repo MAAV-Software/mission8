@@ -1,0 +1,8 @@
+/**
+ * ZCM type for an rgbd image
+ */
+struct rgbd_image_t
+{
+	rgb_image_t rgb_image;
+	depth_image_t depth_image;
+}

@@ -1,0 +1,10 @@
+/**
+ * ZCM type for a depth image
+ */
+struct depth_image_t
+{
+	int32_t width;
+	int32_t height;
+    int32_t size;
+	int16_t raw_image[size];
+}
