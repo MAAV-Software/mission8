@@ -1,7 +1,7 @@
 #include "vision/driver/VideoInterface.hpp"
 #include <mutex>
 #include <thread>
-#include "common/messages/cam_capture_t.hpp"
+#include "common/messages/cam_capture_t.hpp" // TODO: Remove all uses of cam_capture_t
 #include "common/messages/framebuffer_request_t.hpp"
 #include "vision/depth-utils/RGBDGetter.hpp"
 #include "vision/depth-utils/CameraInput.hpp"
