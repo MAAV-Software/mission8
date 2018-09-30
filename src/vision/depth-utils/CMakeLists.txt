@@ -1,4 +1,4 @@
-#find required packages
+# find required packages
 find_package(PCL 1.7 REQUIRED)
 find_package(GLM REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -13,10 +13,10 @@ include_directories(
     ${ZCM_INCLUDE_DIR}
     ${YAMLCPP_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
-	${LIBREALSENSE_INCLUDE_DIRS}
-	${LIBREALSENSE2_INCLUDE_DIRS}
-	${PCL_INCLUDE_DIRS}
-	${GLM_INCLUDE_DIRS}
+    ${LIBREALSENSE_INCLUDE_DIRS}
+    ${LIBREALSENSE2_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
+    ${GLM_INCLUDE_DIRS}
     ${GLFW3_INCLUDE_DIR}
 )
 
@@ -185,3 +185,4 @@ target_link_libraries(combined_view
     ${LIBREALSENSE2_LIBRARIES}
     ${OpenCV_LIBS}
 )
+

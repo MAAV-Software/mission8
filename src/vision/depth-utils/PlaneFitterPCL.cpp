@@ -110,6 +110,7 @@ bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, fl
 	float height = abs(cosAlpha * zdepth);
 	zdot = height - lastHeight;
 	lastHeight = height;
+	// TODO Implement the plane fitting stuff here
 	return true;
 }
 
