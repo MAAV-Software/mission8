@@ -45,8 +45,6 @@ void toVehicle(ZCM& vehicle_zcm, ZCM& gcs_zcm)
 		&MessageForwarder::forward_message<waypoint_t>, &forwarder);
 	gcs_zcm.subscribe(CAMERA_DISC_CMD,
 		&MessageForwarder::forward_message<camera_disc_t>, &forwarder);
-	gcs_zcm.subscribe("DJI",
-		&MessageForwarder::forward_message<dji_t>, &forwarder);
 	gcs_zcm.subscribe(CTRL_PARAMS_CHANNEL,
 		&MessageForwarder::forward_message<ctrl_params_t>, &forwarder);
 	gcs_zcm.subscribe(IDLE_CHANNEL,
