@@ -6,7 +6,7 @@
 # DO NOT MOVE THIS SCRIPT
 # Should work for Ubuntu and Arch-like systems
 # Authors: Martin Deegan (mdeegan),
-#	   Romario Pashollari (rpash)
+#       Romario Pashollari (rpash)
 
 # Get location of software
 SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
@@ -41,6 +41,7 @@ sudo apt install cmake \
                  libusb-1.0-0-dbg \
                  python3 \
                  python3-pip \
+                 libvtk6-dev \
                  sl -y # system libraries
 
 # Install custom deps

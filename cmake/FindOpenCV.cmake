@@ -77,6 +77,66 @@ find_library(OpenCV_CCALIB_LIBRARY NAMES opencv_ccalib libopencv_ccalib
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
     )
 
+find_library(OpenCV_CUDAARITHM_LIBRARY NAMES opencv_cudaarithm libopencv_cudaarithm
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDABGSEGM_LIBRARY NAMES opencv_cudabgsegm libopencv_cudabgsegm
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDACODEC_LIBRARY NAMES opencv_cudacodec libopencv_cudacodec
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAFEATURES2D_LIBRARY NAMES opencv_cudafeatures2d libopencv_cudafeatures2d
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAFILTERS_LIBRARY NAMES opencv_cudafilters libopencv_cudafilters
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAIMGPROC_LIBRARY NAMES opencv_cudaimgproc libopencv_cudaimgproc
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDALEGACY_LIBRARY NAMES opencv_cudalegacy libopencv_cudalegacy
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAOBJDETECT_LIBRARY NAMES opencv_cudaobjdetect libopencv_cudaobjdetect
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAOPTFLOW_LIBRARY NAMES opencv_cudaoptflow libopencv_cudaoptflow
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDASTEREO_LIBRARY NAMES opencv_cudastereo libopencv_cudastereo
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDAWARPING_LIBRARY NAMES opencv_cudawarping libopencv_cudawarping
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
+find_library(OpenCV_CUDEV_LIBRARY NAMES opencv_cudev libopencv_cudev
+        PATH_SUFFIXES opencv opencv/lib
+        PATHS ${PROJECT_SOURCE_DIR}/thirdparty
+    )
+
 find_library(OpenCV_DATASETS_LIBRARY NAMES opencv_datasets libopencv_datasets
         PATH_SUFFIXES opencv opencv/lib
         PATHS ${PROJECT_SOURCE_DIR}/thirdparty
