@@ -5,9 +5,6 @@ namespace maav
 const char* const CTRL_CHANNEL 				= "CTRL";
 const char* const CTRL_PARAMS_CHANNEL 			= "CTRL_PARAMS";
 const char* const STATE_CHANNEL				= "STATE";
-const char* const VISION_LINES_CHANNEL			= "VIS_LINES";
-const char* const VISION_ROOMBAS_CHANNEL		= "VIS_ROOMBAS";
-const char* const ROOMBAS_CHANNEL			= "ROOMBAS";
 const char* const OBSTS_CHANNEL			= "OBSTACLES";
 const char* const IMU_CHANNEL				= "IMU";
 const char* const SIM_TRUE_IMU_CHANNEL				= "SIM_TRUE_IMU";
@@ -29,7 +26,6 @@ const char* const OBST_HEARTBEAT_CHANNEL		= "OBST_STAT";
 const char* const TRACKED_STATE				= "TRACKED_STATE";
 const char* const IDLE_CHANNEL				= "IDLE";
 const char* const START_VISION				= "START_VISION";
-const char* const LASER					= "LASER";
 const char* const PLANE_FIT_CHANNEL			= "PLANE_FIT_CHANNEL";
 const char* const VISUAL_ODOMETRY_CHANNEL	= "VISUAL_ODOMETRY";
 const char* const SIM_TRUE_VISUAL_ODOMETRY_CHANNEL	= "VISUAL_ODOMETRY";

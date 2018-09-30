@@ -6,9 +6,6 @@ namespace maav
 extern const char* const CTRL_CHANNEL;				///< controller output to inner loop through tanfan
 extern const char* const CTRL_PARAMS_CHANNEL;			///< PID gains from GCS client to controller
 extern const char* const STATE_CHANNEL;				///< state output from localization to system
-extern const char* const VISION_LINES_CHANNEL;			///< vision's line output to sytem
-extern const char* const VISION_ROOMBAS_CHANNEL;		///< vision's roomba output to localization
-extern const char* const ROOMBAS_CHANNEL; 			///< localization's roomba output to system
 extern const char* const OBSTS_CHANNEL; 			///< localization's obstacle output to system
 extern const char* const IMU_CHANNEL;				///< imu channel from tanfan to system
 extern const char* const SIM_TRUE_IMU_CHANNEL;				///< "true" imu readings from simulator
@@ -30,7 +27,6 @@ extern const char* const OBST_HEARTBEAT_CHANNEL;		///< Obstacle det. heartbeat t
 extern const char* const TRACKED_STATE;				///< Vehicle position history sent to vision
 extern const char* const IDLE_CHANNEL;				///< channel on which idle commands are broadcast
 extern const char* const START_VISION;				///< channel on which to send start vision message
-extern const char* const LASER;					///< laser channel
 extern const char* const PLANE_FIT_CHANNEL;			///< plane fitting update
 extern const char* const VISUAL_ODOMETRY_CHANNEL;	///< visual odometry updates
 extern const char* const SIM_TRUE_VISUAL_ODOMETRY_CHANNEL;	///< "true" visual odometry from simulator
