@@ -55,7 +55,7 @@ find_package(ZCM REQUIRED)
 add_subdirectory(src)
 add_subdirectory(examples)
 add_subdirectory(thirdparty)
-
+add_subdirectory(drivers)
 # Setup testing options
 if(BUILD_TESTS)
     enable_testing()
