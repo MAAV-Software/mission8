@@ -11,6 +11,7 @@ include_directories(
         ${Boost_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIR}
         ${SOPHUS_INCLUDE_DIR}
+        ${YAML_CPP_INCLUDE_DIRS}
 )
 
 add_library(testhelper SHARED test_helpers.cpp)
@@ -23,7 +24,8 @@ target_link_libraries(testhelper
 set(TEST_SRCS
         state_test.cpp
         history_test.cpp
-        unscented_transform_test.cpp)
+        unscented_transform_test.cpp
+        pid_test.cpp)
 
 foreach (testSrc ${TEST_SRCS})
     #Extract the filename without an extension (NAME_WE)
@@ -37,6 +39,9 @@ foreach (testSrc ${TEST_SRCS})
             maav-state
             maav-gnc
             maav-kalman
+            maav-control
+            ${YAML_CPP_LIBRARY}
+            yaml-cpp
             testhelper
             )
 
@@ -52,3 +57,13 @@ foreach (testSrc ${TEST_SRCS})
             WORKING_DIRECTORY ${TEST_BIN_DIR}
             COMMAND ${TEST_BIN_DIR}/${testName})
 endforeach (testSrc)
+
+# copies over ground truth unit test values to testBin dir
+set(GROUND_TRUTH_FILES
+        pid_res.out
+        controller_unit_test.yaml
+        )
+
+foreach(pid_res.out ${GROUND_TRUTH_FILES})
+    configure_file(pid_res.out ${TEST_BIN_DIR}/pid_res.out COPYONLY)
+endforeach(pid_res.out)
