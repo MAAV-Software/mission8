@@ -27,16 +27,16 @@ int main()
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>());
 	float zdot = 0;
 	float zdepth = 0;
+	float roll = 0;
+	float pitch = 0;
 	while (true)
 	{
 		cam.loadNext();
 		cam.getPointCloudBasic(*cloudPtr);
-		if (planeFitter.runPlaneFitting(cloudPtr, zdot, zdepth))
+		if (planeFitter.runPlaneFitting(cloudPtr, zdot, zdepth, roll, pitch))
 		{
 			cout << planeFitter.getLastHeight() << '\t' <<
-				zdot << '\t' << zdepth << endl;
-			cout << "Roll " << roll << endl;
-			cout << "Pitch " << pitch << endl;
+				zdot << '\t' << zdepth << '\t' << roll << '\t' << pitch << endl;
 		}
 		else
 		{

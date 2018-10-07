@@ -205,7 +205,9 @@ void randomTest(std::ofstream &fout, std::ofstream &foutError, std::ofstream &fo
 				.count();
 	float zdot;
 	float zdepth;
-	planeFitterPCL.runPlaneFitting(cloud, zdot, zdepth);
+	float roll;
+	float pitch;
+	planeFitterPCL.runPlaneFitting(cloud, zdot, zdepth, roll, pitch);
 	if (coefs.size() == 0)
 	{
 		foutErrorPCL << std::numeric_limits<double>::max();
