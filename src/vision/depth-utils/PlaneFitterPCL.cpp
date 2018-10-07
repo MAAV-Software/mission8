@@ -86,14 +86,15 @@ Eigen::MatrixXf PlaneFitterPCL::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cl
 	}
 }
 
-bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
-									 float &zdepth)
+bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+	float &zdot, float &zdepth ,float &roll, float &pitch)
 {
-	return getPlaneInfo(cloud, zdot, zdepth, junkMatrix);
+	return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, junkMatrix);
 }
 
-bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
-								  float &zdepth, Eigen::MatrixXf &coefs)
+bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+	float &zdot, float &zdepth, float &roll, float & pitch,
+	Eigen::MatrixXf& coefs)
 {
 	coefs = fitPlane(cloud);
 	if (coefs.size() == 0)
@@ -111,6 +112,13 @@ bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, fl
 	zdot = height - lastHeight;
 	lastHeight = height;
 	// TODO Implement the plane fitting stuff here
+	// assuming quad plane normal is [0,0,1]
+	float xq = 0, yq = 0, zq = 1;
+	float xg = coefs(0);
+	float yg = coefs(1);
+	float zg = coefs(2);
+	roll = acos((xg * xq + zg *zq) / sqrt(xg * xg + zg *zg));
+	pitch = acos((yg *yq + zg *zq) / sqrt(yg * yg + zg * zg));
 	return true;
 }
 

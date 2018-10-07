@@ -33,7 +33,10 @@ int main()
 		cam.getPointCloudBasic(*cloudPtr);
 		if (planeFitter.runPlaneFitting(cloudPtr, zdot, zdepth))
 		{
-			cout << planeFitter.getLastHeight() << '\t' << zdot << '\t' << zdepth << endl;
+			cout << planeFitter.getLastHeight() << '\t' <<
+				zdot << '\t' << zdepth << endl;
+			cout << "Roll " << roll << endl;
+			cout << "Pitch " << pitch << endl;
 		}
 		else
 		{

@@ -32,10 +32,12 @@ class PlaneFitterPCL
 	// or zero dimension matrix if failure
 	Eigen::MatrixXf fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
 	// Calculate the zdepth and the zdot
-	bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth);
+	bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+		float &zdot, float &zdepth, float &roll, float &pitch);
 	// Obtain all the plane information needed by driver
-	bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
-					  Eigen::MatrixXf &coefs);
+	bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+		float &zdot, float &zdepth, float &roll, float &pitch,
+		Eigen::MatrixXf& coefs);
 	// Get the last height
 	float getLastHeight() const;
 
