@@ -2,18 +2,21 @@
 
 #include <Eigen/Dense>
 
-namespace maav {
-namespace gnc {
-namespace measurements {
-
+namespace maav
+{
+namespace gnc
+{
+namespace measurements
+{
 /*
  * Stores the necessary info we need from an IMU message.
  */
-struct ImuMeasurement {
-    Eigen::Vector3d acceleration;
-    Eigen::Vector3d angular_rates;
-    Eigen::Vector3d magnetometer;
-    uint64_t time_usec;
+struct ImuMeasurement
+{
+	Eigen::Vector3d acceleration;
+	Eigen::Vector3d angular_rates;
+	Eigen::Vector3d magnetometer;
+	uint64_t time_usec;
 };
 
 }  // namespace measurements

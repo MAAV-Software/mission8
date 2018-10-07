@@ -1,20 +1,19 @@
 #ifndef MAAV_GCS_CONSTANTS_HPP
 #define MAAV_GCS_CONSTANTS_HPP
 #include <yaml-cpp/yaml.h>
-#include <string>
 #include <array>
+#include <string>
 
 namespace maav
 {
 namespace gcs
 {
-
 /**
 * @brief A container for holding constants for GCS
 */
 class GCSConsts
 {
-public:
+   public:
 	// Spacing for GUI
 	const int SMALL_SPACE;
 	const int MED_SPACE;
@@ -50,7 +49,7 @@ public:
 	*/
 	void writeGains(std::array<double, 21> gains) const;
 
-}; // class GCSConsts
-} // namespace gcs
-} // namespace maav
+};  // class GCSConsts
+}  // namespace gcs
+}  // namespace maav
 #endif

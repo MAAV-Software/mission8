@@ -3,17 +3,19 @@
 #include "gnc/measurements/Measurement.hpp"
 #include "gnc/state.hpp"
 
-namespace maav {
-namespace gnc {
-
-class Estimator {
+namespace maav
+{
+namespace gnc
+{
+class Estimator
+{
    public:
-    Estimator();
+	Estimator();
 
-    const State& add_measurement_set(/*const measurements::MeasurementSet& meas*/);
+	const State& add_measurement_set(/*const measurements::MeasurementSet& meas*/);
 
    private:
-    State state;
+	State state;
 };
 
 }  // namespace gnc

@@ -1,5 +1,5 @@
-#include "gcs/zcm_type_ops.hpp"
 #include "common/messages/MsgChannels.hpp"
+#include "gcs/zcm_type_ops.hpp"
 
 #include <zcm/zcm-cpp.hpp>
 
@@ -42,21 +42,19 @@ class FakeCtrl
 
 	mutex lock;
 
-	void handle_params(const zcm::ReceiveBuffer*, const string&,
-		const params_t* msg)
+	void handle_params(const zcm::ReceiveBuffer*, const string&, const params_t* msg)
 	{
-		lock_guard<mutex> g {lock};
+		lock_guard<mutex> g{lock};
 		params = *msg;
 		cout << "new params:\n" << params << endl;
 	}
 
-	//state transitions are handled here
-	void handle_waypoint(const zcm::ReceiveBuffer*, const string&,
-		const waypoint_t* msg)
+	// state transitions are handled here
+	void handle_waypoint(const zcm::ReceiveBuffer*, const string&, const waypoint_t* msg)
 	{
 		{
-		lock_guard<mutex> g {lock};
-		waypoint = *msg;
+			lock_guard<mutex> g{lock};
+			waypoint = *msg;
 		}
 		if (waypoint.pmode == 0) cout << "autonomous mode!" << endl;
 		if (waypoint.pmode == 1) cout << "hovering!" << endl;
@@ -69,11 +67,10 @@ class FakeCtrl
 		if (waypoint.pmode == 5) cout << "leaving arena!" << endl;
 	}
 
-public:
-
+   public:
 	FakeCtrl() : zcm{"ipc"}
 	{
-		//the fake controller starts with all parameters set to 0 and landed
+		// the fake controller starts with all parameters set to 0 and landed
 		pid_gains_t pid;
 		pid.p = 0;
 		pid.i = 0;
@@ -91,9 +88,10 @@ public:
 		cout << "starting params:\n" << params << endl;
 		cout << "vehicle is landed" << endl;
 
-		//this thread handles periodic status broadcasts
-		thread t {[this]() {
-			while (true) {
+		// this thread handles periodic status broadcasts
+		thread t{[this]() {
+			while (true)
+			{
 				{
 					lock_guard<mutex> g{lock};
 					zcm.publish(CTRL_HEARTBEAT_CHANNEL, &params);

@@ -3,7 +3,6 @@
 
 namespace maav
 {
-
 /**
  * @brief Class for handling camera fields of view (FOV).
  * @author Yichen Yao
@@ -12,8 +11,7 @@ namespace maav
  */
 class FieldOfView
 {
-public:
-
+   public:
 	/**
 	 * @brief Constructor
 	 * @param hFOV the horizontal, or x field of view in radians.
@@ -44,13 +42,12 @@ public:
 	 */
 	double dFOV() const;
 
-private:
-
+   private:
 	double horizontalFOV;
 	double verticalFOV;
 	double diagonalFOV;
 };
 
-}	// namespace maav
+}  // namespace maav
 
-#endif // MAAV_FIELD_OF_VIEW_HPP
+#endif  // MAAV_FIELD_OF_VIEW_HPP

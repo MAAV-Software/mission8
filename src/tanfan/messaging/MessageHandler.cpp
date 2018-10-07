@@ -1,16 +1,16 @@
-#include <iostream>
-#include <cstring>
 #include "tanfan/messaging/MessageHandler.hpp"
+#include <cstring>
+#include <iostream>
 
 #include <zcm/zcm-cpp.hpp>
-#include "common/utils/ZCMHandler.hpp"
 #include "common/utils/TimeSync.hpp"
+#include "common/utils/ZCMHandler.hpp"
 
 namespace zcm
 {
-#include "common/messages/lidar_t.hpp"
-#include "common/messages/imu_t.hpp"
 #include "common/messages/emergency_t.hpp"
+#include "common/messages/imu_t.hpp"
+#include "common/messages/lidar_t.hpp"
 }
 
 #include "common/messages/MsgChannels.hpp"
@@ -18,8 +18,8 @@ namespace zcm
 using zcm::ZCM;
 using std::strncmp;
 
-MessageHandler::MessageHandler(zcm::ZCM * zcm_in, double alpha1, double alpha2) :
-	zcm(zcm_in), ts(alpha1, alpha2)
+MessageHandler::MessageHandler(zcm::ZCM *zcm_in, double alpha1, double alpha2)
+	: zcm(zcm_in), ts(alpha1, alpha2)
 {
 	offset = 0;
 
@@ -58,9 +58,11 @@ MessageHandler::MessageHandler(zcm::ZCM * zcm_in, double alpha1, double alpha2) 
 
 void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len, void *user)
 {
-	int64_t recvTimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	int64_t recvTimeStamp = std::chrono::duration_cast<std::chrono::microseconds>(
+								std::chrono::system_clock::now().time_since_epoch())
+								.count();
 
-	MessageHandler *mh = (MessageHandler*)user;
+	MessageHandler *mh = (MessageHandler *)user;
 	if (strncmp(channel, "LID", 3) == 0)
 	{
 		lidar_t_decode(buf, 0, buf_len, &(mh->lidar));
@@ -69,8 +71,9 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
 		zcmLidar.dist = mh->lidar.dist;
 		zcmLidar.vel = mh->lidar.vel;
 		// Add time sync system!
-		//zcmLidar.time = mh->lidar.time + mh->offset;
-		//zcmLidar.time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		// zcmLidar.time = mh->lidar.time + mh->offset;
+		// zcmLidar.time =
+		// std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		zcmLidar.time = mh->ts.reclock(mh->lidar.time, recvTimeStamp);
 
 		mh->zcm->publish("LID", &zcmLidar);
@@ -97,7 +100,7 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
 		{
 			zcmImu.M[i] = mh->imu.M[i];
 		}
-		//zcmImu.time = mh->imu.time + mh->offset;
+		// zcmImu.time = mh->imu.time + mh->offset;
 		zcmImu.time = mh->ts.reclock(mh->imu.time, recvTimeStamp);
 		zcmImu.Timer = mh->imu.Timer;
 		zcmImu.GyroBiasX = mh->imu.GyroBiasX;
@@ -114,7 +117,8 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
 		emergency_t_decode(buf, 0, buf_len, &(mh->ems));
 		zcm::emergency_t zcmEms;
 		zcmEms.status = mh->ems.status;
-		//zcmEms.time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		// zcmEms.time =
+		// std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		zcmEms.time = mh->ts.reclock(mh->ems.time, recvTimeStamp);
 
 		mh->zcm->publish("EMS", &zcmEms);

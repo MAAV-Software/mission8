@@ -5,10 +5,9 @@
 #include <Eigen/Core>
 #include <vector>
 
-//use the MAAV namespace
+// use the MAAV namespace
 namespace maav
 {
-
 /**
  * @brief Detects obstacles in laser data
  * @author Daniel Woodworth (dascwo)
@@ -17,7 +16,7 @@ namespace maav
  */
 class ObstacleDetector
 {
-public:
+   public:
 	/**
 	 * @brief Default
 	 */
@@ -35,14 +34,14 @@ public:
 	 * @details Any distance measurements that are less than this value are
 	 * interpreted as being out of the sensor's range, and thus "far"
 	 */
-	float far_margin {0.4};
+	float far_margin{0.4};
 
 	/**
 	 * @brief The minimum difference between two points to be considered a jump
 	 * @details If two distance measurements vary by more than this value, they
 	 * are assumed to be a boundary between obstacles
 	 */
-	float jump_margin {0.5};
+	float jump_margin{0.5};
 
 	/**
 	 * @brief The data returned for each obstacle by detect
@@ -67,14 +66,12 @@ public:
 	 * @param start The start angle of the laser_data values
 	 * @param step The angular distance between the laser_data values
 	 */
-	std::vector<obstacle_data> detect(
-			const std::vector<float>& laser_data);
+	std::vector<obstacle_data> detect(const std::vector<float>& laser_data);
 
-private:
+   private:
 	float start;
 	float step;
 };
-
 }
 
 #endif

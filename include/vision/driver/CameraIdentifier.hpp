@@ -1,17 +1,17 @@
 #include <iostream>
+#include <mutex>
 #include <vector>
+#include "../../../atomcore/src/zcmtypes/MsgChannels.hpp"
+#include "ImageFeed.hpp"
+#include "VideoInterface.hpp"
+#include "gcsCommunication.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "VideoInterface.hpp"
-#include "ImageFeed.hpp"
 #include "zcm/zcm-cpp.hpp"
-#include "../../../atomcore/src/zcmtypes/MsgChannels.hpp"
-#include "gcsCommunication.hpp"
-#include <mutex>
 
 class CameraIdentifier
 {
-public:
+   public:
 	// Constructor for this class pass in the maximum allowable value (hsv) for
 	// a camera to be considered covered
 	explicit CameraIdentifier(int cameraIdThreshIn);
@@ -22,17 +22,18 @@ public:
 	// is altered. Use green for the bottom camera and purple for
 	// the front camera during startup to identify it returns the number of
 	// cameras successfully identified
-	int identify(std::vector<VideoInterface*> &input, std::vector<bool> &activeCams,
-		std::vector<ImageFeed*> &imgFeeds, bool useGCS, zcm::ZCM* zcmPtr,
-		camIdentifyHandler *handler);
-private:
+	int identify(std::vector<VideoInterface *> &input, std::vector<bool> &activeCams,
+				 std::vector<ImageFeed *> &imgFeeds, bool useGCS, zcm::ZCM *zcmPtr,
+				 camIdentifyHandler *handler);
+
+   private:
 	// Checks which camera index is pulling black images, returns the index that is
 	// if none are pulling black images returns -1
 	int classifyImage(std::vector<cv::Mat> &images, std::vector<bool> &activeCams);
 	// Helper function that swaps the position of two VideoInterfaces
 	// in a vector of size 5
-	void swapPosition(int srcIdx, int dstIdx, std::vector<VideoInterface*> &input,
-		std::vector<bool> &activeCams, std::vector<ImageFeed*> &imgFeeds);
+	void swapPosition(int srcIdx, int dstIdx, std::vector<VideoInterface *> &input,
+					  std::vector<bool> &activeCams, std::vector<ImageFeed *> &imgFeeds);
 	// Holds the maximum value allowed (hsv) for a frame to be considered covered
 	int cameraIdThresh;
 };

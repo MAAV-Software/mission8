@@ -1,17 +1,17 @@
-#include <iostream>
+#include <chrono>
 #include <cstdint>
+#include <ctime>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <ctime>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include <librealsense/rs.hpp>
-#include <cstdio>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <cstdio>
+#include <librealsense/rs.hpp>
 
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
@@ -23,24 +23,23 @@
 
 class PlaneFitterPCL
 {
-public:
+   public:
 	PlaneFitterPCL(float inlierThreshold);
 	// Used mainly for testing converts from dz point
 	// cloud to pcl point cloud
-	void convertCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-		std::vector<pf::Point3f> &points);
+	void convertCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, std::vector<pf::Point3f> &points);
 	// Provide a point cloud, will provide plane coefficients
 	// or zero dimension matrix if failure
 	Eigen::MatrixXf fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
 	// Calculate the zdepth and the zdot
-	bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-		float &zdot, float &zdepth);
+	bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth);
 	// Obtain all the plane information needed by driver
-	bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-		float &zdot, float &zdepth, Eigen::MatrixXf& coefs);
+	bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
+					  Eigen::MatrixXf &coefs);
 	// Get the last height
 	float getLastHeight() const;
-private:
+
+   private:
 	float inlierThresh;
 	float lastHeight;
 	Eigen::MatrixXf junkMatrix;

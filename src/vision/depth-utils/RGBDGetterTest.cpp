@@ -1,6 +1,6 @@
 
-#include <iostream>
 #include "vision/depth-utils/RGBDGetter.hpp"
+#include <iostream>
 
 void test_getRGB(RGBDGetter&);
 void test_getDepth(RGBDGetter&);
@@ -8,10 +8,11 @@ void test_getCombined(RGBDGetter&);
 void test_getCloud(RGBDGetter&);
 void test_getCloudXYZRGBA(RGBDGetter&);
 
-int main() {
-
+int main()
+{
 	RGBDGetter rgbd(0);
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < 10; ++i)
+	{
 		test_getRGB(rgbd);
 		test_getDepth(rgbd);
 		test_getCombined(rgbd);
@@ -26,7 +27,8 @@ int main() {
 	return 0;
 }
 
-void test_getRGB(RGBDGetter& rgbd) {
+void test_getRGB(RGBDGetter& rgbd)
+{
 	cv::Mat img;
 
 	rgbd.getRGB(img);
@@ -34,7 +36,8 @@ void test_getRGB(RGBDGetter& rgbd) {
 	cv::moveWindow("RGB", 0, 0);
 }
 
-void test_getDepth(RGBDGetter& rgbd) {
+void test_getDepth(RGBDGetter& rgbd)
+{
 	cv::Mat img;
 
 	rgbd.getDepth(img);
@@ -42,24 +45,26 @@ void test_getDepth(RGBDGetter& rgbd) {
 	cv::moveWindow("Depth", 500, 0);
 }
 
-void test_getCombined(RGBDGetter& rgbd) {
+void test_getCombined(RGBDGetter& rgbd)
+{
 	cv::Mat img;
 
 	rgbd.getCombined(img);
 	imshow("Combined", img);
 }
 
-void test_getCloud(RGBDGetter& rgbd) {
+void test_getCloud(RGBDGetter& rgbd)
+{
 	pcl::PointCloud<pcl::PointXYZ> cloud;
 
 	rgbd.getCloud(cloud);
 	std::cout << cloud.size() << std::endl;
 }
 
-void test_getCloudXYZRGBA(RGBDGetter& rgbd) {
+void test_getCloudXYZRGBA(RGBDGetter& rgbd)
+{
 	pcl::PointCloud<pcl::PointXYZRGBA> cloud;
 
 	rgbd.getCloudXYZRGBA(cloud);
 	std::cout << cloud.size() << std::endl;
 }
-

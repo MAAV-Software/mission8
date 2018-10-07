@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include "tanfan/messaging/DataLinkDefines.hpp"
+#include <stdint.h>
 
 // Data frame special values
 const uint8_t DATA_FRAME_START_DELIMITER = 0x7E;

@@ -2,9 +2,9 @@
 #define LCMHANDLER_HPP
 
 #include <lcm/lcm-cpp.hpp>
-#include <string>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <string>
 
 /**
  * @brief LCM Message Handler
@@ -16,7 +16,7 @@
 template <typename T>
 class LCMHandler
 {
-public:
+   public:
 	/**
 	 * @brief Constructs a default MessageHander with an empty message queue.
 	 */
@@ -30,7 +30,7 @@ public:
 	 *			is to be registered as the callback for this message type when
 	 *			subscribing to the message and channel as follows (assume
 	 *			LCM object "lcm" and LCMHandler "mh" for message type "T"
-     *			are already instantiated):
+	 *			are already instantiated):
 	 *
 	 *			lcm.subscribe("channel", &LCMHandler<T>::recv, &mh);
 	 *
@@ -40,40 +40,38 @@ public:
 	 * @param channel	LCM channel being subsribed to for this message
 	 * @param msg		pointer to the newly received LCM message
 	 */
-	void recv(const lcm::ReceiveBuffer*,
-			  const std::string&,
-			  const T* msg)
-    {
-        std::lock_guard<std::mutex> lck(mtx);
-        msgs.push(*msg);
-    }
+	void recv(const lcm::ReceiveBuffer*, const std::string&, const T* msg)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+		msgs.push(*msg);
+	}
 
- 	/**
-     * @brief Returns the message at the front of the queue.
+	/**
+	 * @brief Returns the message at the front of the queue.
 	 */
-    T msg()
-    {
-        std::lock_guard<std::mutex> lck(mtx);
-        return msgs.front();
-    }
+	T msg()
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+		return msgs.front();
+	}
 
 	/**
 	 * @bief Returns true if the queue is not empty; false otherwise.
 	 */
-    bool ready()
-    {
-        std::lock_guard<std::mutex> lck(mtx);
-        return !msgs.empty();
-    }
+	bool ready()
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+		return !msgs.empty();
+	}
 
 	/**
 	 * @brief Pops the message at the front of the queue.
 	 */
-    void pop()
-    {
-        std::lock_guard<std::mutex> lck(mtx);
-        if (!msgs.empty()) msgs.pop();
-    }
+	void pop()
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+		if (!msgs.empty()) msgs.pop();
+	}
 
 	/**
 	 * @brief Returns the size of the message queue.
@@ -84,9 +82,9 @@ public:
 		return msgs.size();
 	}
 
-private:
-    std::queue<T> msgs; ///< message queue
-    std::mutex mtx;		///< mutex for locking the queue (use with std::lock_guard)
+   private:
+	std::queue<T> msgs;  ///< message queue
+	std::mutex mtx;		 ///< mutex for locking the queue (use with std::lock_guard)
 };
 
 #endif

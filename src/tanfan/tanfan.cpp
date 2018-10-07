@@ -1,30 +1,30 @@
-#include <iostream>
-#include <thread>
-#include <atomic>
 #include <signal.h>
-#include <functional>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <functional>
+#include <iostream>
 #include <stdexcept>
+#include <thread>
 
 #include <zcm/zcm-cpp.hpp>
 #include "common/utils/ZCMHandler.hpp"
 
 #include "tanfan/lcmlite.h"
+#include "tanfan/messaging/dji_t.h"
 #include "tanfan/nav/PhysicalController.hpp"
 #include "tanfan/nav/msg/feedback_t.h"
 #include "tanfan/nav/msg/gains_t.h"
 #include "tanfan/nav/msg/setpt_t.h"
-#include "tanfan/messaging/dji_t.h"
 
 namespace zcm
 {
-#include "common/messages/feedback_t.hpp"
-#include "common/messages/setpt_t.hpp"
-#include "common/messages/gains_t.hpp"
-#include "common/messages/lidar_t.hpp"
-#include "common/messages/imu_t.hpp"
 #include "common/messages/dji_t.hpp"
+#include "common/messages/feedback_t.hpp"
+#include "common/messages/gains_t.hpp"
+#include "common/messages/imu_t.hpp"
+#include "common/messages/lidar_t.hpp"
+#include "common/messages/setpt_t.hpp"
 }
 
 using maav::PhysicalController;
@@ -37,12 +37,12 @@ using std::ref;
 
 void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController);
 void sendToTivaLoop(PhysicalController &physicalController,
-		ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
-	   	ZCMHandler<zcm::gains_t> &gainsZcmHandler,
-	   	ZCMHandler<zcm::dji_t> &djiZcmHandler);
+					ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
+					ZCMHandler<zcm::gains_t> &gainsZcmHandler,
+					ZCMHandler<zcm::dji_t> &djiZcmHandler);
 void recvLcmLoop(ZCM &zcm);
 void sendGarbage(ZCM &zcm);
-void transmitPlaceholder(const uint8_t*, uint32_t);
+void transmitPlaceholder(const uint8_t *, uint32_t);
 
 // Kill Signal Handler
 void gracefulKill(int);
@@ -95,16 +95,16 @@ int main()
 
 	physicalController.connect("/dev/ttyUSB0");
 
-	thread sendToTivaThread(sendToTivaLoop, ref(physicalController),
-		   	ref(setpointZcmHandler), ref(gainsZcmHandler), ref(djiZcmHandler));
+	thread sendToTivaThread(sendToTivaLoop, ref(physicalController), ref(setpointZcmHandler),
+							ref(gainsZcmHandler), ref(djiZcmHandler));
 	thread recvLcmThread(recvLcmLoop, ref(zcm));
 
 	tivaToAtomLoop(ref(zcm), ref(physicalController));
 
 	// the above functions block, so this is just cleanup for when the program
 	// exits.
-	//sendToTivaThread.join();
-	//recvLcmThread.join();
+	// sendToTivaThread.join();
+	// recvLcmThread.join();
 
 	physicalController.disconnect();
 
@@ -126,7 +126,7 @@ void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController)
 {
 	while (isAlive)
 	{
-		void (*placeholder)(const uint8_t*, uint32_t);
+		void (*placeholder)(const uint8_t *, uint32_t);
 		placeholder = &transmitPlaceholder;
 		DataLink dlink(placeholder, &zcm);
 
@@ -153,9 +153,9 @@ void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController)
  *
  */
 void sendToTivaLoop(PhysicalController &physicalController,
-		ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
-	   	ZCMHandler<zcm::gains_t> &gainsZcmHandler,
-	   	ZCMHandler<zcm::dji_t> &djiZcmHandler)
+					ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
+					ZCMHandler<zcm::gains_t> &gainsZcmHandler,
+					ZCMHandler<zcm::dji_t> &djiZcmHandler)
 {
 	while (isAlive)
 	{
@@ -199,7 +199,6 @@ void sendToTivaLoop(PhysicalController &physicalController,
 			physicalController.sendDji(msg.roll, msg.pitch, msg.yawRate, msg.thrust);
 			djiZcmHandler.pop();
 		}
-
 	}
 }
 
@@ -226,13 +225,11 @@ void recvLcmLoop(ZCM &zcm)
  * exit on quit.
  *
  */
-void gracefulKill(int)
+void gracefulKill(int) { isAlive = false; }
+void transmitPlaceholder(const uint8_t *buffer, uint32_t size)
 {
-	isAlive = false;
-}
-
-void transmitPlaceholder(const uint8_t* buffer, uint32_t size) {
-
-	throw std::runtime_error("This function should not have been called. This DataLink object exists solely to process data from the Tiva. PhysicalController should be used to receive and send data from the Tiva");
-
+	throw std::runtime_error(
+		"This function should not have been called. This DataLink object exists solely to process "
+		"data from the Tiva. PhysicalController should be used to receive and send data from the "
+		"Tiva");
 }

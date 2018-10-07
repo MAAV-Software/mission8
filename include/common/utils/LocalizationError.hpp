@@ -6,26 +6,17 @@
 
 namespace maav
 {
-
 namespace err
 {
-
 /**
  * @brief This class indicates an attempt to localize has failed
  */
 class LocalizationError : std::exception
 {
-public:
-	explicit LocalizationError(const std::string &problem) : reason{problem}
-	{
-	}
-
-	virtual const char * what() const noexcept override
-	{
-		return reason.c_str();
-	}
-
-private:
+   public:
+	explicit LocalizationError(const std::string &problem) : reason{problem} {}
+	virtual const char *what() const noexcept override { return reason.c_str(); }
+   private:
 	std::string reason;
 };
 

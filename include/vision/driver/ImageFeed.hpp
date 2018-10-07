@@ -1,16 +1,16 @@
 #ifndef _Image_Feed_HPP_
 #define _Image_Feed_HPP_
 
-#include <iostream>
+#include <condition_variable>
 #include <cstdint>
-#include <vector>
+#include <deque>
+#include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <shared_mutex>
-#include <condition_variable>
-#include <deque>
-#include <memory>
 #include <thread>
+#include <vector>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -21,14 +21,14 @@
 // Can be used with multiple calls retrieving data from it.
 class ImageFeed
 {
-public:
+   public:
 	// Constructor for Image Feed requires min size to write to file
 	// and min size for delete from deque as arguments
 	ImageFeed(size_t writeSizeIn, size_t deleteSizeIn, int IDIn);
 	// Constructor for ImageFeed that is used when using DataCoordinator
 	// will spawn writer thread as well when called
-	ImageFeed(size_t writeSizeIn, size_t deleteSizeIn, std::shared_ptr<DataCoordinator>
-		dataCoordIn, int IDIn);
+	ImageFeed(size_t writeSizeIn, size_t deleteSizeIn, std::shared_ptr<DataCoordinator> dataCoordIn,
+			  int IDIn);
 	// Stores a frame and timestamp in the Image_Feed adding it to the front of
 	// the deque and removing from the back if the deque exceeds the max size
 	void storeFrame(std::shared_ptr<cv::Mat> &input, int64_t inTime);
@@ -37,7 +37,7 @@ public:
 	// false is returned and a new frame is not obtained, otherwise
 	// returns false
 	bool getFrame(std::shared_ptr<cv::Mat> &input, int64_t &inTime,
-		std::shared_ptr<std::shared_mutex> &outMtx);
+				  std::shared_ptr<std::shared_mutex> &outMtx);
 	// Returns whether a new frame is ready based on the timestamp if so,
 	// returns true, else returns false
 	bool ready(int64_t inTime);
@@ -69,7 +69,8 @@ public:
 	// Destructor, will either write frames at destruction or delete depending on
 	// the hasDataCoord bool
 	~ImageFeed();
-private:
+
+   private:
 	// Deletes the frame and timestamp at the back of the deque
 	void deleteFrame();
 	// Holds the storeFrameImpl thread that was last executed
@@ -79,17 +80,17 @@ private:
 	// Extracts shared pointer to frame and timestamp of frame in back of deque
 	// Use with data coordinator to write to video or image
 	void extractToWrite(std::shared_ptr<cv::Mat> &output, int64_t &timestamp,
-		std::shared_ptr<std::shared_mutex> &sharedMtxPtr);
+						std::shared_ptr<std::shared_mutex> &sharedMtxPtr);
 	// stores last frame from camera
-	std::deque< std::shared_ptr<cv::Mat> > frames;
+	std::deque<std::shared_ptr<cv::Mat>> frames;
 	// stores last timestamp from camera
 	std::deque<int64_t> timestamps;
 	// Stores shared mutexes for each frame in frames and
-	std::deque< std::shared_ptr< std::shared_mutex > > sharedMutexes;
+	std::deque<std::shared_ptr<std::shared_mutex>> sharedMutexes;
 	// Shared mutex to write and read from the deque
 	std::shared_mutex sharedMtx;
 	// Called by insert to prevent blocking upon insertion
-	static void storeFrameImpl(std::shared_ptr<cv::Mat> input, int64_t inTime,ImageFeed* imgFeed);
+	static void storeFrameImpl(std::shared_ptr<cv::Mat> input, int64_t inTime, ImageFeed *imgFeed);
 	// Stores the size required before pre destruction writting begins
 	size_t writeSize;
 	// Stores the size required before pre destruction deletion of frames

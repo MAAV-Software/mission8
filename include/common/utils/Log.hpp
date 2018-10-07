@@ -1,18 +1,17 @@
 #ifndef MAAV_LOG_HPP
 #define MAAV_LOG_HPP
 
-//some useful standard-library stuff
+// some useful standard-library stuff
+#include <chrono>
+#include <fstream>
 #include <iostream>
 #include <mutex>
-#include <chrono>
 #include <sstream>
-#include <fstream>
 #include <type_traits>
 
-//use the MAAV namespace
+// use the MAAV namespace
 namespace maav
 {
-
 /**
  * @brief Manages a log
  * @author Daniel Woodworth (dascwo)
@@ -92,20 +91,26 @@ namespace maav
  */
 class Log
 {
-public:
+   public:
 	/**
 	 * @brief A type for representing a log level
 	 */
-	enum class Level {debug, info, warn, error};
+	enum class Level
+	{
+		debug,
+		info,
+		warn,
+		error
+	};
 
-private:
-	//mutexes for the streams
+   private:
+	// mutexes for the streams
 	static std::mutex clog_mutex, file_mutex;
 
-	//the file stream
+	// the file stream
 	static std::ofstream file_stream;
 
-	//the minimum logging levels for clog and for the file
+	// the minimum logging levels for clog and for the file
 	static Level clog_level, file_level;
 
 	/**
@@ -115,12 +120,11 @@ private:
 	 */
 	class TimeWriter
 	{
-		//keep track of a tm and a millisecond measure
+		// keep track of a tm and a millisecond measure
 		std::tm time_struct;
 		std::chrono::milliseconds millis;
 
-	public:
-
+	   public:
 		/**
 		 * @brief Constructs a TimeWriter with a certain time
 		 */
@@ -129,14 +133,13 @@ private:
 		/**
 		 * @brief Writes the time
 		 */
-		friend std::ostream& operator<< (std::ostream&,
-			const TimeWriter&);
+		friend std::ostream& operator<<(std::ostream&, const TimeWriter&);
 	};
 
-	//we need to friend TimeWriter's operator<< out here too
-	friend std::ostream& operator<< (std::ostream&,const TimeWriter&);
+	// we need to friend TimeWriter's operator<< out here too
+	friend std::ostream& operator<<(std::ostream&, const TimeWriter&);
 
-public:
+   public:
 	/**
 	 * @brief No instantiation for you
 	 */
@@ -148,9 +151,8 @@ public:
 	 * @param file_level The minimum log level for the file
 	 * @param clog_level The minimum log level for clog
 	 */
-	static void init(const char* file_name = "maav.log",
-		Level file_level = Level::debug,
-		Level clog_level = Level::info);
+	static void init(const char* file_name = "maav.log", Level file_level = Level::debug,
+					 Level clog_level = Level::info);
 
 	/**
 	 * @brief Writes an info-level log entry
@@ -159,9 +161,9 @@ public:
 	 * @param message The log message to display
 	 * @param timestamp The time to record with this entry
 	 */
-	static void info(const char* mod_id, const std::string& message,
-		std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now());
+	static void info(
+		const char* mod_id, const std::string& message,
+		std::chrono::system_clock::time_point timestamp = std::chrono::system_clock::now());
 
 	/**
 	 * @brief Writes an error-level log entry
@@ -170,9 +172,9 @@ public:
 	 * @param message The log message to display
 	 * @param timestamp The time to record with this entry
 	 */
-	static void error(const char* mod_id, const std::string& message,
-		std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now());
+	static void error(
+		const char* mod_id, const std::string& message,
+		std::chrono::system_clock::time_point timestamp = std::chrono::system_clock::now());
 
 	/**
 	 * @brief Writes a warning-level log entry
@@ -181,9 +183,9 @@ public:
 	 * @param message The log message to display
 	 * @param timestamp The time to record with this entry
 	 */
-	static void warn(const char* mod_id, const std::string& message,
-		std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now());
+	static void warn(
+		const char* mod_id, const std::string& message,
+		std::chrono::system_clock::time_point timestamp = std::chrono::system_clock::now());
 
 	/**
 	 * @brief Writes a debug-level log entry
@@ -192,9 +194,9 @@ public:
 	 * @param message The log message to display
 	 * @param timestamp The time to record with this entry
 	 */
-	static void debug(const char* mod_id, const std::string& message,
-		std::chrono::system_clock::time_point timestamp
-		= std::chrono::system_clock::now());
+	static void debug(
+		const char* mod_id, const std::string& message,
+		std::chrono::system_clock::time_point timestamp = std::chrono::system_clock::now());
 
 	/**
 	 * @brief A local logger stream to be used with Log
@@ -203,29 +205,26 @@ public:
 	 */
 	class Logger : public std::ostringstream
 	{
-		//our "module identifier"
+		// our "module identifier"
 		const char* mod_id;
 
-		//the log level that the logger is set to
+		// the log level that the logger is set to
 		//(info seems like a sensible default)
-		Level level {Level::info};
+		Level level{Level::info};
 
-	public:
-
+	   public:
 		/**
 		 * @brief Constructs a Logger
 		 * @param mod_id The "module identifier" to use
 		 */
 		explicit Logger(const char* mod_id_in) : mod_id{mod_id_in} {}
-
 		/**
 		 * @brief Writes an info-level log entry
 		 * @param message The log message to display
 		 * @param timestamp The time to record with this entry
 		 */
-		void info(const std::string& message,
-			std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now())
+		void info(const std::string& message, std::chrono::system_clock::time_point timestamp =
+												  std::chrono::system_clock::now())
 		{
 			Log::info(mod_id, message, timestamp);
 		}
@@ -235,9 +234,8 @@ public:
 		 * @param message The log message to display
 		 * @param timestamp The time to record with this entry
 		 */
-		void error(const std::string& message,
-			std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now())
+		void error(const std::string& message, std::chrono::system_clock::time_point timestamp =
+												   std::chrono::system_clock::now())
 		{
 			Log::error(mod_id, message, timestamp);
 		}
@@ -247,9 +245,8 @@ public:
 		 * @param message The log message to display
 		 * @param timestamp The time to record with this entry
 		 */
-		void warn(const std::string& message,
-			std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now())
+		void warn(const std::string& message, std::chrono::system_clock::time_point timestamp =
+												  std::chrono::system_clock::now())
 		{
 			Log::warn(mod_id, message, timestamp);
 		}
@@ -259,9 +256,8 @@ public:
 		 * @param message The log message to display
 		 * @param timestamp The time to record with this entry
 		 */
-		void debug(const std::string& message,
-			std::chrono::system_clock::time_point timestamp
-			= std::chrono::system_clock::now())
+		void debug(const std::string& message, std::chrono::system_clock::time_point timestamp =
+												   std::chrono::system_clock::now())
 		{
 			Log::debug(mod_id, message, timestamp);
 		}
@@ -313,23 +309,24 @@ public:
 		 */
 		void commit()
 		{
-			//switch according to the log level
-			switch (level) {
-			case Level::info:
-				info(std::ostringstream::str());
-				break;
-			case Level::error:
-				error(std::ostringstream::str());
-				break;
-			case Level::warn:
-				warn(std::ostringstream::str());
-				break;
-			case Level::debug:
-				debug(std::ostringstream::str());
-				break;
+			// switch according to the log level
+			switch (level)
+			{
+				case Level::info:
+					info(std::ostringstream::str());
+					break;
+				case Level::error:
+					error(std::ostringstream::str());
+					break;
+				case Level::warn:
+					warn(std::ostringstream::str());
+					break;
+				case Level::debug:
+					debug(std::ostringstream::str());
+					break;
 			}
 
-			//and then clear the string
+			// and then clear the string
 			std::ostringstream::str("");
 		}
 	};
@@ -343,7 +340,6 @@ public:
  * otherwise, undefined behavior will ensue
  */
 std::ostream& commit(std::ostream&);
-
 }
 
-#endif //MAAV_LOG_HPP
+#endif  // MAAV_LOG_HPP

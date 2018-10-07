@@ -6,31 +6,24 @@
 
 namespace maav
 {
-
 inline Eigen::Matrix3d rotMatZ(double angle)
 {
 	Eigen::Matrix3d R;
-	R << std::cos(angle), -std::sin(angle), 0,
-	  	 std::sin(angle),  std::cos(angle), 0,
-		 			   0,				 0, 1;
+	R << std::cos(angle), -std::sin(angle), 0, std::sin(angle), std::cos(angle), 0, 0, 0, 1;
 	return R;
 }
 
 inline Eigen::Matrix3d rotMatX(double angle)
 {
 	Eigen::Matrix3d R;
-	R << 1,               0,                0,
-	     0, std::cos(angle), -std::sin(angle),
-	  	 0, std::sin(angle),  std::cos(angle);
+	R << 1, 0, 0, 0, std::cos(angle), -std::sin(angle), 0, std::sin(angle), std::cos(angle);
 	return R;
 }
 
 inline Eigen::Matrix3d rotMatY(double angle)
 {
 	Eigen::Matrix3d R;
-	R <<  std::cos(angle), 0, std::sin(angle),
-	     				0, 1, 0,
-		 -std::sin(angle), 0, std::cos(angle);	
+	R << std::cos(angle), 0, std::sin(angle), 0, 1, 0, -std::sin(angle), 0, std::cos(angle);
 	return R;
 }
 
@@ -61,7 +54,6 @@ inline double bounded(double input, double upper, double lower)
 	if (input < lower) return lower;
 	return input;
 }
-
 }
 
-#endif // math_utils.hpp
+#endif  // math_utils.hpp

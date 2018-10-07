@@ -1,13 +1,12 @@
 #ifndef LASERREADER_HPP
 #define LASERREADER_HPP
 
-#include "common/utils/SerialTTY.hpp"
 #include <string>
 #include <vector>
+#include "common/utils/SerialTTY.hpp"
 
 namespace maav
 {
-
 /**
  * @brief Shared implementation functionality for reading laser data
  *
@@ -17,8 +16,7 @@ namespace maav
  */
 class LaserReaderDecoder
 {
-public:
-
+   public:
 	/**
 	 * @brief Decodes laser reader data to produce distance values
 	 * @param data The data to read
@@ -26,8 +24,8 @@ public:
 	 */
 	std::vector<double> getDistances(const std::string& data);
 
-	//a helper function; not really part of the public interface, but needs to
-	//be exposed for testing
+	// a helper function; not really part of the public interface, but needs to
+	// be exposed for testing
 	int decode(const std::string& data, int len);
 };
 
@@ -41,12 +39,12 @@ public:
  */
 class SerialLaserReader : LaserReaderDecoder
 {
-public:
+   public:
 	/**
 	 * @brief Opens the given port for communication
 	 * @param serialPort Path of serial port to connect to
 	 */
-	explicit SerialLaserReader(const char *serialPort);
+	explicit SerialLaserReader(const char* serialPort);
 
 	/**
 	 *@brief shuts down laser and closes serial port
@@ -56,7 +54,7 @@ public:
 	/**
 	 * @brief Starts the laser allowing measurement to begin
 	 */
-	bool connect(const char *serialPort);
+	bool connect(const char* serialPort);
 
 	/**
 	 * @brief Stops the laser
@@ -102,7 +100,7 @@ public:
 	 */
 	double getStep();
 
-private:
+   private:
 	std::string send(const std::string& command);
 
 	std::string getDistData(int start, int end, int resolution);
@@ -118,12 +116,11 @@ private:
  */
 class StaticLaserReader : LaserReaderDecoder
 {
-public:
-
-	//LaserReaderDecoder's getDistances is sufficient for this class
+   public:
+	// LaserReaderDecoder's getDistances is sufficient for this class
 	using LaserReaderDecoder::getDistances;
 
-	//again for testing purposes
+	// again for testing purposes
 	using LaserReaderDecoder::decode;
 
 	/**
@@ -144,7 +141,6 @@ public:
 	 */
 	double getStep();
 };
-
 }
 
 #endif

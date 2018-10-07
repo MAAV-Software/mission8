@@ -1,14 +1,13 @@
 #include "gcs/GCSConsts.hpp"
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 using namespace std;
 namespace maav
 {
 namespace gcs
 {
-
 void GCSConsts::writeGains(array<double, 21> gains) const
 {
 	ofstream fout(FILENAME);
@@ -36,5 +35,5 @@ void GCSConsts::writeGains(array<double, 21> gains) const
 	fout.close();
 }
 
-} // namespace gcs
-} // namespace maav
+}  // namespace gcs
+}  // namespace maav

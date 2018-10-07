@@ -1,10 +1,10 @@
-#include "common/utils/LocalizationError.hpp"
 #include "common/math/math.hpp"
 #include <Eigen/Dense>
+#include "common/utils/LocalizationError.hpp"
 
+#include <cassert>
 #include <cstring>
 #include <iterator>
-#include <cassert>
 
 constexpr double MAX_PIXEL_DIFF = 5.0;
 
@@ -37,16 +37,14 @@ using std::min;
 
 namespace maav
 {
-
 PRNG::PRNG() : random_engine{random_device{}()} {}
-
-PRNG::PRNG(const char* seed)
+PRNG::PRNG(const char *seed)
 {
 	seed_seq sseq(seed, seed + strlen(seed));
 	random_engine.seed(sseq);
 }
 
-PRNG::PRNG(const string& seed)
+PRNG::PRNG(const string &seed)
 {
 	seed_seq sseq(begin(seed), end(seed));
 	random_engine.seed(sseq);
@@ -57,7 +55,6 @@ double PRNG::operator()(double left, double right)
 	assert(left < right);
 	return uniform_real_distribution<>{left, right}(random_engine);
 }
-
 }
 
 void maav::matchCorners(vector<Vector2d> &expected, vector<Vector2d> &camera)
@@ -97,8 +94,8 @@ void maav::matchCorners(vector<Vector2d> &expected, vector<Vector2d> &camera)
 	camera = newCamera;
 }
 
-Matrix3d maav::getTransformMatrix(const vector<Vector2d> &expected,
-	const vector<Vector2d> &camera, double yaw)
+Matrix3d maav::getTransformMatrix(const vector<Vector2d> &expected, const vector<Vector2d> &camera,
+								  double yaw)
 {
 	int totalPoints = min(expected.size(), camera.size());
 
@@ -139,16 +136,14 @@ Matrix3d maav::getTransformMatrix(const vector<Vector2d> &expected,
 
 	// Get transformation matrix from x
 	Matrix3d transform;
-	transform << M1, M2, x[1],
-	             M4, M5, x[2],
-	             0,  0,  1;
+	transform << M1, M2, x[1], M4, M5, x[2], 0, 0, 1;
 
 	return transform;
 }
 
 vector<Vector2d> maav::get_line_points(const Mat &src)
 {
-	vector<vector<Point> > all_contours;
+	vector<vector<Point>> all_contours;
 	vector<Vector2d> contours;
 	Mat tmp;
 
@@ -167,10 +162,9 @@ vector<Vector2d> maav::get_line_points(const Mat &src)
 	return contours;
 }
 
-Eigen::Vector3d maav::localizePosition(const Eigen::Vector3d &pos,
-		double yaw,
-		const std::vector<Eigen::Vector2d> &expected,
-		const std::vector<Eigen::Vector2d> &camera)
+Eigen::Vector3d maav::localizePosition(const Eigen::Vector3d &pos, double yaw,
+									   const std::vector<Eigen::Vector2d> &expected,
+									   const std::vector<Eigen::Vector2d> &camera)
 {
 	Eigen::Vector3d newPos;
 

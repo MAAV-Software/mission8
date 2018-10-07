@@ -12,7 +12,6 @@ namespace maav
 {
 namespace gcs
 {
-
 /**
  * @brief A status/command handler
  *
@@ -118,56 +117,55 @@ namespace gcs
 template <typename Status>
 class StatCmd : public GlibZCM::Handler<Status>
 {
-	//a convenient alias for the long parent class name
+	// a convenient alias for the long parent class name
 	using super = GlibZCM::Handler<Status>;
 
-	//the current reported status, old_stat, and the desired status, new_stat
+	// the current reported status, old_stat, and the desired status, new_stat
 	Status old_stat, new_stat;
 
-	//which channel to use to send command messages
+	// which channel to use to send command messages
 	std::string cmd_channel;
 
-	//the signal for status updates
+	// the signal for status updates
 	sigc::signal<void, const Status&> update_signal;
 
-	//is the corresponding command channel primed
+	// is the corresponding command channel primed
 	bool primed{false};
 
-	//how to update the desired status and correctly emit the signal
+	// how to update the desired status and correctly emit the signal
 	void update_new(const Status& stat)
 	{
 		update_signal.emit(stat);
 		new_stat = stat;
 	}
 
-protected:
-
+   protected:
 	/**
 	 * @brief Handles new messages and updates the internal status
 	 * @param msg The new message that has come in
 	 */
 	void on_message(const Status& msg) override
 	{
-		//if there's an update in progress and the status still hasn't been
-		//updated, resend the command message
-		if (old_stat != new_stat) {
-			if (msg != new_stat)
-				super::get_zcm().publish(cmd_channel, new_stat);
+		// if there's an update in progress and the status still hasn't been
+		// updated, resend the command message
+		if (old_stat != new_stat)
+		{
+			if (msg != new_stat) super::get_zcm().publish(cmd_channel, new_stat);
 		}
 
-		//otherwise, if there isn't an update in progress, update the desired
-		//message if there's a new status
-		else if (msg != new_stat) update_new(msg);
+		// otherwise, if there isn't an update in progress, update the desired
+		// message if there's a new status
+		else if (msg != new_stat)
+			update_new(msg);
 
-		//always update the reported status
+		// always update the reported status
 		old_stat = msg;
 
-		//call back up to emit the message signal
+		// call back up to emit the message signal
 		super::on_message(msg);
 	}
 
-public:
-
+   public:
 	/**
 	 * @brief Creates a status/command handler
 	 * @param zcm The GlibZCM instance to use for communicating with ZCM
@@ -176,12 +174,12 @@ public:
 	 * the status channel
 	 * @param init The initial status value
 	 */
-	StatCmd(GlibZCM& zcm, const std::string& channel,
-		const Status& init = Status())
+	StatCmd(GlibZCM& zcm, const std::string& channel, const Status& init = Status())
 		: super{zcm, channel + "_STAT"},
-			old_stat{init}, new_stat{init}, cmd_channel{channel + "_CMD"}
+		  old_stat{init},
+		  new_stat{init},
+		  cmd_channel{channel + "_CMD"}
 	{
-
 	}
 
 	/**
@@ -194,10 +192,9 @@ public:
 	 * @param init The initial status value
 	*/
 	StatCmd(GlibZCM& zcm, const std::string& cmd_channel_in, const std::string& stat_channel_in,
-		const Status& init = Status()) : super{zcm, stat_channel_in},
-			old_stat{init}, new_stat{init}, cmd_channel{cmd_channel_in}
+			const Status& init = Status())
+		: super{zcm, stat_channel_in}, old_stat{init}, new_stat{init}, cmd_channel{cmd_channel_in}
 	{
-
 	}
 
 	/**
@@ -206,7 +203,8 @@ public:
 	*/
 	void prime()
 	{
-		if(!primed) {
+		if (!primed)
+		{
 			super::get_zcm().publish(cmd_channel, new_stat);
 			primed = true;
 		}
@@ -235,7 +233,8 @@ public:
 	*/
 	StatCmd<Status>& operator=(StatCmd<Status>&& other) noexcept
 	{
-		if(this != &other){
+		if (this != &other)
+		{
 			old_stat = std::move(other.old_stat);
 			new_stat = std::move(other.new_stat);
 			cmd_channel = std::move(other.cmd_channel);
@@ -250,7 +249,8 @@ public:
 	*
 	* @param stat_in The Status to set old_stat and new_stat to
 	*/
-	void initStat(Status stat_in){
+	void initStat(Status stat_in)
+	{
 		new_stat = stat_in;
 		old_stat = stat_in;
 	}
@@ -260,15 +260,14 @@ public:
 	 * update is in progress
 	 * @return The current status
 	 */
-	const Status& stat() const {return new_stat;}
-
+	const Status& stat() const { return new_stat; }
 	/**
 	 * @brief Updates the status and starts sending command messages
 	 * @param cmd The value to update the status to
 	 */
 	void cmd(const Status& cmd)
 	{
-	//	if (cmd == new_stat) return;
+		//	if (cmd == new_stat) return;
 		update_new(cmd);
 		super::get_zcm().publish(cmd_channel, new_stat);
 	}
@@ -280,18 +279,14 @@ public:
 	*/
 	void update(const Status& update)
 	{
-		if(update == new_stat) return;
+		if (update == new_stat) return;
 		update_new(update);
 	}
 
 	/**
 	* @brief Publishes the most recent command message
 	*/
-	void publish_new()
-	{
-		super::get_zcm().publish(cmd_channel, new_stat);
-	}
-
+	void publish_new() { super::get_zcm().publish(cmd_channel, new_stat); }
 	/**
 	 * @brief Exposes the status update signal
 	 * @return The signal; connect to this to get status updates
@@ -318,12 +313,8 @@ public:
 	 * });
 	 * ```
 	 */
-	sigc::signal<void, const Status&>& signal_update()
-	{
-		return update_signal;
-	}
+	sigc::signal<void, const Status&>& signal_update() { return update_signal; }
 };
-
 }
 }
 

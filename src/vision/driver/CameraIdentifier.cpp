@@ -3,19 +3,19 @@
 using namespace std;
 using namespace cv;
 
-CameraIdentifier::CameraIdentifier(int cameraIdThreshIn) : cameraIdThresh {cameraIdThreshIn} { }
-
-int CameraIdentifier::identify(vector<VideoInterface*> &input, vector<bool> &activeCams,
-	vector<ImageFeed*> &imgFeeds, bool usingGCS, zcm::ZCM* zcmPtr, camIdentifyHandler *handler)
+CameraIdentifier::CameraIdentifier(int cameraIdThreshIn) : cameraIdThresh{cameraIdThreshIn} {}
+int CameraIdentifier::identify(vector<VideoInterface *> &input, vector<bool> &activeCams,
+							   vector<ImageFeed *> &imgFeeds, bool usingGCS, zcm::ZCM *zcmPtr,
+							   camIdentifyHandler *handler)
 {
 	vector<Mat> images(5);
-	int numFound {0};
-	int srcIdx {0};
-	int numActiveCams {0};
-	int dstIdx {0};
+	int numFound{0};
+	int srcIdx{0};
+	int numActiveCams{0};
+	int dstIdx{0};
 	string tempStr;
 	camera_disc_t msg;
-	for (int i {0}; i < 5; ++i)
+	for (int i{0}; i < 5; ++i)
 	{
 		if (activeCams[i])
 		{
@@ -45,23 +45,23 @@ int CameraIdentifier::identify(vector<VideoInterface*> &input, vector<bool> &act
 		}
 		cout << "Finding camera " << dstIdx << '\n';
 		// Makes sure that the frame used is in fact a new one
-		for (int i {0}; i < 10; ++i)
+		for (int i{0}; i < 10; ++i)
 		{
-			for (int ii {0}; ii < 5; ++ii)
+			for (int ii{0}; ii < 5; ++ii)
 			{
 				if (!activeCams[ii])
 				{
 					continue;
 				}
-				else if(input[ii]->grab())
+				else if (input[ii]->grab())
 				{
 					input[ii]->retrieve(images[ii]);
 				}
 			}
 		}
-		for (bool found {false}; !found; )
+		for (bool found{false}; !found;)
 		{
-			for (int i {0}; i < 5; ++i)
+			for (int i{0}; i < 5; ++i)
 			{
 				if (!activeCams[i])
 				{
@@ -72,24 +72,24 @@ int CameraIdentifier::identify(vector<VideoInterface*> &input, vector<bool> &act
 				}
 				input[i]->retrieve(images[i]);
 			}
-			srcIdx = classifyImage(images,activeCams);
+			srcIdx = classifyImage(images, activeCams);
 			if (srcIdx == -1)
 			{
 				continue;
 			}
-			swapPosition(srcIdx,dstIdx,input,activeCams,imgFeeds);
+			swapPosition(srcIdx, dstIdx, input, activeCams, imgFeeds);
 			++numFound;
 			found = true;
 			msg.numCameras = numFound;
-			zcmPtr->publish(maav::CAMERA_DISC_STAT,&msg);
+			zcmPtr->publish(maav::CAMERA_DISC_STAT, &msg);
 			cout << "Found camera " << dstIdx << '\n';
 		}
 	}
 	return numFound;
 }
 
-void CameraIdentifier::swapPosition(int srcIdx, int dstIdx, vector<VideoInterface*> &input,
-	vector<bool> &activeCams, vector<ImageFeed*> &imgFeeds)
+void CameraIdentifier::swapPosition(int srcIdx, int dstIdx, vector<VideoInterface *> &input,
+									vector<bool> &activeCams, vector<ImageFeed *> &imgFeeds)
 {
 	// Check if srcIdx is same as new, return if same
 	if (srcIdx == dstIdx)
@@ -97,8 +97,8 @@ void CameraIdentifier::swapPosition(int srcIdx, int dstIdx, vector<VideoInterfac
 		return;
 	}
 	// Declare temp pointers
-	VideoInterface* tempPtr;
-	ImageFeed* tempImgFeedPtr;
+	VideoInterface *tempPtr;
+	ImageFeed *tempImgFeedPtr;
 	// swap VideoInterface
 	tempPtr = input[dstIdx];
 	input[dstIdx] = input[srcIdx];
@@ -119,14 +119,14 @@ int CameraIdentifier::classifyImage(vector<Mat> &images, vector<bool> &activeCam
 {
 	vector<Mat> hsvImages(5);
 	vector<Mat> binary(5);
-	for (int i {0}; i < 5; ++i)
+	for (int i{0}; i < 5; ++i)
 	{
 		if (!activeCams[i])
 		{
 			continue;
 		}
-		cvtColor(images[i],hsvImages[i],COLOR_BGR2HSV);
-		inRange(hsvImages[i],Scalar(0,0,0),Scalar(255,255,cameraIdThresh),binary[i]);
+		cvtColor(images[i], hsvImages[i], COLOR_BGR2HSV);
+		inRange(hsvImages[i], Scalar(0, 0, 0), Scalar(255, 255, cameraIdThresh), binary[i]);
 		if ((sum(binary[i]))[0] > 230400)
 		{
 			return i;

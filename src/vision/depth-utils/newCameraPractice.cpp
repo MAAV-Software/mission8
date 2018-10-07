@@ -1,15 +1,15 @@
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <librealsense2/rs.hpp>
-#include <iostream>
-#include <fstream>
 #include <cassert>
 #include <cstdlib>
-#include <vector>
-#include <string>
 #include <exception>
+#include <fstream>
+#include <iostream>
+#include <librealsense2/rs.hpp>
+#include <string>
+#include <vector>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
 	assert(argc == 2);
 	int numCams = atoi(argv[1]);
@@ -21,8 +21,8 @@ int main(int argc, char ** argv)
 	std::vector<rs2::pipeline> pipe(numCams);
 	std::vector<rs2::config> cfg(numCams);
 
-	const rs2::device & dev1 = list[0];
-	const rs2::device & dev2 = list[1];
+	const rs2::device& dev1 = list[0];
+	const rs2::device& dev2 = list[1];
 
 	rs2::pipeline p1;
 	rs2::pipeline p2;
@@ -42,18 +42,16 @@ int main(int argc, char ** argv)
 	std::vector<rs2::frameset> frames(numCams);
 
 	// Camera warmup - dropping several first frames to let auto-exposure stabilize
-    	for(int i = 0; i < 30; i++)
-    	{
-        	//Wait for all configured streams to produce a frame
-		for (int j = 0; j < numCams; ++j)
-			frames[j] = pipe[j].wait_for_frames();
-    	}
+	for (int i = 0; i < 30; i++)
+	{
+		// Wait for all configured streams to produce a frame
+		for (int j = 0; j < numCams; ++j) frames[j] = pipe[j].wait_for_frames();
+	}
 
 	std::vector<rs2::frame> rgbFrame(numCams);
 	std::vector<rs2::frame> depthFrame(numCams);
 	std::ofstream file("data.txt");
-	if (!file)
-		throw std::runtime_error("???");
+	if (!file) throw std::runtime_error("???");
 	while (true)
 	{
 		for (int i = 0; i < numCams; ++i)
@@ -63,7 +61,7 @@ int main(int argc, char ** argv)
 
 			if (rgbFrame[i])
 			{
-				auto img =(const uint16_t*)rgbFrame[i].get_data();
+				auto img = (const uint16_t*)rgbFrame[i].get_data();
 				cv::Mat mat = cv::Mat(cv::Size(640, 480), CV_8UC3, (void*)img, cv::Mat::AUTO_STEP);
 				std::string s("RGB ");
 				s += std::to_string(i);
@@ -71,7 +69,7 @@ int main(int argc, char ** argv)
 			}
 			if (depthFrame[i])
 			{
-				auto img =(const uint16_t*)depthFrame[i].get_data();
+				auto img = (const uint16_t*)depthFrame[i].get_data();
 				cv::Mat mat = cv::Mat(cv::Size(640, 480), CV_16SC1, (void*)img, cv::Mat::AUTO_STEP);
 				file << cv::format(mat, cv::Formatter::FMT_CSV) << std::endl;
 				std::string s("Depth ");
@@ -81,10 +79,8 @@ int main(int argc, char ** argv)
 		}
 
 		cv::waitKey(0);
-		for (int j = 0; j < numCams; ++j)
-			frames[j] = pipe[j].wait_for_frames();
+		for (int j = 0; j < numCams; ++j) frames[j] = pipe[j].wait_for_frames();
 	}
-	
 
 	return 0;
 }

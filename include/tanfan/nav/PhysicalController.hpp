@@ -1,19 +1,18 @@
 #ifndef MAAV_PHYSICAL_CONTROLLER_HPP
 #define MAAV_PHYSICAL_CONTROLLER_HPP
 
+#include <functional>
+#include <string>
+#include "../messaging/DataLink.hpp"
 #include "Controller.hpp"
 #include "Log.hpp"
 #include "SerialTTY.hpp"
 #include "data_link.h"
 #include "msg/feedback_t.h"
 #include "msg/gains_t.h"
-#include "../messaging/DataLink.hpp"
-#include <string>
-#include <functional>
 
 namespace maav
 {
-
 /**
  * @brief A non-blocking interface to talk to the actual controller
  *
@@ -22,7 +21,7 @@ namespace maav
  */
 class PhysicalController : public Controller
 {
-public:
+   public:
 	/**
 	 * @brief Does the needful
 	 */
@@ -68,7 +67,7 @@ public:
 	/**
 	 * @brief handles the controller's hot garbage
 	 */
-	void setFeedbackHandler(std::function<void (const feedback_t *)>);
+	void setFeedbackHandler(std::function<void(const feedback_t *)>);
 
 	/**
 	 * @brief stop this thing
@@ -84,19 +83,19 @@ public:
 	 * @brief Forwards a gains_t
 	 */
 	void sendGains(const gains_t *g);
-	
+
 	/**
 	 * @brief Forwards a dji_t
 	 */
 	void sendDji(float roll, float pitch, float yaw, float thrust);
 
-private:
-	std::function<void (const feedback_t *)> handler;
+   private:
+	std::function<void(const feedback_t *)> handler;
 	maav::Log::Logger log;
 	maav::SerialTTY port;
 	bool running;
 };
 
-} // namespace maav
+}  // namespace maav
 
-#endif // MAAV_PHYSICAL_CONTROLLER_HPP
+#endif  // MAAV_PHYSICAL_CONTROLLER_HPP

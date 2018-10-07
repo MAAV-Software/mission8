@@ -1,10 +1,10 @@
 #ifndef ZCMHANDLER_HPP
 #define ZCMHANDLER_HPP
 
-#include <zcm/zcm-cpp.hpp>
-#include <string>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <string>
+#include <zcm/zcm-cpp.hpp>
 
 /**
  * @brief ZCM Message Handler
@@ -16,7 +16,7 @@
 template <typename T>
 class ZCMHandler
 {
-public:
+   public:
 	/**
 	 * @brief Constructs a default MessageHander with an empty message queue.
 	 */
@@ -40,15 +40,13 @@ public:
 	 * @param channel	ZCM channel being subsribed to for this message
 	 * @param msg		pointer to the newly received ZCM message
 	 */
-	void recv(const zcm::ReceiveBuffer*,
-			  const std::string&,
-			  const T* msg)
+	void recv(const zcm::ReceiveBuffer*, const std::string&, const T* msg)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 		msgs.push(*msg);
 	}
 
- 	/**
+	/**
 	 * @brief Returns the message at the front of the queue.
 	 */
 	T msg()
@@ -84,9 +82,9 @@ public:
 		return msgs.size();
 	}
 
-private:
-	std::queue<T> msgs; ///< message queue
-	std::mutex mtx;		///< mutex for locking the queue (use with std::lock_guard)
+   private:
+	std::queue<T> msgs;  ///< message queue
+	std::mutex mtx;		 ///< mutex for locking the queue (use with std::lock_guard)
 };
 
 /**
@@ -99,15 +97,11 @@ private:
 template <typename T>
 class ZCMSingleHandler
 {
-public:
+   public:
 	/**
 	 * @brief Constructs a default MessageHander with an empty message queue.
 	 */
-	ZCMSingleHandler( T msg_in)
-	{
-		msg_ = msg_in;
-	}
-
+	ZCMSingleHandler(T msg_in) { msg_ = msg_in; }
 	/**
 	 * @brief ZCM Message Callback
 	 * @details This function gets called upon the arrival of an ZCM message as
@@ -126,14 +120,12 @@ public:
 	 * @param channel	ZCM channel being subsribed to for this message
 	 * @param msg		pointer to the newly received ZCM message
 	 */
-	void recv(const zcm::ReceiveBuffer*,
-			  const std::string&,
-			  const T* msg)
+	void recv(const zcm::ReceiveBuffer*, const std::string&, const T* msg)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 		msg_ = *msg;
 	}
- 	/**
+	/**
 	 * @brief Returns the message at the front of the queue.
 	 */
 	T msg()
@@ -141,9 +133,10 @@ public:
 		std::lock_guard<std::mutex> lck(mtx);
 		return msg_;
 	}
-private:
-	T msg_; 			///< latest message
-	std::mutex mtx;		///< mutex for locking the queue (use with std::lock_guard)
+
+   private:
+	T msg_;			 ///< latest message
+	std::mutex mtx;  ///< mutex for locking the queue (use with std::lock_guard)
 };
 
 #endif

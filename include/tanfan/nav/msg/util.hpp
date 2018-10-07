@@ -1,13 +1,12 @@
 #ifndef MAAV_MSG_UTIL_H
 #define MAAV_MSG_UTIL_H
 
+#include <vector>
 #include "gains_t.h"
 #include "setpt_t.h"
-#include <vector>
 
 namespace maav
 {
-
 /**
  * @brief Messaging utility functions
  */

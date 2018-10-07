@@ -2,18 +2,20 @@
 
 #include "gnc/state.hpp"
 
-namespace maav {
-namespace gnc {
-
-class Controller {
+namespace maav
+{
+namespace gnc
+{
+class Controller
+{
    public:
-    Controller();
+	Controller();
 
-    // TODO: create target struct
-    void set_target(void);
+	// TODO: create target struct
+	void set_target(void);
 
-    // TODO: return actuator controls
-    void add_state(/*const State& state*/);
+	// TODO: return actuator controls
+	void add_state(/*const State& state*/);
 };
 
 }  // namespace gnc

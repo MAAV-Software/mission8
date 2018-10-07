@@ -1,13 +1,12 @@
 #ifndef MAAV_SERIAL_HPP
 #define MAAV_SERIAL_HPP
 
-#include "Log.hpp"
 #include <sys/types.h>
 #include <termios.h>
+#include "Log.hpp"
 
 namespace maav
 {
-
 /**
  * @brief Dual blocking/non-blocking serial I/O.
  *
@@ -16,7 +15,7 @@ namespace maav
  */
 class SerialTTY
 {
-public:
+   public:
 	SerialTTY();
 
 	explicit SerialTTY(const char *fname);
@@ -69,7 +68,7 @@ public:
 
 	void registerCallback(void (*func)(const char *, size_t));
 
-private:
+   private:
 	void (*cb)(const char *, size_t);
 	bool connected;
 	maav::Log::Logger log;
@@ -77,7 +76,6 @@ private:
 	struct termios tio;
 	int tty;
 };
-
 }
 
-#endif // MAAV_SERIAL_HPP
+#endif  // MAAV_SERIAL_HPP

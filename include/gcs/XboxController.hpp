@@ -3,22 +3,18 @@
 
 #include "common/messages/dji_t.hpp"
 
-#include "common/utils/xbox-controller/gamepad.h"
 #include <array>
+#include "common/utils/xbox-controller/gamepad.h"
 
 namespace maav
 {
-
 namespace gcs
 {
-
 class XboxController
 {
+	using FourElemArray = std::array<double, 4>;
 
-using FourElemArray = std::array<double, 4>;
-
-public:
-
+   public:
 	/**
 	 * @brief Constructs an Xbox360 gamepad controller.
 	 */
@@ -36,15 +32,12 @@ public:
 	 * 		stick ranges and the given minimum throttle.
 	 * @detail See setStickOutputRange for argument documentation.
 	 */
-	XboxController(const FourElemArray& stick_ranges,
-			double min_throttle)
-		: XboxController{}
+	XboxController(const FourElemArray& stick_ranges, double min_throttle) : XboxController{}
 	{
 		setStickOutputRange(stick_ranges, min_throttle);
 	}
 
-	~XboxController() {GamepadShutdown();}
-
+	~XboxController() { GamepadShutdown(); }
 	/**
 	 * @brief Update the controller's current stick values.
 	 */
@@ -76,8 +69,7 @@ public:
 	 *			thrust:		[0, 0.8] Newtons
 	 *		}
 	 */
-	void setStickOutputRange(const FourElemArray& stick_ranges,
-			double min_throttle = 0);
+	void setStickOutputRange(const FourElemArray& stick_ranges, double min_throttle = 0);
 
 	/**
 	 * @brief Get a dji_t message whose roll, pitch, yaw, and throttle
@@ -94,19 +86,19 @@ public:
 	 */
 	const FourElemArray& getRawStickVals() const;
 
-private:
-	//lx = left stick x values, positive values -> stick moved right
-	//ly = left stick y values, positive values -> stick moved up
-	//Range: [-1.0, 1.0]
-	//etc.
+   private:
+	// lx = left stick x values, positive values -> stick moved right
+	// ly = left stick y values, positive values -> stick moved up
+	// Range: [-1.0, 1.0]
+	// etc.
 	FourElemArray stick_vals;
 	double& lx = stick_vals.at(2);
 	double& ly = stick_vals.at(3);
 	double& rx = stick_vals.at(0);
 	double& ry = stick_vals.at(1);
 
-	//Take stick values and divide by these values to get
-	//values that will be returned by getDesiredRpyt
+	// Take stick values and divide by these values to get
+	// values that will be returned by getDesiredRpyt
 	double roll_range{1};
 	double pitch_range{1};
 	double yaw_rate_range{1};
@@ -114,11 +106,11 @@ private:
 
 	double throttle_floor{0};
 
-	GAMEPAD_DEVICE controller{GAMEPAD_0}; //"player one" controller
+	GAMEPAD_DEVICE controller{GAMEPAD_0};  //"player one" controller
 };
 
-} //namespace gcs
+}  // namespace gcs
 
-} //namespace maav
+}  // namespace maav
 
 #endif

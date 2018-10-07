@@ -2,23 +2,21 @@
 #ifndef NEW_CAMERA_INPUT_HPP
 #define NEW_CAMERA_INPUT_HPP
 
-#include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
+#include <librealsense2/rs.hpp>
+#include <memory>
+#include <string>
+#include <vector>
+#include "CameraInputBase.hpp"
+#include "Point3f.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include <vector>
-#include "Point3f.hpp"
-#include "CameraInputBase.hpp"
-#include <string>
-#include <memory>
-
-
 
 // pulls data frame-by-frame directly from the camera
 // and provides the RGBD data in various forms
 class NewCameraInput : public CameraInputBase
 {
-public:
+   public:
 	// A CameraInput instance cannot be created without
 	// at least a given camera id
 	NewCameraInput() = delete;
@@ -39,9 +37,9 @@ public:
 	// img : a cv::Mat reference to hold the returned depth data
 	virtual void getDepth(cv::Mat &img) const override;
 
-	virtual void getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ>& cloud) const override;
+	virtual void getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ> &cloud) const override;
 
-	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) const override;
+	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ> &cloud) const override;
 
 	// increments the camera to the next available frame
 	// all the get methods now pull data from the most recent frame
@@ -49,9 +47,9 @@ public:
 
 	// increments to the next frame using loadNext
 	// Returns the CameraInput instance following the increment
-	virtual NewCameraInput & operator++() override;
+	virtual NewCameraInput &operator++() override;
 
-private:
+   private:
 	const uint16_t *depthImage;
 	const uint16_t *colorImage;
 
@@ -68,4 +66,3 @@ private:
 };
 
 #endif
-

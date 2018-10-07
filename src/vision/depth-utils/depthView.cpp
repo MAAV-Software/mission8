@@ -10,7 +10,7 @@ using namespace cv;
 int main()
 {
 	rs::context ctx;
-	rs::device * dev = ctx.get_device(0);
+	rs::device* dev = ctx.get_device(0);
 	// Configure Infrared stream to run at VGA resolution at 30 frames per second
 	dev->enable_stream(rs::stream::infrared, 640, 480, rs::format::y8, 30);
 	// We must also configure depth stream in order to IR stream run properly
@@ -18,15 +18,15 @@ int main()
 	// Start streaming
 	dev->start();
 	// Camera warmup - Dropped frames to allow stabilization
-	namedWindow("Display Image", WINDOW_AUTOSIZE );
-	for(int i = 0; i < 40; i++)
-	dev->wait_for_frames();
+	namedWindow("Display Image", WINDOW_AUTOSIZE);
+	for (int i = 0; i < 40; i++) dev->wait_for_frames();
 	while (true)
 	{
-		Mat ir(Size(640, 480), CV_8UC1, (void*)dev->get_frame_data(rs::stream::infrared), Mat::AUTO_STEP);
+		Mat ir(Size(640, 480), CV_8UC1, (void*)dev->get_frame_data(rs::stream::infrared),
+			   Mat::AUTO_STEP);
 
 		// Apply Histogram Equalization
-		equalizeHist( ir, ir );
+		equalizeHist(ir, ir);
 		applyColorMap(ir, ir, COLORMAP_JET);
 		// Display the image in GUI
 		imshow("Display Image", ir);

@@ -1,28 +1,26 @@
 #ifndef _VIDEO_INTERFACE_HPP_
 #define _VIDEO_INTERFACE_HPP_
 
-#include <iostream>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <vector>
-#include <string>
-#include <cstdint>
-#include <memory>
-#include "zcm/zcm-cpp.hpp"
-#include <librealsense/rs.hpp>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <cstdint>
+#include <iostream>
+#include <librealsense/rs.hpp>
+#include <memory>
+#include <string>
+#include <vector>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "zcm/zcm-cpp.hpp"
 
 #include "../depth-utils/Point3f.hpp"
 
-
-
 class VideoInterface
 {
-private:
+   private:
 	class HandlerFrame;
 	struct VisionSimZCMData;
 	class Impl;
@@ -38,16 +36,17 @@ private:
 	// commands impl to initialize zcm threads and zcm within this
 	// instance of impl and returns the struct
 	void init(VisionSimZCMData *&zcmDataOut);
-public:
+
+   public:
 	// Constructor of video capture object
 	// type = 0 is standard cv::VideoCapture (from camera)
 	// type = 1 is standard cv::VideoCapture (from file)
 	// type = 2 is sim VideoCapture
-	explicit VideoInterface(int type); // TODO
+	explicit VideoInterface(int type);  // TODO
 	// Function that accepts an std::vector of size 5 and fills it
 	// with VideoInterface type 2 pointers, the de facto
 	// constructor for type 2 VideoInterface (Phys_Sim_Intrface)
-	static void spawnT2Caps(std::vector<VideoInterface*> &cap);
+	static void spawnT2Caps(std::vector<VideoInterface *> &cap);
 	// Opens the indicated video input
 	bool open(int index);
 	bool open(std::string filename);
@@ -58,27 +57,24 @@ public:
 	// Wrapper for cv::VideoCapture::grab()
 	bool grab();
 	// Wrapper for cv::VideoCapture::retrieve(cv::Mat&,int)
-	bool retrieve(cv::Mat &image, int channel=0);
+	bool retrieve(cv::Mat &image, int channel = 0);
 	// Wrapper for cv::VideoCapture::read(cv::Mat &image)
 	bool read(cv::Mat &image);
 
 	bool retrieve(pcl::PointCloud<pcl::PointXYZ> &cloud, int channel);
 	bool read(pcl::PointCloud<pcl::PointXYZ> &cloud);
-	bool retrieve(std::vector<pf::Point3f> & cloud, int channel);
-	bool read(std::vector<pf::Point3f> & cloud);
-
+	bool retrieve(std::vector<pf::Point3f> &cloud, int channel);
+	bool read(std::vector<pf::Point3f> &cloud);
 
 	// Wrapper for cv::VideoCapture::get(int)
 	double get(int propID);
 	// Wrapper for cv::VideoCapture::set(int,double)
 	bool set(int propID, double value);
 
-	void setContext(rs::context * context);
-	rs::context * getContext();
+	void setContext(rs::context *context);
+	rs::context *getContext();
 	// Destructor for VideoInterface
 	~VideoInterface();
 };
-
-
 
 #endif

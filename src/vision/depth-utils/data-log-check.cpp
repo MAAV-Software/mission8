@@ -1,8 +1,8 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <string>
+#include <vector>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -14,7 +14,7 @@ using std::vector;
 void open(bool rgb, std::string path)
 {
 	std::ifstream infile(path, std::ios::in | std::ios::binary);
-	unsigned char * data;
+	unsigned char *data;
 	cv::Mat mat;
 	if (rgb)
 	{
@@ -34,7 +34,7 @@ void open(bool rgb, std::string path)
 	delete[] data;
 }
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
 	std::cout << "Usage: data-log-check <directory> <number of cameras>" << std::endl;
 
@@ -43,8 +43,7 @@ int main(int argc, char ** argv)
 
 	std::vector<DataLogReader> readers;
 	readers.reserve(numCams);
-	for (int i = 0; i < numCams; ++i)
-		readers.emplace_back(path, i);
+	for (int i = 0; i < numCams; ++i) readers.emplace_back(path, i);
 
 	bool moreImages = true;
 	while (moreImages)
@@ -71,4 +70,3 @@ int main(int argc, char ** argv)
 
 	return 0;
 }
-

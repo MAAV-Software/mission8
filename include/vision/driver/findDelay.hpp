@@ -1,16 +1,16 @@
 #ifndef _FIND_DELAY_
 #define _FIND_DELAY_
+#include <chrono>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <cstdint>
-#include <chrono> 
 #include <string>
 
 class findDelay
 {
-public:
-	findDelay() : findDelay(std::string("")) {  }
-	findDelay(std::string fileOut) : firstTime {0}, lastTime {0}
+   public:
+	findDelay() : findDelay(std::string("")) {}
+	findDelay(std::string fileOut) : firstTime{0}, lastTime{0}
 	{
 		std::string filename("Outdelays");
 		filename += fileOut;
@@ -20,18 +20,19 @@ public:
 	void first(std::string nameIn)
 	{
 		delayID = nameIn;
-		firstTime = std::chrono::duration_cast<std::chrono::
-   			milliseconds>(std::chrono::system_clock::now().
-   			time_since_epoch()).count();
+		firstTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+						std::chrono::system_clock::now().time_since_epoch())
+						.count();
 	}
 	void last()
 	{
-		lastTime = std::chrono::duration_cast<std::chrono::
-   			milliseconds>(std::chrono::system_clock::now().
-   			time_since_epoch()).count();
+		lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+					   std::chrono::system_clock::now().time_since_epoch())
+					   .count();
 		write();
 	}
-private:
+
+   private:
 	void write()
 	{
 		fout << delayID << ": ";

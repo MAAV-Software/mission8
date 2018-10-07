@@ -3,12 +3,12 @@
 
 namespace pf
 {
-	struct Point3f
-	{
-		float x;
-		float y;
-		float z;
-	};
+struct Point3f
+{
+	float x;
+	float y;
+	float z;
+};
 }
 
 #endif

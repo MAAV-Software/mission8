@@ -1,8 +1,8 @@
 #ifndef RECORD_HPP
 #define RECORD_HPP
 
-#include <memory>
 #include <cstdint>
+#include <memory>
 #include <utility>
 
 /**

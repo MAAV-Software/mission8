@@ -1,6 +1,6 @@
 
-int main() {
-
+int main()
+{
 	CameraInput cam(0);
 
 	cv::Mat mat1;

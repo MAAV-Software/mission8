@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <string>
 #include <sys/poll.h>
 #include <termios.h>
 #include <unistd.h>
+#include <string>
 #include <system_error>
 
 using maav::SerialTTY;
@@ -22,11 +22,7 @@ SerialTTY::SerialTTY() : log{"SerialTTY"}
 	running = true;
 }
 
-SerialTTY::SerialTTY(const char *ttydevice) : SerialTTY()
-{
-	connect(ttydevice);
-}
-
+SerialTTY::SerialTTY(const char *ttydevice) : SerialTTY() { connect(ttydevice); }
 void SerialTTY::connect(const char *port)
 {
 	int err;
@@ -36,8 +32,7 @@ void SerialTTY::connect(const char *port)
 	tty = open(port, O_RDWR | O_NOCTTY | O_NONBLOCK | O_SYNC);
 	if (tty == -1)
 	{
-		log.error() << "failed to open port " << port << " - " <<
-			strerror(errno) << commit;
+		log.error() << "failed to open port " << port << " - " << strerror(errno) << commit;
 		throw system_error{errno, system_category()};
 	}
 	else
@@ -56,7 +51,7 @@ void SerialTTY::connect(const char *port)
 	cfsetospeed(&tio, B115200);
 	cfsetispeed(&tio, B115200);
 
-	tio.c_cc[VMIN]  = 0;
+	tio.c_cc[VMIN] = 0;
 	tio.c_cc[VTIME] = 100;
 
 	tio.c_cflag &= ~CSIZE;
@@ -85,11 +80,7 @@ void SerialTTY::connect(const char *port)
 	connected = true;
 }
 
-SerialTTY::~SerialTTY()
-{
-	disconnect();
-}
-
+SerialTTY::~SerialTTY() { disconnect(); }
 void SerialTTY::send(const char *buffer, size_t len)
 {
 	int err = 0;
@@ -140,8 +131,7 @@ size_t SerialTTY::receive(char *buffer, size_t bufferLength)
 		}
 		else if (err == -1)
 		{
-			log.error() << "problem polling " <<
-				strerror(errno) << commit;
+			log.error() << "problem polling " << strerror(errno) << commit;
 		}
 
 		err = read(tty, buffer, bufferLength);
@@ -187,11 +177,7 @@ bool SerialTTY::disconnect() noexcept
 	return true;
 }
 
-bool SerialTTY::isConnected() const
-{
-	return connected;
-}
-
+bool SerialTTY::isConnected() const { return connected; }
 void SerialTTY::process()
 {
 	running = true;
@@ -236,12 +222,5 @@ void SerialTTY::process()
 	}
 }
 
-void SerialTTY::registerCallback(void (*func)(const char *, size_t))
-{
-	cb = func;
-}
-
-void SerialTTY::stop()
-{
-	running = false;
-}
+void SerialTTY::registerCallback(void (*func)(const char *, size_t)) { cb = func; }
+void SerialTTY::stop() { running = false; }

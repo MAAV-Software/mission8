@@ -6,13 +6,12 @@
 
 using std::string;
 
-
-DataLogReader::DataLogReader(std::string dir, int camNum) : directory(dir), counter(0), cameraNumber(camNum)
+DataLogReader::DataLogReader(std::string dir, int camNum)
+	: directory(dir), counter(0), cameraNumber(camNum)
 {
-
 }
 
-bool DataLogReader::getRGB(cv::Mat & mat)
+bool DataLogReader::getRGB(cv::Mat &mat)
 {
 	string filePath = directory;
 	filePath += "/";
@@ -23,9 +22,8 @@ bool DataLogReader::getRGB(cv::Mat & mat)
 	filePath += ".bin";
 
 	std::ifstream fin(filePath, std::ios::in | std::ios::binary);
-	if (!fin)
-		return false;
-	unsigned char * data = new unsigned char[480 * 640 * 3];
+	if (!fin) return false;
+	unsigned char *data = new unsigned char[480 * 640 * 3];
 	fin.read((char *)data, sizeof(unsigned char) * 480 * 640 * 3);
 
 	std::cout << filePath << "\n";
@@ -34,7 +32,7 @@ bool DataLogReader::getRGB(cv::Mat & mat)
 	return true;
 }
 
-bool DataLogReader::getDepth(cv::Mat & mat)
+bool DataLogReader::getDepth(cv::Mat &mat)
 {
 	string filePath = directory;
 	filePath += "/";
@@ -45,22 +43,13 @@ bool DataLogReader::getDepth(cv::Mat & mat)
 	filePath += ".bin";
 
 	std::ifstream fin(filePath, std::ios::in | std::ios::binary);
-	if (!fin)
-		return false;
-	unsigned char * data = new unsigned char[480 * 640 * 2];
+	if (!fin) return false;
+	unsigned char *data = new unsigned char[480 * 640 * 2];
 	fin.read((char *)data, sizeof(unsigned char) * 480 * 640 * 2);
 
 	mat = cv::Mat(480, 640, CV_16SC1, (void *)data).clone();
 	return true;
 }
 
-void DataLogReader::increment()
-{
-	++counter;
-}
-
-void DataLogReader::setCounter(int count)
-{
-	counter = count;
-}
-
+void DataLogReader::increment() { ++counter; }
+void DataLogReader::setCounter(int count) { counter = count; }

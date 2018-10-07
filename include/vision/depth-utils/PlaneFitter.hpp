@@ -2,14 +2,14 @@
 #define __PLANEFITTER_HPP__
 
 #include <eigen3/Eigen/Dense>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "Point3f.hpp"
 
 class PlaneFitter
 {
-public:
+   public:
 	PlaneFitter() = delete;
 	explicit PlaneFitter(float inlierDistanceIn);
 	// Pass in a matrix that stores all the points
@@ -24,7 +24,8 @@ public:
 	Eigen::MatrixXf samplePoints(const std::vector<pf::Point3f> &pointsIn);
 	// Calculate the least mean squares error
 	double calculateError(const Eigen::Vector4f &sampledCoefficients);
-private:
+
+   private:
 	float inlierDistance;
 	std::vector<Eigen::Vector3f> pointsVectors;
 };

@@ -5,15 +5,25 @@ using namespace std;
 using namespace cv;
 
 ImageFeed::ImageFeed(size_t writeSizeIn, size_t deleteSizeIn, int IDIn)
-	: joinable {false}, writeSize {writeSizeIn}, deleteSize {deleteSizeIn},
-	isDestructing {false} , hasDataCoord {false}, ImageFeedID {IDIn} { }
-
-ImageFeed::ImageFeed(size_t writeSizeIn, size_t deleteSizeIn, std::shared_ptr<DataCoordinator>
-	dataCoordIn, int cameraID) : joinable {false}, writeSize {writeSizeIn},
-	deleteSize {deleteSizeIn}, isDestructing {false}, hasDataCoord {false},
-	ImageFeedID {cameraID}
+	: joinable{false},
+	  writeSize{writeSizeIn},
+	  deleteSize{deleteSizeIn},
+	  isDestructing{false},
+	  hasDataCoord{false},
+	  ImageFeedID{IDIn}
 {
-	dataCoordThreadHolder = thread(dataCoordThread,dataCoordIn,this);
+}
+
+ImageFeed::ImageFeed(size_t writeSizeIn, size_t deleteSizeIn,
+					 std::shared_ptr<DataCoordinator> dataCoordIn, int cameraID)
+	: joinable{false},
+	  writeSize{writeSizeIn},
+	  deleteSize{deleteSizeIn},
+	  isDestructing{false},
+	  hasDataCoord{false},
+	  ImageFeedID{cameraID}
+{
+	dataCoordThreadHolder = thread(dataCoordThread, dataCoordIn, this);
 }
 
 void ImageFeed::setID(int newID)
@@ -29,13 +39,13 @@ void ImageFeed::storeFrame(shared_ptr<cv::Mat> &input, int64_t inTime)
 		currentThread.join();
 		joinable = false;
 	}
-	currentThread = thread(storeFrameImpl,input,inTime,this);
+	currentThread = thread(storeFrameImpl, input, inTime, this);
 	joinable = true;
 }
 
-void ImageFeed::storeFrameImpl(shared_ptr<cv::Mat> input, int64_t inTime,ImageFeed* imgFeed)
+void ImageFeed::storeFrameImpl(shared_ptr<cv::Mat> input, int64_t inTime, ImageFeed *imgFeed)
 {
-	std::lock_guard <std::shared_mutex> l(imgFeed->sharedMtx);
+	std::lock_guard<std::shared_mutex> l(imgFeed->sharedMtx);
 	imgFeed->frames.push_front(input);
 	imgFeed->timestamps.push_front(inTime);
 	imgFeed->sharedMutexes.push_front(make_shared<shared_mutex>());
@@ -81,22 +91,22 @@ void ImageFeed::dataCoordThread(shared_ptr<DataCoordinator> dataCoord, ImageFeed
 		{
 			imgFeed->cvWriter.wait(lck);
 		}
-		imgFeed->extractToWrite(framePtr,timestamp,sharedMtxSharedPtr);
-		dataCoord->insert(framePtr,timestamp,imgFeed->getID(),sharedMtxSharedPtr);
+		imgFeed->extractToWrite(framePtr, timestamp, sharedMtxSharedPtr);
+		dataCoord->insert(framePtr, timestamp, imgFeed->getID(), sharedMtxSharedPtr);
 	}
-	int counter {0};
-	int last {0};
+	int counter{0};
+	int last{0};
 	while (imgFeed->getFramesSize())
 	{
-		imgFeed->extractToWrite(framePtr,timestamp,sharedMtxSharedPtr);
-		dataCoord->insert(framePtr,timestamp,imgFeed->getID(),sharedMtxSharedPtr);
+		imgFeed->extractToWrite(framePtr, timestamp, sharedMtxSharedPtr);
+		dataCoord->insert(framePtr, timestamp, imgFeed->getID(), sharedMtxSharedPtr);
 		if (++counter - last > 49)
 		{
 			last = counter;
 			cout << "Writting frames " << counter << " and greater...\n";
 		}
 	}
-	cout << "Data Coord Thread " <<  imgFeed->getID() << " finished...\n";
+	cout << "Data Coord Thread " << imgFeed->getID() << " finished...\n";
 }
 
 int ImageFeed::getID()
@@ -106,7 +116,7 @@ int ImageFeed::getID()
 }
 
 void ImageFeed::extractToWrite(shared_ptr<Mat> &framePtr, int64_t &timeOut,
-	shared_ptr<shared_mutex> &sharedMtxPtr)
+							   shared_ptr<shared_mutex> &sharedMtxPtr)
 {
 	std::lock_guard<std::shared_mutex> l(sharedMtx);
 	framePtr = frames.back();
@@ -127,9 +137,9 @@ void ImageFeed::deleteFrame()
 
 void ImageFeed::forceReady()
 {
-	std::lock_guard <std::shared_mutex> l(sharedMtx);
+	std::lock_guard<std::shared_mutex> l(sharedMtx);
 	shared_ptr<cv::Mat> tempPtr = make_shared<cv::Mat>();
-	*tempPtr = Mat::ones(480,640,CV_8UC3);
+	*tempPtr = Mat::ones(480, 640, CV_8UC3);
 	frames.push_front(tempPtr);
 	sharedMutexes.push_front(make_shared<shared_mutex>());
 	timestamps.push_front(999);
@@ -137,8 +147,7 @@ void ImageFeed::forceReady()
 	cv.notify_one();
 }
 
-bool ImageFeed::getFrame(shared_ptr<Mat> &input, int64_t &inTime,
-	shared_ptr<shared_mutex> &outMtx)
+bool ImageFeed::getFrame(shared_ptr<Mat> &input, int64_t &inTime, shared_ptr<shared_mutex> &outMtx)
 {
 	std::shared_lock<std::shared_mutex> lck(sharedMtx);
 	if (frames.size() && inTime != timestamps.front())

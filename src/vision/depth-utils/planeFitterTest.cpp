@@ -1,15 +1,15 @@
-#include <iostream>
-#include <string>
+#include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <cmath>
 #include <eigen3/Eigen/Dense>
-#include <random>
-#include <chrono>
 #include <fstream>
+#include <iostream>
+#include <random>
+#include <string>
 
-#include "vision/depth-utils/Point3f.hpp"
 #include "vision/depth-utils/PlaneFitter.hpp"
+#include "vision/depth-utils/Point3f.hpp"
 
 using std::vector;
 using std::cout;
@@ -21,23 +21,17 @@ using std::ofstream;
 constexpr float distanceTolerance = 0.3f;
 
 double calculateError(const Eigen::Vector4f &sampledCoefficients,
-	vector<Eigen::Vector3f> &pointsVectors)
+					  vector<Eigen::Vector3f> &pointsVectors)
 {
 	// Orthogonal projection least squares method
 	// Calculate a basis of the plane represented by sampledCoefficients
 	// Points used to calculate plane basis
-	Eigen::Vector3f bPoints[3] =
-	{
-		{0, 0, 0},
-		{1, 1, 0},
-		{1, 2, 0}
-	};
+	Eigen::Vector3f bPoints[3] = {{0, 0, 0}, {1, 1, 0}, {1, 2, 0}};
 	for (unsigned i = 0; i < 3; ++i)
 	{
 		bPoints[i](2) = (sampledCoefficients(0) * bPoints[i](0) +
-			sampledCoefficients(1) * bPoints[i](1) -
-			sampledCoefficients(3)) /
-			(-1 * sampledCoefficients(2));
+						 sampledCoefficients(1) * bPoints[i](1) - sampledCoefficients(3)) /
+						(-1 * sampledCoefficients(2));
 	}
 	// Basis vectors
 	Eigen::Vector3f bVectors[2];
@@ -71,9 +65,8 @@ double calculateError(const Eigen::Vector4f &sampledCoefficients,
 	return squaredError;
 }
 
-vector<Point3f> generatePoints(const float x, const float y,
-	const float z, const float d,
-	const float noise, const unsigned numPoints)
+vector<Point3f> generatePoints(const float x, const float y, const float z, const float d,
+							   const float noise, const unsigned numPoints)
 {
 	std::normal_distribution<float> sample;
 	std::random_device rd;
@@ -147,12 +140,10 @@ bool checkCoefficients(coefficients_t ground, coefficients_t test)
 		float testY = sample(gen) * 10;
 		Point3f groundPoint = {testX, testY, 0.f};
 		Point3f testPoint = {testX, testY, 0.f};
-		groundPoint.z = (-1 * groundPoint.x * ground.x - ground.y * groundPoint.y -
-			ground.d) / ground.z;
-		testPoint.z = (-1 * testPoint.x * test.x - test.y * testPoint.y -
-			test.d) / test.z;
-		if (sqrt((testPoint.z - groundPoint.z) * (testPoint.z - groundPoint.z))
-			> distanceTolerance)
+		groundPoint.z =
+			(-1 * groundPoint.x * ground.x - ground.y * groundPoint.y - ground.d) / ground.z;
+		testPoint.z = (-1 * testPoint.x * test.x - test.y * testPoint.y - test.d) / test.z;
+		if (sqrt((testPoint.z - groundPoint.z) * (testPoint.z - groundPoint.z)) > distanceTolerance)
 		{
 			cout << "Failing z: " << testPoint.z << " " << groundPoint.z << '\n';
 			return false;
@@ -183,21 +174,20 @@ void randomTest(std::ofstream &fout, std::ofstream &foutError)
 		pointsVectors[i](1) = points[i].y;
 		pointsVectors[i](2) = points[i].z;
 	}
-	const long long time1 = std::chrono::duration_cast<std::chrono::
-		microseconds>(std::chrono::system_clock::now().
-		time_since_epoch()).count();
+	const long long time1 = std::chrono::duration_cast<std::chrono::microseconds>(
+								std::chrono::system_clock::now().time_since_epoch())
+								.count();
 	MatrixXf coefs = planeFitter.fitPlane(points);
-	const long long time2 = std::chrono::duration_cast<std::chrono::
-		microseconds>(std::chrono::system_clock::now().
-		time_since_epoch()).count();
+	const long long time2 = std::chrono::duration_cast<std::chrono::microseconds>(
+								std::chrono::system_clock::now().time_since_epoch())
+								.count();
 	if (coefs.size() == 0)
 	{
 		foutError << std::numeric_limits<double>::max();
 	}
 	else
 	{
-		foutError << calculateError(coefs, pointsVectors) /
-			pointsVectors.size() << std::endl;
+		foutError << calculateError(coefs, pointsVectors) / pointsVectors.size() << std::endl;
 	}
 	fout << (time2 - time1) / 1000 << std::endl;
 	cout << "new set:\n";

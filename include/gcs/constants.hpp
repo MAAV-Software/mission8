@@ -5,7 +5,6 @@ namespace maav
 {
 namespace gcs
 {
-
 /**
  * A good size for relatively large spaces in UI
  */
@@ -32,7 +31,6 @@ constexpr auto QUIET_TIMEOUT = 2;
  * DOWN (after being moved to QUIET)
  */
 constexpr auto DOWN_TIMEOUT = 10;
-
 }
 }
 

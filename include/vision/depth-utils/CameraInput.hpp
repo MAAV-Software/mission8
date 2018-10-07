@@ -2,27 +2,24 @@
 #ifndef CAMERA_INPUT_H
 #define CAMERA_INPUT_H
 
-#include <librealsense/rs.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <cstdio>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <cstdio>
+#include <librealsense/rs.hpp>
 #include <vector>
-#include "Point3f.hpp"
 #include "CameraInputBase.hpp"
-
-
+#include "Point3f.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 // pulls data frame-by-frame directly from the camera
 // and provides the RGBD data in various forms
 class CameraInput : public CameraInputBase
 {
-public:
-
+   public:
 	// Creates a new CameraInput instance that pulls
 	// frames from the camera associated with the provided
 	// camera id (creates a new rs::context to find the device)
@@ -57,7 +54,7 @@ public:
 	~CameraInput();
 
 	// Returns the rs::context
-	rs::context* getContext();
+	rs::context *getContext();
 
 	// pulls the RGB data for the current camera frame
 	// and provides it in a cv::Mat
@@ -88,7 +85,7 @@ public:
 	// frame and provides it in a vector of Points
 	//
 	// cloud : a vector of Points to hold the returned data
-	void getCloud(std::vector<pf::Point3f> & cloud);
+	void getCloud(std::vector<pf::Point3f> &cloud);
 
 	// pulls the Point Cloud data for the current camera
 	// frame and provides it in a pcl::PointCloud
@@ -110,18 +107,17 @@ public:
 
 	// increments to the next frame using loadNext
 	// Returns the CameraInput instance following the increment
-	virtual CameraInput & operator++() override;
+	virtual CameraInput &operator++() override;
 
 	// returns the id associated with the camera
 	int getCamID() const;
 
 	// These two not currently implemented
-	virtual void getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ>& cloud) const override;
+	virtual void getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ> &cloud) const override;
 
-	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) const override;
+	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ> &cloud) const override;
 
-
-private:
+   private:
 	int camera_id;
 	bool isSource;
 
@@ -137,4 +133,3 @@ private:
 };
 
 #endif
-

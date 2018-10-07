@@ -14,7 +14,6 @@ namespace maav
 {
 namespace gcs
 {
-
 bool GlibZCM::handle_input()
 {
 	if (handle() < 0) throw runtime_error{"ZCM message handling failed!"};
@@ -30,17 +29,11 @@ GlibZCM::GlibZCM(const string& url) : zcm::ZCM{url}
 	MAAV_DEBUG("Initializing ZCM");
 	if (not good()) throw runtime_error{"ZCM initialization failed!"};
 	zcm_connection = Glib::signal_io().connect(
-		[this](Glib::IOCondition) {return handle_input();},
+		[this](Glib::IOCondition) { return handle_input(); },
 		((TransportUDPM*)((zcm_blocking_t*)getUnderlyingZCM()->impl)->zt)->udpm.recvfd.fd,
-		Glib::IO_IN,
-		Glib::PRIORITY_DEFAULT_IDLE
-	);
+		Glib::IO_IN, Glib::PRIORITY_DEFAULT_IDLE);
 }
 
-GlibZCM::~GlibZCM()
-{
-	zcm_connection.disconnect();
-}
-
+GlibZCM::~GlibZCM() { zcm_connection.disconnect(); }
 }
 }

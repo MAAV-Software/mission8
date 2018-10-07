@@ -4,14 +4,13 @@
 #include <getopt.h>
 #include <iostream>
 
-static option longOptions [] = {
+static option longOptions[] = {
 	// LONG        ARGUMENT USED?     (ignore) RETURN VALUE
-	{"RGB",       no_argument,       nullptr, 'r'},
-	{"combined",      no_argument,       nullptr, 'c'},
-	{"depth",      no_argument,       nullptr, 'd'},
-	{"Points",     no_argument, nullptr, 'p'},
-	{"help", no_argument, nullptr, 'h'}
-};
+	{"RGB", no_argument, nullptr, 'r'},
+	{"combined", no_argument, nullptr, 'c'},
+	{"depth", no_argument, nullptr, 'd'},
+	{"Points", no_argument, nullptr, 'p'},
+	{"help", no_argument, nullptr, 'h'}};
 
 // Sets the variables passed using the command line arguments
 // parsed by getopt
@@ -28,40 +27,39 @@ bool setVariables(bool &combined, bool &rgb, bool &depth, bool &points, int argc
 	try
 	{
 		char choice;
-		while ((choice = getopt_long(argc, argv, "rcdph", longOptions,
-			nullptr)) != -1)
+		while ((choice = getopt_long(argc, argv, "rcdph", longOptions, nullptr)) != -1)
 		{
-			switch (choice){
-			case 'r':
-				rgb = true;
-				break;
-			case 'c':
-				combined = true;
-				break;
-			case 'd':
-				depth = true;
-				break;
-			case 'p':
-				points = true;
-				break;
-			case 'h':
-				std::cout << "Use -c for combined images, use -r for rgb images,\n";
-				std::cout << "use -d for depth images, or use -p for point clouds";
-				std::cout << std::endl;
-				return false;
-				break;
-			default:
-				throw "Unrecognized option\n";
-				break;
-			} // switch (choice)
+			switch (choice)
+			{
+				case 'r':
+					rgb = true;
+					break;
+				case 'c':
+					combined = true;
+					break;
+				case 'd':
+					depth = true;
+					break;
+				case 'p':
+					points = true;
+					break;
+				case 'h':
+					std::cout << "Use -c for combined images, use -r for rgb images,\n";
+					std::cout << "use -d for depth images, or use -p for point clouds";
+					std::cout << std::endl;
+					return false;
+					break;
+				default:
+					throw "Unrecognized option\n";
+					break;
+			}  // switch (choice)
 		}
 	}
-	catch (const char* errorStr)
+	catch (const char *errorStr)
 	{
 		throw;
 	}
 	return true;
 }
-
 
 #endif

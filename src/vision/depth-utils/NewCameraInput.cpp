@@ -1,11 +1,10 @@
 
 #include "vision/depth-utils/NewCameraInput.hpp"
 
-#include <iostream>
 #include <stdlib.h>
+#include <iostream>
 
 using std::string;
-
 
 NewCameraInput::NewCameraInput(string serial_number)
 {
@@ -26,9 +25,9 @@ NewCameraInput::NewCameraInput(string serial_number)
 	scale = sensor.get_depth_scale();
 
 	// get the extrinsics (very hacky)
-	rs2_error* memory = (rs2_error *)malloc(5000);
-	rs2_stream_profile * depth = (rs2_stream_profile *)(&depth_stream);
-	rs2_stream_profile * color = (rs2_stream_profile *)(&color_stream);
+	rs2_error* memory = (rs2_error*)malloc(5000);
+	rs2_stream_profile* depth = (rs2_stream_profile*)(&depth_stream);
+	rs2_stream_profile* color = (rs2_stream_profile*)(&color_stream);
 	rs2_get_extrinsics(depth, color, &depthToColor, &memory);
 
 	// Set up the align object
@@ -36,12 +35,12 @@ NewCameraInput::NewCameraInput(string serial_number)
 	alignObject.reset(new rs2::align(RS2_STREAM_COLOR));
 }
 
-void NewCameraInput::getRGB(cv::Mat & img) const
+void NewCameraInput::getRGB(cv::Mat& img) const
 {
 	img = cv::Mat(cv::Size(640, 480), CV_8UC3, (void*)colorImage, cv::Mat::AUTO_STEP).clone();
 }
 
-void NewCameraInput::getDepth(cv::Mat & img) const
+void NewCameraInput::getDepth(cv::Mat& img) const
 {
 	img = cv::Mat(cv::Size(640, 480), CV_16SC1, (void*)depthImage, cv::Mat::AUTO_STEP).clone();
 }
@@ -56,34 +55,32 @@ void NewCameraInput::loadNext()
 	depthFrame = processed.get_depth_frame();
 	if (rgbFrame)
 	{
-		colorImage = (const uint16_t*) rgbFrame.get_data();
+		colorImage = (const uint16_t*)rgbFrame.get_data();
 	}
 	if (depthFrame)
 	{
-		depthImage = (const uint16_t*) depthFrame.get_data();
+		depthImage = (const uint16_t*)depthFrame.get_data();
 	}
 }
 
-NewCameraInput & NewCameraInput::operator++()
+NewCameraInput& NewCameraInput::operator++()
 {
 	loadNext();
 	return *this;
 }
 
-
 void NewCameraInput::getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ>& cloud) const
 {
 	cloud.clear();
-	for (int dy {0}; dy < depthIntrinsics.height; ++dy)
+	for (int dy{0}; dy < depthIntrinsics.height; ++dy)
 	{
-		for (int dx {0}; dx < depthIntrinsics.width; ++dx)
+		for (int dx{0}; dx < depthIntrinsics.width; ++dx)
 		{
 			// Retrieve depth value and map it to more "real" coordinates
 			uint16_t depthValue = depthImage[dy * depthIntrinsics.width + dx];
 			float depthInMeters = depthValue * scale;
 			// Skip over values with a depth of zero (not found depth)
-			if (depthValue == 0)
-				continue;
+			if (depthValue == 0) continue;
 
 			// For mapping color to depth
 			// Map from pixel coordinates in the depth image to pixel coordinates in the color image
@@ -100,17 +97,16 @@ void NewCameraInput::getPointCloudBasic(pcl::PointCloud<pcl::PointXYZ>& cloud) c
 void NewCameraInput::getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) const
 {
 	cloud.clear();
-	cloud = pcl::PointCloud<pcl::PointXYZ>(640, 480, pcl::PointXYZ(0,0,0));
-	for (int dy {0}; dy < depthIntrinsics.height; ++dy)
+	cloud = pcl::PointCloud<pcl::PointXYZ>(640, 480, pcl::PointXYZ(0, 0, 0));
+	for (int dy{0}; dy < depthIntrinsics.height; ++dy)
 	{
-		for (int dx {0}; dx < depthIntrinsics.width; ++dx)
+		for (int dx{0}; dx < depthIntrinsics.width; ++dx)
 		{
 			// Retrieve depth value and map it to more "real" coordinates
 			uint16_t depthValue = depthImage[dy * depthIntrinsics.width + dx];
 			float depthInMeters = depthValue * scale;
 			// Skip over values with a depth of zero (not found depth)
-			if (depthValue == 0)
-				continue;
+			if (depthValue == 0) continue;
 			// For mapping color to depth
 			// Map from pixel coordinates in the depth image to pixel coordinates in the color image
 			float depth_pixel[2] = {(float)dx, (float)dy};
@@ -121,4 +117,3 @@ void NewCameraInput::getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) 
 		}
 	}
 }
-

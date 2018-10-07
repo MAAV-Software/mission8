@@ -1,7 +1,7 @@
 #include "tanfan/nav/PhysicalController.hpp"
-#include "tanfan/nav/msg/setpt_t.h"
-#include "tanfan/messaging/dji_t.h"
 #include <ctime>
+#include "tanfan/messaging/dji_t.h"
+#include "tanfan/nav/msg/setpt_t.h"
 
 using maav::PhysicalController;
 using maav::SerialTTY;
@@ -22,20 +22,9 @@ static inline void encode_u32(uint8_t *p, uint32_t v)
 	p[0] = v & 0xff;
 }
 
-PhysicalController::PhysicalController() : log{"PhysicalController"}
-{
-	running = true;
-}
-
-PhysicalController::~PhysicalController()
-{
-}
-
-void PhysicalController::connect(const string &portPath)
-{
-	port.connect(portPath.c_str());
-}
-
+PhysicalController::PhysicalController() : log{"PhysicalController"} { running = true; }
+PhysicalController::~PhysicalController() {}
+void PhysicalController::connect(const string &portPath) { port.connect(portPath.c_str()); }
 void PhysicalController::move(double dx, double dy, double dz)
 {
 	sendSetpoint(dx, dy, dz, 0, SETPT_T_POSE);
@@ -71,7 +60,7 @@ void PhysicalController::sendGains(const gains_t *g)
 		serLen = data_link_assemble_packet(lcmBuf, serBuf, lcmLen + extraLen);
 
 		log.info("sending gains message");
-		port.send((char *) serBuf, serLen);
+		port.send((char *)serBuf, serLen);
 	}
 
 	delete[] lcmBuf;
@@ -79,8 +68,7 @@ void PhysicalController::sendGains(const gains_t *g)
 	free(channel);
 }
 
-void PhysicalController::sendSetpoint(float x, float y, float z, float h,
-		int8_t flags)
+void PhysicalController::sendSetpoint(float x, float y, float z, float h, int8_t flags)
 {
 	setpt_t pt;
 	unsigned char *lcmBuf{nullptr};
@@ -118,7 +106,7 @@ void PhysicalController::sendSetpoint(float x, float y, float z, float h,
 		serLen = data_link_assemble_packet(lcmBuf, serBuf, lcmLen + extraLen);
 
 		log.info("sending setpoint message");
-		port.send((char *) serBuf, serLen);
+		port.send((char *)serBuf, serLen);
 	}
 
 	delete[] lcmBuf;
@@ -126,7 +114,8 @@ void PhysicalController::sendSetpoint(float x, float y, float z, float h,
 	free(setptChannel);
 }
 
-void PhysicalController::sendDji(float roll, float pitch, float yaw, float thrust) {
+void PhysicalController::sendDji(float roll, float pitch, float yaw, float thrust)
+{
 	dji_t dji;
 	unsigned char *lcmBuf{nullptr};
 	unsigned char *serBuf{nullptr};
@@ -161,7 +150,7 @@ void PhysicalController::sendDji(float roll, float pitch, float yaw, float thrus
 		serLen = data_link_assemble_packet(lcmBuf, serBuf, lcmLen + extraLen);
 
 		log.info("sending dji message");
-		port.send((char *) serBuf, serLen);
+		port.send((char *)serBuf, serLen);
 	}
 
 	delete[] lcmBuf;
@@ -171,26 +160,18 @@ void PhysicalController::sendDji(float roll, float pitch, float yaw, float thrus
 
 void PhysicalController::rotate(double dr, double dp, double dy)
 {
-	log.warn() << "this function is *not* implemented, so I'm not " <<
-		"applying the following RPY tuple: (" <<
-		dr << "," << dp << "," << dy << ")" << commit;
+	log.warn() << "this function is *not* implemented, so I'm not "
+			   << "applying the following RPY tuple: (" << dr << "," << dp << "," << dy << ")"
+			   << commit;
 }
 
-void PhysicalController::takeoff()
-{
-	sendSetpoint(0, 0, 0, 0, SETPT_T_TAKEOFF);
-}
-
-void PhysicalController::land()
-{
-	sendSetpoint(0, 0, 0, 0, SETPT_T_LAND);
-}
-
+void PhysicalController::takeoff() { sendSetpoint(0, 0, 0, 0, SETPT_T_TAKEOFF); }
+void PhysicalController::land() { sendSetpoint(0, 0, 0, 0, SETPT_T_LAND); }
 void PhysicalController::process(DataLink &dlink)
 {
-//	data_frame_t *frame;
+	//	data_frame_t *frame;
 
-//	frame = data_frame_create(512);
+	//	frame = data_frame_create(512);
 
 	while (running)
 	{
@@ -200,12 +181,11 @@ void PhysicalController::process(DataLink &dlink)
 		serBuf = new unsigned char[512];
 		try
 		{
-			serLen = static_cast<int>(port.receive((char *) serBuf, 512));
+			serLen = static_cast<int>(port.receive((char *)serBuf, 512));
 		}
-		catch(std::system_error e)
+		catch (std::system_error e)
 		{
-			log.error() << "Reading from serial port failed " << e.what() <<
-				commit;
+			log.error() << "Reading from serial port failed " << e.what() << commit;
 			running = false;
 			break;
 		}
@@ -219,7 +199,7 @@ void PhysicalController::process(DataLink &dlink)
 	}
 }
 
-void PhysicalController::setFeedbackHandler(function<void (const feedback_t *)> func)
+void PhysicalController::setFeedbackHandler(function<void(const feedback_t *)> func)
 {
 	handler = func;
 }
@@ -230,7 +210,4 @@ void PhysicalController::stop()
 	running = false;
 }
 
-void PhysicalController::disconnect() noexcept
-{
-	port.disconnect();
-}
+void PhysicalController::disconnect() noexcept { port.disconnect(); }

@@ -8,14 +8,10 @@ CameraInputBase::CameraInputBase()
 	++GLOBAL_TAG;
 }
 
-CameraInputBase & CameraInputBase::operator++()
+CameraInputBase& CameraInputBase::operator++()
 {
 	loadNext();
 	return *this;
 }
 
-int CameraInputBase::getTag() const
-{
-	return tag;
-}
-
+int CameraInputBase::getTag() const { return tag; }

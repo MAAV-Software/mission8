@@ -5,12 +5,12 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 class CameraInputBase
 {
-public:
+   public:
 	CameraInputBase();
 
 	virtual void getRGB(cv::Mat& mat) const = 0;
@@ -19,7 +19,7 @@ public:
 
 	virtual void loadNext() = 0;
 
-	virtual CameraInputBase & operator++();
+	virtual CameraInputBase& operator++();
 
 	virtual int getTag() const;
 
@@ -27,10 +27,9 @@ public:
 
 	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) const = 0;
 
-private:
+   private:
 	int tag;
 	static int GLOBAL_TAG;
 };
 
 #endif
-

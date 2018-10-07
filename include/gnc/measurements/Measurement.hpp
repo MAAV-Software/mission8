@@ -8,20 +8,23 @@
 #include "gnc/measurements/PlaneFit.hpp"
 #include "gnc/measurements/VisualOdometry.hpp"
 
-namespace maav {
-namespace gnc {
-namespace measurements {
-
+namespace maav
+{
+namespace gnc
+{
+namespace measurements
+{
 /**
  * The Measurement class holds a group of measurements that are meant to be
  * together (so, they all happened at the same time).
  */
-struct Measurement {
-    std::shared_ptr<const ImuMeasurement> imu;
-    std::shared_ptr<const LidarMeasurement> lidar;
-    std::shared_ptr<const PlaneFitMeasurement> plane_fit;
-    std::shared_ptr<const VisualOdometryMeasurement> visual_odometry;
-    std::shared_ptr<const GlobalUpdateMeasurement> global_update;
+struct Measurement
+{
+	std::shared_ptr<const ImuMeasurement> imu;
+	std::shared_ptr<const LidarMeasurement> lidar;
+	std::shared_ptr<const PlaneFitMeasurement> plane_fit;
+	std::shared_ptr<const VisualOdometryMeasurement> visual_odometry;
+	std::shared_ptr<const GlobalUpdateMeasurement> global_update;
 };
 
 /*

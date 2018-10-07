@@ -6,9 +6,7 @@ namespace maav
 {
 namespace gcs
 {
-
-GCS::GCS(const string& zcm_url, const GCSConsts& consts_in)
-	: zcm{zcm_url}, CONSTS{consts_in}
+GCS::GCS(const string& zcm_url, const GCSConsts& consts_in) : zcm{zcm_url}, CONSTS{consts_in}
 {
 	set_title("MAAV Ground Control Station");
 	set_position(Gtk::WIN_POS_CENTER);
@@ -26,6 +24,5 @@ GCS::GCS(const string& zcm_url, const GCSConsts& consts_in)
 
 	show_all_children();
 }
-
 }
 }

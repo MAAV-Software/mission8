@@ -1,9 +1,11 @@
 #include <cstdint>
 
-namespace maav {
-namespace gnc {
-namespace constants {
-
+namespace maav
+{
+namespace gnc
+{
+namespace constants
+{
 /**
  * Nominal average acceleration from earths gravity
  */

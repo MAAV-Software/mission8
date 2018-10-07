@@ -3,24 +3,25 @@
 
 #include <limits>
 
-class TimeSync{
-public:
+class TimeSync
+{
+   public:
 	TimeSync(double in_alpha1, double in_alpha2);
 
 	long f(long diff);
 
 	long reclock(long tivaTimeStamp, long recvTimeStamp);
-	
+
 	long bootstrap(long tivaTimeStamp, long recvTimeStamp);
 
-private:
+   private:
 	bool doBootstrap = true;
 	long tivaTimeStamp;
 	long recvTimeStamp;
 	double alpha1;
-	double alpha2;		
+	double alpha2;
 	long lastGoodP;
 	long lastGoodQ;
 };
 
-#endif//TIMESYNC_HPP
+#endif  // TIMESYNC_HPP

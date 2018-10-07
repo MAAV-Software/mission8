@@ -2,27 +2,24 @@
 
 using namespace std;
 
-ZCMAccumulator::ZCMAccumulator() :
-	roombasReady {false}, linesReady {false}, destructionReady {false} { }
-
-bool ZCMAccumulator::ready()
+ZCMAccumulator::ZCMAccumulator() : roombasReady{false}, linesReady{false}, destructionReady{false}
 {
-	return roombasReady || linesReady || destructionReady;
 }
 
+bool ZCMAccumulator::ready() { return roombasReady || linesReady || destructionReady; }
 void ZCMAccumulator::insertr(const int64_t timestamp)
 {
 	// using detached prevents blockages
-	thread(insertTimer,this,timestamp).detach();
+	thread(insertTimer, this, timestamp).detach();
 }
 
 void ZCMAccumulator::insertl(const int64_t timestamp)
 {
 	// using detached prevents blockages
-	thread(insertTimel,this,timestamp).detach();
+	thread(insertTimel, this, timestamp).detach();
 }
 
-void ZCMAccumulator::insertTimer(ZCMAccumulator* ptr, int64_t timestamp)
+void ZCMAccumulator::insertTimer(ZCMAccumulator *ptr, int64_t timestamp)
 {
 	std::lock_guard<std::mutex> l(ptr->mtx1);
 	if (ptr->binCounterR.find(timestamp) == ptr->binCounterR.end())
@@ -49,7 +46,7 @@ void ZCMAccumulator::insertTimer(ZCMAccumulator* ptr, int64_t timestamp)
 	}
 }
 
-void ZCMAccumulator::insertTimel(ZCMAccumulator* ptr, int64_t timestamp)
+void ZCMAccumulator::insertTimel(ZCMAccumulator *ptr, int64_t timestamp)
 {
 	std::lock_guard<std::mutex> l(ptr->mtx3);
 	if (ptr->binCounterL.find(timestamp) == ptr->binCounterL.end())
@@ -86,10 +83,10 @@ void ZCMAccumulator::insert(const roomba_list_t &src)
 	}
 	else
 	{
-		int previousNum {(*itr).second.num_roombas};
+		int previousNum{(*itr).second.num_roombas};
 		(*itr).second.num_roombas += src.num_roombas;
 		(*itr).second.roombas.resize((*itr).second.num_roombas);
-		for (int i {0}; i < src.num_roombas; ++i)
+		for (int i{0}; i < src.num_roombas; ++i)
 		{
 			(*itr).second.roombas[previousNum + i] = src.roombas[i];
 		}
@@ -97,8 +94,7 @@ void ZCMAccumulator::insert(const roomba_list_t &src)
 	receivedOner[src.utime] = true;
 	if (!(--binCounterR[src.utime]) && !isSingler[src.utime])
 	{
-		if(extractToReadyR(src.utime))
-			cv.notify_all();
+		if (extractToReadyR(src.utime)) cv.notify_all();
 	}
 }
 
@@ -113,19 +109,19 @@ void ZCMAccumulator::insert(const visual_data_t &src)
 	else
 	{
 		// Set variables holding previous size
-		int prevLines {(*itr).second.num_lines};
-		int prevMarks {(*itr).second.num_landmarks};
+		int prevLines{(*itr).second.num_lines};
+		int prevMarks{(*itr).second.num_landmarks};
 		// Set new num of lines and landmarks in msg
 		(*itr).second.num_lines += src.num_lines;
 		(*itr).second.num_landmarks += src.num_landmarks;
 		// Resize vectors of features
 		(*itr).second.lines.resize((*itr).second.num_lines);
 		(*itr).second.landmarks.resize((*itr).second.num_landmarks);
-		for (int i {0}; i < src.num_lines; ++i)
+		for (int i{0}; i < src.num_lines; ++i)
 		{
 			(*itr).second.lines[prevLines + i] = src.lines[i];
 		}
-		for (int i {0}; i < src.num_landmarks; ++i)
+		for (int i{0}; i < src.num_landmarks; ++i)
 		{
 			(*itr).second.landmarks[prevMarks + i] = src.landmarks[i];
 		}
@@ -133,8 +129,7 @@ void ZCMAccumulator::insert(const visual_data_t &src)
 	receivedOnel[src.utime] = true;
 	if (!(--binCounterL[src.utime]) && !isSinglel[src.utime])
 	{
-		if (extractToReadyL(src.utime))
-			cv.notify_all();
+		if (extractToReadyL(src.utime)) cv.notify_all();
 	}
 }
 
@@ -144,8 +139,7 @@ void ZCMAccumulator::notifyR(const int64_t &timestamp)
 	receivedOner[timestamp] = true;
 	if (!(--binCounterR[timestamp]) && !isSingler[timestamp])
 	{
-		if(extractToReadyR(timestamp))
-			cv.notify_all();
+		if (extractToReadyR(timestamp)) cv.notify_all();
 	}
 }
 
@@ -155,8 +149,7 @@ void ZCMAccumulator::notifyL(const int64_t &timestamp)
 	receivedOnel[timestamp] = true;
 	if (!(--binCounterL[timestamp]) && !isSinglel[timestamp])
 	{
-		if (extractToReadyL(timestamp))
-			cv.notify_all();
+		if (extractToReadyL(timestamp)) cv.notify_all();
 	}
 }
 
@@ -227,8 +220,7 @@ bool ZCMAccumulator::extract(roomba_list_t &dst)
 		std::lock_guard<std::mutex> l(mtx2);
 		dst = readyRoombas.front();
 		readyRoombas.pop_front();
-		if (!readyRoombas.size())
-			roombasReady = false;
+		if (!readyRoombas.size()) roombasReady = false;
 		return true;
 	}
 	else
@@ -244,8 +236,7 @@ bool ZCMAccumulator::extract(visual_data_t &dst)
 		std::lock_guard<std::mutex> l(mtx4);
 		dst = readyLines.front();
 		readyLines.pop_front();
-		if (!readyLines.size())
-			linesReady = false;
+		if (!readyLines.size()) linesReady = false;
 		return true;
 	}
 	else
@@ -262,7 +253,7 @@ void ZCMAccumulator::forceReady()
 
 void ZCMAccumulator::clearTime(int64_t timestamp)
 {
-	thread(clearTimeImpl,this,timestamp).detach();
+	thread(clearTimeImpl, this, timestamp).detach();
 }
 
 void ZCMAccumulator::clearTimeImpl(ZCMAccumulator *ptr, int64_t timestamp)

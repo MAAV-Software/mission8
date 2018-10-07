@@ -1,20 +1,20 @@
 #include "vision/depth-utils/PlaneFitterPCL.hpp"
 
-#include <iostream>
+#include <chrono>
+#include <cmath>
 #include <cstdint>
+#include <ctime>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <ctime>
-#include <cmath>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include <librealsense/rs.hpp>
-#include <cstdio>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <cstdio>
+#include <librealsense/rs.hpp>
 
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
@@ -30,73 +30,70 @@ using std::string;
 using std::vector;
 using cv::Mat;
 
-PlaneFitterPCL::PlaneFitterPCL(float inlierThreshold) :
-	inlierThresh {inlierThreshold}, lastHeight {0}
+PlaneFitterPCL::PlaneFitterPCL(float inlierThreshold) : inlierThresh{inlierThreshold}, lastHeight{0}
 {
-
 }
 
 void PlaneFitterPCL::convertCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-	std::vector<pf::Point3f> &points)
+								  std::vector<pf::Point3f> &points)
 {
-	for (auto &point: points)
+	for (auto &point : points)
 	{
 		cloud->push_back(pcl::PointXYZ(point.x, point.y, point.z));
 	}
 }
 
-Eigen::MatrixXf PlaneFitterPCL::fitPlane(
-	pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
+Eigen::MatrixXf PlaneFitterPCL::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
 {
 	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 	pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
 	// Create the segmentation object
 	pcl::SACSegmentation<pcl::PointXYZ> segs;
 	// Optional
-	segs.setOptimizeCoefficients (true);
+	segs.setOptimizeCoefficients(true);
 	// Mandatory
-	segs.setModelType (pcl::SACMODEL_PLANE);
-	segs.setMethodType (pcl::SAC_RANSAC);
-	segs.setDistanceThreshold (inlierThresh);
+	segs.setModelType(pcl::SACMODEL_PLANE);
+	segs.setMethodType(pcl::SAC_RANSAC);
+	segs.setDistanceThreshold(inlierThresh);
 	// Old distanceThreshold at 0.3
 
-	segs.setInputCloud (cloud);
-	segs.setOptimizeCoefficients (true);
+	segs.setInputCloud(cloud);
+	segs.setOptimizeCoefficients(true);
 	// Set the cloud to use for plane fitting
-	segs.setInputCloud (cloud);
+	segs.setInputCloud(cloud);
 	if (cloud->size())
 	{
 		// Beginning planar segmentation
 		segs.segment(*inliers, *coefficients);
 		// Check to see if a model was found
-		if (inliers->indices.size () == 0)
+		if (inliers->indices.size() == 0)
 		{
-			return Eigen::MatrixXf(0,0);
+			return Eigen::MatrixXf(0, 0);
 		}
 	}
 	else
 	{
-		return Eigen::MatrixXf(0,0);
+		return Eigen::MatrixXf(0, 0);
 	}
 	if (coefficients->values.size())
 	{
-		Eigen::MatrixXf coefficientsMatrix(4,1);
+		Eigen::MatrixXf coefficientsMatrix(4, 1);
 		for (unsigned i = 0; i < 4; ++i)
 		{
-			coefficientsMatrix(i,0) = coefficients->values[i];
+			coefficientsMatrix(i, 0) = coefficients->values[i];
 		}
 		return coefficientsMatrix;
 	}
 }
 
-bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-	float &zdot, float &zdepth)
+bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
+									 float &zdepth)
 {
 	return getPlaneInfo(cloud, zdot, zdepth, junkMatrix);
 }
 
-bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-	float &zdot, float &zdepth, Eigen::MatrixXf& coefs)
+bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
+								  float &zdepth, Eigen::MatrixXf &coefs)
 {
 	coefs = fitPlane(cloud);
 	if (coefs.size() == 0)
@@ -116,7 +113,4 @@ bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
 	return true;
 }
 
-float PlaneFitterPCL::getLastHeight() const
-{
-	return lastHeight;
-}
+float PlaneFitterPCL::getLastHeight() const { return lastHeight; }

@@ -1,9 +1,9 @@
-#include <vector>
-#include <iostream>
-#include <cstdlib>
-#include <limits>
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
 #include <random>
+#include <vector>
 
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/SVD>
@@ -36,30 +36,18 @@ constexpr float percentPoints = 0.65f;
 // Minimum number of iterations before returning success
 constexpr unsigned int minIterations = 8;
 
-PlaneFitter::PlaneFitter(float inlierDistanceIn) :
-	inlierDistance {inlierDistanceIn}
-{
-
-}
-
-
+PlaneFitter::PlaneFitter(float inlierDistanceIn) : inlierDistance{inlierDistanceIn} {}
 double PlaneFitter::calculateError(const Eigen::Vector4f &sampledCoefficients)
 {
 	// Orthogonal projection least squares method
 	// Calculate a basis of the plane represented by sampledCoefficients
 	// Points used to calculate plane basis
-	Eigen::Vector3f bPoints[3] =
-	{
-		{0, 0, 0},
-		{1, 1, 0},
-		{1, 2, 0}
-	};
+	Eigen::Vector3f bPoints[3] = {{0, 0, 0}, {1, 1, 0}, {1, 2, 0}};
 	for (unsigned i = 0; i < 3; ++i)
 	{
 		bPoints[i](2) = (sampledCoefficients(0) * bPoints[i](0) +
-			sampledCoefficients(1) * bPoints[i](1) -
-			sampledCoefficients(3)) /
-			(-1 * sampledCoefficients(2));
+						 sampledCoefficients(1) * bPoints[i](1) - sampledCoefficients(3)) /
+						(-1 * sampledCoefficients(2));
 	}
 	// Basis vectors
 	Eigen::Vector3f bVectors[2];
@@ -130,7 +118,7 @@ MatrixXf PlaneFitter::fitPlane(vector<Point> &points)
 		Vector4f vn(0, 0, 0, 0);
 		for (unsigned row = 0; row < 4; ++row)
 		{
-			vn(row) = v(row,v.cols() - 1);
+			vn(row) = v(row, v.cols() - 1);
 		}
 		// Find out how many points are inliers
 		unsigned numInliers = 0;
@@ -138,7 +126,7 @@ MatrixXf PlaneFitter::fitPlane(vector<Point> &points)
 		{
 			Point &p = points[idx];
 			float distance = (vn(0) * p.x + vn(1) * p.y + vn(2) * p.z + vn(3)) /
-				sqrt(vn(0) * vn(0) + vn(1) * vn(1) + vn(2) * vn(2));
+							 sqrt(vn(0) * vn(0) + vn(1) * vn(1) + vn(2) * vn(2));
 			if (distance <= inlierDistance)
 			{
 				++numInliers;
@@ -161,7 +149,7 @@ MatrixXf PlaneFitter::fitPlane(vector<Point> &points)
 	}
 	if (bestError == std::numeric_limits<double>::max())
 	{
-		return MatrixXf(0,0);
+		return MatrixXf(0, 0);
 	}
 	else
 	{
