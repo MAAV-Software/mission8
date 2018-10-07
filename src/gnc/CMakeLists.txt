@@ -25,6 +25,7 @@ add_subdirectory(state)
 add_subdirectory(control)
 add_subdirectory(kalman)
 add_subdirectory(slam)
+add_subdirectory(utils)
 
 # build libmaav-gnc
 add_library(maav-gnc SHARED
@@ -48,4 +49,5 @@ target_link_libraries(maav-gnc
     maav-state
     maav-kalman
 	${OpenCV_LIBS}
+    maav-gnc-utils
 )

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "gnc/state.hpp"
+#include <gnc/measurements/waypoint.hpp>
+#include <gnc/state.hpp>
 
 namespace maav
 {
@@ -12,10 +13,10 @@ class Controller
 	Controller();
 
 	// TODO: create target struct
-	void set_target(void);
+	void set_target(const Waypoint& waypoint);
 
 	// TODO: return actuator controls
-	void add_state(/*const State& state*/);
+	void add_state(const State& state);
 };
 
 }  // namespace gnc
