@@ -12,7 +12,7 @@ class Estimator
    public:
 	Estimator();
 
-	const State& add_measurement_set(/*const measurements::MeasurementSet& meas*/);
+	const State& add_measurement_set(const measurements::MeasurementSet& meas);
 
    private:
 	State state;

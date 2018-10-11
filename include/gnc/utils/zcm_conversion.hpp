@@ -8,6 +8,7 @@ namespace maav
 {
 namespace gnc
 {
+state_t convert_state(const State& state);
 State convert_state(const state_t& state);
 Waypoint convert_waypoint(const waypoint_t& zcm_waypoint);
 }
