@@ -27,8 +27,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 # Set all compiled executables to be placed in software/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
+# Include generated zcm messages
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/generated)
+
 # Set include directory
-set(SW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/generated)
+set(SW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -39,13 +42,14 @@ endif()
 include(CheckIncludeFiles)
 
 # Set global C++ flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wall -Wextra -pedantic -Werror")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
 
 # Set global debug flags
 # Helps with debugging memory and thread issues
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
 # Find all globally required libraries
 find_package(YAML REQUIRED)

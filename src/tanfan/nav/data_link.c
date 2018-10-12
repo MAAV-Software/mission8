@@ -1,41 +1,45 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "tanfan/nav/data_link.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 char transmit_user[256];
 
-//char* data_frame_state_names[] = { "READY", "LEN_1", "LEN_2", "LEN_1_ESCP", "LEN_2_ESCP", "READ", "READ_ESCP", "CHECKSUM", "CHECKSUM_ESCP", "DONE", "START_ERR", "CHECKSUM_ERR", "DATA_ERR" };
+// char* data_frame_state_names[] = { "READY", "LEN_1", "LEN_2", "LEN_1_ESCP", "LEN_2_ESCP", "READ",
+// "READ_ESCP", "CHECKSUM", "CHECKSUM_ESCP", "DONE", "START_ERR", "CHECKSUM_ERR", "DATA_ERR" };
 char* feedback_channel_name = CHANNEL_FEEDBACK;
 char* position_channel_name = CHANNEL_POSITION;
 char* target_channel_name = CHANNEL_TARGET;
 char* tuning_channel_name = CHANNEL_TUNING;
 
 static inline void data_link_branchless_assemble_byte(uint8_t* pkt, size_t* pkt_i,
-	uint8_t data_byte);
+													  uint8_t data_byte);
 
-//static inline uint8_t data_link_branchless_decode_byte(uint8_t* pkt, size_t* pkt_i);
+// static inline uint8_t data_link_branchless_decode_byte(uint8_t* pkt, size_t* pkt_i);
 
-data_frame_t* data_frame_create(uint16_t size) {
-	data_frame_t* frame = (data_frame_t*) malloc(sizeof(data_frame_t));
-	frame->buffer = (uint8_t*) malloc(sizeof(uint8_t) * size);
+data_frame_t* data_frame_create(uint16_t size)
+{
+	data_frame_t* frame = (data_frame_t*)malloc(sizeof(data_frame_t));
+	frame->buffer = (uint8_t*)malloc(sizeof(uint8_t) * size);
 	frame->size = 0;
 	frame->index = 0;
-	//frame->state = READY;
+	// frame->state = READY;
 
 	return frame;
 }
 
-void data_frame_destroy(data_frame_t* frame) {
+void data_frame_destroy(data_frame_t* frame)
+{
 	free(frame->buffer);
 	free(frame);
 }
 
-void data_frame_clear(data_frame_t* frame) {
+void data_frame_clear(data_frame_t* frame)
+{
 	frame->size = 0;
 	frame->index = 0;
-	//frame->state = READY;
+	// frame->state = READY;
 }
 /*
 // state machine to process bytes in the data link layer
@@ -119,7 +123,8 @@ bool data_frame_push_byte(data_frame_t* frame, uint8_t byte) {
 	return true;
 }
 */
-uint16_t data_link_assemble_packet(uint8_t* msg, uint8_t* pkt, uint16_t size) {
+uint16_t data_link_assemble_packet(uint8_t* msg, uint8_t* pkt, uint16_t size)
+{
 	size_t msg_i = 0, pkt_i = 0;
 	pkt[pkt_i++] = DATA_FRAME_START_DELIMITER;
 
@@ -129,7 +134,8 @@ uint16_t data_link_assemble_packet(uint8_t* msg, uint8_t* pkt, uint16_t size) {
 	pkt_i++;
 
 	uint8_t checksum = 0;
-	while (msg_i < size) {
+	while (msg_i < size)
+	{
 		data_link_branchless_assemble_byte(pkt, &pkt_i, msg[msg_i]);
 		checksum += msg[msg_i++];
 		pkt_i++;
@@ -169,9 +175,10 @@ bool data_link_decode_packet(uint8_t* msg, uint8_t* pkt, uint16_t* size) {
 }
 */
 static inline void data_link_branchless_assemble_byte(uint8_t* pkt, size_t* pkt_i,
-	uint8_t data_byte) {
-	uint8_t is_special_char = (data_byte == DATA_FRAME_START_DELIMITER) +
-	(data_byte == DATA_FRAME_ESCAPE_CHAR);
+													  uint8_t data_byte)
+{
+	uint8_t is_special_char =
+		(data_byte == DATA_FRAME_START_DELIMITER) + (data_byte == DATA_FRAME_ESCAPE_CHAR);
 	uint8_t xor_val = is_special_char << 5;
 	pkt[*pkt_i] = DATA_FRAME_ESCAPE_CHAR;
 	pkt[*pkt_i + is_special_char] = data_byte ^ xor_val;

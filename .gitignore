@@ -32,3 +32,5 @@ compile_commands.json
 *.idea
 thirdparty/opencv
 .syntastic_cpp_config
+CameraTrajectory.txt
+KeyFrameTrajectory.txt
