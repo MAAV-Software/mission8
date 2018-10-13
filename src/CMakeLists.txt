@@ -13,7 +13,6 @@ include_directories(
 )
 
 add_subdirectory(common)
-add_subdirectory(gcs)
 add_subdirectory(gcs-client)
 add_subdirectory(gnc)
 add_subdirectory(lidar)

@@ -27,6 +27,8 @@ class CameraInputBase
 
 	virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ>& cloud) const = 0;
 
+	virtual ~CameraInputBase() = default;
+
    private:
 	int tag;
 	static int GLOBAL_TAG;

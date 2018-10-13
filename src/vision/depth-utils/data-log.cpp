@@ -53,8 +53,8 @@ int main(int argc, char **argv)
 		directory = "ImageData";
 	}
 
-	int oldCams = std::stoi(argv[1]);
-	int newCams = std::stoi(argv[2]);
+	unsigned int oldCams = static_cast<unsigned>(std::stoi(argv[1]));
+	unsigned int newCams = static_cast<unsigned>(std::stoi(argv[2]));
 
 	// Initialize cameras
 	vector<CameraInputBase *> cameras;
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 		// Continue creating cameras
 		for (unsigned i = 1; i < oldCams; ++i)
 		{
-			CameraInput *nextCam = new CameraInput(i, ctx);
+			CameraInput *nextCam = new CameraInput(static_cast<int>(i), ctx);
 			cameras.push_back(nextCam);
 		}
 		std::cout << "rs1 Cameras created" << std::endl;
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 		rs2::context ctx;
 		auto list = ctx.query_devices();
 		std::cout << list.size() << " rs2 devices connected.\n";
-		for (int i = 0; i < newCams; ++i)
+		for (unsigned int i = 0; i < newCams; ++i)
 		{
 			NewCameraInput *nextCam =
 				new NewCameraInput(list[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
@@ -157,7 +157,7 @@ void camera_thread(CameraInputBase *cam)
 		fname += ".bin";
 		std::ofstream outfileRGB(fname, std::ios::out | std::ios::binary);
 		std::cout << rgb.elemSize() << " " << rgb.total() << "\n";
-		outfileRGB.write((char *)rgb.data, rgb.elemSize() * rgb.total());
+		outfileRGB.write((char *)rgb.data, (long int)(rgb.elemSize() * rgb.total()));
 		outfileRGB.close();
 
 		fname = directory;
@@ -168,7 +168,7 @@ void camera_thread(CameraInputBase *cam)
 		fname += ".bin";
 		std::ofstream outfileDepth(fname, std::ios::out | std::ios::binary);
 		std::cout << depth.elemSize() << " " << depth.total() << "\n";
-		outfileDepth.write((char *)depth.data, depth.elemSize() * depth.total());
+		outfileDepth.write((char *)depth.data, (long int)(depth.elemSize() * depth.total()));
 		outfileDepth.close();
 
 		timestamps << startTime << '\n';

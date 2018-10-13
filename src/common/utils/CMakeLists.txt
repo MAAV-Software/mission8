@@ -19,5 +19,3 @@ add_library(maav-utils SHARED
 target_link_libraries(maav-utils
     ${ZCM_LIBRARIES}
 )
-
-add_subdirectory(xbox-controller)

@@ -14,6 +14,9 @@ Guidance, navigation, and control.
 
 `./scripts/setup.sh`
 
+Set the MAAV_SOFTWARE_DIR environment variable on your machine to the path to the maav software
+folder on your machine. Add export MAAV_SOFTWARE_DIR='path' to your shell config.
+
 ### Compile the code:
 
 `mkdir build`

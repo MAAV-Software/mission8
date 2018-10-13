@@ -4,6 +4,9 @@ project(maav-software)
 # Add path to search for modules
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 
+# Set software source dir
+set(SOFTWARE_SOURCE_DIR ${PROJECT_SOURCE_DIR})
+
 # Set C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -12,10 +15,8 @@ set(CMAKE_CXX_EXTENSIONS ON)
 option(BUILD_GNC "Build the GNC module" ON)
 option(BUILD_VISION "Build the vision module" ON)
 option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
-option(BUILD_GCS "Build the ground control station" OFF)
 option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
 option(BUILD_TANFAN "Build the Tiva Atom Network Forwarding Application (TANFAN)" OFF)
-option(BUILD_EXAMPLES "Build example executables" ON)
 option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 set(BUILD_TANFAN OFF)
@@ -60,7 +61,6 @@ find_package(ZCM REQUIRED)
 
 # Add source directory
 add_subdirectory(src)
-add_subdirectory(examples)
 add_subdirectory(thirdparty)
 add_subdirectory(drivers)
 # Setup testing options

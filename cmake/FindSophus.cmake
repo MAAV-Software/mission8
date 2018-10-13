@@ -1,5 +1,5 @@
 find_path(SOPHUS_INCLUDE_DIR sophus/so3.hpp
-    PATHS ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
+    PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty/Sophus
 )
 
 set(SOPHUS_INCLUDE_DIRS ${SOPHUS_INCLUDE_DIR})
