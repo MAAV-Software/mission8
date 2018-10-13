@@ -24,7 +24,8 @@ int main(int argc, char** argv)
 	gopt.addString('c', "config", "", "Path to config.");
 	// TODO: Add getopt arguments as necessary
 
-	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help")) {
+	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
+	{
 		std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
 		gopt.printHelp();
 		return 1;
@@ -42,15 +43,18 @@ int main(int argc, char** argv)
 	Planner planner(gopt.getString("config"));
 
 	bool kill = false;
-	while (!kill) {
-		if (map_handler.ready()) {
+	while (!kill)
+	{
+		if (map_handler.ready())
+		{
 			const auto msg = map_handler.msg();
 			map_handler.pop();
 			// TODO: Implement add map for planner
 			//            planner.add_map(msg);
 		}
 
-		if (state_handler.ready()) {
+		if (state_handler.ready())
+		{
 			const auto msg = state_handler.msg();
 			state_handler.pop();
 

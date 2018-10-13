@@ -21,18 +21,16 @@ using namespace maav::gnc::state;
 using namespace maav::gnc::kalman;
 
 KalmanState identity(const KalmanState& state) { return state; }
+BOOST_AUTO_TEST_CASE(IdentityTransformTest)
+{
+	UnscentedTransform<KalmanState> id(identity, 0.1, 2, 0);
 
-BOOST_AUTO_TEST_CASE(IdentityTransformTest) {
+	KalmanState state = KalmanState::zero(0);
 
-    UnscentedTransform<KalmanState> id(identity, 0.1, 2, 0);
+	KalmanState transformed_state = id(state);
 
-    KalmanState state = KalmanState::zero(0);
-
-    KalmanState transformed_state = id(state);
-
-    constexpr double tol = 1e-5;
-    BOOST_REQUIRE(std::abs(diff(state.attitude(), transformed_state.attitude())) < tol);
-    BOOST_REQUIRE(std::abs(diff(state.position(), transformed_state.position())) < tol);
-    BOOST_REQUIRE(std::abs(diff(state.velocity(), transformed_state.velocity())) < tol);
-
+	constexpr double tol = 1e-5;
+	BOOST_REQUIRE(std::abs(diff(state.attitude(), transformed_state.attitude())) < tol);
+	BOOST_REQUIRE(std::abs(diff(state.position(), transformed_state.position())) < tol);
+	BOOST_REQUIRE(std::abs(diff(state.velocity(), transformed_state.velocity())) < tol);
 }

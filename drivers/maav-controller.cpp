@@ -25,7 +25,8 @@ int main(int argc, char** argv)
 	gopt.addString('c', "config", "", "Path to config.");
 	// TODO: Add getopt arguments as necessary
 
-	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help")) {
+	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
+	{
 		std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
 		gopt.printHelp();
 		return 1;
@@ -43,15 +44,19 @@ int main(int argc, char** argv)
 	Controller controller;
 
 	bool kill = false;
-	while (!kill) {
-		if (path_handler.ready()) {
+	while (!kill)
+	{
+		if (path_handler.ready())
+		{
 			const auto msg = path_handler.msg();
 			path_handler.pop();
 			controller.set_target(convert_waypoint(msg.waypoints[0]));
-			// TODO: save path, pass waypoints sequentially to set_target when waiting for new path!!!
+			// TODO: save path, pass waypoints sequentially to set_target when waiting for new
+			// path!!!
 		}
 
-		if (state_handler.ready()) {
+		if (state_handler.ready())
+		{
 			const auto msg = state_handler.msg();
 			state_handler.pop();
 
