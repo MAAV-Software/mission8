@@ -1,4 +1,6 @@
 #include <iostream>
+#include <atomic>
+#include <signal.h>
 
 #include <zcm/zcm-cpp.hpp>
 
@@ -16,8 +18,18 @@ using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
 
+std::atomic<bool> KILL{false};
+void sig_handler(int){ KILL = true; }
+
 int main(int argc, char** argv)
 {
+	
+	signal(SIGINT, sig_handler);
+	signal(SIGABRT, sig_handler);
+	signal(SIGSEGV, sig_handler);
+	signal(SIGTERM, sig_handler);
+
+
 	std::cout << "Controller Driver" << std::endl;
 
 	GetOpt gopt;
@@ -43,8 +55,7 @@ int main(int argc, char** argv)
 
 	Controller controller;
 
-	bool kill = false;
-	while (!kill)
+	while (!KILL)
 	{
 		if (path_handler.ready())
 		{
@@ -67,5 +78,6 @@ int main(int argc, char** argv)
 		//        path_t path = localizer.get_path();
 		//        zcm.publish(PATH_CHANNEL, &path);
 	}
+
 	zcm.stop();
 }
