@@ -4,3 +4,6 @@
 [submodule "thirdparty/eigen"]
 	path = thirdparty/eigen
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "thirdparty/mavlink"]
+	path = thirdparty/mavlink
+	url = https://github.com/mavlink/mavlink.git

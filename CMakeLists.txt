@@ -27,8 +27,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 # Set all compiled executables to be placed in software/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# Include generated zcm messages
-include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/generated)
+# Include generated zcm messages and mavlink headers
+include_directories(SYSTEM 
+    ${PROJECT_SOURCE_DIR}/generated 
+    ${PROJECT_SOURCE_DIR}/thirdparty/mavlink/include
+)
 
 # Set include directory
 set(SW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)

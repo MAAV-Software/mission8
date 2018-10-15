@@ -14,7 +14,9 @@ add_executable(maav-controller maav-controller.cpp)
 target_link_libraries(maav-controller maav-gnc
         ${ZCM_LIBRARIES}
         maav-utils
-        maav-msg)
+        maav-msg
+        maav-mavlink
+)
 
 add_executable(maav-estimator maav-estimator.cpp)
 
@@ -22,6 +24,7 @@ target_link_libraries(maav-estimator
 	maav-gnc
         ${ZCM_LIBRARIES}
         maav-utils
-        maav-msg)
+        maav-msg
+)
 
 

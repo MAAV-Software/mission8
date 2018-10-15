@@ -1,9 +1,10 @@
-#include <iostream>
-#include <atomic>
 #include <signal.h>
+#include <atomic>
+#include <iostream>
 
 #include <zcm/zcm-cpp.hpp>
 
+#include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/state_t.hpp>
@@ -17,18 +18,16 @@ using maav::PATH_CHANNEL;
 using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
+using maav::mavlink::OffboardControl;
 
 std::atomic<bool> KILL{false};
-void sig_handler(int){ KILL = true; }
-
+void sig_handler(int) { KILL = true; }
 int main(int argc, char** argv)
 {
-	
 	signal(SIGINT, sig_handler);
 	signal(SIGABRT, sig_handler);
 	signal(SIGSEGV, sig_handler);
 	signal(SIGTERM, sig_handler);
-
 
 	std::cout << "Controller Driver" << std::endl;
 
@@ -54,6 +53,8 @@ int main(int argc, char** argv)
 	zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
 
 	Controller controller;
+
+	OffboardControl con;  // added to demonstrate mavlink interface
 
 	while (!KILL)
 	{
