@@ -4,7 +4,6 @@
 
 #include <zcm/zcm-cpp.hpp>
 
-#include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/state_t.hpp>
@@ -18,7 +17,6 @@ using maav::PATH_CHANNEL;
 using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
-using maav::mavlink::OffboardControl;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
@@ -54,8 +52,6 @@ int main(int argc, char** argv)
 
 	Controller controller;
 
-	OffboardControl con;  // added to demonstrate mavlink interface
-
 	while (!KILL)
 	{
 		if (path_handler.ready())
@@ -75,9 +71,11 @@ int main(int argc, char** argv)
 			controller.add_state(convert_state(msg));
 		}
 
-		// TODO: Get output from planner
-		//        path_t path = localizer.get_path();
-		//        zcm.publish(PATH_CHANNEL, &path);
+		// pixhawk needs attitude/thrust setpoint commands at 
+		// rate >2 Hz otherwise it will go into failsafe
+		// ***make sure at some point controller is
+		// sending commands at a sufficient rate***
+		controller.run();
 	}
 
 	zcm.stop();

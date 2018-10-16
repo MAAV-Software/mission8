@@ -46,4 +46,5 @@ target_link_libraries(maav-gnc
     maav-kalman
 	${OpenCV_LIBS}
     maav-gnc-utils
+    maav-mavlink
 )
