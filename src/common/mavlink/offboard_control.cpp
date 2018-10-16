@@ -20,7 +20,6 @@ std::atomic<bool> KILL{false};
 
 // helper for starting read thread
 void read_thread_start(OffboardControl* OffboardControl) { OffboardControl->read_thread(); }
-
 // Creates thread and passing read_messages loop into thread
 OffboardControl::OffboardControl()
 {
@@ -198,22 +197,29 @@ void OffboardControl::set_zero_attitude()
 	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0, 0, 0, 0, SET_ALL);
 }
 
-//Requires 0<= thrust <= 1
-void OffboardControl::set_thrust(const float thrust){
+// Requires 0<= thrust <= 1
+void OffboardControl::set_thrust(const float thrust)
+{
 	assert(thrust >= 0 && thrust <= 1);
 	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), thrust, 0., 0., 0., SET_THRUST);
 }
 
-void OffboardControl::set_yaw_rate(const float yaw_rate){
-	set_attitude_target(Eigen::Quaternion<float>(1.,0.,0.,0.), 0., 0., 0., yaw_rate, SET_YAW_RATE);
+void OffboardControl::set_yaw_rate(const float yaw_rate)
+{
+	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., 0., 0., yaw_rate,
+						SET_YAW_RATE);
 }
 
-void OffboardControl::set_pitch_rate(const float pitch_rate){
-	set_attitude_target(Eigen::Quaternion<float>(1.,0.,0.,0.), 0., 0., pitch_rate, 0., SET_PITCH_RATE);
+void OffboardControl::set_pitch_rate(const float pitch_rate)
+{
+	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., 0., pitch_rate, 0.,
+						SET_PITCH_RATE);
 }
 
-void OffboardControl::set_roll_rate(const float roll_rate){
-	set_attitude_target(Eigen::Quaternion<float>(1.,0.,0.,0.), 0., roll_rate, 0., 0., SET_ROLL_RATE);
+void OffboardControl::set_roll_rate(const float roll_rate)
+{
+	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., roll_rate, 0., 0.,
+						SET_ROLL_RATE);
 }
 }  // maav
 }  // gnc

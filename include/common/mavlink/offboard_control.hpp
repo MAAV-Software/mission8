@@ -31,8 +31,7 @@ class OffboardControl
 	void set_pitch_rate(const float pitch_rate);
 
    private:
-
-   	void read_message();
+	void read_message();
 	void read_thread();
 	void write_message(const mavlink_message_t& message);
 	void check_offboard_control();

@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 			controller.add_state(convert_state(msg));
 		}
 
-		// pixhawk needs attitude/thrust setpoint commands at 
+		// pixhawk needs attitude/thrust setpoint commands at
 		// rate >2 Hz otherwise it will go into failsafe
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
