@@ -18,17 +18,35 @@ struct Messages
 	mavlink_ping_t ping;
 };
 
+struct Setpoint
+{
+	Eigen::Quaternion<float> q{1, 0, 0, 0};
+	float thrust = 0;	// 0 <= thrust <= 1
+	float roll_rate = 0;		// rad/s
+	float pitch_rate = 0;	// rad/s
+	float yaw_rate = 0;		// rad/s
+};
+
 class OffboardControl
 {
    public:
 	OffboardControl();
 	~OffboardControl();
 
+	//
+	// PIXHAWK MIGHT NOT ACCEPT THESE COMMANDS INDIVIDUALLY
+	//
 	void set_zero_attitude();
 	void set_thrust(const float thrust);
 	void set_yaw_rate(const float yaw_rate);
 	void set_roll_rate(const float roll_rate);
 	void set_pitch_rate(const float pitch_rate);
+	void set_attitude(const Eigen::Quaternion<float>& q);
+	void zero_rates();
+
+	void update_setpoint(){
+
+	}
 
    private:
 	void read_message();
@@ -40,9 +58,7 @@ class OffboardControl
 	void send_heartbeat();
 	void activate_offboard_control();
 
-	void set_attitude_target(const Eigen::Quaternion<float>& q, const float thrust,
-							 const float roll_rate, const float pitch_rate, const float yaw_rate,
-							 const uint8_t type_mask);
+	void set_attitude_target(const Setpoint& new_setpoint, const uint8_t type_mask);
 
 	Messages current_messages_in;
 	std::thread read_tid;
@@ -57,6 +73,8 @@ class OffboardControl
 	const uint8_t companion_id =
 		0;  // this is the OffboardController id i think (not really sure abou this one)
 	union px4_custom_mode custom_mode;
+
+	Setpoint current_setpoint;
 
 	// Define type masks for set_attitude_target
 	static constexpr uint8_t SET_ALL = 0b00000000;

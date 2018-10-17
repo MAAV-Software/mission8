@@ -166,26 +166,25 @@ void OffboardControl::activate_offboard_control()
 	write_message(message);
 }
 
-void OffboardControl::set_attitude_target(const Eigen::Quaternion<float>& q, const float thrust,
-										  const float roll_rate, const float pitch_rate,
-										  const float yaw_rate, const uint8_t type_mask)
+void OffboardControl::set_attitude_target(const Setpoint& new_setpoint, const uint8_t type_mask)
 {
-	assert(thrust >= 0 && thrust <= 1);
+	assert(new_setpoint.thrust >= 0 && new_setpoint.thrust <= 1);
 
 	mavlink_set_attitude_target_t setpoint;
 	setpoint.time_boot_ms = current_messages_in.system_time.time_boot_ms;
 	setpoint.target_system = system_id;
 	setpoint.target_component = autopilot_id;
-	setpoint.type_mask = type_mask;
+	setpoint.type_mask = type_mask; //Using variable to prevent error
+	setpoint.type_mask = 0b10000000; //TODO: figure out how to work this
 
-	setpoint.q[0] = q.w();
-	setpoint.q[1] = q.x();
-	setpoint.q[2] = q.y();
-	setpoint.q[3] = q.z();
-	setpoint.body_roll_rate = roll_rate;
-	setpoint.body_pitch_rate = pitch_rate;
-	setpoint.body_yaw_rate = yaw_rate;
-	setpoint.thrust = thrust;
+	setpoint.q[0] = new_setpoint.q.w();
+	setpoint.q[1] = new_setpoint.q.x();
+	setpoint.q[2] = new_setpoint.q.y();
+	setpoint.q[3] = new_setpoint.q.z();
+	setpoint.body_roll_rate = new_setpoint.roll_rate;
+	setpoint.body_pitch_rate = new_setpoint.pitch_rate;
+	setpoint.body_yaw_rate = new_setpoint.yaw_rate;
+	setpoint.thrust = new_setpoint.thrust;
 
 	mavlink_message_t message;
 	mavlink_msg_set_attitude_target_encode(system_id, companion_id, &message, &setpoint);
@@ -194,32 +193,45 @@ void OffboardControl::set_attitude_target(const Eigen::Quaternion<float>& q, con
 
 void OffboardControl::set_zero_attitude()
 {
-	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0, 0, 0, 0, SET_ALL);
+	set_attitude_target(current_setpoint, SET_ALL);
 }
 
 // Requires 0<= thrust <= 1
 void OffboardControl::set_thrust(const float thrust)
 {
 	assert(thrust >= 0 && thrust <= 1);
-	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), thrust, 0., 0., 0., SET_THRUST);
+	current_setpoint.thrust = thrust;
+	set_attitude_target(current_setpoint, SET_ALL);
 }
 
 void OffboardControl::set_yaw_rate(const float yaw_rate)
 {
-	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., 0., 0., yaw_rate,
-						SET_YAW_RATE);
+	current_setpoint.yaw_rate = yaw_rate;
+	set_attitude_target(current_setpoint,
+						SET_ALL);
 }
 
 void OffboardControl::set_pitch_rate(const float pitch_rate)
 {
-	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., 0., pitch_rate, 0.,
-						SET_PITCH_RATE);
+	current_setpoint.pitch_rate = pitch_rate;
+	set_attitude_target(current_setpoint, SET_ALL);
 }
 
 void OffboardControl::set_roll_rate(const float roll_rate)
 {
-	set_attitude_target(Eigen::Quaternion<float>(1., 0., 0., 0.), 0., roll_rate, 0., 0.,
-						SET_ROLL_RATE);
+	current_setpoint.roll_rate = roll_rate;
+	set_attitude_target(current_setpoint, SET_ALL);
+}
+
+void OffboardControl::set_attitude(const Eigen::Quaternion<float>& q){
+	current_setpoint.q = q;
+	set_attitude_target(current_setpoint, SET_ALL);
+}
+
+void OffboardControl::zero_rates(){
+	current_setpoint.yaw_rate = 0;
+	current_setpoint.roll_rate = 0;
+	current_setpoint.pitch_rate = 0;
 }
 }  // maav
 }  // gnc

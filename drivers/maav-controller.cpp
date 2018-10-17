@@ -20,6 +20,29 @@ using maav::gnc::convert_waypoint;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
+
+
+/*
+ * Temporary Operating Procedure (to start work on controller)
+ * ================================================================
+ * 1. Start simulator
+ * 2. Wait for px4 to initialize. When "commander status" shows
+ *	  the px4 in main mode: 4 it is probably time
+ * 3. run "./maav-controller" - the controller will try to 
+ * 	  establish offboard control.  It will timeout after 10 sec.
+ * 	  If it doesnt work for some reason just kil the program and try again.
+ * 	  It usually works after one or two tries (this will be fixed to be more 
+ *    robust)
+ * 4. The program will indicate that offboard control has bee
+ *    established.  The quadcopter is now in the controllers hands....
+ * 5. If the pixhawk does not receive setpoint commands (thurst,
+ *    attitude, angle rates) at a rate of >2 Hz it will enter failsafe
+ *    mode and switch out of offboard control.  It is currently the
+ *    responsibility of the control class to provide these inputs
+ *    at a sufficient rate.
+*/
+
+
 int main(int argc, char** argv)
 {
 	signal(SIGINT, sig_handler);
@@ -52,6 +75,8 @@ int main(int argc, char** argv)
 
 	Controller controller;
 
+	uint64_t t = time(NULL);
+	uint64_t et = 0;
 	while (!KILL)
 	{
 		if (path_handler.ready())
@@ -75,7 +100,18 @@ int main(int argc, char** argv)
 		// rate >2 Hz otherwise it will go into failsafe
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
-		controller.run();
+		et = (time(NULL) - t);
+		if(et < 10) controller.take_off();
+		else if(et < 11) controller.yaw_right();
+		else if(et < 13) controller.yaw_left();
+		else if(et < 14) controller.yaw_right();
+		else if(et < 15) controller.pitch_forward();
+		else if(et < 17) controller.pitch_back();
+		else if(et < 18) controller.pitch_forward();
+		else if(et < 19) controller.roll_right();
+		else if(et < 21) controller.roll_left();
+		else if(et < 22) controller.roll_right();
+		else controller.land();
 	}
 
 	zcm.stop();
