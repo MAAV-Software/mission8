@@ -49,7 +49,7 @@ class OffboardControl
 	}
 
    private:
-	void read_message();
+	bool read_message();
 	void read_thread();
 	void write_message(const mavlink_message_t& message);
 	void check_offboard_control();

@@ -27,6 +27,9 @@ OffboardControl::OffboardControl()
 	custom_mode.data = 0;
 	custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
 
+	//Read messages until we get a heartbeat
+	while(read_message());
+
 	// Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
 	read_tid = thread(read_thread_start, this);
 
@@ -35,6 +38,13 @@ OffboardControl::OffboardControl()
 	// or pixhawk will enter failsafe (disable offboard and RTL)
 	offboard_control_active = false;
 	uint64_t timeout_start = time(NULL);
+
+	//Spam zero attitudes to pixhawk
+	for(int i = 0; i < 100; ++i){
+		set_zero_attitude();
+		sleep_for(10ms);
+	}
+	
 	while (!offboard_control_active)
 	{
 		set_zero_attitude();
@@ -78,10 +88,11 @@ void OffboardControl::read_thread()
 	}
 }
 
-void OffboardControl::read_message()
+bool OffboardControl::read_message()
 {
 	mavlink_message_t message;
 	bool message_received = false;
+	bool heartbeat_received = false;
 
 	message_received = com_port.read_message(message);
 
@@ -93,6 +104,7 @@ void OffboardControl::read_message()
 				mavlink_msg_heartbeat_decode(&message, &(current_messages_in.heartbeat));
 				check_offboard_control();  // check each heartbeat
 				// TODO: handle loss of heartbeat
+				heartbeat_received = true;
 				break;
 			case MAVLINK_MSG_ID_SYSTEM_TIME:
 				mavlink_msg_system_time_decode(&message, &(current_messages_in.system_time));
@@ -102,6 +114,8 @@ void OffboardControl::read_message()
 				break;
 		}
 	}
+
+	return heartbeat_received;  //return this so we can look for first heartbeat
 }
 
 void OffboardControl::write_message(const mavlink_message_t& message)
@@ -153,13 +167,12 @@ void OffboardControl::activate_offboard_control()
 	// This command will fail if the pixhawk is not
 	// receiving offboard position/attitude commands
 	// at a rate >2 Hz
-
 	mavlink_command_long_t command;
 	command.command = MAV_CMD_NAV_GUIDED_ENABLE;
 	command.target_system = system_id;
 	command.target_component = autopilot_id;
-	command.confirmation = true;  // idk what this is doing
-	command.param1 = (float)1;	// >0.5 activate, <0.5 deactivate
+	command.confirmation = 2;  // idk what this is doing, true seems bad, 2 seems better
+	command.param1 = 1.;	// >0.5 activate, <0.5 deactivate
 
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);

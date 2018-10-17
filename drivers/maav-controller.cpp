@@ -26,20 +26,24 @@ void sig_handler(int) { KILL = true; }
  * Temporary Operating Procedure (to start work on controller)
  * ================================================================
  * 1. Start simulator
- * 2. Wait for px4 to initialize. When "commander status" shows
+ * 2. Wait for px4 to initialize. When "pxh >> commander status" shows
  *	  the px4 in main mode: 4 it is probably time
  * 3. run "./maav-controller" - the controller will try to 
  * 	  establish offboard control.  It will timeout after 10 sec.
  * 	  If it doesnt work for some reason just kil the program and try again.
  * 	  It usually works after one or two tries (this will be fixed to be more 
- *    robust)
+ *    robust when state machine is implemented)
  * 4. The program will indicate that offboard control has bee
  *    established.  The quadcopter is now in the controllers hands....
- * 5. If the pixhawk does not receive setpoint commands (thurst,
+ * 5. If the pixhawk does not receive setpoint commands (thrust,
  *    attitude, angle rates) at a rate of >2 Hz it will enter failsafe
  *    mode and switch out of offboard control.  It is currently the
- *    responsibility of the control class to provide these inputs
+ *    responsibility of the controller class to provide these inputs
  *    at a sufficient rate.
+ * 6. If offboard control is lost in flight, order the pixhawk to land
+ * 	  with "pxh >> commander land" and rerun maav-controller.  If the 
+ *    pixhawk rejects offboard control, try setting auto loiter with
+ *    "pxh >> commander mode auto:loiter" then rerunning maav-controller
 */
 
 

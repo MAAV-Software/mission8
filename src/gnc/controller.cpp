@@ -1,5 +1,7 @@
 #include "gnc/controller.hpp"
 
+//Please direct complaints about class OffboardControl to Glen Haggin
+
 namespace maav
 {
 namespace gnc
@@ -65,5 +67,10 @@ void Controller::land(){
  * void set_pitch_rate(const float pitch_rate);
  * --sets yaw/pitch/roll rate in rad/s
  * 
+ * void set_attitutde(const Eigen::Quaternion<float>& q)
+ * --set attitude
  * 
+ * NOTE: Offboard control will set current setpoints and
+ * use them until changed (this interface might suck,
+ * please provide Glen Haggin with feedback)
  */
