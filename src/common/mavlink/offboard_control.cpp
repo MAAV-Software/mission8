@@ -28,6 +28,7 @@ OffboardControl::OffboardControl()
 	custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
 
 	//Read messages until we get a heartbeat
+	cout << "Checking for heartbeat...\n";
 	while(read_message());
 
 	// Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
@@ -40,11 +41,10 @@ OffboardControl::OffboardControl()
 	uint64_t timeout_start = time(NULL);
 
 	//Spam zero attitudes to pixhawk
-	for(int i = 0; i < 100; ++i){
-		set_zero_attitude();
-		sleep_for(10ms);
-	}
+	cout << "Zeroing attitude setpoints...\n";
+	hold_zero_attitude(1);
 	
+	cout << "Requesting offboard control...\n";
 	while (!offboard_control_active)
 	{
 		set_zero_attitude();
@@ -67,6 +67,12 @@ OffboardControl::OffboardControl()
 	}
 
 	cout << "Established offboard control on pixhawk\n\n";
+	hold_zero_attitude(1);
+
+	//Arm quad, this is for real.
+	//Loop, check if armed
+	arm();
+	
 }
 
 OffboardControl::~OffboardControl()
@@ -108,7 +114,7 @@ bool OffboardControl::read_message()
 				break;
 			case MAVLINK_MSG_ID_SYSTEM_TIME:
 				mavlink_msg_system_time_decode(&message, &(current_messages_in.system_time));
-				ping(current_messages_in.system_time.time_boot_ms * 1e3);  // convert to us
+				ping(current_messages_in.system_time.time_boot_ms * 1000);  // convert to us
 				break;
 			default:
 				break;
@@ -131,6 +137,13 @@ void OffboardControl::check_offboard_control()
 	{
 		offboard_control_active = false;
 		cout << "Lost offboard control on pixhawk\n\n";
+	}
+}
+
+void OffboardControl::hold_zero_attitude(const uint64_t seconds){
+	for(uint64_t i = 0; i < 100 * seconds; ++i){
+		set_zero_attitude();
+		sleep_for(10ms);
 	}
 }
 
@@ -172,14 +185,27 @@ void OffboardControl::activate_offboard_control()
 	command.target_system = system_id;
 	command.target_component = autopilot_id;
 	command.confirmation = 2;  // idk what this is doing, true seems bad, 2 seems better
-	command.param1 = 1.;	// >0.5 activate, <0.5 deactivate
-
+	command.param1 = 2;	   // >0.5 activate, <0.5 deactivate
+	
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 	write_message(message);
 }
 
-void OffboardControl::set_attitude_target(const Setpoint& new_setpoint, const uint8_t type_mask)
+void OffboardControl::arm(){
+	mavlink_command_long_t command;
+	command.command = MAV_CMD_COMPONENT_ARM_DISARM;
+	command.target_system = system_id;
+	command.target_component = autopilot_id;
+	command.confirmation = 0;  // idk what this is doing
+	command.param1 = 1.;	   // 1 arm, 0 disarm
+	
+	mavlink_message_t message;
+	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
+	write_message(message);
+}
+
+void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint)
 {
 	assert(new_setpoint.thrust >= 0 && new_setpoint.thrust <= 1);
 
@@ -187,8 +213,7 @@ void OffboardControl::set_attitude_target(const Setpoint& new_setpoint, const ui
 	setpoint.time_boot_ms = current_messages_in.system_time.time_boot_ms;
 	setpoint.target_system = system_id;
 	setpoint.target_component = autopilot_id;
-	setpoint.type_mask = type_mask; //Using variable to prevent error
-	setpoint.type_mask = 0b10000000; //TODO: figure out how to work this
+	setpoint.type_mask = 0b10000000; //ignore nothing
 
 	setpoint.q[0] = new_setpoint.q.w();
 	setpoint.q[1] = new_setpoint.q.x();
@@ -204,47 +229,16 @@ void OffboardControl::set_attitude_target(const Setpoint& new_setpoint, const ui
 	write_message(message);
 }
 
-void OffboardControl::set_zero_attitude()
-{
-	set_attitude_target(current_setpoint, SET_ALL);
+void OffboardControl::set_zero_attitude(){
+	InnerLoopSetpoint setpoint;
+	setpoint.q = Eigen::Quaternion<float>(1, 0 ,0, 0);
+	setpoint.yaw_rate = 0;
+	setpoint.roll_rate = 0;
+	setpoint.pitch_rate = 0;
+	setpoint.thrust = 0;
+
+	set_attitude_target(setpoint);
 }
 
-// Requires 0<= thrust <= 1
-void OffboardControl::set_thrust(const float thrust)
-{
-	assert(thrust >= 0 && thrust <= 1);
-	current_setpoint.thrust = thrust;
-	set_attitude_target(current_setpoint, SET_ALL);
-}
-
-void OffboardControl::set_yaw_rate(const float yaw_rate)
-{
-	current_setpoint.yaw_rate = yaw_rate;
-	set_attitude_target(current_setpoint,
-						SET_ALL);
-}
-
-void OffboardControl::set_pitch_rate(const float pitch_rate)
-{
-	current_setpoint.pitch_rate = pitch_rate;
-	set_attitude_target(current_setpoint, SET_ALL);
-}
-
-void OffboardControl::set_roll_rate(const float roll_rate)
-{
-	current_setpoint.roll_rate = roll_rate;
-	set_attitude_target(current_setpoint, SET_ALL);
-}
-
-void OffboardControl::set_attitude(const Eigen::Quaternion<float>& q){
-	current_setpoint.q = q;
-	set_attitude_target(current_setpoint, SET_ALL);
-}
-
-void OffboardControl::zero_rates(){
-	current_setpoint.yaw_rate = 0;
-	current_setpoint.roll_rate = 0;
-	current_setpoint.pitch_rate = 0;
-}
 }  // maav
 }  // gnc
