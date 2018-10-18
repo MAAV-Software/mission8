@@ -84,18 +84,17 @@ Eigen::MatrixXf PlaneFitterPCL::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cl
 		}
 		return coefficientsMatrix;
 	}
-	return Eigen::MatrixXf(0,0);
+	return Eigen::MatrixXf(0, 0);
 }
 
-bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-	float &zdot, float &zdepth ,float &roll, float &pitch)
+bool PlaneFitterPCL::runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
+									 float &zdepth, float &roll, float &pitch)
 {
 	return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, junkMatrix);
 }
 
-bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
-	float &zdot, float &zdepth, float &roll, float & pitch,
-	Eigen::MatrixXf& coefs)
+bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot,
+								  float &zdepth, float &roll, float &pitch, Eigen::MatrixXf &coefs)
 {
 	coefs = fitPlane(cloud);
 	if (coefs.size() == 0)
@@ -118,8 +117,8 @@ bool PlaneFitterPCL::getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
 	float xg = coefs(0);
 	float yg = coefs(1);
 	float zg = coefs(2);
-	roll = acos((xg * xq + zg *zq) / sqrt(xg * xg + zg *zg));
-	pitch = acos((yg *yq + zg *zq) / sqrt(yg * yg + zg * zg));
+	roll = acos((xg * xq + zg * zq) / sqrt(xg * xg + zg * zg));
+	pitch = acos((yg * yq + zg * zq) / sqrt(yg * yg + zg * zg));
 	if (yg < 0)
 	{
 		pitch *= -1;

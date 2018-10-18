@@ -20,18 +20,16 @@ using maav::gnc::convert_waypoint;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
-
-
 /*
  * Temporary Operating Procedure (to start work on controller)
  * ================================================================
  * 1. Start simulator
  * 2. Wait for px4 to initialize. When "pxh >> commander status" shows
  *	  the px4 in "main mode: 4" it is probably time
- * 3. run "./maav-controller" - the controller will try to 
+ * 3. run "./maav-controller" - the controller will try to
  * 	  establish offboard control.  It will timeout after 10 sec.
  * 	  If it doesnt work for some reason just kill this program and try again.
- * 	  It usually works after one or two tries (this will be fixed to be more 
+ * 	  It usually works after one or two tries (this will be fixed to be more
  *    robust when state machine is implemented)
  * 4. The program will indicate that offboard control has been
  *    established.  The quadcopter is now in the controllers hands....
@@ -43,7 +41,7 @@ void sig_handler(int) { KILL = true; }
  *    responsibility of the controller class to provide these inputs
  *    at a sufficient rate.
  * 6. If offboard control is lost in flight, order the pixhawk to land
- * 	  with "pxh >> commander land" and rerun maav-controller.  If the 
+ * 	  with "pxh >> commander land" and rerun maav-controller.  If the
  *    pixhawk rejects offboard control, try setting auto loiter with
  *    "pxh >> commander mode auto:loiter" then rerunning maav-controller.
  *	  If that doesnt work, restart the sim and try again.
@@ -51,7 +49,6 @@ void sig_handler(int) { KILL = true; }
  *    it is armed with "pxh >> commander status" and arm with
  *    "pxh >> commander arm" as needed.
 */
-
 
 int main(int argc, char** argv)
 {

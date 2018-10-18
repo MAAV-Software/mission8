@@ -21,10 +21,10 @@ struct Messages
 struct InnerLoopSetpoint
 {
 	Eigen::Quaternion<float> q{1, 0, 0, 0};
-	float thrust = 0;			// 0 <= thrust <= 1
-	float roll_rate = 0;		// rad/s
-	float pitch_rate = 0;		// rad/s
-	float yaw_rate = 0;			// rad/s
+	float thrust = 0;	  // 0 <= thrust <= 1
+	float roll_rate = 0;   // rad/s
+	float pitch_rate = 0;  // rad/s
+	float yaw_rate = 0;	// rad/s
 };
 
 class OffboardControl
@@ -34,7 +34,7 @@ class OffboardControl
 	~OffboardControl();
 
 	void set_attitude_target(const InnerLoopSetpoint& new_setpoint);
-	void set_zero_attitude();  //good for establishing control
+	void set_zero_attitude();  // good for establishing control
 
    private:
 	bool read_message();

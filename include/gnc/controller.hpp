@@ -29,13 +29,11 @@ class Controller
 }  // namespace gnc
 }  // namespace maav
 
-
-
 /* Inteface to offboard control
  * ===============================================================
- * 
+ *
  * void set_attitude_target(const InnerLoopSetpoint& new_setpoint)
- * 
+ *
  * void set_zero_attitude();  //good for establishing control(set zero attitude and thrust)
- * 
+ *
  */
