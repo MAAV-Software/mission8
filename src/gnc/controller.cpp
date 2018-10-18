@@ -16,12 +16,3 @@ void Controller::run(){
 }
 }  // namespace gnc
 }  // namespace maav
-
-
-
-/* Inteface to offboard control
- * ==============================
- *  void update_setpoint(const Setpoint& setpoint)
- *      -send at >2Hz
- * 
- */
