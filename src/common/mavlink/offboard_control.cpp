@@ -18,26 +18,25 @@ namespace mavlink
 {
 std::atomic<bool> KILL{false};
 
-// helper for starting read thread
-void read_thread_start(OffboardControl* offboard_control) { offboard_control->read_thread(); }
 // Creates thread and passing read_messages loop into thread
 OffboardControl::OffboardControl()
 {
 	// set custom mode to offboard control (for comparisons)
 	custom_mode.data = 0;
 	custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
+	offboard_control_active = false;
 
 	// Read messages until we get a heartbeat
 	cout << "Checking for heartbeat...\n";
-	while (!read_message());
+	while (!read_message())
+		;
 
 	// Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
-	read_tid = thread(read_thread_start, this);
+	read_tid = thread(&OffboardControl::read_thread, this);
 
 	// Establish Offboard Control
 	// must establish heartbeat to pixhawk and set attitude
 	// or pixhawk will enter failsafe (disable offboard and RTL)
-	offboard_control_active = false;
 	uint64_t timeout_start = time(NULL);
 
 	// Spam zero attitudes to pixhawk

@@ -60,8 +60,6 @@ class OffboardControl
 	const uint8_t autopilot_id = 1;  // componenet we are controlling should always be 1 (autopilot)
 	const uint8_t companion_id = 2;
 	union px4_custom_mode custom_mode;
-
-	friend void read_thread_start(OffboardControl* offboard_control);
 };
 
 }  // maav
