@@ -4,6 +4,7 @@
 
 #include <zcm/zcm-cpp.hpp>
 
+#include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/state_t.hpp>
@@ -17,6 +18,7 @@ using maav::PATH_CHANNEL;
 using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
+using maav::mavlink::OffboardControl;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
@@ -81,6 +83,7 @@ int main(int argc, char** argv)
 	zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
 
 	Controller controller;
+	OffboardControl offboard_control;
 
 	while (!KILL)
 	{
@@ -105,8 +108,17 @@ int main(int argc, char** argv)
 		// rate >2 Hz otherwise it will go into failsafe
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
-		controller.run();
+		offboard_control.set_zero_attitude();
 	}
 
 	zcm.stop();
 }
+
+/* Inteface to offboard control
+ * ===============================================================
+ *
+ * void set_attitude_target(const InnerLoopSetpoint& new_setpoint)
+ *
+ * void set_zero_attitude();  //good for establishing control(set zero attitude and thrust)
+ *
+ */

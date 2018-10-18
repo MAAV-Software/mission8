@@ -19,7 +19,7 @@ namespace mavlink
 std::atomic<bool> KILL{false};
 
 // helper for starting read thread
-void read_thread_start(OffboardControl* OffboardControl) { OffboardControl->read_thread(); }
+void read_thread_start(OffboardControl* offboard_control) { offboard_control->read_thread(); }
 // Creates thread and passing read_messages loop into thread
 OffboardControl::OffboardControl()
 {
@@ -29,8 +29,7 @@ OffboardControl::OffboardControl()
 
 	// Read messages until we get a heartbeat
 	cout << "Checking for heartbeat...\n";
-	while (read_message())
-		;
+	while (!read_message());
 
 	// Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
 	read_tid = thread(read_thread_start, this);
