@@ -58,7 +58,7 @@ class OffboardControl
 	const uint8_t system_id = 1;	 // system we are connecting should always be 1 (only system)
 	const uint8_t autopilot_id = 1;  // componenet we are controlling should always be 1 (autopilot)
 	const uint8_t companion_id = 2;
-	const uint32_t custom_mode = 393216; //from px4_custom_mode.h in px4 firmware
+	const uint32_t custom_mode = 393216;  // from px4_custom_mode.h in px4 firmware
 };
 
 }  // maav
