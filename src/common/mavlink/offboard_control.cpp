@@ -22,8 +22,6 @@ std::atomic<bool> KILL{false};
 OffboardControl::OffboardControl()
 {
 	// set custom mode to offboard control (for comparisons)
-	custom_mode.data = 0;
-	custom_mode.main_mode = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
 	offboard_control_active = false;
 
 	// Read messages until we get a heartbeat
@@ -51,7 +49,7 @@ OffboardControl::OffboardControl()
 
 		activate_offboard_control();
 
-		if (current_messages_in.heartbeat.custom_mode == custom_mode.data)
+		if (current_messages_in.heartbeat.custom_mode == custom_mode)
 		{
 			offboard_control_active = true;
 			break;
@@ -131,7 +129,7 @@ void OffboardControl::write_message(const mavlink_message_t& message)
 
 void OffboardControl::check_offboard_control()
 {
-	if (current_messages_in.heartbeat.custom_mode != custom_mode.data && offboard_control_active)
+	if (current_messages_in.heartbeat.custom_mode != custom_mode && offboard_control_active)
 	{
 		offboard_control_active = false;
 		cout << "Lost offboard control on pixhawk\n\n";
