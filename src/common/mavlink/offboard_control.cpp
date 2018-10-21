@@ -224,10 +224,12 @@ bool OffboardControl::arm()
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
 	uint64_t timeout_start = time(NULL);
-	while(time(NULL) - timeout_start < 10){
+	while (time(NULL) - timeout_start < 10)
+	{
 		write_message(message);
 		set_attitude_target(zero_innerloop_setpoint());
-		if(current_messages_in.heartbeat.base_mode == 157){  //157 is the magic number, px4 not following mavlink standard
+		if (current_messages_in.heartbeat.base_mode == 157)
+		{  // 157 is the magic number, px4 not following mavlink standard
 			return true;
 		}
 	}
@@ -244,7 +246,7 @@ void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint,
 	setpoint.time_boot_ms = current_messages_in.system_time.time_boot_ms;
 	setpoint.target_system = system_id;
 	setpoint.target_component = autopilot_id;
-	setpoint.type_mask = type_mask;  // ignore nothing
+	setpoint.type_mask = type_mask;  // default typemask ignores nothing
 
 	setpoint.q[0] = new_setpoint.q.w();
 	setpoint.q[1] = new_setpoint.q.x();
