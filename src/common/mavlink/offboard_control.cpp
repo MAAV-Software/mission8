@@ -26,7 +26,7 @@ OffboardControl::OffboardControl()
 	// Read messages until we get a heartbeat
 	cout << "Checking for heartbeat...\n";
 	while (!read_message())
-	;
+		;
 
 	cout << "Heartbeat received\n";
 
@@ -38,9 +38,12 @@ OffboardControl::OffboardControl()
 	hold_zero_attitude(1);
 
 	cout << "Requesting offboard control...\n";
-	if(activate_offboard_control()){
+	if (activate_offboard_control())
+	{
 		cout << "Established offboard control on pixhawk\n";
-	}else{
+	}
+	else
+	{
 		cout << "Unable to establish off board control!\n";
 	}
 
@@ -49,9 +52,12 @@ OffboardControl::OffboardControl()
 
 	// Arm quad, this is for real.
 	cout << "Arming system\n";
-	if(arm()){
+	if (arm())
+	{
 		cout << "System armed\n";
-	}else{
+	}
+	else
+	{
 		cout << "System failed to arm\n";
 	}
 }
@@ -80,8 +86,9 @@ bool OffboardControl::read_message()
 	mavlink_message_t message;
 	bool heartbeat_received = false;
 
-	//Try to read 100 messages
-	for(int i = 0; i < 100; ++i){
+	// Try to read 100 messages
+	for (int i = 0; i < 100; ++i)
+	{
 		bool message_received = false;
 		message_received = com_port.read_message(message);
 
@@ -128,7 +135,8 @@ void OffboardControl::hold_zero_attitude(const uint64_t seconds)
 {
 	for (uint64_t i = 0; i < 100 * seconds; ++i)
 	{
-		set_attitude_target(zero_innerloop_setpoint());;
+		set_attitude_target(zero_innerloop_setpoint());
+		;
 		sleep_for(10ms);
 	}
 }
@@ -216,11 +224,12 @@ bool OffboardControl::arm()
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 	write_message(message);
 
-	//TODO: check for arm, return appropriately
+	// TODO: check for arm, return appropriately
 	return true;
 }
 
-void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint, const uint8_t type_mask)
+void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint,
+										  const uint8_t type_mask)
 {
 	assert(new_setpoint.thrust >= 0 && new_setpoint.thrust <= 1);
 
@@ -256,9 +265,10 @@ InnerLoopSetpoint OffboardControl::zero_innerloop_setpoint()
 	return setpoint;
 }
 
-void OffboardControl::takeoff(const float takeoff_altitude){
+void OffboardControl::takeoff(const float takeoff_altitude)
+{
 	assert(false);
-	//NOTE: auto:takeoff requires gps, implement using height controller
+	// NOTE: auto:takeoff requires gps, implement using height controller
 }
 
 }  // maav

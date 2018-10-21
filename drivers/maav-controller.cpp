@@ -120,8 +120,9 @@ int main(int argc, char** argv)
  *
  * void set_attitude_target(const InnerLoopSetpoint& new_setpoint)
  *
- * void set_attitude_target(InnerLoopSetpoint& new_setpoint);  //good for establishing control(set zero attitude and thrust)
- * 
+ * void set_attitude_target(InnerLoopSetpoint& new_setpoint);  //good for establishing control(set
+ * zero attitude and thrust)
+ *
  * void takeoff(const float takeoff_altitude)
  *
  */
