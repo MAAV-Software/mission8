@@ -108,7 +108,8 @@ int main(int argc, char** argv)
 		// rate >2 Hz otherwise it will go into failsafe
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
-		offboard_control.set_zero_attitude();
+		// offboard_control.set_attitude_target(offboard_control.zero_innerloop_setpoint());
+		offboard_control.set_attitude_target(offboard_control.zero_innerloop_setpoint());
 	}
 
 	zcm.stop();
@@ -119,6 +120,8 @@ int main(int argc, char** argv)
  *
  * void set_attitude_target(const InnerLoopSetpoint& new_setpoint)
  *
- * void set_zero_attitude();  //good for establishing control(set zero attitude and thrust)
+ * void set_attitude_target(InnerLoopSetpoint& new_setpoint);  //good for establishing control(set zero attitude and thrust)
+ * 
+ * void takeoff(const float takeoff_altitude)
  *
  */

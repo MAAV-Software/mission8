@@ -21,54 +21,39 @@ std::atomic<bool> KILL{false};
 // Creates thread and passing read_messages loop into thread
 OffboardControl::OffboardControl()
 {
-	// set custom mode to offboard control (for comparisons)
 	offboard_control_active = false;
 
 	// Read messages until we get a heartbeat
 	cout << "Checking for heartbeat...\n";
 	while (!read_message())
-		;
+	;
+
+	cout << "Heartbeat received\n";
 
 	// Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
 	read_tid = thread(&OffboardControl::read_thread, this);
 
-	// Establish Offboard Control
-	// must establish heartbeat to pixhawk and set attitude
-	// or pixhawk will enter failsafe (disable offboard and RTL)
-	uint64_t timeout_start = time(NULL);
-
-	// Spam zero attitudes to pixhawk
+	// Spam zero attitudes to pixhawk to make it happy
 	cout << "Zeroing attitude setpoints...\n";
 	hold_zero_attitude(1);
 
 	cout << "Requesting offboard control...\n";
-	while (!offboard_control_active)
-	{
-		set_zero_attitude();
-		sleep_for(100ms);
-
-		activate_offboard_control();
-
-		if (current_messages_in.heartbeat.custom_mode == custom_mode)
-		{
-			offboard_control_active = true;
-			break;
-		}
-
-		// Timeout
-		if ((time(NULL) - timeout_start) > 10)
-		{
-			cout << "Timeout establishing offboard control of pixhawk\n\n";
-			assert(false);
-		}
+	if(activate_offboard_control()){
+		cout << "Established offboard control on pixhawk\n";
+	}else{
+		cout << "Unable to establish off board control!\n";
 	}
 
-	cout << "Established offboard control on pixhawk\n\n";
+	// Spam more setpoints
 	hold_zero_attitude(1);
 
 	// Arm quad, this is for real.
-	// Loop, check if armed
-	arm();
+	cout << "Arming system\n";
+	if(arm()){
+		cout << "System armed\n";
+	}else{
+		cout << "System failed to arm\n";
+	}
 }
 
 OffboardControl::~OffboardControl()
@@ -93,27 +78,30 @@ void OffboardControl::read_thread()
 bool OffboardControl::read_message()
 {
 	mavlink_message_t message;
-	bool message_received = false;
 	bool heartbeat_received = false;
 
-	message_received = com_port.read_message(message);
+	//Try to read 100 messages
+	for(int i = 0; i < 100; ++i){
+		bool message_received = false;
+		message_received = com_port.read_message(message);
 
-	if (message_received)
-	{
-		switch (message.msgid)
+		if (message_received)
 		{
-			case MAVLINK_MSG_ID_HEARTBEAT:
-				mavlink_msg_heartbeat_decode(&message, &(current_messages_in.heartbeat));
-				check_offboard_control();  // check each heartbeat
-				// TODO: handle loss of heartbeat
-				heartbeat_received = true;
-				break;
-			case MAVLINK_MSG_ID_SYSTEM_TIME:
-				mavlink_msg_system_time_decode(&message, &(current_messages_in.system_time));
-				ping(current_messages_in.system_time.time_boot_ms * 1000);  // convert to us
-				break;
-			default:
-				break;
+			switch (message.msgid)
+			{
+				case MAVLINK_MSG_ID_HEARTBEAT:
+					mavlink_msg_heartbeat_decode(&message, &(current_messages_in.heartbeat));
+					check_offboard_control();  // check each heartbeat
+					// TODO: handle loss of heartbeat
+					heartbeat_received = true;
+					break;
+				case MAVLINK_MSG_ID_SYSTEM_TIME:
+					mavlink_msg_system_time_decode(&message, &(current_messages_in.system_time));
+					ping(current_messages_in.system_time.time_boot_ms * 1000);  // convert to us
+					break;
+				default:
+					break;
+			}
 		}
 	}
 
@@ -132,7 +120,7 @@ void OffboardControl::check_offboard_control()
 	if (current_messages_in.heartbeat.custom_mode != custom_mode && offboard_control_active)
 	{
 		offboard_control_active = false;
-		cout << "Lost offboard control on pixhawk\n\n";
+		cout << "Lost offboard control on pixhawk\n";
 	}
 }
 
@@ -140,7 +128,7 @@ void OffboardControl::hold_zero_attitude(const uint64_t seconds)
 {
 	for (uint64_t i = 0; i < 100 * seconds; ++i)
 	{
-		set_zero_attitude();
+		set_attitude_target(zero_innerloop_setpoint());;
 		sleep_for(10ms);
 	}
 }
@@ -173,7 +161,7 @@ void OffboardControl::send_heartbeat()
 	write_message(message);
 }
 
-void OffboardControl::activate_offboard_control()
+bool OffboardControl::activate_offboard_control()
 {
 	// This command will fail if the pixhawk is not
 	// receiving offboard position/attitude commands
@@ -187,10 +175,35 @@ void OffboardControl::activate_offboard_control()
 
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
-	write_message(message);
+
+	uint64_t timeout_start = time(NULL);
+	while (!offboard_control_active)
+	{
+		set_attitude_target(zero_innerloop_setpoint());
+		sleep_for(100ms);
+
+		write_message(message);
+
+		sleep_for(100ms);
+
+		if (current_messages_in.heartbeat.custom_mode == custom_mode)
+		{
+			offboard_control_active = true;
+			break;
+		}
+
+		// Timeout
+		if ((time(NULL) - timeout_start) > 20)
+		{
+			cout << "Timeout establishing offboard control of pixhawk\n\n";
+			return false;
+		}
+	}
+
+	return true;
 }
 
-void OffboardControl::arm()
+bool OffboardControl::arm()
 {
 	mavlink_command_long_t command;
 	command.command = MAV_CMD_COMPONENT_ARM_DISARM;
@@ -202,9 +215,12 @@ void OffboardControl::arm()
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 	write_message(message);
+
+	//TODO: check for arm, return appropriately
+	return true;
 }
 
-void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint)
+void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint, const uint8_t type_mask)
 {
 	assert(new_setpoint.thrust >= 0 && new_setpoint.thrust <= 1);
 
@@ -212,7 +228,7 @@ void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint)
 	setpoint.time_boot_ms = current_messages_in.system_time.time_boot_ms;
 	setpoint.target_system = system_id;
 	setpoint.target_component = autopilot_id;
-	setpoint.type_mask = 0b10000000;  // ignore nothing
+	setpoint.type_mask = type_mask;  // ignore nothing
 
 	setpoint.q[0] = new_setpoint.q.w();
 	setpoint.q[1] = new_setpoint.q.x();
@@ -228,7 +244,7 @@ void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint)
 	write_message(message);
 }
 
-void OffboardControl::set_zero_attitude()
+InnerLoopSetpoint OffboardControl::zero_innerloop_setpoint()
 {
 	InnerLoopSetpoint setpoint;
 	setpoint.q = Eigen::Quaternion<float>(1, 0, 0, 0);
@@ -237,7 +253,12 @@ void OffboardControl::set_zero_attitude()
 	setpoint.pitch_rate = 0;
 	setpoint.thrust = 0;
 
-	set_attitude_target(setpoint);
+	return setpoint;
+}
+
+void OffboardControl::takeoff(const float takeoff_altitude){
+	assert(false);
+	//NOTE: auto:takeoff requires gps, implement using height controller
 }
 
 }  // maav

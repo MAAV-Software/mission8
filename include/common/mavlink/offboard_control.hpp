@@ -32,8 +32,9 @@ class OffboardControl
 	OffboardControl();
 	~OffboardControl();
 
-	void set_attitude_target(const InnerLoopSetpoint& new_setpoint);
-	void set_zero_attitude();  // good for establishing control
+	void set_attitude_target(const InnerLoopSetpoint&, const uint8_t type_mask = 0b10000000);
+	InnerLoopSetpoint zero_innerloop_setpoint();  // good for establishing control
+	void takeoff(const float takeoff_altitude);
 
    private:
 	bool read_message();
@@ -44,8 +45,8 @@ class OffboardControl
 
 	void ping(const uint64_t boot_timestamp);
 	void send_heartbeat();
-	void activate_offboard_control();
-	void arm();
+	bool activate_offboard_control();
+	bool arm();
 
 	Messages current_messages_in;
 	std::thread read_tid;
@@ -53,6 +54,7 @@ class OffboardControl
 	CommunicationPort com_port;
 
 	bool offboard_control_active;
+	bool armed;
 
 	// These are defined so that they are not magic numbers in the code
 	const uint8_t system_id = 1;	 // system we are connecting should always be 1 (only system)
