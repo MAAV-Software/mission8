@@ -178,8 +178,8 @@ bool OffboardControl::activate_offboard_control()
 	command.command = MAV_CMD_NAV_GUIDED_ENABLE;
 	command.target_system = system_id;
 	command.target_component = autopilot_id;
-	command.confirmation = 2;  // idk what this is doing, true seems bad, 2 seems better
-	command.param1 = 2;		   // >0.5 activate, <0.5 deactivate
+	command.confirmation = 0;  // idk what this is doing, true seems bad, 2 seems better
+	command.param1 = 1;		   // >0.5 activate, <0.5 deactivate
 
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
@@ -222,10 +222,17 @@ bool OffboardControl::arm()
 
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
-	write_message(message);
 
-	// TODO: check for arm, return appropriately
-	return true;
+	uint64_t timeout_start = time(NULL);
+	while(time(NULL) - timeout_start < 10){
+		write_message(message);
+		set_attitude_target(zero_innerloop_setpoint());
+		if(current_messages_in.heartbeat.base_mode == 157){  //157 is the magic number, px4 not following mavlink standard
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint,
