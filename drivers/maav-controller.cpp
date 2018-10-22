@@ -1,7 +1,7 @@
 #include <signal.h>
 #include <atomic>
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
 #include <zcm/zcm-cpp.hpp>
 
@@ -101,12 +101,14 @@ int main(int argc, char** argv)
 									 config["uart-path"].as<std::string>());
 	InnerLoopSetpoint inner_loop_setpoint;
 
-	//establish state
+	// establish state
 	cout << "Establishing initial state...\n";
 	int counter = 0;
 	int64_t timeout = time(NULL) + 10;
-	while(counter < 10 && time(NULL) < timeout){
-		if(state_handler.ready()){
+	while (counter < 10 && time(NULL) < timeout)
+	{
+		if (state_handler.ready())
+		{
 			const auto msg = state_handler.msg();
 			state_handler.pop();
 			controller.add_state(convert_state(msg));
