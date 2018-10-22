@@ -2,6 +2,7 @@
 #include <atomic>
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 #include <zcm/zcm-cpp.hpp>
 
@@ -28,6 +29,8 @@ using std::this_thread::sleep_for;
 using namespace std::chrono;
 using std::cout;
 using maav::mavlink::CommunicationType;
+using std::cin;
+using std::thread;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
@@ -62,6 +65,17 @@ void sig_handler(int) { KILL = true; }
 */
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
+std::atomic<double> ALTITUDE = 0;
+void get_altitude()
+{
+	double _altitude;
+	while (!KILL)
+	{
+		cout << "Enter altitude >> ";
+		cin >> _altitude;
+		ALTITUDE = _altitude;
+	}
+}
 
 int main(int argc, char** argv)
 {
@@ -144,7 +158,7 @@ int main(int argc, char** argv)
 			const auto msg = state_handler.msg();
 			state_handler.pop();
 			controller.add_state(convert_state(msg));
-			inner_loop_setpoint = controller.run();
+			inner_loop_setpoint = controller.hold_altitude(ALTITUDE);
 		}
 
 		// pixhawk needs attitude/thrust setpoint commands at
@@ -155,6 +169,7 @@ int main(int argc, char** argv)
 		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
+	tid.join();
 	zcm.stop();
 }
 
