@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <atomic>
 #include <iostream>
+#include <chrono>
 
 #include <zcm/zcm-cpp.hpp>
 
@@ -22,6 +23,9 @@ using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
 using maav::mavlink::OffboardControl;
+using maav::mavlink::InnerLoopSetpoint;
+using std::this_thread::sleep_for;
+using namespace std::chrono;
 using std::cout;
 using maav::mavlink::CommunicationType;
 
@@ -95,6 +99,21 @@ int main(int argc, char** argv)
 	Controller controller;
 	OffboardControl offboard_control(CommunicationType::UART,
 									 config["uart-path"].as<std::string>());
+	InnerLoopSetpoint inner_loop_setpoint;
+
+	//establish state
+	cout << "Establishing initial state...\n";
+	int counter = 0;
+	int64_t timeout = time(NULL) + 10;
+	while(counter < 10 && time(NULL) < timeout){
+		if(state_handler.ready()){
+			const auto msg = state_handler.msg();
+			state_handler.pop();
+			controller.add_state(convert_state(msg));
+			++counter;
+		}
+	}
+	cout << "Initial state established\n";
 
 	// Load default gains from YAML
 
@@ -122,8 +141,8 @@ int main(int argc, char** argv)
 		{
 			const auto msg = state_handler.msg();
 			state_handler.pop();
-
 			controller.add_state(convert_state(msg));
+			inner_loop_setpoint = controller.run();
 		}
 
 		// pixhawk needs attitude/thrust setpoint commands at
@@ -131,7 +150,7 @@ int main(int argc, char** argv)
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
 		// offboard_control.set_attitude_target(offboard_control.zero_innerloop_setpoint());
-		offboard_control.set_attitude_target(offboard_control.zero_innerloop_setpoint());
+		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
 	zcm.stop();

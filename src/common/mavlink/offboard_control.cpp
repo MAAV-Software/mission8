@@ -134,7 +134,7 @@ void OffboardControl::hold_zero_attitude(const uint64_t seconds)
 {
 	for (uint64_t i = 0; i < 100 * seconds; ++i)
 	{
-		set_attitude_target(zero_innerloop_setpoint());
+		set_attitude_target(InnerLoopSetpoint());
 		;
 		sleep_for(10ms);
 	}
@@ -186,7 +186,7 @@ bool OffboardControl::activate_offboard_control()
 	uint64_t timeout_start = time(NULL);
 	while (!offboard_control_active)
 	{
-		set_attitude_target(zero_innerloop_setpoint());
+		set_attitude_target(InnerLoopSetpoint());
 		sleep_for(100ms);
 
 		write_message(message);
@@ -226,7 +226,7 @@ bool OffboardControl::arm()
 	while (time(NULL) - timeout_start < 10)
 	{
 		write_message(message);
-		set_attitude_target(zero_innerloop_setpoint());
+		set_attitude_target(InnerLoopSetpoint());
 		if (current_messages_in.heartbeat.base_mode == 157)
 		{  // 157 is the magic number, px4 not following mavlink standard
 			return true;
@@ -259,18 +259,6 @@ void OffboardControl::set_attitude_target(const InnerLoopSetpoint& new_setpoint,
 	mavlink_message_t message;
 	mavlink_msg_set_attitude_target_encode(system_id, companion_id, &message, &setpoint);
 	write_message(message);
-}
-
-InnerLoopSetpoint OffboardControl::zero_innerloop_setpoint()
-{
-	InnerLoopSetpoint setpoint;
-	setpoint.q = Eigen::Quaternion<float>(1, 0, 0, 0);
-	setpoint.yaw_rate = 0;
-	setpoint.roll_rate = 0;
-	setpoint.pitch_rate = 0;
-	setpoint.thrust = 0;
-
-	return setpoint;
 }
 
 void OffboardControl::takeoff(const float takeoff_altitude)

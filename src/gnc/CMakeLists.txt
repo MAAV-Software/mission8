@@ -47,4 +47,5 @@ target_link_libraries(maav-gnc
 	${OpenCV_LIBS}
     maav-gnc-utils
     maav-mavlink
+    maav-control
 )

@@ -33,7 +33,6 @@ class OffboardControl
 	~OffboardControl();
 
 	void set_attitude_target(const InnerLoopSetpoint&, const uint8_t type_mask = 0b10000000);
-	InnerLoopSetpoint zero_innerloop_setpoint();  // good for establishing control
 	void takeoff(const float takeoff_altitude);
 
    private:

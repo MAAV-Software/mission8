@@ -1,9 +1,9 @@
 #pragma once
 
 #include <common/mavlink/offboard_control.hpp>
-#include <common/messages/ctrl_params_t.hpp>
 #include <gnc/measurements/waypoint.hpp>
 #include <gnc/state.hpp>
+#include <common/messages/ctrl_params_t.hpp>
 
 namespace maav
 {
@@ -26,7 +26,8 @@ class Controller
 	void set_control_params(const ctrl_params_t& _params);
 
    private:
-	ctrl_params_t control_params;
+   	ctrl_params_t control_params;
+
 };
 
 }  // namespace gnc
