@@ -27,6 +27,13 @@ InnerLoopSetpoint Controller::run(const State& state)
 	return hold_altitude(ALTITUDE);
 }
 
+ControlState Controller::get_control_state() const { return current_control_state; }
+bool Controller::set_control_state(const ControlState new_control_state)
+{
+	current_control_state = new_control_state;
+	return true;
+}
+
 InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
 {
 	assert(dt != 0);
