@@ -9,7 +9,10 @@ namespace maav
 namespace gnc
 {
 Controller::Controller(double p, double i, double d)
-	: current_state(0), previous_state(0), thrust_pid(p, i, d)
+	: current_control_state(CONTROL_STATE_STANDBY),
+	  current_state(0),
+	  previous_state(0),
+	  thrust_pid(p, i, d)
 {
 	current_state.zero(0);
 	previous_state.zero(0);
@@ -24,7 +27,34 @@ InnerLoopSetpoint Controller::run(const State& state)
 	current_state = state;
 	dt = current_state.time_sec() - previous_state.time_sec();
 
-	return hold_altitude(ALTITUDE);
+	switch (current_control_state)
+	{
+		case CONTROL_STATE_TAKEOFF:
+			if (fabs(current_state.position().z() - takeoff_altitude) < takeoff_error)
+			{
+				ALTITUDE = takeoff_altitude;
+				current_control_state = CONTROL_STATE_HOLD_ALT;
+				cout << "\rTakeoff altitude +/-" << takeoff_error << " reached\n";
+				cout << "Control mode switched to hold altitude\n";
+				return hold_altitude(takeoff_altitude);
+			}
+			return takeoff(takeoff_altitude);
+
+		case CONTROL_STATE_HOLD_ALT:
+			return hold_altitude(ALTITUDE);
+
+		case CONTROL_STATE_LAND:
+			assert(false);
+
+		case CONTROL_STATE_STANDBY:
+			return InnerLoopSetpoint();
+
+		default:
+			assert(false);
+	}
+
+	assert(false);
+	return hold_altitude(0);
 }
 
 ControlState Controller::get_control_state() const { return current_control_state; }
@@ -50,8 +80,27 @@ InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
 	InnerLoopSetpoint new_setpoint;					   // default initialize everything to zero
 	new_setpoint.thrust = static_cast<float>(thrust);  // checking above assures good downcast
 
-	height_error_prev = height_error;
 	return new_setpoint;
 }
+
+InnerLoopSetpoint Controller::ascend_at_rate(const double rate)
+{
+	assert(false);
+	return InnerLoopSetpoint();
+}
+
+// Now: same as hold altitude, Later: steady ascent rate with rate controls
+mavlink::InnerLoopSetpoint Controller::takeoff(const double takeoff_altitude,
+											   const double ascent_rate)
+{
+	return hold_altitude(takeoff_altitude);
+}
+
+mavlink::InnerLoopSetpoint Controller::land(const double descent_rate)
+{
+	assert(false);
+	return InnerLoopSetpoint();
+}
+
 }  // namespace gnc
 }  // namespace maav

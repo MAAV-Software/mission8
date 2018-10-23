@@ -14,7 +14,8 @@ namespace gnc
 {
 enum ControlState
 {
-	CONTROL_STATE_TAKEOFF = 1,
+	CONTROL_STATE_STANDBY = 0,
+	CONTROL_STATE_TAKEOFF,
 	CONTROL_STATE_LAND,
 	CONTROL_STATE_HOLD_ALT
 };
@@ -55,10 +56,10 @@ class Controller
 	mavlink::InnerLoopSetpoint ascend_at_rate(const double rate);
 
 	// Takeoff to takeoff_altitude at ascent_rate m/s
-	void takeoff(const double takeoff_altitude, const double ascent_rate = 1);
+	mavlink::InnerLoopSetpoint takeoff(const double takeoff_altitude, const double ascent_rate = 1);
 
 	// Land at current location at descent_rate m/s
-	void land(const double descent_rate = 1);
+	mavlink::InnerLoopSetpoint land(const double descent_rate = 1);
 
 	ControlState current_control_state;
 
@@ -67,12 +68,14 @@ class Controller
 	State previous_state;
 	double dt;  // Difference in time between current and previous state
 
-	float thrust_0 = 0.59;  // Equilibrium Thrust (TODO: get real thrust data)
+	float thrust_0 = 0.59;		  // Equilibrium Thrust (TODO: get real thrust data)
+	double takeoff_altitude = 2;  // meters
+	double takeoff_error = 0.25;
 	control::Pid thrust_pid;
-	double height_error_prev;
 };
 
 // global altitude for testing
+// This needs to become "hold_altitude" a member variable in controller class
 std::atomic<double> ALTITUDE = -0.1;
 
 }  // namespace gnc

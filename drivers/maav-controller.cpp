@@ -32,6 +32,9 @@ using std::cout;
 using maav::mavlink::CommunicationType;
 using std::cin;
 using std::thread;
+using maav::gnc::CONTROL_STATE_HOLD_ALT;
+using maav::gnc::CONTROL_STATE_LAND;
+using maav::gnc::CONTROL_STATE_TAKEOFF;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
@@ -136,6 +139,8 @@ int main(int argc, char** argv)
 
 	controller.set_control_params(load_gains_from_yaml(config));
 
+	controller.set_control_state(CONTROL_STATE_TAKEOFF);
+
 	while (!KILL)
 	{
 		if (gains_handler.ready())
@@ -157,6 +162,7 @@ int main(int argc, char** argv)
 		if (state_handler.ready())
 		{
 			// What happens when states come in faster than this loop runs?
+			// What happens when states DONT come in at all?
 			const auto msg = state_handler.msg();
 			state_handler.pop();
 			inner_loop_setpoint = controller.run(convert_state(msg));
