@@ -8,7 +8,8 @@ namespace maav
 {
 namespace gnc
 {
-Controller::Controller() : current_state(0), previous_state(0), thrust_pid(0.1, 0, 0.1)
+Controller::Controller(double p, double i, double d)
+	: current_state(0), previous_state(0), thrust_pid(p, i, d)
 {
 	current_state.zero(0);
 	previous_state.zero(0);
@@ -17,20 +18,20 @@ Controller::Controller() : current_state(0), previous_state(0), thrust_pid(0.1, 
 Controller::~Controller() {}
 void Controller::set_target(const Waypoint& waypoint) {}
 void Controller::set_control_params(const ctrl_params_t& _params) { control_params = _params; }
-void Controller::add_state(const State& state) 
+InnerLoopSetpoint Controller::run(const State& state)
 {
 	previous_state = current_state;
 	current_state = state;
 	dt = current_state.time_sec() - previous_state.time_sec();
+
+	return hold_altitude(ALTITUDE);
 }
 
-InnerLoopSetpoint Controller::run() { return hold_altitude(1); }
-InnerLoopSetpoint Controller::hold_altitude(const double altitude)
+InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
 {
 	assert(dt != 0);
-	double height_setpoint = altitude;
-	double height_error = height_setpoint - current_state.position()(2);
-	double height_error_dot = (height_error - height_error_prev) / dt;
+	double height_error = height_setpoint - current_state.position().z();
+	double height_error_dot = -current_state.velocity().z();
 	double thrust = thrust_pid.run(height_error, height_error_dot) + thrust_0;
 
 	// Set values in proper range

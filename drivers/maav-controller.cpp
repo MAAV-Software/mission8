@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <atomic>
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <thread>
 
@@ -73,7 +74,7 @@ void get_altitude()
 	{
 		cout << "Enter altitude >> ";
 		cin >> _altitude;
-		ALTITUDE = _altitude;
+		maav::gnc::ALTITUDE = _altitude;
 	}
 }
 
@@ -125,7 +126,7 @@ int main(int argc, char** argv)
 		{
 			const auto msg = state_handler.msg();
 			state_handler.pop();
-			controller.add_state(convert_state(msg));
+			controller.run(convert_state(msg));
 			++counter;
 		}
 	}
@@ -155,17 +156,16 @@ int main(int argc, char** argv)
 
 		if (state_handler.ready())
 		{
+			// What happens when states come in faster than this loop runs?
 			const auto msg = state_handler.msg();
 			state_handler.pop();
-			controller.add_state(convert_state(msg));
-			inner_loop_setpoint = controller.hold_altitude(ALTITUDE);
+			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
 
 		// pixhawk needs attitude/thrust setpoint commands at
 		// rate >2 Hz otherwise it will go into failsafe
 		// ***make sure at some point controller is
 		// sending commands at a sufficient rate***
-		// offboard_control.set_attitude_target(offboard_control.zero_innerloop_setpoint());
 		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
