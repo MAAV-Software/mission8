@@ -4,8 +4,10 @@
 
 #include <zcm/zcm-cpp.hpp>
 
+#include <yaml-cpp/yaml.h>
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
+#include <common/messages/ctrl_params_t.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
@@ -15,6 +17,7 @@
 
 using maav::STATE_CHANNEL;
 using maav::PATH_CHANNEL;
+using maav::CTRL_PARAMS_CHANNEL;
 using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
@@ -52,6 +55,8 @@ void sig_handler(int) { KILL = true; }
  *    "pxh >> commander arm" as needed.
 */
 
+ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
+
 int main(int argc, char** argv)
 {
 	signal(SIGINT, sig_handler);
@@ -63,7 +68,7 @@ int main(int argc, char** argv)
 
 	GetOpt gopt;
 	gopt.addBool('h', "help", false, "This message");
-	gopt.addString('c', "config", "", "Path to config.");
+	gopt.addString('c', "config", "", "Path to YAML control config.");
 	// TODO: Add getopt arguments as necessary
 
 	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
@@ -78,15 +83,28 @@ int main(int argc, char** argv)
 
 	ZCMHandler<path_t> path_handler;
 	ZCMHandler<state_t> state_handler;
+	ZCMHandler<ctrl_params_t> gains_handler;
 
 	zcm.subscribe(PATH_CHANNEL, &ZCMHandler<path_t>::recv, &path_handler);
 	zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+	zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
 
 	Controller controller;
 	OffboardControl offboard_control;
 
+	// Load default gains from YAML
+	YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
+	controller.set_control_params(load_gains_from_yaml(gains_config));
+
 	while (!KILL)
 	{
+		if (gains_handler.ready())
+		{
+			const auto msg = gains_handler.msg();
+			gains_handler.pop();
+			controller.set_control_params(msg);
+		}
+
 		if (path_handler.ready())
 		{
 			const auto msg = path_handler.msg();
@@ -126,3 +144,41 @@ int main(int argc, char** argv)
  * void takeoff(const float takeoff_altitude)
  *
  */
+
+ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
+{
+	ctrl_params_t gains;
+
+	const YAML::Node& posGains = config_file["pid-gains"]["pos-ctrl"];
+
+	gains.value[0].p = posGains["x"][0].as<double>();
+	gains.value[0].i = posGains["x"][1].as<double>();
+	gains.value[0].d = posGains["x"][2].as<double>();
+
+	gains.value[1].p = posGains["y"][0].as<double>();
+	gains.value[1].i = posGains["y"][1].as<double>();
+	gains.value[1].d = posGains["y"][2].as<double>();
+
+	gains.value[2].p = posGains["z"][0].as<double>();
+	gains.value[2].i = posGains["z"][1].as<double>();
+	gains.value[2].d = posGains["z"][2].as<double>();
+
+	gains.value[3].p = posGains["yaw"][0].as<double>();
+	gains.value[3].i = posGains["yaw"][1].as<double>();
+	gains.value[3].d = posGains["yaw"][2].as<double>();
+
+	const YAML::Node& rateGains = config_file["pid-gains"]["rate-ctrl"];
+	gains.rate[0].p = rateGains["x"][0].as<double>();
+	gains.rate[0].i = rateGains["x"][1].as<double>();
+	gains.rate[0].d = rateGains["x"][2].as<double>();
+
+	gains.rate[1].p = rateGains["y"][0].as<double>();
+	gains.rate[1].i = rateGains["y"][1].as<double>();
+	gains.rate[1].d = rateGains["y"][2].as<double>();
+
+	gains.rate[2].p = rateGains["z"][0].as<double>();
+	gains.rate[2].i = rateGains["z"][1].as<double>();
+	gains.rate[2].d = rateGains["z"][2].as<double>();
+
+	return gains;
+}

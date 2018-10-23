@@ -1,6 +1,5 @@
 #include "gnc/controller.hpp"
-
-// Please direct complaints about class OffboardControl to Glen Haggin
+#include <iostream>
 
 namespace maav
 {
@@ -11,5 +10,6 @@ Controller::~Controller() {}
 void Controller::set_target(const Waypoint& waypoint) {}
 void Controller::add_state(const State& state) {}
 void Controller::run() {}
+void Controller::set_control_params(const ctrl_params_t& _params) { control_params = _params; }
 }  // namespace gnc
 }  // namespace maav

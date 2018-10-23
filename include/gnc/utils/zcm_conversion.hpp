@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Eigen>
 #include <common/messages/state_t.hpp>
 #include <common/messages/waypoint_t.hpp>
