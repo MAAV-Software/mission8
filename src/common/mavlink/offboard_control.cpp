@@ -183,7 +183,7 @@ bool OffboardControl::activate_offboard_control()
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
-	uint64_t timeout_start = time(NULL);
+	auto timeout = system_clock::now() + 20s;
 	while (!offboard_control_active)
 	{
 		set_attitude_target(InnerLoopSetpoint());
@@ -200,7 +200,7 @@ bool OffboardControl::activate_offboard_control()
 		}
 
 		// Timeout
-		if ((time(NULL) - timeout_start) > 20)
+		if (system_clock::now() > timeout)
 		{
 			cout << "Timeout establishing offboard control of pixhawk\n\n";
 			return false;
@@ -222,8 +222,8 @@ bool OffboardControl::arm()
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
-	uint64_t timeout_start = time(NULL);
-	while (time(NULL) - timeout_start < 10)
+	auto timeout = system_clock::now() + 10s;
+	while (system_clock::now() < timeout)
 	{
 		write_message(message);
 		set_attitude_target(InnerLoopSetpoint());

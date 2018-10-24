@@ -51,15 +51,11 @@ using maav::gnc::ControlState;
 */
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
-<<<<<<< 0b6a46b56b8cb143c169f2e69cf5da31fc8a7dbd
-std::atomic<double> ALTITUDE = 0;
-=======
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
 // Function for testing altitude controller, intent
 // is to remove when no longer needed for testing.
->>>>>>> Controller class loads gains from file
 void get_altitude()
 {
 	double _altitude;
@@ -112,8 +108,8 @@ int main(int argc, char** argv)
 	// establish state
 	cout << "Establishing initial state...\n";
 	int counter = 0;
-	int64_t timeout = time(NULL) + 10;
-	while (counter < 10 && time(NULL) < timeout)
+	auto timeout = system_clock::now() + 10s;
+	while (counter < 10 && system_clock::now() < timeout)
 	{
 		if (state_handler.ready())
 		{
@@ -131,7 +127,7 @@ int main(int argc, char** argv)
 
 	controller.set_control_state(ControlState::TAKEOFF);
 
-	uint64_t land_timer = time(NULL) + 10;
+	auto land_timer = system_clock::now() + 10s;
 	while (!KILL)
 	{
 		if (gains_handler.ready())
@@ -159,7 +155,8 @@ int main(int argc, char** argv)
 			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
 
-		if (land_timer - time(NULL) <= 0) controller.set_control_state(ControlState::LAND);
+		if (system_clock::now() > land_timer && controller.get_control_state() == ControlState::HOLD_ALT) 
+			controller.set_control_state(ControlState::LAND);
 
 		// pixhawk needs attitude/thrust setpoint commands at
 		// rate >2 Hz otherwise it will go into failsafe
@@ -168,7 +165,7 @@ int main(int argc, char** argv)
 		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
-	tid.join();
+	// tid.join();
 	zcm.stop();
 }
 
