@@ -32,9 +32,7 @@ using std::cout;
 using maav::mavlink::CommunicationType;
 using std::cin;
 using std::thread;
-using maav::gnc::CONTROL_STATE_HOLD_ALT;
-using maav::gnc::CONTROL_STATE_LAND;
-using maav::gnc::CONTROL_STATE_TAKEOFF;
+using maav::gnc::ControlState;
 
 /*
  * Temporary Operating Procedure (to start work on controller)
@@ -69,7 +67,7 @@ void get_altitude()
 	{
 		cout << "Enter altitude >> ";
 		cin >> _altitude;
-		maav::gnc::ALTITUDE = _altitude;
+		maav::gnc::SETPOINT = _altitude;
 	}
 }
 
@@ -131,8 +129,9 @@ int main(int argc, char** argv)
 
 	controller.set_control_params(load_gains_from_yaml(config));
 
-	controller.set_control_state(CONTROL_STATE_TAKEOFF);
+	controller.set_control_state(ControlState::TAKEOFF);
 
+	uint64_t land_timer = time(NULL) + 10;
 	while (!KILL)
 	{
 		if (gains_handler.ready())
@@ -159,6 +158,8 @@ int main(int argc, char** argv)
 			state_handler.pop();
 			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
+
+		if (land_timer - time(NULL) <= 0) controller.set_control_state(ControlState::LAND);
 
 		// pixhawk needs attitude/thrust setpoint commands at
 		// rate >2 Hz otherwise it will go into failsafe

@@ -12,12 +12,14 @@ namespace maav
 {
 namespace gnc
 {
-enum ControlState
+enum class ControlState
 {
-	CONTROL_STATE_STANDBY = 0,
-	CONTROL_STATE_TAKEOFF,
-	CONTROL_STATE_LAND,
-	CONTROL_STATE_HOLD_ALT
+	STANDBY = 0,
+	TAKEOFF,
+	LAND,
+	HOLD_ALT,
+	TEST_ASCEND_AT_RATE,
+	TEST_HOLD_ALTITUDE
 };
 
 class Controller
@@ -55,14 +57,18 @@ class Controller
 	double dt;  // Difference in time between current and previous state
 
 	float thrust_0 = 0.59;		  // Equilibrium Thrust (TODO: get real thrust data)
-	double takeoff_altitude = 2;  // meters
+	double takeoff_altitude = 5;  // meters
+	double takeoff_rate = 1;
 	double takeoff_error = 0.25;
-	control::Pid thrust_pid;
+	double hold_altitude_setpoint = 0;
+
+	control::Pid z_position_pid;
+	control::Pid z_velocity_pid;
 };
 
 // global altitude for testing
 // This needs to become "hold_altitude" a member variable in controller class
-std::atomic<double> ALTITUDE = -0.1;
+std::atomic<double> SETPOINT = -10;
 
 }  // namespace gnc
 }  // namespace maav

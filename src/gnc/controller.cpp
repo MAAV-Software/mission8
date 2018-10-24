@@ -9,7 +9,7 @@ namespace maav
 namespace gnc
 {
 Controller::Controller()
-	: current_control_state(CONTROL_STATE_STANDBY), current_state(0), previous_state(0)
+	: current_control_state(ControlState::STANDBY), current_state(0), previous_state(0)
 {
 	current_state.zero(0);
 	previous_state.zero(0);
@@ -19,8 +19,11 @@ Controller::~Controller() {}
 void Controller::set_target(const Waypoint& waypoint) {}
 void Controller::set_control_params(const ctrl_params_t& ctrl_params)
 {
-	thrust_pid.reset();
-	thrust_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
+	z_position_pid.reset();
+	z_position_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
+
+	z_velocity_pid.reset();
+	z_velocity_pid.setGains(ctrl_params.rate[2].p, ctrl_params.rate[2].i, ctrl_params.rate[2].d);
 }
 
 InnerLoopSetpoint Controller::run(const State& state)
@@ -31,25 +34,39 @@ InnerLoopSetpoint Controller::run(const State& state)
 
 	switch (current_control_state)
 	{
-		case CONTROL_STATE_TAKEOFF:
+		case ControlState::TAKEOFF:
 			if (fabs(current_state.position().z() - takeoff_altitude) < takeoff_error)
 			{
-				ALTITUDE = takeoff_altitude;
-				current_control_state = CONTROL_STATE_HOLD_ALT;
+				hold_altitude_setpoint = takeoff_altitude;
+				current_control_state = ControlState::HOLD_ALT;
 				cout << "\rTakeoff altitude +/-" << takeoff_error << " reached\n";
-				cout << "Control mode switched to hold altitude\n";
+				cout << "Control mode switched to HOLD_ALT\n";
 				return hold_altitude(takeoff_altitude);
 			}
-			return takeoff(takeoff_altitude);
+			return takeoff(takeoff_altitude, takeoff_rate);
 
-		case CONTROL_STATE_HOLD_ALT:
-			return hold_altitude(ALTITUDE);
+		case ControlState::HOLD_ALT:
+			return hold_altitude(hold_altitude_setpoint);
 
-		case CONTROL_STATE_LAND:
-			assert(false);
+		case ControlState::LAND:
+			if (fabs(current_state.velocity().z()) <= 0.1 &&
+				fabs(current_state.position().z()) <= 0.2)
+			{
+				current_control_state = ControlState::STANDBY;
+				cout << "\rLanding detecteed\n";
+				cout << "Control mode switched to STANDBY\n";
+				return InnerLoopSetpoint();
+			}
+			return land();
 
-		case CONTROL_STATE_STANDBY:
+		case ControlState::STANDBY:
 			return InnerLoopSetpoint();
+
+		case ControlState::TEST_ASCEND_AT_RATE:
+			return ascend_at_rate(SETPOINT);
+
+		case ControlState::TEST_HOLD_ALTITUDE:
+			return hold_altitude(SETPOINT);
 
 		default:
 			assert(false);
@@ -71,7 +88,7 @@ InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
 	assert(dt != 0);
 	double height_error = height_setpoint - current_state.position().z();
 	double height_error_dot = -current_state.velocity().z();
-	double thrust = thrust_pid.run(height_error, height_error_dot) + thrust_0;
+	double thrust = z_position_pid.run(height_error, height_error_dot) + thrust_0;
 
 	// Set values in proper range
 	if (thrust > 1)
@@ -85,23 +102,49 @@ InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
 	return new_setpoint;
 }
 
-InnerLoopSetpoint Controller::ascend_at_rate(const double rate)
+InnerLoopSetpoint Controller::ascend_at_rate(const double velocity_setpoint)
 {
-	assert(false);
-	return InnerLoopSetpoint();
+	double velocity_error = velocity_setpoint - current_state.velocity().z();
+	double velocity_error_dot = -current_state.acceleration().z();
+	double thrust = z_velocity_pid.run(velocity_error, velocity_error_dot) + thrust_0;
+
+	// Set values in proper range
+	if (thrust > 1)
+		thrust = 1;
+	else if (thrust < 0)
+		thrust = 0;
+
+	InnerLoopSetpoint new_setpoint;					   // default initialize everything to zero
+	new_setpoint.thrust = static_cast<float>(thrust);  // checking above assures good downcast
+
+	return new_setpoint;
 }
 
-// Now: same as hold altitude, Later: steady ascent rate with rate controls
+// Ascend at a constant rate until hold altitude takes over
 mavlink::InnerLoopSetpoint Controller::takeoff(const double takeoff_altitude,
 											   const double ascent_rate)
 {
-	return hold_altitude(takeoff_altitude);
+	InnerLoopSetpoint rate_setpoint = ascend_at_rate(ascent_rate);
+	InnerLoopSetpoint height_setpoint = hold_altitude(takeoff_altitude);
+
+	InnerLoopSetpoint new_setpoint;
+	if (rate_setpoint.thrust < height_setpoint.thrust)
+		new_setpoint.thrust = rate_setpoint.thrust;
+	else
+		new_setpoint.thrust = height_setpoint.thrust;
+
+	// dummy check
+	assert(new_setpoint.thrust <= 1 && new_setpoint.thrust >= 0);
+
+	return new_setpoint;
 }
 
 mavlink::InnerLoopSetpoint Controller::land(const double descent_rate)
 {
-	assert(false);
-	return InnerLoopSetpoint();
+	if (current_state.position().z() > 1)
+		return ascend_at_rate(-descent_rate);
+	else
+		return ascend_at_rate(-0.2);
 }
 
 }  // namespace gnc
