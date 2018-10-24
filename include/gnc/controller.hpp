@@ -3,10 +3,10 @@
 #include <atomic>
 
 #include <common/mavlink/offboard_control.hpp>
+#include <common/messages/ctrl_params_t.hpp>
 #include <gnc/control/pid.hpp>
 #include <gnc/measurements/waypoint.hpp>
 #include <gnc/state.hpp>
-#include <common/messages/ctrl_params_t.hpp>
 
 namespace maav
 {
@@ -23,29 +23,16 @@ enum ControlState
 class Controller
 {
    public:
-	Controller(double p, double i, double d);
+	Controller();
 	~Controller();
 
 	// TODO: create target struct
 	void set_target(const Waypoint& waypoint);
 
-<<<<<<< b916e82788727fb6a9298039298b7021c94584cf
-	// TODO: return actuator controls
-	void add_state(const State& state);
-
-	void run();
-=======
 	mavlink::InnerLoopSetpoint run(const State& state);
->>>>>>> PID cmd line arguments for maav-controller
 
-<<<<<<< 364c87a6c879c5bac4c600186a91a7d669f469ce
 	void set_control_params(const ctrl_params_t& _params);
-	
-	mavlink::InnerLoopSetpoint hold_altitude(const double altitude);
 
-   private:
-    ctrl_params_t control_params;
-=======
 	ControlState get_control_state() const;
 	bool set_control_state(const ControlState new_control_state);
 
@@ -63,7 +50,6 @@ class Controller
 
 	ControlState current_control_state;
 
->>>>>>> Added interface for state machine and ascent/descent rate control
 	State current_state;
 	State previous_state;
 	double dt;  // Difference in time between current and previous state

@@ -36,40 +36,32 @@ using maav::gnc::CONTROL_STATE_HOLD_ALT;
 using maav::gnc::CONTROL_STATE_LAND;
 using maav::gnc::CONTROL_STATE_TAKEOFF;
 
-std::atomic<bool> KILL{false};
-void sig_handler(int) { KILL = true; }
 /*
  * Temporary Operating Procedure (to start work on controller)
  * ================================================================
- * 1. Start simulator
- * 2. Wait for px4 to initialize. When "pxh >> commander status" shows
- *	  the px4 in "main mode: 4" it is probably time
- * 3. run "./maav-controller" - the controller will try to
- * 	  establish offboard control.  It will timeout after 10 sec.
- * 	  If it doesnt work for some reason just kill this program and try again.
- * 	  It usually works after one or two tries (this will be fixed to be more
- *    robust when state machine is implemented)
- * 4. The program will indicate that offboard control has been
- *    established.  The quadcopter is now in the controllers hands....
- * 	  Note that controller.run() currently just set zero attitude to maintain
- *    offboard control.
- * 5. If the pixhawk does not receive setpoint commands (thrust,
+ * 1. Start simulator and wait for px4 to initialize
+ * 2. run "./maav-controller" - the controller will try to
+ * 	  establish offboard control.  If it fails, restart it and
+ * 	  it should work.
+ * 3. The program will indicate that offboard control has been
+ *    established and armed.
+ * 4. If the pixhawk does not receive setpoint commands (thrust,
  *    attitude, angle rates) at a rate of >2 Hz it will enter failsafe
  *    mode and switch out of offboard control.  It is currently the
  *    responsibility of the controller class to provide these inputs
  *    at a sufficient rate.
- * 6. If offboard control is lost in flight, order the pixhawk to land
- * 	  with "pxh >> commander land" and rerun maav-controller.  If the
- *    pixhawk rejects offboard control, try setting auto loiter with
- *    "pxh >> commander mode auto:loiter" then rerunning maav-controller.
- *	  If that doesnt work, restart the sim and try again.
- * 7. The offboard_control will attempt to arm the vehicle.  Check that
- *    it is armed with "pxh >> commander status" and arm with
- *    "pxh >> commander arm" as needed.
 */
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
+<<<<<<< 0b6a46b56b8cb143c169f2e69cf5da31fc8a7dbd
 std::atomic<double> ALTITUDE = 0;
+=======
+
+std::atomic<bool> KILL{false};
+void sig_handler(int) { KILL = true; }
+// Function for testing altitude controller, intent
+// is to remove when no longer needed for testing.
+>>>>>>> Controller class loads gains from file
 void get_altitude()
 {
 	double _altitude;
@@ -178,18 +170,6 @@ int main(int argc, char** argv)
 	tid.join();
 	zcm.stop();
 }
-
-/* Inteface to offboard control
- * ===============================================================
- *
- * void set_attitude_target(const InnerLoopSetpoint& new_setpoint)
- *
- * void set_attitude_target(InnerLoopSetpoint& new_setpoint);  //good for establishing control(set
- * zero attitude and thrust)
- *
- * void takeoff(const float takeoff_altitude)
- *
- */
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
 {

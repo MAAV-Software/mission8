@@ -227,8 +227,8 @@ bool OffboardControl::arm()
 	{
 		write_message(message);
 		set_attitude_target(InnerLoopSetpoint());
-		if (current_messages_in.heartbeat.base_mode == 157)
-		{  // 157 is the magic number, px4 not following mavlink standard
+		if (current_messages_in.heartbeat.base_mode == armed_base_mode)
+		{
 			return true;
 		}
 	}

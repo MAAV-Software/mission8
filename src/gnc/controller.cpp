@@ -8,11 +8,8 @@ namespace maav
 {
 namespace gnc
 {
-Controller::Controller(double p, double i, double d)
-	: current_control_state(CONTROL_STATE_STANDBY),
-	  current_state(0),
-	  previous_state(0),
-	  thrust_pid(p, i, d)
+Controller::Controller()
+	: current_control_state(CONTROL_STATE_STANDBY), current_state(0), previous_state(0)
 {
 	current_state.zero(0);
 	previous_state.zero(0);
@@ -20,7 +17,12 @@ Controller::Controller(double p, double i, double d)
 
 Controller::~Controller() {}
 void Controller::set_target(const Waypoint& waypoint) {}
-void Controller::set_control_params(const ctrl_params_t& _params) { control_params = _params; }
+void Controller::set_control_params(const ctrl_params_t& ctrl_params)
+{
+	thrust_pid.reset();
+	thrust_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
+}
+
 InnerLoopSetpoint Controller::run(const State& state)
 {
 	previous_state = current_state;
