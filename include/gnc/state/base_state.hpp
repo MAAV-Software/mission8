@@ -24,6 +24,8 @@ class BaseState
 	 */
 	BaseState(uint64_t time_usec);
 
+	BaseState() = default;
+
 	/**
 	 * Initialize the state to identity values
 	 */

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <functional>
 #include <vector>
 
@@ -18,21 +19,27 @@ template <class TargetSpace>
 class UnscentedTransform
 {
    public:
+	constexpr static size_t N = 1 + 2 * KalmanState::DoF;
+
 	using Transform = std::function<TargetSpace(const KalmanState&)>;
+	using SigmaPoints = std::array<KalmanState, N>;
+	using TransformedPoints = std::array<TargetSpace, N>;
+	using Weights = std::array<double, N>;
 
 	UnscentedTransform(Transform transform, double alpha, double beta, double kappa)
 		: _transformation(transform), _alpha(alpha), _beta(beta), _kappa(kappa)
 	{
-		constexpr size_t n = 1 + 2 * KalmanState::DIM;
-		constexpr auto n_d = static_cast<double>(n);
+		constexpr auto n_d = static_cast<double>(N);
+
 		_lambda = _alpha * _alpha * (n_d + _kappa) - n_d;
 		const double w_m_0 = _lambda / (n_d + _lambda);
 		const double w_c_0 = w_m_0 + (1 - (_alpha * _alpha) + _beta);
 		const double w = 1 / (2 * (n_d + _lambda));
-		m_weights = std::vector<double>(n, w);
-		c_weights = std::vector<double>(n, w);
-		m_weights[0] = w_m_0;
-		c_weights[0] = w_c_0;
+
+		_m_weights.fill(w);
+		_c_weights.fill(w);
+		_m_weights[0] = w_m_0;
+		_c_weights[0] = w_c_0;
 	}
 
 	/**
@@ -42,53 +49,52 @@ class UnscentedTransform
 	TargetSpace operator()(const KalmanState& state);
 
    private:
-	using SigmaPoints = std::vector<KalmanState>;
+	TransformedPoints _transformed_points;
+	SigmaPoints _sigma_points;
 
-	SigmaPoints generate_sigma_points(const KalmanState& state);
+	void generate_sigma_points(const KalmanState& state);
 
    private:
 	Transform _transformation;
 
 	double _lambda;
-
 	double _alpha;
-
 	double _beta;
-
 	double _kappa;
 
-	std::vector<double> m_weights;
-	std::vector<double> c_weights;
+	Weights _m_weights;
+	Weights _c_weights;
+
+   public:
+	const Weights& m_weights() { return _m_weights; }
+	const Weights& c_weights() { return _c_weights; }
+	const SigmaPoints& last_sigma_points() { return _sigma_points; }
+	const TransformedPoints& last_transformed_points() { return _transformed_points; }
 };
 
 template <class TargetSpace>
 TargetSpace UnscentedTransform<TargetSpace>::operator()(const KalmanState& state)
 {
-	SigmaPoints sigma_points = generate_sigma_points(state);
-	std::vector<TargetSpace> transformed_points;
-	transformed_points.reserve(sigma_points.size());
+	generate_sigma_points(state);
 	// Pass all sigma points through the transform
-	std::transform(sigma_points.begin(), sigma_points.end(), std::back_inserter(transformed_points),
+	std::transform(_sigma_points.begin(), _sigma_points.end(), _transformed_points.begin(),
 				   _transformation);
 
 	// Recompute the mean and covariance
-	TargetSpace result = TargetSpace::compute_gaussian(transformed_points, m_weights, c_weights);
+	TargetSpace result = TargetSpace::compute_gaussian(_transformed_points, _m_weights, _c_weights);
 	return result;
 }
 
 template <class TargetSpace>
-typename UnscentedTransform<TargetSpace>::SigmaPoints
-UnscentedTransform<TargetSpace>::generate_sigma_points(const KalmanState& state)
+void UnscentedTransform<TargetSpace>::generate_sigma_points(const KalmanState& state)
 {
-	constexpr size_t N = KalmanState::E_DIM;
-
 	Eigen::LLT<KalmanState::CovarianceMatrix> decomp((static_cast<double>(N) + _lambda) *
 													 state.covariance());
 	const KalmanState::CovarianceMatrix L = decomp.matrixL();
-	SigmaPoints points;
-	points.reserve(1 + 2 * N);
-	points.push_back(state);
-	for (size_t i = 0; i < N; i++)
+
+	// Set the starting point to the current mean
+	_sigma_points[0] = state;
+	for (size_t i = 0; i < KalmanState::DoF; i++)
 	{
 		const KalmanState::ErrorStateVector& sigma_point_offset = L.col(i);
 
@@ -98,11 +104,9 @@ UnscentedTransform<TargetSpace>::generate_sigma_points(const KalmanState& state)
 		additive_point += sigma_point_offset;
 		subtractive_point += (-1 * sigma_point_offset);
 
-		points.push_back(additive_point);
-		points.push_back(subtractive_point);
+		_sigma_points[2 * i + 1] = additive_point;
+		_sigma_points[2 * i + 2] = subtractive_point;
 	}
-
-	return points;
 }
 
 }  // namespace kalman

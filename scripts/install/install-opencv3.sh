@@ -33,6 +33,10 @@ cmake -D BUILD_PNG=ON \
       -D OPENCV_EXTRA_MODULES_PATH='/tmp/opencv_contrib/modules' \
       -D CMAKE_BUILD_TYPE='Release' \
       -D CMAKE_INSTALL_PREFIX:PATH=${SOFTWARE_DIR}/thirdparty/opencv \
+      -D BUILD_EXAMPLES=OFF \
+      -D BUILD_DOCS=OFF \
+      -D BUILD_PERF_TESTS=OFF \
+      -D BUILD_TESTS=OFF \
       ..
 
 num_procs_avail=$(($(grep -c ^processor /proc/cpuinfo)-1))

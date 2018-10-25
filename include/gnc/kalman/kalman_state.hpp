@@ -25,14 +25,15 @@ namespace kalman
 class KalmanState : public state::BaseState
 {
    public:
-	constexpr static size_t DIM = 4 + 3 + 3;
-	constexpr static size_t E_DIM = DIM - 1;
+	constexpr static size_t DoF = 9;
 
-	using CovarianceMatrix = Eigen::Matrix<double, E_DIM, E_DIM>;
-	using ErrorStateVector = Eigen::Matrix<double, E_DIM, 1>;
+	using CovarianceMatrix = Eigen::Matrix<double, DoF, DoF>;
+	using ErrorStateVector = Eigen::Matrix<double, DoF, 1>;
 
    public:
-	explicit KalmanState(uint64_t time_usec);
+	KalmanState(uint64_t time_usec);
+
+	KalmanState() = default;
 
 	static KalmanState zero(uint64_t time_usec);
 
@@ -63,24 +64,27 @@ class KalmanState : public state::BaseState
 	CovarianceMatrix _covar;
 
    public:
+	constexpr static size_t N = 1 + 2 * DoF;
 	// TODO: Make private
-	static KalmanState mean(const std::vector<KalmanState>& sigma_points,
-							const std::vector<double>& weights);
+	static KalmanState mean(const std::array<KalmanState, N>& sigma_points,
+							const std::array<double, N>& weights);
 
 	static CovarianceMatrix cov(const KalmanState& mean,
-								const std::vector<KalmanState>& sigma_points,
-								const std::vector<double>& weights);
+								const std::array<KalmanState, N>& sigma_points,
+								const std::array<double, N>& weights);
 
+	/**
+	 * Functions required for computing with gaussians and such.
+	 */
    public:
-	static KalmanState compute_gaussian(const std::vector<KalmanState>& points,
-										const std::vector<double>& m_weights,
-										const std::vector<double>& c_weights);
+	static KalmanState compute_gaussian(const std::array<KalmanState, 1 + 2 * DoF>& points,
+										const std::array<double, N>& m_weights,
+										const std::array<double, N>& c_weights);
 
 	KalmanState& operator+=(const ErrorStateVector& e_state);
-};
 
-Sophus::SO3d weighted_average(const std::vector<Sophus::SO3d>& points,
-							  const std::vector<double>& weights);
+	ErrorStateVector operator-(const KalmanState& other) const;
+};
 
 }  // namespace kalman
 }  // namespace gnc

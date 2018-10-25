@@ -30,7 +30,9 @@ BOOST_AUTO_TEST_CASE(IdentityTransformTest)
 	KalmanState transformed_state = id(state);
 
 	constexpr double tol = 1e-5;
-	BOOST_REQUIRE(std::abs(diff(state.attitude(), transformed_state.attitude())) < tol);
-	BOOST_REQUIRE(std::abs(diff(state.position(), transformed_state.position())) < tol);
-	BOOST_REQUIRE(std::abs(diff(state.velocity(), transformed_state.velocity())) < tol);
+	BOOST_CHECK_LE(std::abs(diff(state.attitude(), transformed_state.attitude())), tol);
+	BOOST_CHECK_LE(std::abs(diff(state.position(), transformed_state.position())), tol);
+	BOOST_CHECK_LE(std::abs(diff(state.velocity(), transformed_state.velocity())), tol);
 }
+
+// TODO: Add more complex transformations
