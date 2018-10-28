@@ -12,7 +12,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <stdexcept>
 
 #include <librealsense/rs.hpp>
 #include <librealsense2/rs.hpp>
@@ -38,8 +37,6 @@ void sigHandler(int);
 void camera_thread(CameraInputBase *cam);
 void createDirectories();
 void createDirectories(std::string);
-
-void pass() {}
 
 int main(int argc, char **argv)
 {
@@ -182,14 +179,15 @@ void camera_thread(CameraInputBase *cam)
 
 void createDirectories(std::string dirName)
 {
+	bool result = true;
 	std::string command = "rm -rf ";
 	command += dirName;
-	system(command.c_str()) ? pass() : throw std::runtime_error("system call failed");
+	result = result && system(command.c_str());
 	command = "mkdir ";
 	command += dirName;
-	(void)system(command.c_str());
+	result = result && system(command.c_str());
 	command += "/Timestamps";
-	(void)system(command.c_str());
+	result = result && system(command.c_str());
 
 	for (int i = 0; i < 5; ++i)
 	{
@@ -197,18 +195,30 @@ void createDirectories(std::string dirName)
 		command += dirName;
 		command += "/RGB";
 		command += std::to_string(i);
-		(void)system(command.c_str());
+		result = result && system(command.c_str());
 		command = "mkdir ";
 		command += dirName;
 		command += "/Depth";
 		command += std::to_string(i);
-		(void)system(command.c_str());
+		result = result && system(command.c_str());
+	}
+	try
+	{
+		if (!result)
+		{
+			throw std::runtime_error("a system call returned failure");
+		}
+	}
+	catch(std::runtime_error err)
+	{
+		throw err;
 	}
 }
 
 void createDirectories()
 {
 	struct stat statStruct;
+	bool result = true;
 	stat("ImageData", &statStruct);
 
 	// if the ImageData directory exists, tar the existing data
@@ -229,21 +239,32 @@ void createDirectories()
 		command += filename;
 		command += " ImageData/*";
 		std::cout << command << std::endl;
-		(void)system(command.c_str());
-		(void)system("rm -rf ImageData");
+		result = result && system(command.c_str());
+		result = result && system("rm -rf ImageData");
 	}
 
 	// create the new directories for storage
-	(void)system("mkdir ImageData");
-	(void)system("mkdir ImageData/Timestamps");
+	result = result && system("mkdir ImageData");
+	result = result && system("mkdir ImageData/Timestamps");
 
 	for (int i = 0; i < 5; ++i)
 	{
 		std::string command = "mkdir ImageData/RGB";
 		command += std::to_string(i);
-		(void)system(command.c_str());
+		result = result && system(command.c_str());
 		command = "mkdir ImageData/Depth";
 		command += std::to_string(i);
-		(void)system(command.c_str());
+		result = result && system(command.c_str());
+	}
+	try
+	{
+		if (!result)
+		{
+			throw std::runtime_error("a system call returned failure");
+		}
+	}
+	catch(std::runtime_error err)
+	{
+		throw err;
 	}
 }
