@@ -27,7 +27,8 @@ constexpr size_t HISTORY_SIZE = 3;
 
 BOOST_AUTO_TEST_CASE(HistoryInitializeTest)
 {
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 	MeasurementSet set;
 	ImuMeasurement imu;
 	imu.time_usec = 0;
@@ -46,7 +47,8 @@ BOOST_AUTO_TEST_CASE(HistoryInitializeTest)
 BOOST_AUTO_TEST_CASE(HistorySimpleTest)
 {
 	// Create first measurement set
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 	MeasurementSet set1;
 	ImuMeasurement imu1;
 	imu1.time_usec = 0;
@@ -77,7 +79,8 @@ BOOST_AUTO_TEST_CASE(HistorySimpleTest)
 
 BOOST_AUTO_TEST_CASE(HistoryOverflowTest)
 {
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 
 	// Add 10 measurements
 	for (size_t i = 0; i < 10; i++)
@@ -96,7 +99,8 @@ BOOST_AUTO_TEST_CASE(HistoryOverflowTest)
 
 BOOST_AUTO_TEST_CASE(HistoryTolerance)
 {
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 
 	// Add 4 measurements
 	for (size_t i = 0; i < 4; i++)
@@ -149,7 +153,8 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance)
 
 BOOST_AUTO_TEST_CASE(HistoryInerpolateTest)
 {
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 
 	// Add 4 measurements
 	for (size_t i = 0; i < 4; i++)
@@ -204,7 +209,8 @@ MeasurementSet create_meas(uint64_t imu_t, uint64_t lid_t)
 
 BOOST_AUTO_TEST_CASE(HistoryOlderTest)
 {
-	History history(HISTORY_SIZE);
+	YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
+	History history(config);
 
 	auto set1 = create_meas(0, 0);
 	history.add_measurement(set1);

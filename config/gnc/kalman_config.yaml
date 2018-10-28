@@ -1,0 +1,48 @@
+# Configuration file for the kalman filter
+# All covariance matrices are diagonal
+
+history:
+  # Max size of the playback history
+  size: 300
+  # Tolerance in of combining a measurement
+  tolerance: 1000 # [us]
+
+state:
+  # Starting state
+  attitude:
+    - [1, 0, 0, 0]
+  position:
+    - [0, 0, 0] # [m]
+  velocity:
+    - [0, 0, 0] # [m/s]
+
+  # Starting covariance
+  P: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+
+
+prediction:
+  # Unscented transform params
+  UT:
+    alpha: 0.1
+    beta: 2.0
+    kappa: 0.0
+
+  # Process noise covariance
+  Q_i: [0.1, 0.1, 0.1, 1.0, 1.0, 1.0]
+
+
+
+updates:
+
+  lidar:
+    # Unscented transform params
+    UT:
+      alpha: 0.1
+      beta: 2.0
+      kappa: 0.0
+
+    # Sensor noise covariance
+    R: [0.01]
+
+
+# Unscented transform params\nUT:\n  alpha: 0.1\n  beta: 2.0\n  kappa: 0.0\n# Process noise covariance\nQ_i:\n- [0.1, 0.1, 0.1, 1.0, 1.0, 1.0]\n

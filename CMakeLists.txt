@@ -21,7 +21,7 @@ option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 set(BUILD_TANFAN OFF)
 set(BUILD_OBSTACLES OFF)
-option(BUILD_VISION OFF)
+set(BUILD_VISION OFF)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)

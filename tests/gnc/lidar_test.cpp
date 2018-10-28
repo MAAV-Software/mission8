@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE StateTest
+#define BOOST_TEST_MODULE LidarTest
 /**
  * Tests for both BaseState and Kalman State
  */

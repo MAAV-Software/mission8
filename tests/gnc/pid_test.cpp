@@ -48,7 +48,6 @@ BOOST_AUTO_TEST_CASE(presetGainsTest)
 	Fixture f;
 	double ans = 1.11;
 	double res = f.pidPreset.run(1.0, 1.0);
-	cout << res << " " << ans << endl;
 	BOOST_CHECK(f.absDiff(res, ans) < f.tol);
 }
 
@@ -99,7 +98,6 @@ BOOST_AUTO_TEST_CASE(discreteMultiIterTest)
 	for (size_t i = 0; i < iters; ++i)
 	{
 		double res = f.pidPreset.runDiscrete(error[i], dt);
-		cout << "Error: " << error[i] << " Out: " << res << " Ans: " << ans[i] << endl;
 		BOOST_CHECK(f.absDiff(res, ans[i]) < f.tol);
 	}
 }

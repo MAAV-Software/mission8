@@ -2,7 +2,7 @@
 #include <iterator>
 #include <memory>
 
-#include "gnc/kalman/history.hpp"
+#include <gnc/kalman/history.hpp>
 
 using maav::gnc::measurements::ImuMeasurement;
 using maav::gnc::measurements::Measurement;
@@ -15,7 +15,11 @@ namespace gnc
 {
 namespace kalman
 {
-History::History(size_t size) : _size(size) {}
+History::History(YAML::Node config)
+	: _size(config["size"].as<size_t>()), tolerance(config["tolerance"].as<uint64_t>())
+{
+}
+
 pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementSet &measurements)
 {
 	// Insert zero state if empty
@@ -40,12 +44,11 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
 
 	// Microsecond tolerance to merge measurements
 	// IMU will be running on a 10000 microsecond period
-	constexpr uint64_t tolerance = 1000;
 
 	if (measurements.lidar)
 	{
 		uint64_t lidar_time = measurements.lidar->time_usec;
-		auto snap_iter = find_snapshot(lidar_time, tolerance);
+		auto snap_iter = find_snapshot(lidar_time);
 		if (snap_iter != _history.end())
 		{
 			snap_iter->measurement.lidar = measurements.lidar;
@@ -58,7 +61,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
 	if (measurements.plane_fit)
 	{
 		uint64_t plane_fit_time = measurements.plane_fit->time_usec;
-		auto snap_iter = find_snapshot(plane_fit_time, tolerance);
+		auto snap_iter = find_snapshot(plane_fit_time);
 		if (snap_iter != _history.end())
 		{
 			snap_iter->measurement.plane_fit = measurements.plane_fit;
@@ -71,7 +74,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
 	if (measurements.visual_odometry)
 	{
 		uint64_t vo_time = measurements.visual_odometry->time_usec;
-		auto snap_iter = find_snapshot(vo_time, tolerance);
+		auto snap_iter = find_snapshot(vo_time);
 		if (snap_iter != _history.end())
 		{
 			snap_iter->measurement.visual_odometry = measurements.visual_odometry;
@@ -84,7 +87,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
 	if (measurements.global_update)
 	{
 		uint64_t gu_time = measurements.global_update->time_usec;
-		auto snap_iter = find_snapshot(gu_time, tolerance);
+		auto snap_iter = find_snapshot(gu_time);
 		if (snap_iter != _history.end())
 		{
 			snap_iter->measurement.global_update = measurements.global_update;
@@ -119,7 +122,7 @@ void History::resize(Iterator last_modified)
 	}
 }
 
-History::Iterator History::find_snapshot(uint64_t time, uint64_t tolerance)
+History::Iterator History::find_snapshot(uint64_t time)
 {
 	auto end = _history.rbegin();
 	if (time > end->get_time())

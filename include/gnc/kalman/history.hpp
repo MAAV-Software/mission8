@@ -3,8 +3,10 @@
 #include <cstdlib>
 #include <list>
 
-#include "gnc/kalman/kalman_state.hpp"
-#include "gnc/measurements/Measurement.hpp"
+#include <yaml-cpp/yaml.h>
+
+#include <gnc/kalman/kalman_state.hpp>
+#include <gnc/measurements/Measurement.hpp>
 
 namespace maav
 {
@@ -19,7 +21,7 @@ namespace kalman
 class History
 {
    public:
-	explicit History(size_t size);
+	explicit History(YAML::Node config);
 
    public:
 	/**
@@ -39,6 +41,7 @@ class History
 	};
 
 	using Iterator = std::list<History::Snapshot>::iterator;
+	using ConstIterator = std::list<History::Snapshot>::const_iterator;
 
 	/**
 	 * Takes a MeasurementSet of all new measurements. Adds all of those
@@ -58,10 +61,9 @@ class History
 	 * Finds a snapshot within tolerance of the given time or creates a new
 	 * snapshot with an interpolated IMU measurement.
 	 * @param time
-	 * @param tolerance
 	 * @return
 	 */
-	Iterator find_snapshot(uint64_t time, uint64_t tolerance);
+	Iterator find_snapshot(uint64_t time);
 
 	measurements::ImuMeasurement interpolate_imu(const measurements::ImuMeasurement& prev,
 												 const measurements::ImuMeasurement& next,
@@ -71,6 +73,7 @@ class History
 
    private:
 	size_t _size;
+	uint64_t tolerance;
 
 	std::list<History::Snapshot> _history;
 };

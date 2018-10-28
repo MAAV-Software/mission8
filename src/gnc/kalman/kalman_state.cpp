@@ -43,6 +43,9 @@ KalmanState KalmanState::mean(const std::array<KalmanState, N>& sigma_points,
 {
 	uint64_t time = sigma_points[0].time_usec();
 	KalmanState mean_state(time);
+
+	// Use only the previous mean's transformed point because this is linear with respect to the
+	// attitude
 	mean_state.attitude() = sigma_points[0].attitude();
 	for (size_t i = 0; i < sigma_points.size(); i++)
 	{
@@ -92,9 +95,9 @@ KalmanState KalmanState::compute_gaussian(const std::array<KalmanState, N>& poin
 										  const std::array<double, N>& m_weights,
 										  const std::array<double, N>& c_weights)
 {
-	KalmanState g = KalmanState::mean(points, m_weights);
-	g.covariance() = KalmanState::cov(g, points, c_weights);
-	return g;
+	KalmanState mu = KalmanState::mean(points, m_weights);
+	mu.covariance() = KalmanState::cov(mu, points, c_weights);
+	return mu;
 }
 
 KalmanState& KalmanState::operator+=(const KalmanState::ErrorStateVector& e_state)
@@ -118,29 +121,6 @@ KalmanState::ErrorStateVector KalmanState::operator-(const KalmanState& other) c
 	difference.segment<3>(6) = velocity() - other.velocity();
 
 	return difference;
-}
-// TODO: fix this
-Sophus::SO3d weighted_average(const std::vector<Sophus::SO3d>& points,
-							  const std::vector<double>& weights)
-{
-	// https://stackoverflow.com/questions/12374087/average-of-multiple-quaternions/27410865#27410865
-	// Number of sigma points generated will be the number of rotations in
-	// `points`
-	size_t N = points.size();
-	size_t i = 0;
-	Eigen::Matrix4Xd Q;
-	Q.resize(Eigen::NoChange, 4);
-	for (const Sophus::SO3d& rot : points)
-	{
-		const Eigen::Quaterniond& q = rot.unit_quaternion();
-		Q.col(i) = q.coeffs() * weights[i];
-	}
-
-	const Eigen::Matrix4d QQT = Q * Q.transpose();
-
-	Eigen::SelfAdjointEigenSolver<Eigen::Matrix4d> solver(QQT);
-	Eigen::Quaterniond avg(solver.eigenvectors().col(N - 1));
-	return Sophus::SO3d(avg);
 }
 
 }  // namespace kalman
