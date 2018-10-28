@@ -134,8 +134,7 @@ int main(int argc, char** argv)
 	controller.set_control_params(load_gains_from_yaml(config));
 
 	controller.set_control_state(ControlState::TAKEOFF);
-
-	auto land_timer = system_clock::now() + 10s;
+	//thread tid(get_setpoint);
 
 	while (!KILL)
 	{
@@ -164,14 +163,6 @@ int main(int argc, char** argv)
 			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
 
-		if (system_clock::now() > land_timer &&
-			controller.get_control_state() == ControlState::HOLD_ALT)
-			controller.set_control_state(ControlState::LAND);
-
-		// pixhawk needs attitude/thrust setpoint commands at
-		// rate >2 Hz otherwise it will go into failsafe
-		// ***make sure at some point controller is
-		// sending commands at a sufficient rate***
 		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
@@ -197,9 +188,9 @@ ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
 	gains.value[2].i = posGains["z"][1].as<double>();
 	gains.value[2].d = posGains["z"][2].as<double>();
 
-	gains.value[3].p = posGains["yaw"][0].as<double>();
-	gains.value[3].i = posGains["yaw"][1].as<double>();
-	gains.value[3].d = posGains["yaw"][2].as<double>();
+	gains.value[3].p = posGains["pitch"][0].as<double>();
+	gains.value[3].i = posGains["pitch"][1].as<double>();
+	gains.value[3].d = posGains["pitch"][2].as<double>();
 
 	const YAML::Node& rateGains = config_file["pid-gains"]["rate-ctrl"];
 	gains.rate[0].p = rateGains["x"][0].as<double>();

@@ -35,12 +35,9 @@ class Controller
 		double mass;		  //< vehicle mass
 		double setpoint_tol;  //< convergence tolerance for achieving setpoints
 		double min_F_norm;	//< minimum allowed force L2-norm
-		std::array<std::pair<double, double>, 3>
-			rate_limits;  //< pair of (upper, lower) limits on [x, y, z, yaw] rates
-		std::array<std::pair<double, double>, 3>
-			accel_limits;  //< pair of (upper, lower) limits on [x, y, z] accel
-		std::array<std::pair<double, double>, 3>
-			angle_limits;  //< pair of (upper, lower) limits on [roll, pitch]
+		std::array<std::pair<double, double>, 3> rate_limits;
+		std::array<std::pair<double, double>, 3> accel_limits;
+		std::array<std::pair<double, double>, 3> angle_limits;
 		std::pair<double, double> thrust_limits{1, 0};
 	};
 
@@ -52,14 +49,14 @@ class Controller
 	void set_control_params(const ctrl_params_t&, const Parameters&);
 	ControlState get_control_state() const;
 	bool set_control_state(const ControlState new_control_state);
-	double calculate_thrust(const double height_setpoint);
 
    private:
 	mavlink::InnerLoopSetpoint move_to_waypoint(const Waypoint& waypoint);
 	mavlink::InnerLoopSetpoint hold_altitude(const double altitude);
 	mavlink::InnerLoopSetpoint takeoff(const double takeoff_altitude);
 	mavlink::InnerLoopSetpoint land();
-	mavlink::InnerLoopSetpoint yaw_to_heading(const double heading);
+
+	double calculate_thrust(const double height_setpoint);
 
 	ControlState current_control_state;
 
@@ -67,7 +64,7 @@ class Controller
 	State previous_state;
 	double dt;  // Difference in time between current and previous state
 
-	double takeoff_altitude = -5;		// meters
+	double takeoff_altitude = -2;		// meters
 	double hold_altitude_setpoint = 0;  // Default to zero so nothing crazy happens on accident
 	std::chrono::time_point<std::chrono::system_clock> takeoff_delay;
 	std::chrono::time_point<std::chrono::system_clock> landing_timer;
@@ -75,6 +72,7 @@ class Controller
 
 	control::Pid z_position_pid;
 	control::Pid z_rate_pid;
+	control::Pid pitch_pid;
 	Parameters veh_params;
 };
 
