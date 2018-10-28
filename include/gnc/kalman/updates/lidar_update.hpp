@@ -42,7 +42,7 @@ class LidarUpdate : BaseUpdate<LidarMeasurement>
 	LidarMeasurement measured(const measurements::Measurement& meas);
 
    public:
-	void operator()(History::Snapshot& snap) { BaseUpdate<LidarMeasurement>::operator()(snap); }
+	using BaseUpdate::operator();
 };
 }
 }
