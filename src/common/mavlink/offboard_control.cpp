@@ -183,7 +183,7 @@ bool OffboardControl::activate_offboard_control()
 	mavlink_message_t message;
 	mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
-	auto timeout = system_clock::now() + 20s;
+	auto timeout = system_clock::now() + 10s;
 	while (!offboard_control_active)
 	{
 		set_attitude_target(InnerLoopSetpoint());

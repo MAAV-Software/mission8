@@ -33,6 +33,8 @@ using maav::mavlink::CommunicationType;
 using std::cin;
 using std::thread;
 using maav::gnc::ControlState;
+using YAML::Node;
+using std::make_pair;
 
 /*
  * Temporary Operating Procedure (to start work on controller)
@@ -51,19 +53,20 @@ using maav::gnc::ControlState;
 */
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
+Controller::Parameters load_vehicle_params(const Node& config);
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
 // Function for testing altitude controller, intent
 // is to remove when no longer needed for testing.
-void get_altitude()
+void get_setpoint()
 {
-	double _altitude;
+	double _setpoint;
 	while (!KILL)
 	{
-		cout << "Enter altitude >> ";
-		cin >> _altitude;
-		maav::gnc::SETPOINT = _altitude;
+		cout << "Enter setpoint >> ";
+		cin >> _setpoint;
+		maav::gnc::SETPOINT = _setpoint;
 	}
 }
 
@@ -105,11 +108,16 @@ int main(int argc, char** argv)
 									 config["uart-path"].as<std::string>());
 	InnerLoopSetpoint inner_loop_setpoint;
 
+	// Load default gains from YAML
+	YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
+	controller.set_control_params(load_gains_from_yaml(gains_config),
+								  load_vehicle_params(gains_config));
+
 	// establish state
 	cout << "Establishing initial state...\n";
 	int counter = 0;
 	auto timeout = system_clock::now() + 10s;
-	while (counter < 10 && system_clock::now() < timeout)
+	while (!KILL && counter < 2 && system_clock::now() < timeout)
 	{
 		if (state_handler.ready())
 		{
@@ -128,6 +136,7 @@ int main(int argc, char** argv)
 	controller.set_control_state(ControlState::TAKEOFF);
 
 	auto land_timer = system_clock::now() + 10s;
+
 	while (!KILL)
 	{
 		if (gains_handler.ready())
@@ -155,7 +164,8 @@ int main(int argc, char** argv)
 			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
 
-		if (system_clock::now() > land_timer && controller.get_control_state() == ControlState::HOLD_ALT) 
+		if (system_clock::now() > land_timer &&
+			controller.get_control_state() == ControlState::HOLD_ALT)
 			controller.set_control_state(ControlState::LAND);
 
 		// pixhawk needs attitude/thrust setpoint commands at
@@ -205,4 +215,39 @@ ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
 	gains.rate[2].d = rateGains["z"][2].as<double>();
 
 	return gains;
+}
+
+Controller::Parameters load_vehicle_params(const Node& config)
+{
+	Controller::Parameters params;
+
+	params.mass = config["mass"].as<double>();
+	params.setpoint_tol = config["tol"].as<double>();
+	params.min_F_norm = config["min-fnorm"].as<double>();
+	params.thrust_limits = make_pair<double, double>(1, config["min-thrust"].as<double>());
+
+	constexpr double deg2rad = M_PI / 180.0;
+
+	const Node& rateNode = config["limits"]["rate"];
+	params.rate_limits[0] = make_pair(rateNode["x"][0].as<double>(), rateNode["x"][1].as<double>());
+	params.rate_limits[1] = make_pair(rateNode["y"][0].as<double>(), rateNode["y"][1].as<double>());
+	params.rate_limits[2] = make_pair(rateNode["z"][0].as<double>(), rateNode["z"][1].as<double>());
+
+	const Node& accelNode = config["limits"]["accel"];
+	params.accel_limits[0] =
+		make_pair(accelNode["x"][0].as<double>(), accelNode["x"][1].as<double>());
+	params.accel_limits[1] =
+		make_pair(accelNode["y"][0].as<double>(), accelNode["y"][1].as<double>());
+	params.accel_limits[2] =
+		make_pair(accelNode["z"][0].as<double>(), accelNode["z"][1].as<double>());
+
+	const Node& angNode = config["limits"]["angle"];
+	params.angle_limits[0] = make_pair(angNode["roll"][0].as<double>() * deg2rad,
+									   angNode["roll"][1].as<double>() * deg2rad);
+	params.angle_limits[1] = make_pair(angNode["pitch"][0].as<double>() * deg2rad,
+									   angNode["pitch"][1].as<double>() * deg2rad);
+	params.angle_limits[2] = make_pair(angNode["yaw"][0].as<double>() * deg2rad,
+									   angNode["yaw"][1].as<double>() * deg2rad);
+
+	return params;
 }

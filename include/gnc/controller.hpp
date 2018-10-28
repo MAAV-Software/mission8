@@ -1,11 +1,14 @@
 #pragma once
 
+#include <array>
 #include <atomic>
+#include <list>
+#include <utility>
 
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/ctrl_params_t.hpp>
 #include <gnc/control/pid.hpp>
-#include <gnc/measurements/waypoint.hpp>
+#include <gnc/measurements/Waypoint.hpp>
 #include <gnc/state.hpp>
 
 namespace maav
@@ -18,37 +21,45 @@ enum class ControlState
 	TAKEOFF,
 	LAND,
 	HOLD_ALT,
+	PLANNER,
 	TEST_ASCEND_AT_RATE,
-	TEST_HOLD_ALTITUDE
+	TEST_HOLD_ALTITUDE,
+	TEST_DIRECT_THRUST
 };
 
 class Controller
 {
    public:
+	struct Parameters
+	{
+		double mass;		  //< vehicle mass
+		double setpoint_tol;  //< convergence tolerance for achieving setpoints
+		double min_F_norm;	//< minimum allowed force L2-norm
+		std::array<std::pair<double, double>, 3>
+			rate_limits;  //< pair of (upper, lower) limits on [x, y, z, yaw] rates
+		std::array<std::pair<double, double>, 3>
+			accel_limits;  //< pair of (upper, lower) limits on [x, y, z] accel
+		std::array<std::pair<double, double>, 3>
+			angle_limits;  //< pair of (upper, lower) limits on [roll, pitch]
+		std::pair<double, double> thrust_limits{1, 0};
+	};
+
 	Controller();
 	~Controller();
-
-	// TODO: create target struct
 	void set_target(const Waypoint& waypoint);
-
 	mavlink::InnerLoopSetpoint run(const State& state);
-
-	void set_control_params(const ctrl_params_t& _params);
-
+	void set_control_params(const ctrl_params_t&);
+	void set_control_params(const ctrl_params_t&, const Parameters&);
 	ControlState get_control_state() const;
 	bool set_control_state(const ControlState new_control_state);
+	double calculate_thrust(const double height_setpoint);
 
    private:
+	mavlink::InnerLoopSetpoint move_to_waypoint(const Waypoint& waypoint);
 	mavlink::InnerLoopSetpoint hold_altitude(const double altitude);
-
-	// Ascend at a particular rate
-	mavlink::InnerLoopSetpoint ascend_at_rate(const double rate);
-
-	// Takeoff to takeoff_altitude at ascent_rate m/s
-	mavlink::InnerLoopSetpoint takeoff(const double takeoff_altitude, const double ascent_rate = 1);
-
-	// Land at current location at descent_rate m/s
-	mavlink::InnerLoopSetpoint land(const double descent_rate = 1);
+	mavlink::InnerLoopSetpoint takeoff(const double takeoff_altitude);
+	mavlink::InnerLoopSetpoint land();
+	mavlink::InnerLoopSetpoint yaw_to_heading(const double heading);
 
 	ControlState current_control_state;
 
@@ -56,19 +67,20 @@ class Controller
 	State previous_state;
 	double dt;  // Difference in time between current and previous state
 
-	float thrust_0 = 0.59;		  // Equilibrium Thrust (TODO: get real thrust data)
-	double takeoff_altitude = 5;  // meters
-	double takeoff_rate = 1;
-	double takeoff_error = 0.25;
-	double hold_altitude_setpoint = 0;
+	double takeoff_altitude = -5;		// meters
+	double hold_altitude_setpoint = 0;  // Default to zero so nothing crazy happens on accident
+	std::chrono::time_point<std::chrono::system_clock> takeoff_delay;
+	std::chrono::time_point<std::chrono::system_clock> landing_timer;
+	bool landing_sequence_init;
 
 	control::Pid z_position_pid;
-	control::Pid z_velocity_pid;
+	control::Pid z_rate_pid;
+	Parameters veh_params;
 };
 
 // global altitude for testing
 // This needs to become "hold_altitude" a member variable in controller class
-std::atomic<double> SETPOINT = -10;
+std::atomic<double> SETPOINT = 0;
 
 }  // namespace gnc
 }  // namespace maav

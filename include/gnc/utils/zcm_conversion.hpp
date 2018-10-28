@@ -3,7 +3,7 @@
 #include <Eigen/Eigen>
 #include <common/messages/state_t.hpp>
 #include <common/messages/waypoint_t.hpp>
-#include <gnc/measurements/waypoint.hpp>
+#include <gnc/measurements/Waypoint.hpp>
 #include <gnc/state.hpp>
 
 namespace maav
