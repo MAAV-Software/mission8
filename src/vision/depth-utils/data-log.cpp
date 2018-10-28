@@ -12,6 +12,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <stdexcept>
 
 #include <librealsense/rs.hpp>
 #include <librealsense2/rs.hpp>
@@ -37,6 +38,8 @@ void sigHandler(int);
 void camera_thread(CameraInputBase *cam);
 void createDirectories();
 void createDirectories(std::string);
+
+void pass() {}
 
 int main(int argc, char **argv)
 {
@@ -181,12 +184,12 @@ void createDirectories(std::string dirName)
 {
 	std::string command = "rm -rf ";
 	command += dirName;
-	system(command.c_str());
+	system(command.c_str()) ? pass() : throw std::runtime_error("system call failed");
 	command = "mkdir ";
 	command += dirName;
-	system(command.c_str());
+	(void)system(command.c_str());
 	command += "/Timestamps";
-	system(command.c_str());
+	(void)system(command.c_str());
 
 	for (int i = 0; i < 5; ++i)
 	{
@@ -194,12 +197,12 @@ void createDirectories(std::string dirName)
 		command += dirName;
 		command += "/RGB";
 		command += std::to_string(i);
-		system(command.c_str());
+		(void)system(command.c_str());
 		command = "mkdir ";
 		command += dirName;
 		command += "/Depth";
 		command += std::to_string(i);
-		system(command.c_str());
+		(void)system(command.c_str());
 	}
 }
 
@@ -226,21 +229,21 @@ void createDirectories()
 		command += filename;
 		command += " ImageData/*";
 		std::cout << command << std::endl;
-		system(command.c_str());
-		system("rm -rf ImageData");
+		(void)system(command.c_str());
+		(void)system("rm -rf ImageData");
 	}
 
 	// create the new directories for storage
-	system("mkdir ImageData");
-	system("mkdir ImageData/Timestamps");
+	(void)system("mkdir ImageData");
+	(void)system("mkdir ImageData/Timestamps");
 
 	for (int i = 0; i < 5; ++i)
 	{
 		std::string command = "mkdir ImageData/RGB";
 		command += std::to_string(i);
-		system(command.c_str());
+		(void)system(command.c_str());
 		command = "mkdir ImageData/Depth";
 		command += std::to_string(i);
-		system(command.c_str());
+		(void)system(command.c_str());
 	}
 }
