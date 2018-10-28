@@ -49,7 +49,7 @@ bool CommunicationPort::read_message(mavlink_message_t &message)
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 
-	ssize_t recsize;
+	ssize_t recsize = 0;
 
 	switch (com_type)
 	{
