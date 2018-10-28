@@ -22,6 +22,8 @@ using maav::gnc::Controller;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
 using maav::mavlink::OffboardControl;
+using std::cout;
+using maav::mavlink::CommunicationType;
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
@@ -68,7 +70,7 @@ int main(int argc, char** argv)
 
 	GetOpt gopt;
 	gopt.addBool('h', "help", false, "This message");
-	gopt.addString('c', "config", "", "Path to YAML control config.");
+	gopt.addString('c', "config", "", "Path to YAML control config");
 	// TODO: Add getopt arguments as necessary
 
 	if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
@@ -89,12 +91,14 @@ int main(int argc, char** argv)
 	zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
 	zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
 
+	YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 	Controller controller;
-	OffboardControl offboard_control;
+	OffboardControl offboard_control(CommunicationType::UART,
+									 config["uart-path"].as<std::string>());
 
 	// Load default gains from YAML
-	YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
-	controller.set_control_params(load_gains_from_yaml(gains_config));
+
+	controller.set_control_params(load_gains_from_yaml(config));
 
 	while (!KILL)
 	{

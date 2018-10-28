@@ -19,7 +19,8 @@ namespace mavlink
 std::atomic<bool> KILL{false};
 
 // Creates thread and passing read_messages loop into thread
-OffboardControl::OffboardControl()
+OffboardControl::OffboardControl(const CommunicationType com_type, const std::string& port_path)
+	: com_port(com_type, port_path)
 {
 	offboard_control_active = false;
 
@@ -76,8 +77,6 @@ void OffboardControl::read_thread()
 
 		send_heartbeat();  // maintain link with pixhawk, if link lost pixhawk -> failsafe
 		// This heartbeat is probably too fast, consider lowering rate (what is the minimum?)
-
-		sleep_for(10ms);  // sample at 100 Hz
 	}
 }
 

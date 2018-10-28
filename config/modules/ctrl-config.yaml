@@ -29,3 +29,5 @@ limits:
 mass: 3.0 # kg
 tol: 0.01 # convergence tolerance (norm of [x, y, z, yaw])
 min-fnorm: 0.001 # minimum allowed body-force norm (L2) on the vehicle: || [Fx, Fy, Fz] ||
+
+uart-path: "/dev/ttyACM1"

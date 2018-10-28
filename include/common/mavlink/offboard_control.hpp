@@ -29,7 +29,7 @@ struct InnerLoopSetpoint
 class OffboardControl
 {
    public:
-	OffboardControl();
+	OffboardControl(const CommunicationType, const std::string& port_path = "");
 	~OffboardControl();
 
 	void set_attitude_target(const InnerLoopSetpoint&, const uint8_t type_mask = 0b10000000);
