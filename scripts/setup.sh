@@ -54,3 +54,4 @@ ${SOFTWARE_DIR}/scripts/install/install-pcl.sh
 ${SOFTWARE_DIR}/scripts/install/install-opencv3.sh
 ${SOFTWARE_DIR}/scripts/install/install-lcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-librealsense-legacy.sh
+${SOFTWARE_DIR}/scripts/install/install-apriltag.sh

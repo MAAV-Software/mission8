@@ -31,6 +31,9 @@ compile_commands.json
 *.vscode
 *.idea
 thirdparty/opencv
+thirdparty/apriltags
 .syntastic_cpp_config
 CameraTrajectory.txt
 KeyFrameTrajectory.txt
+debug_*.pnm
+debug_*.ps

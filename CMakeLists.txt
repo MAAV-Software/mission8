@@ -19,9 +19,6 @@ option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
 option(BUILD_TANFAN "Build the Tiva Atom Network Forwarding Application (TANFAN)" OFF)
 option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
-set(BUILD_TANFAN OFF)
-set(BUILD_OBSTACLES OFF)
-set(BUILD_VISION OFF)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -30,8 +27,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # Include generated zcm messages and mavlink headers
-include_directories(SYSTEM 
-    ${PROJECT_SOURCE_DIR}/generated 
+include_directories(SYSTEM
+    ${PROJECT_SOURCE_DIR}/generated
     ${PROJECT_SOURCE_DIR}/thirdparty/mavlink/include
 )
 
