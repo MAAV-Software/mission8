@@ -209,7 +209,7 @@ void createDirectories(std::string dirName)
 			throw std::runtime_error("a system call returned failure");
 		}
 	}
-	catch(std::runtime_error err)
+	catch (std::runtime_error err)
 	{
 		throw err;
 	}
@@ -263,7 +263,7 @@ void createDirectories()
 			throw std::runtime_error("a system call returned failure");
 		}
 	}
-	catch(std::runtime_error err)
+	catch (std::runtime_error err)
 	{
 		throw err;
 	}

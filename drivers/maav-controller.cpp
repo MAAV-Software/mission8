@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include <zcm/zcm-cpp.hpp>
@@ -35,6 +36,8 @@ using std::thread;
 using maav::gnc::ControlState;
 using YAML::Node;
 using std::make_pair;
+using std::string;
+using maav::gnc::CONTROL_STATE_SETPOINT;
 
 /*
  * Temporary Operating Procedure (to start work on controller)
@@ -57,18 +60,8 @@ Controller::Parameters load_vehicle_params(const Node& config);
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
-// Function for testing altitude controller, intent
-// is to remove when no longer needed for testing.
-void get_setpoint()
-{
-	double _setpoint;
-	while (!KILL)
-	{
-		cout << "Enter setpoint >> ";
-		cin >> _setpoint;
-		maav::gnc::SETPOINT = _setpoint;
-	}
-}
+void get_setpoint();
+path_t create_test_path();
 
 int main(int argc, char** argv)
 {
@@ -102,16 +95,12 @@ int main(int argc, char** argv)
 	zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
 	zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
 
-	YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 	Controller controller;
-	OffboardControl offboard_control(CommunicationType::UART,
-									 config["uart-path"].as<std::string>());
-	InnerLoopSetpoint inner_loop_setpoint;
-
-	// Load default gains from YAML
 	YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
 	controller.set_control_params(load_gains_from_yaml(gains_config),
 								  load_vehicle_params(gains_config));
+	OffboardControl offboard_control(CommunicationType::UDP);
+	InnerLoopSetpoint inner_loop_setpoint;
 
 	// establish state
 	cout << "Establishing initial state...\n";
@@ -129,15 +118,31 @@ int main(int argc, char** argv)
 	}
 	cout << "Initial state established\n";
 
-	// Load default gains from YAML
+	// Command line input for tests
+	thread tid(get_setpoint);
 
-	controller.set_control_params(load_gains_from_yaml(config));
-
-	controller.set_control_state(ControlState::TAKEOFF);
-	//thread tid(get_setpoint);
+	// Create a test path;
+	path_t test_path = create_test_path();
 
 	while (!KILL)
 	{
+		// Command line input logic (with global variables...sorry)
+		if (CONTROL_STATE_SETPOINT)
+		{
+			if (controller.get_control_state() != ControlState::TEST_WAYPOINT)
+			{
+				controller.set_control_state(ControlState::TEST_WAYPOINT);
+			}
+		}
+		else
+		{
+			if (controller.get_control_state() != ControlState::TEST_PATH)
+			{
+				controller.set_control_state(ControlState::TEST_PATH);
+				controller.set_path(test_path);
+			}
+		}
+
 		if (gains_handler.ready())
 		{
 			const auto msg = gains_handler.msg();
@@ -147,9 +152,8 @@ int main(int argc, char** argv)
 
 		if (path_handler.ready())
 		{
-			const auto msg = path_handler.msg();
+			controller.set_path(path_handler.msg());
 			path_handler.pop();
-			controller.set_target(convert_waypoint(msg.waypoints[0]));
 			// TODO: save path, pass waypoints sequentially to set_target when waiting for new
 			// path!!!
 		}
@@ -163,10 +167,12 @@ int main(int argc, char** argv)
 			inner_loop_setpoint = controller.run(convert_state(msg));
 		}
 
+		// Continues setting the same inner loop setpoint even if there is no input from the
+		// controller
 		offboard_control.set_attitude_target(inner_loop_setpoint);
 	}
 
-	// tid.join();
+	tid.join();
 	zcm.stop();
 }
 
@@ -188,9 +194,9 @@ ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
 	gains.value[2].i = posGains["z"][1].as<double>();
 	gains.value[2].d = posGains["z"][2].as<double>();
 
-	gains.value[3].p = posGains["pitch"][0].as<double>();
-	gains.value[3].i = posGains["pitch"][1].as<double>();
-	gains.value[3].d = posGains["pitch"][2].as<double>();
+	gains.value[3].p = posGains["yaw"][0].as<double>();
+	gains.value[3].i = posGains["yaw"][1].as<double>();
+	gains.value[3].d = posGains["yaw"][2].as<double>();
 
 	const YAML::Node& rateGains = config_file["pid-gains"]["rate-ctrl"];
 	gains.rate[0].p = rateGains["x"][0].as<double>();
@@ -223,6 +229,8 @@ Controller::Parameters load_vehicle_params(const Node& config)
 	params.rate_limits[0] = make_pair(rateNode["x"][0].as<double>(), rateNode["x"][1].as<double>());
 	params.rate_limits[1] = make_pair(rateNode["y"][0].as<double>(), rateNode["y"][1].as<double>());
 	params.rate_limits[2] = make_pair(rateNode["z"][0].as<double>(), rateNode["z"][1].as<double>());
+	params.rate_limits[3] =
+		make_pair(rateNode["yaw"][0].as<double>(), rateNode["yaw"][1].as<double>());
 
 	const Node& accelNode = config["limits"]["accel"];
 	params.accel_limits[0] =
@@ -237,8 +245,97 @@ Controller::Parameters load_vehicle_params(const Node& config)
 									   angNode["roll"][1].as<double>() * deg2rad);
 	params.angle_limits[1] = make_pair(angNode["pitch"][0].as<double>() * deg2rad,
 									   angNode["pitch"][1].as<double>() * deg2rad);
-	params.angle_limits[2] = make_pair(angNode["yaw"][0].as<double>() * deg2rad,
-									   angNode["yaw"][1].as<double>() * deg2rad);
 
 	return params;
+}
+
+/*
+ *	Test path for testing tests
+*/
+path_t create_test_path()
+{
+	path_t path;
+
+	waypoint_t wpt;
+	wpt.pose[0] = 0;
+	wpt.pose[1] = 0;
+	wpt.pose[2] = -2;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = 1;
+	wpt.pose[1] = 1;
+	wpt.pose[2] = -3;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = 1;
+	wpt.pose[1] = -1;
+	wpt.pose[2] = -4;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = -1;
+	wpt.pose[1] = -1;
+	wpt.pose[2] = -3;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = -1;
+	wpt.pose[1] = 1;
+	wpt.pose[2] = -2;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = 0;
+	wpt.pose[1] = 0;
+	wpt.pose[2] = -1;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	wpt.pose[0] = 0;
+	wpt.pose[1] = 0;
+	wpt.pose[2] = 0;
+	wpt.pose[3] = 0;
+	path.waypoints.push_back(wpt);
+
+	path.NUM_WAYPOINTS = 7;
+
+	return path;
+}
+
+// Function for testing altitude controller, intent
+// is to remove when no longer needed for testing.
+void get_setpoint()
+{
+	cout << "Enter \">> test\" to run test path\n";
+	cout << "  <or>\n";
+	cout << "Enter wayoints (x,y,z,yaw)\n";
+	double a, b, c, d;
+	string command;
+	while (!KILL)
+	{
+		cout << ">> ";
+		cin >> command;
+		if (command == "test")
+		{
+			CONTROL_STATE_SETPOINT = false;
+		}
+		else
+		{
+			try
+			{
+				a = std::stof(command);
+			}
+			catch (...)
+			{
+				cout << "INVALID INPUT\n";
+				continue;
+			}
+
+			CONTROL_STATE_SETPOINT = true;
+			cin >> b >> c >> d;
+			maav::gnc::SETPOINT = {Eigen::Vector3d(a, b, c), Eigen::Vector3d(0, 0, 0), d};
+		}
+	}
 }

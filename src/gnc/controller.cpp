@@ -1,4 +1,5 @@
 #include "gnc/controller.hpp"
+#include <gnc/utils/zcm_conversion.hpp>
 #include <iostream>
 
 using std::cout;
@@ -11,9 +12,10 @@ namespace maav
 {
 namespace gnc
 {
+// Helper to saturate values
 static double bounded(double value, const pair<double, double>& limits)
 {
-	assert(limits.first > limits.second);
+	assert(limits.first > limits.second);  // first is upper limit
 
 	if (value > limits.first)
 		return limits.first;
@@ -23,7 +25,12 @@ static double bounded(double value, const pair<double, double>& limits)
 		return value;
 }
 
-Controller::Controller() : current_state(0), previous_state(0)
+Controller::Controller()
+	: current_state(0),
+	  previous_state(0),
+	  current_target({Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0.}),
+	  hold_altitude_setpoint(Waypoint{Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0}),
+	  set_pause(false)
 {
 	set_control_state(ControlState::STANDBY);
 	current_state.zero(0);
@@ -31,16 +38,27 @@ Controller::Controller() : current_state(0), previous_state(0)
 }
 
 Controller::~Controller() {}
-void Controller::set_target(const Waypoint& waypoint) {}
+void Controller::set_path(const path_t& _path)
+{
+	converged_on_waypoint = false;
+	set_pause = false;
+	path = _path;
+	path_counter = 0;
+	current_target = convert_waypoint(path.waypoints[path_counter]);
+}
+
 void Controller::set_control_params(const ctrl_params_t& ctrl_params)
 {
 	z_position_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
 	z_rate_pid.setGains(ctrl_params.rate[2].p, ctrl_params.rate[2].i, ctrl_params.rate[2].d);
-	pitch_pid.setGains(ctrl_params.value[3].p, ctrl_params.value[3].i, ctrl_params.value[3].d);
+	yaw_pid.setGains(ctrl_params.value[3].p, ctrl_params.value[3].i, ctrl_params.value[3].d);
+	pitch_pid.setGains(ctrl_params.rate[0].p, ctrl_params.rate[0].i, ctrl_params.rate[0].d);
 }
+
 void Controller::set_control_params(const ctrl_params_t& ctrl_params, const Parameters& _veh_params)
 {
 	set_control_params(ctrl_params);
+	// add something to veh params, see member varialbes
 	veh_params = _veh_params;
 }
 
@@ -49,46 +67,45 @@ InnerLoopSetpoint Controller::run(const State& state)
 	previous_state = current_state;
 	current_state = state;
 	dt = current_state.time_sec() - previous_state.time_sec();
-	InnerLoopSetpoint s;  // For tests
+	// Calculate discrete error derivatives?
+	// Low pass filter?
 
 	switch (current_control_state)
 	{
-		case ControlState::TAKEOFF:
-			if (std::chrono::system_clock::now() < takeoff_delay)
-			{
-				return hold_altitude(0);
-			}
-			if (fabs(current_state.position().z() - takeoff_altitude) < 0.25)
-			{
-				hold_altitude_setpoint = takeoff_altitude;
-				set_control_state(ControlState::HOLD_ALT);
-				return hold_altitude(takeoff_altitude);
-			}
-			return takeoff(takeoff_altitude);
 		case ControlState::HOLD_ALT:
 			return hold_altitude(hold_altitude_setpoint);
-		case ControlState::LAND:
-			if (fabs(current_state.velocity().z()) <= 0.1 &&
-				fabs(current_state.position().z()) <= 0.1)
-			{
-				set_control_state(ControlState::STANDBY);
-				cout << "Landing detected\n";
-				return InnerLoopSetpoint();
-			}
-			return land();
+
 		case ControlState::STANDBY:
 			return InnerLoopSetpoint();
-		case ControlState::TEST_HOLD_ALTITUDE:
-			return hold_altitude(SETPOINT);
-		case ControlState::TEST_DIRECT_THRUST:
-			s.thrust = SETPOINT;
-			return s;
+
+		case ControlState::TEST_WAYPOINT:
+			current_target = SETPOINT;
+			return move_to_current_target();
+
+		case ControlState::TEST_PATH:
+			if (set_pause == true && system_clock::now() < pause_timer)
+			{
+				return move_to_current_target();
+			}
+			else
+			{
+				set_pause = false;
+			}
+
+			if (converged_on_waypoint && path_counter < path.NUM_WAYPOINTS - 1)
+			{
+				++path_counter;
+				current_target = convert_waypoint(path.waypoints[path_counter]);
+				converged_on_waypoint = false;
+			}
+			return move_to_current_target();
+
 		default:
-			assert(false);
+			assert(false);  // make sure all states get handled
 	}
 
-	assert(false);
-	return hold_altitude(0);
+	assert(false);								   // state logic should return
+	return hold_altitude(hold_altitude_setpoint);  // dummy
 }
 
 ControlState Controller::get_control_state() const { return current_control_state; }
@@ -98,25 +115,21 @@ bool Controller::set_control_state(const ControlState new_control_state)
 
 	switch (current_control_state)
 	{
-		case ControlState::TAKEOFF:
-			cout << "Control mode switched to TAKEOFF\n";
-			takeoff_delay = system_clock::now() + seconds(2);
-			break;
 		case ControlState::HOLD_ALT:
 			cout << "Control mode switched to HOLD_ALT\n";
 			break;
-		case ControlState::LAND:
-			cout << "Control mode switched to LAND\n";
-			break;
+
 		case ControlState::STANDBY:
 			cout << "Control mode switched to STANDBY\n";
 			break;
-		case ControlState::TEST_HOLD_ALTITUDE:
-			cout << "Control mode switched to TEST_HOLD_ALTITUDE\n";
+
+		case ControlState::TEST_WAYPOINT:
+			cout << "Control mode switched to TEST_WAYPOINT\n";
 			break;
-		case ControlState::TEST_DIRECT_THRUST:
-			cout << "Control mode switched to TEST_DIRECT_THRUST\n";
-			break;
+
+		case ControlState::TEST_PATH:
+			cout << "Control mode switched to TEST_PATH\n";
+
 		default:
 			assert(false);
 	}
@@ -124,31 +137,38 @@ bool Controller::set_control_state(const ControlState new_control_state)
 	return true;
 }
 
-mavlink::InnerLoopSetpoint move_to_waypoint(const Waypoint& waypoint)
-{
-	assert(false);
-	return InnerLoopSetpoint();
-}
-
-InnerLoopSetpoint Controller::hold_altitude(const double height_setpoint)
+mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 {
 	static double xy_disp_last_norm;
 	InnerLoopSetpoint new_setpoint;
 
-	Eigen::Vector2d xy_disp = {current_state.position().x(), current_state.position().y()};
-	double xy_disp_dot = (xy_disp.norm() - xy_disp_last_norm) / dt;
-	xy_disp_last_norm = xy_disp.norm();
-	double angle = pitch_pid.run(xy_disp.norm(), xy_disp_dot);
-	Eigen::Vector2d rot = {-xy_disp.normalized().y(), xy_disp.normalized().x()};
+	Eigen::Vector2d xy_error = {current_state.position().x() - current_target.position.x(),
+								current_state.position().y() - current_target.position.y()};
 
-	bounded(angle, veh_params.angle_limits[0]);
+	// Functionality to pause a waypoints
+	// this is to slow down the movement along path during testing
+	if (!set_pause && xy_error.norm() < convergence_tolerance)
+	{
+		pause_timer = system_clock::now() + seconds(5);
+		set_pause = true;
+		converged_on_waypoint = true;
+	}
 
-	new_setpoint.thrust = calculate_thrust(height_setpoint);
-	new_setpoint.q.w() = cos(angle / 2);
-	new_setpoint.q.x() = rot.x() * sin(angle / 2);
-	new_setpoint.q.y() = rot.y() * sin(angle / 2);
-	new_setpoint.q.z() = 0;
-	new_setpoint.yaw_rate = 0;
+	double xy_disp_dot = (xy_error.norm() - xy_disp_last_norm) / dt;
+	xy_disp_last_norm = xy_error.norm();
+	double angle = pitch_pid.run(xy_error.norm(), xy_disp_dot);
+	Eigen::Vector2d rot = {-xy_error.normalized().y(), xy_error.normalized().x()};
+
+	angle = bounded(angle, veh_params.angle_limits[0]);
+
+	Eigen::Quaterniond q_yaw = {cos(current_target.yaw * M_PI / 180 / 2), 0, 0,
+								sin(current_target.yaw * M_PI / 180 / 2)};
+	Eigen::Quaterniond q_pitch = {cos(angle / 2), rot.x() * sin(angle / 2),
+								  rot.y() * sin(angle / 2), 0};
+
+	new_setpoint.thrust = calculate_thrust(current_target.position.z());
+	new_setpoint.q = static_cast<Eigen::Quaternion<float>>(q_pitch * q_yaw);
+
 	return new_setpoint;
 }
 
@@ -168,31 +188,10 @@ double Controller::calculate_thrust(const double height_setpoint)
 	return static_cast<float>(thrust);
 }
 
-mavlink::InnerLoopSetpoint Controller::takeoff(const double alt) { return hold_altitude(alt); }
-mavlink::InnerLoopSetpoint Controller::land()
+InnerLoopSetpoint Controller::hold_altitude(const Waypoint& hold_alt_wpt)
 {
-	if (current_state.position().z() < -0.55)
-	{
-		if (landing_sequence_init) landing_sequence_init = false;
-		return hold_altitude(-0.5);
-	}
-	else if (landing_sequence_init && system_clock::now() < landing_timer + seconds(3))
-	{
-		return hold_altitude(-0.1);
-	}
-	else if (landing_sequence_init && system_clock::now() > landing_timer + seconds(3))
-	{
-		return hold_altitude(0);
-	}
-	else if (!landing_sequence_init)
-	{
-		landing_sequence_init = true;
-		landing_timer = system_clock::now();
-		return hold_altitude(-0.5);
-	}
-
-	assert(false);
-	return hold_altitude(-0.1);
+	current_target = hold_alt_wpt;
+	return move_to_current_target();
 }
 
 }  // namespace gnc
