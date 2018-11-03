@@ -129,7 +129,8 @@ bool Controller::set_control_state(const ControlState new_control_state)
 
 		case ControlState::TEST_PATH:
 			cout << "Control mode switched to TEST_PATH\n";
-
+			break;
+			
 		default:
 			assert(false);
 	}
