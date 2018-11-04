@@ -15,9 +15,12 @@ include_directories(
     ${EIGEN3_INCLUDE_DIR}
     ${LIBREALSENSE_INCLUDE_DIRS}
     ${LIBREALSENSE2_INCLUDE_DIRS}
-    ${PCL_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${GLFW3_INCLUDE_DIR}
+)
+
+include_directories(SYSTEM
+    ${PCL_INCLUDE_DIRS}
 )
 
 link_directories(${PCL_LIBRARY_DIRS})
