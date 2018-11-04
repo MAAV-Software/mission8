@@ -31,15 +31,18 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class KeyFrame;
 class Frame;
 
-class KeyFrameDatabase {
-   public:
+class KeyFrameDatabase
+{
+    public:
     KeyFrameDatabase(const ORBVocabulary& voc);
 
     void add(KeyFrame* pKF);
@@ -54,12 +57,12 @@ class KeyFrameDatabase {
     // Relocalization
     std::vector<KeyFrame*> DetectRelocalizationCandidates(Frame* F);
 
-   protected:
+    protected:
     // Associated vocabulary
     const ORBVocabulary* mpVoc;
 
     // Inverted file
-    std::vector<list<KeyFrame*> > mvInvertedFile;
+    std::vector<list<KeyFrame*>> mvInvertedFile;
 
     // Mutex
     std::mutex mMutex;

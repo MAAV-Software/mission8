@@ -41,7 +41,7 @@ class LidarUpdate : BaseUpdate<LidarMeasurement>
     LidarMeasurement predicted(const KalmanState& state);
     LidarMeasurement measured(const measurements::Measurement& meas);
 
-   public:
+    public:
     using BaseUpdate::operator();
 };
 }

@@ -31,17 +31,20 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Map;
 class MapPoint;
 class Frame;
 class KeyFrameDatabase;
 
-class KeyFrame {
-   public:
+class KeyFrame
+{
+    public:
     KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     // Pose functions
@@ -90,8 +93,7 @@ class KeyFrame {
     MapPoint* GetMapPoint(const size_t& idx);
 
     // KeyPoint functions
-    std::vector<size_t> GetFeaturesInArea(const float& x, const float& y,
-                                          const float& r) const;
+    std::vector<size_t> GetFeaturesInArea(const float& x, const float& y, const float& r) const;
     cv::Mat UnprojectStereo(int i);
 
     // Image
@@ -109,14 +111,10 @@ class KeyFrame {
     float ComputeSceneMedianDepth(const int q);
 
     static bool weightComp(int a, int b) { return a > b; }
-
-    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2) {
-        return pKF1->mnId < pKF2->mnId;
-    }
-
+    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2) { return pKF1->mnId < pKF2->mnId; }
     // The following variables are accesed from only 1 thread or never change
     // (no mutex needed).
-   public:
+    public:
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;
@@ -187,7 +185,7 @@ class KeyFrame {
 
     // The following variables need to be accessed trough a mutex to be thread
     // safe.
-   protected:
+    protected:
     // SE3 Pose and camera center
     cv::Mat Tcw;
     cv::Mat Twc;
@@ -203,7 +201,7 @@ class KeyFrame {
     ORBVocabulary* mpORBvocabulary;
 
     // Grid over the image to speed up feature matching
-    std::vector<std::vector<std::vector<size_t> > > mGrid;
+    std::vector<std::vector<std::vector<size_t>>> mGrid;
 
     std::map<KeyFrame*, int> mConnectedKeyFrameWeights;
     std::vector<KeyFrame*> mvpOrderedConnectedKeyFrames;

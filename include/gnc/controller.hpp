@@ -26,7 +26,7 @@ enum class ControlState
 
 class Controller
 {
-   public:
+    public:
     struct Parameters
     {
         double mass;          //< vehicle mass
@@ -47,7 +47,7 @@ class Controller
     ControlState get_control_state() const;
     bool set_control_state(const ControlState new_control_state);
 
-   private:
+    private:
     mavlink::InnerLoopSetpoint move_to_current_target();
     double calculate_thrust(const double height_setpoint);
 

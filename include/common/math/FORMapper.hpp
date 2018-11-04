@@ -14,7 +14,7 @@
  */
 class FORMapper
 {
-   public:
+    public:
     /**
      * @brief Constructor. Initializes the matrices from calibration
      */
@@ -32,7 +32,7 @@ class FORMapper
     Eigen::Vector3d operator()(
         const Eigen::Vector3d &px, const Eigen::Vector3d &x, const Eigen::Quaterniond &q);
 
-   private:
+    private:
     Eigen::Matrix3d Rc2i;       // rotation matrix camera to imu
     Eigen::Matrix3d Ri2c;       // rotation matrix camera to imu
     Eigen::Vector3d Tc;         // translation in camera

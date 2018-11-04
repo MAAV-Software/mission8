@@ -21,27 +21,27 @@ extern "C" {
 typedef struct _feedback_t feedback_t;
 struct _feedback_t
 {
-    float      x[3];
-    float      y[3];
-    float      z[3];
-    float      roll;
-    float      pitch;
-    float      yaw;
-    int8_t     flags;
-    int64_t    utime;
-    float      batteryVoltage;
+    float x[3];
+    float y[3];
+    float z[3];
+    float roll;
+    float pitch;
+    float yaw;
+    int8_t flags;
+    int64_t utime;
+    float batteryVoltage;
 };
 
 /**
  * Create a deep copy of a feedback_t.
  * When no longer needed, destroy it with feedback_t_destroy()
  */
-feedback_t* feedback_t_copy(const feedback_t* to_copy);
+feedback_t *feedback_t_copy(const feedback_t *to_copy);
 
 /**
  * Destroy an instance of feedback_t created by feedback_t_copy()
  */
-void feedback_t_destroy(feedback_t* to_destroy);
+void feedback_t_destroy(feedback_t *to_destroy);
 
 /**
  * Encode a message of type feedback_t into binary form.
@@ -83,11 +83,11 @@ int feedback_t_encoded_size(const feedback_t *p);
 // LCM support functions. Users should not call these
 int64_t __feedback_t_get_hash(void);
 uint64_t __feedback_t_hash_recursive(const __lcm_hash_ptr *p);
-int     __feedback_t_encode_array(void *buf, int offset, int maxlen, const feedback_t *p, int elements);
-int     __feedback_t_decode_array(const void *buf, int offset, int maxlen, feedback_t *p, int elements);
-int     __feedback_t_decode_array_cleanup(feedback_t *p, int elements);
-int     __feedback_t_encoded_array_size(const feedback_t *p, int elements);
-int     __feedback_t_clone_array(const feedback_t *p, feedback_t *q, int elements);
+int __feedback_t_encode_array(void *buf, int offset, int maxlen, const feedback_t *p, int elements);
+int __feedback_t_decode_array(const void *buf, int offset, int maxlen, feedback_t *p, int elements);
+int __feedback_t_decode_array_cleanup(feedback_t *p, int elements);
+int __feedback_t_encoded_array_size(const feedback_t *p, int elements);
+int __feedback_t_clone_array(const feedback_t *p, feedback_t *q, int elements);
 
 #ifdef __cplusplus
 }

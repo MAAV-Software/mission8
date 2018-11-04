@@ -28,16 +28,19 @@
 #include <mutex>
 #include <opencv2/core/core.hpp>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class KeyFrame;
 class Map;
 class Frame;
 
-class MapPoint {
-   public:
+class MapPoint
+{
+    public:
     MapPoint(const cv::Mat& Pos, KeyFrame* pRefKF, Map* pMap);
     MapPoint(const cv::Mat& Pos, Map* pMap, Frame* pFrame, const int& idxF);
 
@@ -66,7 +69,6 @@ class MapPoint {
     void IncreaseFound(int n = 1);
     float GetFoundRatio();
     inline int GetFound() { return mnFound; }
-
     void ComputeDistinctiveDescriptors();
 
     cv::Mat GetDescriptor();
@@ -78,7 +80,7 @@ class MapPoint {
     int PredictScale(const float& currentDist, KeyFrame* pKF);
     int PredictScale(const float& currentDist, Frame* pF);
 
-   public:
+    public:
     long unsigned int mnId;
     static long unsigned int nNextId;
     long int mnFirstKFid;
@@ -108,7 +110,7 @@ class MapPoint {
 
     static std::mutex mGlobalMutex;
 
-   protected:
+    protected:
     // Position in absolute coordinates
     cv::Mat mWorldPos;
 

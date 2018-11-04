@@ -17,22 +17,22 @@ extern "C" {
 typedef struct _raw_pose_t raw_pose_t;
 struct _raw_pose_t
 {
-    float      x;
-    float      y;
-    float      yaw;
-    int64_t    utime;
+    float x;
+    float y;
+    float yaw;
+    int64_t utime;
 };
 
 /**
  * Create a deep copy of a raw_pose_t.
  * When no longer needed, destroy it with raw_pose_t_destroy()
  */
-raw_pose_t* raw_pose_t_copy(const raw_pose_t* to_copy);
+raw_pose_t *raw_pose_t_copy(const raw_pose_t *to_copy);
 
 /**
  * Destroy an instance of raw_pose_t created by raw_pose_t_copy()
  */
-void raw_pose_t_destroy(raw_pose_t* to_destroy);
+void raw_pose_t_destroy(raw_pose_t *to_destroy);
 
 /**
  * Encode a message of type raw_pose_t into binary form.
@@ -74,11 +74,11 @@ int raw_pose_t_encoded_size(const raw_pose_t *p);
 // LCM support functions. Users should not call these
 int64_t __raw_pose_t_get_hash(void);
 int64_t __raw_pose_t_hash_recursive(const __lcm_hash_ptr *p);
-int     __raw_pose_t_encode_array(void *buf, int offset, int maxlen, const raw_pose_t *p, int elements);
-int     __raw_pose_t_decode_array(const void *buf, int offset, int maxlen, raw_pose_t *p, int elements);
-int     __raw_pose_t_decode_array_cleanup(raw_pose_t *p, int elements);
-int     __raw_pose_t_encoded_array_size(const raw_pose_t *p, int elements);
-int     __raw_pose_t_clone_array(const raw_pose_t *p, raw_pose_t *q, int elements);
+int __raw_pose_t_encode_array(void *buf, int offset, int maxlen, const raw_pose_t *p, int elements);
+int __raw_pose_t_decode_array(const void *buf, int offset, int maxlen, raw_pose_t *p, int elements);
+int __raw_pose_t_decode_array_cleanup(raw_pose_t *p, int elements);
+int __raw_pose_t_encoded_array_size(const raw_pose_t *p, int elements);
+int __raw_pose_t_clone_array(const raw_pose_t *p, raw_pose_t *q, int elements);
 
 #ifdef __cplusplus
 }

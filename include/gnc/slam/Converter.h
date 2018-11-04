@@ -27,12 +27,15 @@
 #include "g2o/types/types_seven_dof_expmap.h"
 #include "g2o/types/types_six_dof_expmap.h"
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
-class Converter {
-   public:
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
+class Converter
+{
+    public:
     static std::vector<cv::Mat> toDescriptorVector(const cv::Mat& Descriptors);
 
     static g2o::SE3Quat toSE3Quat(const cv::Mat& cvT);
@@ -43,8 +46,8 @@ class Converter {
     static cv::Mat toCvMat(const Eigen::Matrix<double, 4, 4>& m);
     static cv::Mat toCvMat(const Eigen::Matrix3d& m);
     static cv::Mat toCvMat(const Eigen::Matrix<double, 3, 1>& m);
-    static cv::Mat toCvSE3(const Eigen::Matrix<double, 3, 3>& R,
-                           const Eigen::Matrix<double, 3, 1>& t);
+    static cv::Mat toCvSE3(
+        const Eigen::Matrix<double, 3, 3>& R, const Eigen::Matrix<double, 3, 1>& t);
 
     static Eigen::Matrix<double, 3, 1> toVector3d(const cv::Mat& cvVector);
     static Eigen::Matrix<double, 3, 1> toVector3d(const cv::Point3f& cvPoint);

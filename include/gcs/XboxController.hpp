@@ -14,7 +14,7 @@ class XboxController
 {
     using FourElemArray = std::array<double, 4>;
 
-   public:
+    public:
     /**
      * @brief Constructs an Xbox360 gamepad controller.
      */
@@ -86,7 +86,7 @@ class XboxController
      */
     const FourElemArray& getRawStickVals() const;
 
-   private:
+    private:
     // lx = left stick x values, positive values -> stick moved right
     // ly = left stick y values, positive values -> stick moved up
     // Range: [-1.0, 1.0]

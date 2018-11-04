@@ -20,7 +20,7 @@ namespace control
  */
 class Pid
 {
-   public:
+    public:
     Pid();
 
     /*
@@ -78,7 +78,7 @@ class Pid
 
     void reset();
 
-   private:
+    private:
     //! Proportional gain
     double _kp;
 

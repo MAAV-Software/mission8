@@ -22,7 +22,7 @@ typedef enum frame_state {
 
 class Decoder
 {
-   public:
+    public:
     // MODIFIES: *this
     // EFFECTS:  Tells the decoder that datum is the next byte in the
     //           received packet
@@ -65,7 +65,7 @@ class Decoder
     // Decodes the information in raw and assigns it into buffer.
     Decoder& operator=(const uint8_t* raw);
 
-   private:
+    private:
     uint32_t at;
     uint32_t size;
     uint8_t buffer[1024];

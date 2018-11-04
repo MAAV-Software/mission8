@@ -21,7 +21,7 @@ struct SlamInitializer
 
 class Localizer
 {
-   public:
+    public:
     Localizer(SlamInitializer& slam_init);
 
     ~Localizer();
@@ -31,7 +31,7 @@ class Localizer
     // TODO: Add imu to graph
     void add_imu(/*const measurements::ImuMeasurement& imu*/);
 
-   private:
+    private:
     slam::System slam;
 };
 

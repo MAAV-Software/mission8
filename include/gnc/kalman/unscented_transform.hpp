@@ -19,7 +19,7 @@ namespace kalman
 template <class TargetSpace>
 class UnscentedTransform
 {
-   public:
+    public:
     constexpr static size_t N = 1 + 2 * KalmanState::DoF;
 
     using Transform = std::function<TargetSpace(const KalmanState&)>;
@@ -53,13 +53,13 @@ class UnscentedTransform
 
     void set_transformation(Transform transform);
 
-   private:
+    private:
     TransformedPoints _transformed_points;
     SigmaPoints _sigma_points;
 
     void generate_sigma_points(const KalmanState& state);
 
-   private:
+    private:
     Transform _transformation;
 
     double _lambda;
@@ -70,7 +70,7 @@ class UnscentedTransform
     Weights _m_weights;
     Weights _c_weights;
 
-   public:
+    public:
     const Weights& m_weights() const { return _m_weights; }
     const Weights& c_weights() const { return _c_weights; }
     const SigmaPoints& last_sigma_points() const { return _sigma_points; }

@@ -16,7 +16,7 @@ namespace maav
  */
 class ObstacleDetector
 {
-   public:
+    public:
     /**
      * @brief Default
      */
@@ -68,7 +68,7 @@ class ObstacleDetector
      */
     std::vector<obstacle_data> detect(const std::vector<float>& laser_data);
 
-   private:
+    private:
     float start;
     float step;
 };

@@ -24,12 +24,13 @@
 #include "DBoW2/FORB.h"
 #include "DBoW2/TemplatedVocabulary.h"
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
-typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>
-    ORBVocabulary;
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
+typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB> ORBVocabulary;
 
 }  // namespace slam
 }  // namespace gnc

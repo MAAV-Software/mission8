@@ -24,23 +24,23 @@ extern "C" {
 typedef struct _gains_t gains_t;
 struct _gains_t
 {
-    float      xGains[6];
-    float      yGains[6];
-    float      zGains[6];
-    float      yawGains[3];
-    int64_t    utime;
+    float xGains[6];
+    float yGains[6];
+    float zGains[6];
+    float yawGains[3];
+    int64_t utime;
 };
 
 /**
  * Create a deep copy of a gains_t.
  * When no longer needed, destroy it with gains_t_destroy()
  */
-gains_t* gains_t_copy(const gains_t* to_copy);
+gains_t *gains_t_copy(const gains_t *to_copy);
 
 /**
  * Destroy an instance of gains_t created by gains_t_copy()
  */
-void gains_t_destroy(gains_t* to_destroy);
+void gains_t_destroy(gains_t *to_destroy);
 
 /**
  * Encode a message of type gains_t into binary form.
@@ -82,11 +82,11 @@ int gains_t_encoded_size(const gains_t *p);
 // LCM support functions. Users should not call these
 int64_t __gains_t_get_hash(void);
 int64_t __gains_t_hash_recursive(const __lcm_hash_ptr *p);
-int     __gains_t_encode_array(void *buf, int offset, int maxlen, const gains_t *p, int elements);
-int     __gains_t_decode_array(const void *buf, int offset, int maxlen, gains_t *p, int elements);
-int     __gains_t_decode_array_cleanup(gains_t *p, int elements);
-int     __gains_t_encoded_array_size(const gains_t *p, int elements);
-int     __gains_t_clone_array(const gains_t *p, gains_t *q, int elements);
+int __gains_t_encode_array(void *buf, int offset, int maxlen, const gains_t *p, int elements);
+int __gains_t_decode_array(const void *buf, int offset, int maxlen, gains_t *p, int elements);
+int __gains_t_decode_array_cleanup(gains_t *p, int elements);
+int __gains_t_encoded_array_size(const gains_t *p, int elements);
+int __gains_t_clone_array(const gains_t *p, gains_t *q, int elements);
 
 #ifdef __cplusplus
 }

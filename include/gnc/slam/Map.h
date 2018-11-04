@@ -27,15 +27,18 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class MapPoint;
 class KeyFrame;
 
-class Map {
-   public:
+class Map
+{
+    public:
     Map();
 
     void AddKeyFrame(KeyFrame* pKF);
@@ -65,7 +68,7 @@ class Map {
     // (id conflict)
     std::mutex mMutexPointCreation;
 
-   protected:
+    protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
 

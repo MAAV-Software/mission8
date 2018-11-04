@@ -24,13 +24,13 @@ namespace kalman
  */
 class KalmanState : public state::BaseState
 {
-   public:
+    public:
     constexpr static size_t DoF = 9;
 
     using CovarianceMatrix = Eigen::Matrix<double, DoF, DoF>;
     using ErrorStateVector = Eigen::Matrix<double, DoF, 1>;
 
-   public:
+    public:
     KalmanState(uint64_t time_usec);
 
     KalmanState() = default;
@@ -52,7 +52,7 @@ class KalmanState : public state::BaseState
     const CovarianceMatrix& covariance() const;
     CovarianceMatrix& covariance();
 
-   protected:
+    protected:
     Eigen::Vector3d _gyro_bias;
 
     Eigen::Vector3d _accel_bias;
@@ -63,7 +63,7 @@ class KalmanState : public state::BaseState
 
     CovarianceMatrix _covar;
 
-   public:
+    public:
     constexpr static size_t N = 1 + 2 * DoF;
     // TODO: Make private
     static KalmanState mean(
@@ -75,7 +75,7 @@ class KalmanState : public state::BaseState
     /**
      * Functions required for computing with gaussians and such.
      */
-   public:
+    public:
     static KalmanState compute_gaussian(const std::array<KalmanState, 1 + 2 * DoF>& points,
         const std::array<double, N>& m_weights, const std::array<double, N>& c_weights);
 

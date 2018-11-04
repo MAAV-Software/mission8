@@ -28,19 +28,22 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Tracking;
 class FrameDrawer;
 class MapDrawer;
 class System;
 
-class Viewer {
-   public:
-    Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
-           Tracking* pTracking, const string& strSettingPath);
+class Viewer
+{
+    public:
+    Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking* pTracking,
+        const string& strSettingPath);
 
     // Main thread function. Draw points, keyframes, the current camera pose and
     // the last processed frame. Drawing is refreshed according to the camera
@@ -57,7 +60,7 @@ class Viewer {
 
     void Release();
 
-   private:
+    private:
     bool Stop();
 
     System* mpSystem;

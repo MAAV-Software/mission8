@@ -39,10 +39,12 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Viewer;
 class FrameDrawer;
 class Map;
@@ -50,19 +52,17 @@ class LocalMapping;
 class LoopClosing;
 class System;
 
-class Tracking {
-   public:
-    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer,
-             MapDrawer* pMapDrawer, Map* pMap, KeyFrameDatabase* pKFDB,
-             const string& strSettingPath, const int sensor);
+class Tracking
+{
+    public:
+    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
+        Map* pMap, KeyFrameDatabase* pKFDB, const string& strSettingPath, const int sensor);
 
     // Preprocess the input and call Track(). Extract features and performs
     // stereo matching.
-    cv::Mat GrabImageStereo(const cv::Mat& imRectLeft,
-                            const cv::Mat& imRectRight,
-                            const double& timestamp);
-    cv::Mat GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
-                          const double& timestamp);
+    cv::Mat GrabImageStereo(
+        const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp);
+    cv::Mat GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD, const double& timestamp);
     cv::Mat GrabImageMonocular(const cv::Mat& im, const double& timestamp);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
@@ -79,9 +79,10 @@ class Tracking {
     // to localize the camera.
     void InformOnlyTracking(const bool& flag);
 
-   public:
+    public:
     // Tracking states
-    enum eTrackingState {
+    enum eTrackingState
+    {
         SYSTEM_NOT_READY = -1,
         NO_IMAGES_YET = 0,
         NOT_INITIALIZED = 1,
@@ -120,7 +121,7 @@ class Tracking {
 
     void Reset();
 
-   protected:
+    protected:
     // Main tracking function. It is independent of the input sensor.
     void Track();
 

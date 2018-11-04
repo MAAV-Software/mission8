@@ -42,12 +42,12 @@ class AutoRescaleSlider : public Gtk::Scale
     // updates the scale to reflect new values of cur_scale and cur_digits
     void update_scale();
 
-   protected:
+    protected:
     // handle button release events to adjust the range when the user lets go of
     // the thumb
     bool on_button_release_event(GdkEventButton*) override;
 
-   public:
+    public:
     /**
      * @brief Creates a default AutoRescaleSlider with an initial range from 0
      * to 11
@@ -75,7 +75,7 @@ class TuningFrame : public Gtk::Frame
         Gtk::Label label;
         const GCSConsts CONSTS;
 
-       public:
+        public:
         // label text is specified via the constructor
         PIDScale(const char* name, const GCSConsts& consts_in);
 
@@ -98,7 +98,7 @@ class TuningFrame : public Gtk::Frame
         const GCSConsts& CONSTS;
         PIDScale p{"P", CONSTS}, i{"I", CONSTS}, d{"D", CONSTS};
 
-       public:
+        public:
         explicit PIDControl(const GCSConsts& consts_in);
 
         // getters and setters which update/read the three sub-controls
@@ -158,7 +158,7 @@ class TuningFrame : public Gtk::Frame
     // The current saved params
     ctrl_params_t saved_params;
 
-   public:
+    public:
     /**
      * @brief Sets up a tuning frame
      */

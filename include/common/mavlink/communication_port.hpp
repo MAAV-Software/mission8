@@ -30,13 +30,13 @@ constexpr size_t BUFFER_SIZE = 300;
 
 class CommunicationPort
 {
-   public:
+    public:
     CommunicationPort(CommunicationType type, const std::string &port_path);
     ~CommunicationPort();
     bool read_message(mavlink_message_t &message);
     void write_message(const mavlink_message_t &message);
 
-   private:
+    private:
     CommunicationType com_type;
 
     struct sockaddr_in local_address;

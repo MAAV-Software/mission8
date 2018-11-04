@@ -16,7 +16,7 @@ namespace maav
  */
 class LaserReaderDecoder
 {
-   public:
+    public:
     /**
      * @brief Decodes laser reader data to produce distance values
      * @param data The data to read
@@ -39,7 +39,7 @@ class LaserReaderDecoder
  */
 class SerialLaserReader : LaserReaderDecoder
 {
-   public:
+    public:
     /**
      * @brief Opens the given port for communication
      * @param serialPort Path of serial port to connect to
@@ -100,7 +100,7 @@ class SerialLaserReader : LaserReaderDecoder
      */
     double getStep();
 
-   private:
+    private:
     std::string send(const std::string& command);
 
     std::string getDistData(int start, int end, int resolution);
@@ -116,7 +116,7 @@ class SerialLaserReader : LaserReaderDecoder
  */
 class StaticLaserReader : LaserReaderDecoder
 {
-   public:
+    public:
     // LaserReaderDecoder's getDistances is sufficient for this class
     using LaserReaderDecoder::getDistances;
 

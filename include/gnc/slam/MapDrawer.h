@@ -28,12 +28,15 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
-class MapDrawer {
-   public:
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
+class MapDrawer
+{
+    public:
     MapDrawer(Map* pMap, const string& strSettingPath);
 
     Map* mpMap;
@@ -45,7 +48,7 @@ class MapDrawer {
     void SetReferenceKeyFrame(KeyFrame* pKF);
     void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix& M);
 
-   private:
+    private:
     float mKeyFrameSize;
     float mKeyFrameLineWidth;
     float mGraphLineWidth;

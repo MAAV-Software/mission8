@@ -30,15 +30,18 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Tracking;
 class Viewer;
 
-class FrameDrawer {
-   public:
+class FrameDrawer
+{
+    public:
     FrameDrawer(Map* pMap);
 
     // Update info from the last processed frame.
@@ -47,7 +50,7 @@ class FrameDrawer {
     // Draw last processed frame.
     cv::Mat DrawFrame();
 
-   protected:
+    protected:
     void DrawTextInfo(cv::Mat& im, int nState, cv::Mat& imText);
 
     // Info of the frame to be drawn

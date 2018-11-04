@@ -74,7 +74,7 @@ class GlibZCM : zcm::ZCM
     // the callback for that connection
     bool handle_input();
 
-   public:
+    public:
     /**
      * @brief Creates an sets up a Glib-enabled ZCM connection
      */
@@ -116,7 +116,7 @@ class GlibZCM : zcm::ZCM
             return on_message(*msg);
         }
 
-       protected:
+        protected:
         /**
          * @brief The virtual function used for handling messages
          * @param msg The message to handle
@@ -125,7 +125,7 @@ class GlibZCM : zcm::ZCM
         // the channel used for this subscription
         const std::string channel;
 
-       public:
+        public:
         /**
          * @brief Creates a handler for handling messages from a given channel
          * @param zcm_in The GlibZCM object to use the handle with

@@ -20,10 +20,10 @@ namespace kalman
  */
 class History
 {
-   public:
+    public:
     explicit History(YAML::Node config);
 
-   public:
+    public:
     /**
      * Snapshots store all information about a state at a specific time.
      */
@@ -54,7 +54,7 @@ class History
 
     size_t size();
 
-   private:
+    private:
     void resize(Iterator last_modified);
 
     /***
@@ -70,7 +70,7 @@ class History
 
     Iterator set_last_modified(const Iterator last_modified, const Iterator modified) const;
 
-   private:
+    private:
     size_t _size;
     uint64_t tolerance;
 

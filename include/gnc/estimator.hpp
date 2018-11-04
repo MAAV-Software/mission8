@@ -9,12 +9,12 @@ namespace gnc
 {
 class Estimator
 {
-   public:
+    public:
     Estimator();
 
     const State& add_measurement_set(const measurements::MeasurementSet& meas);
 
-   private:
+    private:
     State state;
 };
 

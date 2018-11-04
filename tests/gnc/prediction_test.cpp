@@ -25,7 +25,7 @@ using namespace maav::gnc;
 
 class TestUkfPrediction : public UkfPrediction
 {
-   public:
+    public:
     using UkfPrediction::UkfPrediction;
     using UkfPrediction::operator();
     const KalmanState& get_transformed_mean()

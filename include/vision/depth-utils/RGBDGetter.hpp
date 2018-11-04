@@ -22,7 +22,7 @@
 // RGBD data from the filesystem and providing it in various forms
 class RGBDGetter
 {
-   public:
+    public:
     // Creates a new RGBDGetter with the given numbered directory
     //
     // _num : the number of the directory to pull RGBD data from
@@ -74,7 +74,7 @@ class RGBDGetter
     // the timestamp is updated to the time of the next frame
     RGBDGetter &operator++();
 
-   private:
+    private:
     int counter = 0;
     int64_t timestamp = 0;
     std::ifstream timestamps;

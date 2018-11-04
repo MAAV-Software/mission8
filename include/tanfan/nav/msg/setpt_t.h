@@ -23,24 +23,24 @@ extern "C" {
 typedef struct _setpt_t setpt_t;
 struct _setpt_t
 {
-    float      x;
-    float      y;
-    float      z;
-    float      yaw;
-    int8_t     flags;
-    int32_t    utime;
+    float x;
+    float y;
+    float z;
+    float yaw;
+    int8_t flags;
+    int32_t utime;
 };
 
 /**
  * Create a deep copy of a setpt_t.
  * When no longer needed, destroy it with setpt_t_destroy()
  */
-setpt_t* setpt_t_copy(const setpt_t* to_copy);
+setpt_t *setpt_t_copy(const setpt_t *to_copy);
 
 /**
  * Destroy an instance of setpt_t created by setpt_t_copy()
  */
-void setpt_t_destroy(setpt_t* to_destroy);
+void setpt_t_destroy(setpt_t *to_destroy);
 
 /**
  * Encode a message of type setpt_t into binary form.
@@ -82,11 +82,11 @@ int setpt_t_encoded_size(const setpt_t *p);
 // LCM support functions. Users should not call these
 int64_t __setpt_t_get_hash(void);
 int64_t __setpt_t_hash_recursive(const __lcm_hash_ptr *p);
-int     __setpt_t_encode_array(void *buf, int offset, int maxlen, const setpt_t *p, int elements);
-int     __setpt_t_decode_array(const void *buf, int offset, int maxlen, setpt_t *p, int elements);
-int     __setpt_t_decode_array_cleanup(setpt_t *p, int elements);
-int     __setpt_t_encoded_array_size(const setpt_t *p, int elements);
-int     __setpt_t_clone_array(const setpt_t *p, setpt_t *q, int elements);
+int __setpt_t_encode_array(void *buf, int offset, int maxlen, const setpt_t *p, int elements);
+int __setpt_t_decode_array(const void *buf, int offset, int maxlen, setpt_t *p, int elements);
+int __setpt_t_decode_array_cleanup(setpt_t *p, int elements);
+int __setpt_t_encoded_array_size(const setpt_t *p, int elements);
+int __setpt_t_clone_array(const setpt_t *p, setpt_t *q, int elements);
 
 #ifdef __cplusplus
 }

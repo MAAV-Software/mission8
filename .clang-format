@@ -21,4 +21,5 @@ Standard: Cpp11
 TabWidth: '4'
 UseTab: Never
 AlignAfterOpenBracket: DontAlign
+AccessModifierOffset: 0
 ...

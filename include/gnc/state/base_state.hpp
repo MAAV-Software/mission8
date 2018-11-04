@@ -18,7 +18,7 @@ namespace state
  */
 class BaseState
 {
-   public:
+    public:
     /**
      * Create a state with uninitialized members
      */
@@ -55,7 +55,7 @@ class BaseState
     uint64_t time_usec() const;
     double time_sec() const;
 
-   protected:
+    protected:
     uint64_t _time_usec;
 
     /**

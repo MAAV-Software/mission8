@@ -96,7 +96,8 @@ struct lcmlite
 };
 
 // Caller allocates the lcmlite_t object, which we initialize.
-int lcmlite_init(lcmlite_t *lcm, void (*transmit_packet)(const void *_buf, int buf_len, void *user), void *transmit_user);
+int lcmlite_init(lcmlite_t *lcm, void (*transmit_packet)(const void *_buf, int buf_len, void *user),
+    void *transmit_user);
 
 // The user is responsible for creating and listening on a UDP
 // multicast socket. When a packet is received, call this function. Do

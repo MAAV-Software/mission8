@@ -15,7 +15,7 @@ using namespace std;
 
 class LidarViewer
 {
-   public:
+    public:
     LidarViewer(bool hold_in)
         : hold(hold_in),
           width{1000},
@@ -96,7 +96,7 @@ class LidarViewer
         //		}
     }
 
-   private:
+    private:
     bool hold;
     int width;
     int height;

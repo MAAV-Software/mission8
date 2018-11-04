@@ -19,7 +19,7 @@ namespace kalman
 template <class TargetSpace>
 class BaseUpdate
 {
-   private:
+    private:
     using UT = UnscentedTransform<TargetSpace>;
     constexpr static size_t TargetDoF = TargetSpace::DoF;
     using CovarianceMatrix = typename TargetSpace::CovarianceMatrix;
@@ -27,7 +27,7 @@ class BaseUpdate
     using CrossCovarianceMatrix = Eigen::Matrix<double, KalmanState::DoF, TargetDoF>;
     using KalmanGainMatrix = CrossCovarianceMatrix;
 
-   public:
+    public:
     BaseUpdate()
         : _unscented_transform(std::bind(&BaseUpdate::predicted, this, _1), 0.1, 2, 0.0),
           R(CovarianceMatrix::Zero())  // TODO: Read in from yaml
@@ -74,7 +74,7 @@ class BaseUpdate
         snapshot.state.covariance() -= K * S * K.transpose();
     }
 
-   private:
+    private:
     UT _unscented_transform;
     CovarianceMatrix R;
 };

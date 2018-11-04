@@ -32,38 +32,39 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 #define FRAME_GRID_ROWS 48
 #define FRAME_GRID_COLS 64
 
 class MapPoint;
 class KeyFrame;
 
-class Frame {
-   public:
+class Frame
+{
+    public:
     Frame();
 
     // Copy constructor.
     Frame(const Frame& frame);
 
     // Constructor for stereo cameras.
-    Frame(const cv::Mat& imLeft, const cv::Mat& imRight,
-          const double& timeStamp, ORBextractor* extractorLeft,
-          ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat& K,
-          cv::Mat& distCoef, const float& bf, const float& thDepth);
+    Frame(const cv::Mat& imLeft, const cv::Mat& imRight, const double& timeStamp,
+        ORBextractor* extractorLeft, ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat& K,
+        cv::Mat& distCoef, const float& bf, const float& thDepth);
 
     // Constructor for RGB-D cameras.
-    Frame(const cv::Mat& imGray, const cv::Mat& imDepth,
-          const double& timeStamp, ORBextractor* extractor, ORBVocabulary* voc,
-          cv::Mat& K, cv::Mat& distCoef, const float& bf, const float& thDepth);
+    Frame(const cv::Mat& imGray, const cv::Mat& imDepth, const double& timeStamp,
+        ORBextractor* extractor, ORBVocabulary* voc, cv::Mat& K, cv::Mat& distCoef, const float& bf,
+        const float& thDepth);
 
     // Constructor for Monocular cameras.
-    Frame(const cv::Mat& imGray, const double& timeStamp,
-          ORBextractor* extractor, ORBVocabulary* voc, cv::Mat& K,
-          cv::Mat& distCoef, const float& bf, const float& thDepth);
+    Frame(const cv::Mat& imGray, const double& timeStamp, ORBextractor* extractor,
+        ORBVocabulary* voc, cv::Mat& K, cv::Mat& distCoef, const float& bf, const float& thDepth);
 
     // Extract ORB on the image. 0 for left image and 1 for right image.
     void ExtractORB(int flag, const cv::Mat& im);
@@ -80,10 +81,8 @@ class Frame {
 
     // Returns the camera center.
     inline cv::Mat GetCameraCenter() { return mOw.clone(); }
-
     // Returns inverse of rotation
     inline cv::Mat GetRotationInverse() { return mRwc.clone(); }
-
     // Check if a MapPoint is in the frustum of the camera
     // and fill variables of the MapPoint to be used by the tracking
     bool isInFrustum(MapPoint* pMP, float viewingCosLimit);
@@ -91,10 +90,8 @@ class Frame {
     // Compute the cell of a keypoint (return false if outside the grid)
     bool PosInGrid(const cv::KeyPoint& kp, int& posX, int& posY);
 
-    std::vector<size_t> GetFeaturesInArea(const float& x, const float& y,
-                                          const float& r,
-                                          const int minLevel = -1,
-                                          const int maxLevel = -1) const;
+    std::vector<size_t> GetFeaturesInArea(const float& x, const float& y, const float& r,
+        const int minLevel = -1, const int maxLevel = -1) const;
 
     // Search a match for each keypoint in the left image to a keypoint in the
     // right image. If there is a match, depth is computed and the right
@@ -109,7 +106,7 @@ class Frame {
     // coordinates.
     cv::Mat UnprojectStereo(const int& i);
 
-   public:
+    public:
     // Vocabulary used for relocalization.
     ORBVocabulary* mpORBvocabulary;
 
@@ -200,7 +197,7 @@ class Frame {
 
     static bool mbInitialComputations;
 
-   private:
+    private:
     // Undistort keypoints given OpenCV distortion parameters.
     // Only for the RGB-D case. Stereo must be already rectified!
     // (called in the constructor).

@@ -5,7 +5,7 @@ namespace maav
 {
 class Controller
 {
-   public:
+    public:
     virtual void move(double dx, double dy, double dz) = 0;
 
     virtual void rotate(double dr, double dp, double dy) = 0;

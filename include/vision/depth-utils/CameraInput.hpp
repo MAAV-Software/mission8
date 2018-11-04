@@ -19,7 +19,7 @@
 // and provides the RGBD data in various forms
 class CameraInput : public CameraInputBase
 {
-   public:
+    public:
     // Creates a new CameraInput instance that pulls
     // frames from the camera associated with the provided
     // camera id (creates a new rs::context to find the device)
@@ -117,7 +117,7 @@ class CameraInput : public CameraInputBase
 
     virtual void getMappedPointCloud(pcl::PointCloud<pcl::PointXYZ> &cloud) const override;
 
-   private:
+    private:
     int camera_id;
     bool isSource;
 

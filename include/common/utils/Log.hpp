@@ -91,7 +91,7 @@ namespace maav
  */
 class Log
 {
-   public:
+    public:
     /**
      * @brief A type for representing a log level
      */
@@ -103,7 +103,7 @@ class Log
         error
     };
 
-   private:
+    private:
     // mutexes for the streams
     static std::mutex clog_mutex, file_mutex;
 
@@ -124,7 +124,7 @@ class Log
         std::tm time_struct;
         std::chrono::milliseconds millis;
 
-       public:
+        public:
         /**
          * @brief Constructs a TimeWriter with a certain time
          */
@@ -139,7 +139,7 @@ class Log
     // we need to friend TimeWriter's operator<< out here too
     friend std::ostream& operator<<(std::ostream&, const TimeWriter&);
 
-   public:
+    public:
     /**
      * @brief No instantiation for you
      */
@@ -208,7 +208,7 @@ class Log
         //(info seems like a sensible default)
         Level level{Level::info};
 
-       public:
+        public:
         /**
          * @brief Constructs a Logger
          * @param mod_id The "module identifier" to use

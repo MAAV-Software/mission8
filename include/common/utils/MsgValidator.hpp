@@ -9,7 +9,7 @@
  */
 class MsgValidator
 {
-   public:
+    public:
     /**
      * @brief Contructs a MsgValidator and sets the internal prevTime to 0
      */
@@ -21,7 +21,7 @@ class MsgValidator
      */
     bool operator()(int64_t utime);
 
-   private:
+    private:
     int64_t prevTime;  ///< previous time stamp
 };
 

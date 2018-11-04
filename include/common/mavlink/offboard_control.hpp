@@ -28,14 +28,14 @@ struct InnerLoopSetpoint
 
 class OffboardControl
 {
-   public:
+    public:
     OffboardControl(const CommunicationType, const std::string& port_path = "");
     ~OffboardControl();
 
     void set_attitude_target(const InnerLoopSetpoint&, const uint8_t = 0b00000000);
     void takeoff(const float takeoff_altitude);
 
-   private:
+    private:
     bool read_message();
     void read_thread();
     void write_message(const mavlink_message_t& message);

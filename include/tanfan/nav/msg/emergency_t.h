@@ -21,19 +21,19 @@ extern "C" {
 typedef struct _emergency_t emergency_t;
 struct _emergency_t
 {
-    int8_t     status;
+    int8_t status;
 };
 
 /**
  * Create a deep copy of a emergency_t.
  * When no longer needed, destroy it with emergency_t_destroy()
  */
-emergency_t* emergency_t_copy(const emergency_t* to_copy);
+emergency_t *emergency_t_copy(const emergency_t *to_copy);
 
 /**
  * Destroy an instance of emergency_t created by emergency_t_copy()
  */
-void emergency_t_destroy(emergency_t* to_destroy);
+void emergency_t_destroy(emergency_t *to_destroy);
 
 /**
  * Encode a message of type emergency_t into binary form.
@@ -75,11 +75,13 @@ int emergency_t_encoded_size(const emergency_t *p);
 // LCM support functions. Users should not call these
 int64_t __emergency_t_get_hash(void);
 int64_t __emergency_t_hash_recursive(const __lcm_hash_ptr *p);
-int     __emergency_t_encode_array(void *buf, int offset, int maxlen, const emergency_t *p, int elements);
-int     __emergency_t_decode_array(const void *buf, int offset, int maxlen, emergency_t *p, int elements);
-int     __emergency_t_decode_array_cleanup(emergency_t *p, int elements);
-int     __emergency_t_encoded_array_size(const emergency_t *p, int elements);
-int     __emergency_t_clone_array(const emergency_t *p, emergency_t *q, int elements);
+int __emergency_t_encode_array(
+    void *buf, int offset, int maxlen, const emergency_t *p, int elements);
+int __emergency_t_decode_array(
+    const void *buf, int offset, int maxlen, emergency_t *p, int elements);
+int __emergency_t_decode_array_cleanup(emergency_t *p, int elements);
+int __emergency_t_encoded_array_size(const emergency_t *p, int elements);
+int __emergency_t_clone_array(const emergency_t *p, emergency_t *q, int elements);
 
 #ifdef __cplusplus
 }

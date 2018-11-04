@@ -15,7 +15,7 @@
 template <typename T>
 class Tracker
 {
-   public:
+    public:
     /**
      * @brief Constructs a tracker of given size.
      * @param max	Max size.
@@ -63,7 +63,7 @@ class Tracker
     typename std::deque<RecordPtr<T>>::iterator insert(
         typename std::deque<RecordPtr<T>>::iterator position, RecordPtr<T> record);
 
-   private:
+    private:
     size_t maxSize;                    ///< max size for tracker
     std::deque<RecordPtr<T>> history;  ///< deque of tracked history record ptrs
 };

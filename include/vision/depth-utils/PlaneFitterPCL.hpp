@@ -23,7 +23,7 @@
 
 class PlaneFitterPCL
 {
-   public:
+    public:
     PlaneFitterPCL(float inlierThreshold);
     // Used mainly for testing converts from dz point
     // cloud to pcl point cloud
@@ -40,7 +40,7 @@ class PlaneFitterPCL
     // Get the last height
     float getLastHeight() const;
 
-   private:
+    private:
     float inlierThresh;
     float lastHeight;
     Eigen::MatrixXf junkMatrix;

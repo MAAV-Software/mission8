@@ -7,7 +7,7 @@
 
 class DataLogReader
 {
-   public:
+    public:
     DataLogReader() = delete;
 
     // Creates a DataLogReader to read from the given directory
@@ -27,7 +27,7 @@ class DataLogReader
     // allows for jumping to a certain counter position
     void setCounter(int count);
 
-   private:
+    private:
     std::string directory;
     int counter;
     int cameraNumber;

@@ -151,7 +151,7 @@ class PRNG
     // also has a lot of state
     std::mt19937 random_engine;
 
-   public:
+    public:
     /**
      * @brief Creates a randomly-seeded PRNG
      */

@@ -13,10 +13,10 @@ namespace err
  */
 class LocalizationError : std::exception
 {
-   public:
+    public:
     explicit LocalizationError(const std::string &problem) : reason{problem} {}
     virtual const char *what() const noexcept override { return reason.c_str(); }
-   private:
+    private:
     std::string reason;
 };
 

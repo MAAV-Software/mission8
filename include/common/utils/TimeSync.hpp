@@ -5,7 +5,7 @@
 
 class TimeSync
 {
-   public:
+    public:
     TimeSync(double in_alpha1, double in_alpha2);
 
     long f(long diff);
@@ -14,7 +14,7 @@ class TimeSync
 
     long bootstrap(long tivaTimeStamp, long recvTimeStamp);
 
-   private:
+    private:
     bool doBootstrap = true;
     long tivaTimeStamp;
     long recvTimeStamp;

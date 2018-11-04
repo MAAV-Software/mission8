@@ -29,16 +29,19 @@
 
 #include <mutex>
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Tracking;
 class LoopClosing;
 class Map;
 
-class LocalMapping {
-   public:
+class LocalMapping
+{
+    public:
     LocalMapping(Map* pMap, const float bMonocular);
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
@@ -66,12 +69,13 @@ class LocalMapping {
     void RequestFinish();
     bool isFinished();
 
-    int KeyframesInQueue() {
+    int KeyframesInQueue()
+    {
         unique_lock<std::mutex> lock(mMutexNewKFs);
         return mlNewKeyFrames.size();
     }
 
-   protected:
+    protected:
     bool CheckNewKeyFrames();
     void ProcessNewKeyFrame();
     void CreateNewMapPoints();

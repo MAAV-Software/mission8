@@ -33,25 +33,26 @@
 #include <thread>
 #include "g2o/types/types_seven_dof_expmap.h"
 
-namespace maav {
-namespace gnc {
-namespace slam {
-
+namespace maav
+{
+namespace gnc
+{
+namespace slam
+{
 class Tracking;
 class LocalMapping;
 class KeyFrameDatabase;
 
-class LoopClosing {
-   public:
+class LoopClosing
+{
+    public:
     typedef pair<set<KeyFrame*>, int> ConsistentGroup;
-    typedef map<
-        KeyFrame*, g2o::Sim3, std::less<KeyFrame*>,
-        Eigen::aligned_allocator<std::pair<const KeyFrame*, g2o::Sim3> > >
+    typedef map<KeyFrame*, g2o::Sim3, std::less<KeyFrame*>,
+        Eigen::aligned_allocator<std::pair<const KeyFrame*, g2o::Sim3>>>
         KeyFrameAndPose;
 
-   public:
-    LoopClosing(Map* pMap, KeyFrameDatabase* pDB, ORBVocabulary* pVoc,
-                const bool bFixScale);
+    public:
+    LoopClosing(Map* pMap, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, const bool bFixScale);
 
     void SetTracker(Tracking* pTracker);
 
@@ -67,11 +68,13 @@ class LoopClosing {
     // This function will run in a separate thread
     void RunGlobalBundleAdjustment(unsigned long nLoopKF);
 
-    bool isRunningGBA() {
+    bool isRunningGBA()
+    {
         unique_lock<std::mutex> lock(mMutexGBA);
         return mbRunningGBA;
     }
-    bool isFinishedGBA() {
+    bool isFinishedGBA()
+    {
         unique_lock<std::mutex> lock(mMutexGBA);
         return mbFinishedGBA;
     }
@@ -82,7 +85,7 @@ class LoopClosing {
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-   protected:
+    protected:
     bool CheckNewKeyFrames();
 
     bool DetectLoop();

@@ -1,8 +1,8 @@
 #ifndef DATA_LINK_LAYER_H
 #define DATA_LINK_LAYER_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +34,7 @@ extern "C" {
 #define DATA_FRAME_START_DELIMITER 0x7E
 #define DATA_FRAME_ESCAPE_CHAR 0x7D
 #define DATA_FRAME_XOR 0x20
-#define DATA_LINK_UART_BASE UART0_BASE //TODO: Changed to correct UART base
+#define DATA_LINK_UART_BASE UART0_BASE  // TODO: Changed to correct UART base
 
 #define CHANNEL_TARGET "TGT"
 #define CHANNEL_TUNING "TUN"
@@ -52,22 +52,25 @@ A Data link layer packet will look at like
 <msg> - msg with escaped characters
 <checksum> - 1 to 2 bytes (depending if it needs to be escaped)
 
-checksum is the sum of all the data bytes (unescaped), take only the least significant byte, and subtract from 0xFF.
+checksum is the sum of all the data bytes (unescaped), take only the least significant byte, and
+subtract from 0xFF.
 NOTE: probably should include the length bytes in the checksum
 */
 
 // states for data_frame_push_byte
-// typedef enum data_frame_state { READY, LEN_1, LEN_2, LEN_1_ESCP, LEN_2_ESCP, READ, READ_ESCP, CHECKSUM, CHECKSUM_ESCP, DONE, START_ERR, CHECKSUM_ERR, DATA_ERR } data_frame_state_t;
+// typedef enum data_frame_state { READY, LEN_1, LEN_2, LEN_1_ESCP, LEN_2_ESCP, READ, READ_ESCP,
+// CHECKSUM, CHECKSUM_ESCP, DONE, START_ERR, CHECKSUM_ERR, DATA_ERR } data_frame_state_t;
 
 extern char* data_frame_state_names[];
 
 // structure to hold a data frame while it's being decoded
-typedef struct data_frame {
-	uint8_t* buffer;
-	uint16_t size; // keeps track of length of message
-	uint16_t index;
-	uint8_t checksum;
-	//data_frame_state_t state; // state determing next byte read in
+typedef struct data_frame
+{
+    uint8_t* buffer;
+    uint16_t size;  // keeps track of length of message
+    uint16_t index;
+    uint8_t checksum;
+    // data_frame_state_t state; // state determing next byte read in
 } data_frame_t;
 
 /**
@@ -106,14 +109,15 @@ void data_frame_clear(data_frame_t* frame);
  * @param byte byte to push into frame
  * @return true if byte was succesfully processed
  */
-//bool data_frame_push_byte(data_frame_t* frame, uint8_t byte);
+// bool data_frame_push_byte(data_frame_t* frame, uint8_t byte);
 
 /**
  * @brief assembles a packet in the data link layer
  * @details will add the message delimiters, escape the
  * necessary characters, and calculate the checksum
  * @param msg message to be encapsulated
- * @param pkt array to put assembled packet in (size should be 2 * sizeof(msg) + 3) to be on the safe side
+ * @param pkt array to put assembled packet in (size should be 2 * sizeof(msg) + 3) to be on the
+ * safe side
  * @param size size of msg
  * @return size of pkt
  */
@@ -128,7 +132,7 @@ uint16_t data_link_assemble_packet(uint8_t* msg, uint8_t* pkt, uint16_t size);
  * @param size place to put the size of the msg
  * @return true if successfully decoded
  */
-//bool data_link_decode_packet(uint8_t* msg, uint8_t* pkt, uint16_t* size);
+// bool data_link_decode_packet(uint8_t* msg, uint8_t* pkt, uint16_t* size);
 
 #ifdef __cplusplus
 }
