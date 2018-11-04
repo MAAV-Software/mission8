@@ -11,11 +11,11 @@ namespace measurements
  */
 struct PlaneFitMeasurement
 {
-	double height;
-	double vertical_speed;
-	double roll;
-	double pitch;
-	uint64_t time_usec;
+    double height;
+    double vertical_speed;
+    double roll;
+    double pitch;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements

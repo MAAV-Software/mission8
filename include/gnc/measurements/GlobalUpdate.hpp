@@ -14,9 +14,9 @@ namespace measurements
  */
 struct GlobalUpdateMeasurement
 {
-	Eigen::Vector3d position;
-	Sophus::SO3d attitude;
-	uint64_t time_usec;
+    Eigen::Vector3d position;
+    Sophus::SO3d attitude;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements

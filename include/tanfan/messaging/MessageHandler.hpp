@@ -14,16 +14,16 @@
 
 struct MessageHandler
 {
-	lidar_t lidar;
-	imu_t imu;
-	emergency_t ems;
-	int64_t offset;
+    lidar_t lidar;
+    imu_t imu;
+    emergency_t ems;
+    int64_t offset;
 
-	zcm::ZCM *zcm;
-	TimeSync ts;
+    zcm::ZCM *zcm;
+    TimeSync ts;
 
-	MessageHandler(zcm::ZCM *zcm_in, double alpha1 = DEFAULT_ALPHA1,
-				   double alpha2 = DEFAULT_ALPHA2);
+    MessageHandler(
+        zcm::ZCM *zcm_in, double alpha1 = DEFAULT_ALPHA1, double alpha2 = DEFAULT_ALPHA2);
 };
 
 void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len, void *user);

@@ -17,16 +17,16 @@ namespace maav
 class LaserReaderDecoder
 {
    public:
-	/**
-	 * @brief Decodes laser reader data to produce distance values
-	 * @param data The data to read
-	 * @return The distances at each measurement (in meters)
-	 */
-	std::vector<double> getDistances(const std::string& data);
+    /**
+     * @brief Decodes laser reader data to produce distance values
+     * @param data The data to read
+     * @return The distances at each measurement (in meters)
+     */
+    std::vector<double> getDistances(const std::string& data);
 
-	// a helper function; not really part of the public interface, but needs to
-	// be exposed for testing
-	int decode(const std::string& data, int len);
+    // a helper function; not really part of the public interface, but needs to
+    // be exposed for testing
+    int decode(const std::string& data, int len);
 };
 
 /**
@@ -40,74 +40,74 @@ class LaserReaderDecoder
 class SerialLaserReader : LaserReaderDecoder
 {
    public:
-	/**
-	 * @brief Opens the given port for communication
-	 * @param serialPort Path of serial port to connect to
-	 */
-	explicit SerialLaserReader(const char* serialPort);
+    /**
+     * @brief Opens the given port for communication
+     * @param serialPort Path of serial port to connect to
+     */
+    explicit SerialLaserReader(const char* serialPort);
 
-	/**
-	 *@brief shuts down laser and closes serial port
-	 */
-	~SerialLaserReader();
+    /**
+     *@brief shuts down laser and closes serial port
+     */
+    ~SerialLaserReader();
 
-	/**
-	 * @brief Starts the laser allowing measurement to begin
-	 */
-	bool connect(const char* serialPort);
+    /**
+     * @brief Starts the laser allowing measurement to begin
+     */
+    bool connect(const char* serialPort);
 
-	/**
-	 * @brief Stops the laser
-	 */
-	bool disconnect();
+    /**
+     * @brief Stops the laser
+     */
+    bool disconnect();
 
-	/**
-	 * @brief Checks to see if currently open
-	 */
-	bool isConnected() const;
+    /**
+     * @brief Checks to see if currently open
+     */
+    bool isConnected() const;
 
-	/**
-	 * @brief sets the laser to SCIP2.0 mode. Likely not needed
-	 */
-	bool setSCIP2();
+    /**
+     * @brief sets the laser to SCIP2.0 mode. Likely not needed
+     */
+    bool setSCIP2();
 
-	/**
-	 * @brief Returns the range of the laser in meters
-	 * @return The range
-	 */
-	double getRange() const noexcept;
+    /**
+     * @brief Returns the range of the laser in meters
+     * @return The range
+     */
+    double getRange() const noexcept;
 
-	/**
-	 * @brief get basic version and product info from the laser
-	 */
-	std::string getInfo();
+    /**
+     * @brief get basic version and product info from the laser
+     */
+    std::string getInfo();
 
-	/**
-	 * @brief actually gets data and returns a map of the angles and distances
-	 * @return vector of distances (in meters)
-	 */
-	std::vector<double> getDistances();
+    /**
+     * @brief actually gets data and returns a map of the angles and distances
+     * @return vector of distances (in meters)
+     */
+    std::vector<double> getDistances();
 
-	/**
-	 * @brief Retrieves the start angle property from the laser
-	 * @return The start angle
-	 */
-	double getStartAngle();
+    /**
+     * @brief Retrieves the start angle property from the laser
+     * @return The start angle
+     */
+    double getStartAngle();
 
-	/**
-	 * @brief Retrieves the angle step size property from the laser
-	 * @return The angular step size
-	 */
-	double getStep();
+    /**
+     * @brief Retrieves the angle step size property from the laser
+     * @return The angular step size
+     */
+    double getStep();
 
    private:
-	std::string send(const std::string& command);
+    std::string send(const std::string& command);
 
-	std::string getDistData(int start, int end, int resolution);
+    std::string getDistData(int start, int end, int resolution);
 
-	std::string zeroPad(int number, int len);
+    std::string zeroPad(int number, int len);
 
-	SerialTTY tty;
+    SerialTTY tty;
 };
 
 /**
@@ -117,29 +117,29 @@ class SerialLaserReader : LaserReaderDecoder
 class StaticLaserReader : LaserReaderDecoder
 {
    public:
-	// LaserReaderDecoder's getDistances is sufficient for this class
-	using LaserReaderDecoder::getDistances;
+    // LaserReaderDecoder's getDistances is sufficient for this class
+    using LaserReaderDecoder::getDistances;
 
-	// again for testing purposes
-	using LaserReaderDecoder::decode;
+    // again for testing purposes
+    using LaserReaderDecoder::decode;
 
-	/**
-	 * @brief Returns the range of the laser in meters
-	 * @return The range
-	 */
-	double getRange() const noexcept;
+    /**
+     * @brief Returns the range of the laser in meters
+     * @return The range
+     */
+    double getRange() const noexcept;
 
-	/**
-	 * @brief Retrieves the start angle property from the laser
-	 * @return The start angle
-	 */
-	double getStartAngle();
+    /**
+     * @brief Retrieves the start angle property from the laser
+     * @return The start angle
+     */
+    double getStartAngle();
 
-	/**
-	 * @brief Retrieves the angle step size property from the laser
-	 * @return The angular step size
-	 */
-	double getStep();
+    /**
+     * @brief Retrieves the angle step size property from the laser
+     * @return The angular step size
+     */
+    double getStep();
 };
 }
 

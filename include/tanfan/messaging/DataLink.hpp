@@ -41,35 +41,35 @@
 class DataLink
 {
    public:
-	DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm);
-	~DataLink();
+    DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm);
+    ~DataLink();
 
-	// void recv(uint8_t datum) { rb->push(datum); }
-	void processRecv(const uint8_t raw);
+    // void recv(uint8_t datum) { rb->push(datum); }
+    void processRecv(const uint8_t raw);
 
-	// Getters for received messages
-	lidar_t getLidarMsg() const { return msgHandler.lidar; }
-	imu_t getImuMsg() const { return msgHandler.imu; }
-	emergency_t getEmergencyMsg() const { return msgHandler.ems; }
+    // Getters for received messages
+    lidar_t getLidarMsg() const { return msgHandler.lidar; }
+    imu_t getImuMsg() const { return msgHandler.imu; }
+    emergency_t getEmergencyMsg() const { return msgHandler.ems; }
    private:
-	lcmlite_t lcm;  // lcmlite struct
+    lcmlite_t lcm;  // lcmlite struct
 
-	// subscription types for the messages received
-	lcmlite_subscription_t lidarSub;
-	lcmlite_subscription_t imuSub;
-	lcmlite_subscription_t emsSub;
+    // subscription types for the messages received
+    lcmlite_subscription_t lidarSub;
+    lcmlite_subscription_t imuSub;
+    lcmlite_subscription_t emsSub;
 
-	// Lcm Message Handler for recieved messages
-	MessageHandler msgHandler;
+    // Lcm Message Handler for recieved messages
+    MessageHandler msgHandler;
 
-	// Handler for sending lcm messages
-	TransmitHandler msgSender;
+    // Handler for sending lcm messages
+    TransmitHandler msgSender;
 
-	// uint8_t rbBack[256]; // data allocated for ringbuffer
-	// RingBuffer<256> *rb; // ringbuffer for incoming bytes
+    // uint8_t rbBack[256]; // data allocated for ringbuffer
+    // RingBuffer<256> *rb; // ringbuffer for incoming bytes
 
-	// Decoder for Transport Layer
-	Decoder d;
+    // Decoder for Transport Layer
+    Decoder d;
 };
 
 #endif /* DATALINK_HPP_ */

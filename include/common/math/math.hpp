@@ -42,9 +42,9 @@ constexpr double PI = 3.14159265358979;
 template <typename T>
 constexpr bool is_approx_equal(T d1, T d2, double res)
 {
-	double tmp = fabs(d1 - d2);
-	if (tmp < res) return true;
-	return false;
+    double tmp = fabs(d1 - d2);
+    if (tmp < res) return true;
+    return false;
 }
 
 /**
@@ -58,15 +58,15 @@ constexpr bool is_approx_equal(T d1, T d2, double res)
 template <typename T>
 constexpr bool is_approx_equal(const std::vector<T> &d1, const std::vector<T> &d2, double res)
 {
-	bool ret = true;
-	size_t i = 0;
-	size_t size = std::min(d1.size(), d2.size());
-	while (ret && (i < size))
-	{
-		ret &= is_approx_equal(d1[i], d2[i], res);
-		++i;
-	}
-	return ret;
+    bool ret = true;
+    size_t i = 0;
+    size_t size = std::min(d1.size(), d2.size());
+    while (ret && (i < size))
+    {
+        ret &= is_approx_equal(d1[i], d2[i], res);
+        ++i;
+    }
+    return ret;
 }
 
 /**
@@ -79,11 +79,11 @@ constexpr bool is_approx_equal(const std::vector<T> &d1, const std::vector<T> &d
  */
 inline bool is_approx_equal(const Eigen::Vector3d &d1, const Eigen::Vector3d &d2, double res)
 {
-	for (int i = 0; i < 3; i++)
-	{
-		if (!is_approx_equal(d1(i), d2(i), res)) return false;
-	}
-	return true;
+    for (int i = 0; i < 3; i++)
+    {
+        if (!is_approx_equal(d1(i), d2(i), res)) return false;
+    }
+    return true;
 }
 
 /**
@@ -104,7 +104,7 @@ constexpr double rad_to_deg(double angle) { return angle / PI * 180.0; }
  */
 constexpr double calc_hypotenuse(double l1, double l2)
 {
-	return std::sqrt(std::pow(l1, 2) + std::pow(l2, 2));
+    return std::sqrt(std::pow(l1, 2) + std::pow(l2, 2));
 }
 
 /**
@@ -116,9 +116,9 @@ constexpr double calc_hypotenuse(double l1, double l2)
 template <typename T>
 constexpr T mod(T num, T div)
 {
-	if (div == 0) return 0;
-	T tmp = floor(num / div);
-	return num - (div * tmp);
+    if (div == 0) return 0;
+    T tmp = floor(num / div);
+    return num - (div * tmp);
 }
 
 /**
@@ -146,37 +146,37 @@ constexpr T mod(T num, T div)
  */
 class PRNG
 {
-	// this internal random engine used to generate random numbers
-	// this type is chosen because it has a really high period, even though it
-	// also has a lot of state
-	std::mt19937 random_engine;
+    // this internal random engine used to generate random numbers
+    // this type is chosen because it has a really high period, even though it
+    // also has a lot of state
+    std::mt19937 random_engine;
 
    public:
-	/**
-	 * @brief Creates a randomly-seeded PRNG
-	 */
-	PRNG();
+    /**
+     * @brief Creates a randomly-seeded PRNG
+     */
+    PRNG();
 
-	/**
-	 * @brief Creates a PRNG seeded with a certain string
-	 * @param seed The seed to use
-	 */
-	explicit PRNG(const char *seed);
+    /**
+     * @brief Creates a PRNG seeded with a certain string
+     * @param seed The seed to use
+     */
+    explicit PRNG(const char *seed);
 
-	/**
-	 * @brief Creates a PRNG seeded with a certain string
-	 * @param seed The seed to use
-	 */
-	explicit PRNG(const std::string &seed);
+    /**
+     * @brief Creates a PRNG seeded with a certain string
+     * @param seed The seed to use
+     */
+    explicit PRNG(const std::string &seed);
 
-	/**
-	 * @brief Produces a (uniformly distributed) random number in the range
-	 * [left, right)
-	 * @param left The left endpoint
-	 * @param right The right endpoint
-	 * @pre left < right
-	 */
-	double operator()(double left, double right);
+    /**
+     * @brief Produces a (uniformly distributed) random number in the range
+     * [left, right)
+     * @param left The left endpoint
+     * @param right The right endpoint
+     * @pre left < right
+     */
+    double operator()(double left, double right);
 };
 
 /**
@@ -190,22 +190,22 @@ class PRNG
  */
 inline Eigen::Vector3d dir_vec(const Eigen::Vector3d &rpy, double dist)
 {
-	Eigen::Vector3d ret;
-	Eigen::Vector3d rot(rpy);
+    Eigen::Vector3d ret;
+    Eigen::Vector3d rot(rpy);
 
-	ret(0) = 1;
-	ret(1) = 0;
-	ret(2) = 0;
+    ret(0) = 1;
+    ret(1) = 0;
+    ret(2) = 0;
 
-	Eigen::Quaterniond tmp = Eigen::AngleAxisd(rot(0), Eigen::Vector3d::UnitX()) *
-							 Eigen::AngleAxisd(rot(1), Eigen::Vector3d::UnitY()) *
-							 Eigen::AngleAxisd(rot(2), Eigen::Vector3d::UnitZ());
+    Eigen::Quaterniond tmp = Eigen::AngleAxisd(rot(0), Eigen::Vector3d::UnitX()) *
+                             Eigen::AngleAxisd(rot(1), Eigen::Vector3d::UnitY()) *
+                             Eigen::AngleAxisd(rot(2), Eigen::Vector3d::UnitZ());
 
-	tmp.normalize();
+    tmp.normalize();
 
-	ret = tmp.toRotationMatrix() * ret;
-	ret *= dist;
-	return ret;
+    ret = tmp.toRotationMatrix() * ret;
+    ret *= dist;
+    return ret;
 }
 
 /**
@@ -218,10 +218,10 @@ inline Eigen::Vector3d dir_vec(const Eigen::Vector3d &rpy, double dist)
  * @param vh High v
  * @return Threshold array
  */
-constexpr std::array<uint8_t, 6> make_thresh(uint8_t hl, uint8_t hh, uint8_t sl, uint8_t sh,
-											 uint8_t vl, uint8_t vh)
+constexpr std::array<uint8_t, 6> make_thresh(
+    uint8_t hl, uint8_t hh, uint8_t sl, uint8_t sh, uint8_t vl, uint8_t vh)
 {
-	return {hl, hh, sl, sh, vl, vh};
+    return {hl, hh, sl, sh, vl, vh};
 }
 
 /**
@@ -230,18 +230,18 @@ constexpr std::array<uint8_t, 6> make_thresh(uint8_t hl, uint8_t hh, uint8_t sl,
  */
 inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
 {
-	std::string tmp[6];
-	size_t tmp_i = 0;
-	for (size_t i = 0; i < csv.size(); ++i)
-	{
-		if (csv[i] == ',')
-			tmp_i++;
-		else
-			tmp[tmp_i].push_back(csv[i]);
-	}
-	if (tmp_i != 5) return make_thresh(0, 0, 0, 0, 0, 0);
-	return make_thresh(atoi(tmp[0].c_str()), atoi(tmp[1].c_str()), atoi(tmp[2].c_str()),
-					   atoi(tmp[3].c_str()), atoi(tmp[4].c_str()), atoi(tmp[5].c_str()));
+    std::string tmp[6];
+    size_t tmp_i = 0;
+    for (size_t i = 0; i < csv.size(); ++i)
+    {
+        if (csv[i] == ',')
+            tmp_i++;
+        else
+            tmp[tmp_i].push_back(csv[i]);
+    }
+    if (tmp_i != 5) return make_thresh(0, 0, 0, 0, 0, 0);
+    return make_thresh(atoi(tmp[0].c_str()), atoi(tmp[1].c_str()), atoi(tmp[2].c_str()),
+        atoi(tmp[3].c_str()), atoi(tmp[4].c_str()), atoi(tmp[5].c_str()));
 }
 
 /**
@@ -252,30 +252,30 @@ inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
  */
 inline double yaw_between(Eigen::Vector3d &start, Eigen::Vector3d &end)
 {
-	Eigen::Vector3d diff = end - start;
-	if (diff(1) == 0)
-	{
-		if (diff(0) < 0)
-			return maav::PI;
-		else
-			return 0.0;
-	}
-	else if (diff(0) == 0)
-	{
-		if (diff(1) < 0)
-			return -1 * maav::PI / 2;
-		else
-			return maav::PI / 2;
-	}
+    Eigen::Vector3d diff = end - start;
+    if (diff(1) == 0)
+    {
+        if (diff(0) < 0)
+            return maav::PI;
+        else
+            return 0.0;
+    }
+    else if (diff(0) == 0)
+    {
+        if (diff(1) < 0)
+            return -1 * maav::PI / 2;
+        else
+            return maav::PI / 2;
+    }
 
-	double tmp = atan(diff(1) / diff(0));
+    double tmp = atan(diff(1) / diff(0));
 
-	if (diff(0) < 0 && diff(1) > 0)
-		return maav::PI + tmp;
-	else if (diff(0) < 0 && diff(1) < 0)
-		return (-1 * maav::PI) + tmp;
+    if (diff(0) < 0 && diff(1) > 0)
+        return maav::PI + tmp;
+    else if (diff(0) < 0 && diff(1) < 0)
+        return (-1 * maav::PI) + tmp;
 
-	return tmp;
+    return tmp;
 }
 
 /**
@@ -288,16 +288,16 @@ inline double yaw_between(Eigen::Vector3d &start, Eigen::Vector3d &end)
 template <typename T>
 constexpr Eigen::Matrix<T, 3, 1> create_vec(T x, T y, T z)
 {
-	Eigen::Matrix<T, 3, 1> ret;
-	ret(0) = x;
-	ret(1) = y;
-	ret(2) = z;
-	return ret;
+    Eigen::Matrix<T, 3, 1> ret;
+    ret(0) = x;
+    ret(1) = y;
+    ret(2) = z;
+    return ret;
 }
 
 constexpr std::pair<double, double> polar_to_cart(double r, double theta)
 {
-	return std::make_pair(r * cos(theta), r * sin(theta));
+    return std::make_pair(r * cos(theta), r * sin(theta));
 }
 
 /**
@@ -307,13 +307,13 @@ constexpr std::pair<double, double> polar_to_cart(double r, double theta)
  * @param max_dim maximum possible absolute value of x or y
  * @param dimension of the image
  */
-constexpr std::pair<unsigned int, unsigned int> point_to_pixel(double x, double y, double max_dim,
-															   unsigned int image_dim)
+constexpr std::pair<unsigned int, unsigned int> point_to_pixel(
+    double x, double y, double max_dim, unsigned int image_dim)
 {
-	double scale = static_cast<double>(image_dim / 2) / max_dim;
+    double scale = static_cast<double>(image_dim / 2) / max_dim;
 
-	return std::make_pair(static_cast<unsigned int>(x * scale + image_dim / 2),
-						  image_dim - static_cast<unsigned int>(y * scale + image_dim / 2));
+    return std::make_pair(static_cast<unsigned int>(x * scale + image_dim / 2),
+        image_dim - static_cast<unsigned int>(y * scale + image_dim / 2));
 }
 
 /**
@@ -338,7 +338,7 @@ void matchCorners(std::vector<Eigen::Vector2d> &expected, std::vector<Eigen::Vec
  * @return The transformation matrix
  */
 Eigen::Matrix3d getTransformMatrix(const std::vector<Eigen::Vector2d> &expected,
-								   const std::vector<Eigen::Vector2d> &camera, double yaw);
+    const std::vector<Eigen::Vector2d> &camera, double yaw);
 
 /**
  * @brief Returns all the points on lines in the given image
@@ -362,16 +362,14 @@ std::vector<Eigen::Vector2d> get_line_points(const cv::Mat &src);
  * Throws maav::err::LocalizationError if localization is not possible.
  */
 Eigen::Vector3d localizePosition(const Eigen::Vector3d &pos, double yaw,
-								 const std::vector<Eigen::Vector2d> &expected,
-								 const std::vector<Eigen::Vector2d> &camera);
+    const std::vector<Eigen::Vector2d> &expected, const std::vector<Eigen::Vector2d> &camera);
 }  // namespace maav
 
 template <size_t T>
 double MahalanobisDistance(const Eigen::Matrix<double, T, 1> &x,
-						   const Eigen::Matrix<double, T, 1> &y,
-						   const Eigen::Matrix<double, T, T> &P)
+    const Eigen::Matrix<double, T, 1> &y, const Eigen::Matrix<double, T, T> &P)
 {
-	return ((x - y).transpose() * P.inverse() * (x - y))(0);
+    return ((x - y).transpose() * P.inverse() * (x - y))(0);
 }
 
 #endif  // MAAV_MATH_HPP

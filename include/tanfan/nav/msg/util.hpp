@@ -18,14 +18,14 @@ namespace maav
  */
 inline std::vector<unsigned char> to_bytes(const setpt_t *pt)
 {
-	size_t len = setpt_t_encoded_size(nullptr);
-	std::vector<unsigned char> ret;
+    size_t len = setpt_t_encoded_size(nullptr);
+    std::vector<unsigned char> ret;
 
-	ret.resize(len);
+    ret.resize(len);
 
-	setpt_t_encode(ret.data(), 0, len, pt);
+    setpt_t_encode(ret.data(), 0, len, pt);
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -35,14 +35,14 @@ inline std::vector<unsigned char> to_bytes(const setpt_t *pt)
  */
 inline std::vector<unsigned char> to_bytes(const gains_t *g)
 {
-	size_t len = gains_t_encoded_size(nullptr);
-	std::vector<unsigned char> ret;
+    size_t len = gains_t_encoded_size(nullptr);
+    std::vector<unsigned char> ret;
 
-	ret.resize(len);
+    ret.resize(len);
 
-	gains_t_encode(ret.data(), 0, len, g);
+    gains_t_encode(ret.data(), 0, len, g);
 
-	return ret;
+    return ret;
 }
 
 } /* namespace maav */

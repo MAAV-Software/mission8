@@ -24,58 +24,58 @@ using namespace maav::gnc::kalman;
 KalmanState identity(const KalmanState& state) { return state; }
 BOOST_AUTO_TEST_CASE(IdentityTransformTest)
 {
-	UnscentedTransform<KalmanState> id(identity, 0.1, 2, 0);
+    UnscentedTransform<KalmanState> id(identity, 0.1, 2, 0);
 
-	KalmanState state = KalmanState::zero(0);
+    KalmanState state = KalmanState::zero(0);
 
-	KalmanState transformed_state = id(state);
+    KalmanState transformed_state = id(state);
 
-	constexpr double tol = 1e-5;
-	BOOST_CHECK_LE(std::abs(diff(state.attitude(), transformed_state.attitude())), tol);
-	BOOST_CHECK_LE(std::abs(diff(state.position(), transformed_state.position())), tol);
-	BOOST_CHECK_LE(std::abs(diff(state.velocity(), transformed_state.velocity())), tol);
+    constexpr double tol = 1e-5;
+    BOOST_CHECK_LE(std::abs(diff(state.attitude(), transformed_state.attitude())), tol);
+    BOOST_CHECK_LE(std::abs(diff(state.position(), transformed_state.position())), tol);
+    BOOST_CHECK_LE(std::abs(diff(state.velocity(), transformed_state.velocity())), tol);
 }
 
 BOOST_AUTO_TEST_CASE(YAMLRead)
 {
-	YAML::Node config = YAML::Load("alpha: 0.1\nbeta: 2.0\nkappa: 0.1");
-	UnscentedTransform<KalmanState> id(config);
-	id.set_transformation(identity);
+    YAML::Node config = YAML::Load("alpha: 0.1\nbeta: 2.0\nkappa: 0.1");
+    UnscentedTransform<KalmanState> id(config);
+    id.set_transformation(identity);
 
-	double w_m_0 = -97.9011;
-	double w_c_0 = -94.9111;
-	double w = 5.4945;
+    double w_m_0 = -97.9011;
+    double w_c_0 = -94.9111;
+    double w = 5.4945;
 
-	constexpr double tol = 1e-5;
+    constexpr double tol = 1e-5;
 
-	BOOST_CHECK_LE(std::abs(w_m_0 - id.m_weights()[0]), tol);
-	BOOST_CHECK_LE(std::abs(w_c_0 - id.c_weights()[0]), tol);
-	BOOST_CHECK_LE(std::abs(w - id.m_weights()[1]), tol);
-	BOOST_CHECK_LE(std::abs(w - id.c_weights()[1]), tol);
+    BOOST_CHECK_LE(std::abs(w_m_0 - id.m_weights()[0]), tol);
+    BOOST_CHECK_LE(std::abs(w_c_0 - id.c_weights()[0]), tol);
+    BOOST_CHECK_LE(std::abs(w - id.m_weights()[1]), tol);
+    BOOST_CHECK_LE(std::abs(w - id.c_weights()[1]), tol);
 }
 
 void compare_states(const KalmanState& state, const KalmanState::ErrorStateVector& error_state)
 {
-	Sophus::SO3d e_attitude = Sophus::SO3d::exp(error_state.segment<3>(0));
-	Eigen::Vector3d e_position = error_state.segment<3>(3);
-	Eigen::Vector3d e_velocity = error_state.segment<3>(6);
+    Sophus::SO3d e_attitude = Sophus::SO3d::exp(error_state.segment<3>(0));
+    Eigen::Vector3d e_position = error_state.segment<3>(3);
+    Eigen::Vector3d e_velocity = error_state.segment<3>(6);
 
-	constexpr double tol = 1e-4;
-	BOOST_CHECK_LE(diff(state.attitude(), e_attitude), tol);
-	BOOST_CHECK_LE(diff(state.position(), e_position), tol);
-	BOOST_CHECK_LE(diff(state.velocity(), e_velocity), tol);
+    constexpr double tol = 1e-4;
+    BOOST_CHECK_LE(diff(state.attitude(), e_attitude), tol);
+    BOOST_CHECK_LE(diff(state.position(), e_position), tol);
+    BOOST_CHECK_LE(diff(state.velocity(), e_velocity), tol);
 }
 
 BOOST_AUTO_TEST_CASE(SigmaPointsTest)
 {
-	using UT = UnscentedTransform<KalmanState>;
+    using UT = UnscentedTransform<KalmanState>;
 
-	UT id(identity, 0.25, 2, 0);
+    UT id(identity, 0.25, 2, 0);
 
-	KalmanState state = KalmanState::zero(0);
+    KalmanState state = KalmanState::zero(0);
 
-	KalmanState::CovarianceMatrix Sigma;
-	// clang-format off
+    KalmanState::CovarianceMatrix Sigma;
+    // clang-format off
 	Sigma << 
 		1.9371,    2.0888,    1.4652,    1.2174,    1.5518,    1.2272,    1.6696,    1.2636,    1.6087,
     	2.0888,    2.8621,    1.9755,    1.6332,    2.1316,    1.5430,    2.3155,    1.6608,    2.4866,
@@ -86,15 +86,15 @@ BOOST_AUTO_TEST_CASE(SigmaPointsTest)
     	1.6696,    2.3155,    1.4011,    1.1815,    1.9926,    1.4966,    2.6750,    1.2492,    2.1626,
     	1.2636,    1.6608,    0.9566,    0.9951,    0.9625,    0.9215,    1.2492,    1.3088,    1.2292,
     	1.6087,    2.4866,    1.9678,    1.6100,    2.2366,    1.2648,    2.1626,    1.2292,    2.9463;
-	// clang-format on
-	state.covariance() = Sigma;
+    // clang-format on
+    state.covariance() = Sigma;
 
-	id(state);
+    id(state);
 
-	const UT::SigmaPoints& sig_pts = id.last_sigma_points();
-	const UT::TransformedPoints& trans_pts = id.last_transformed_points();
+    const UT::SigmaPoints& sig_pts = id.last_sigma_points();
+    const UT::TransformedPoints& trans_pts = id.last_transformed_points();
 
-	// clang-format off
+    // clang-format off
 	/**
 	 * Values from matlab
 	 */
@@ -109,15 +109,15 @@ BOOST_AUTO_TEST_CASE(SigmaPointsTest)
          0,    0.8997,   -0.8997,    0.4948,   -0.4948,   -0.2147,    0.2147,   -0.2360,    0.2360,    0.4440,   -0.4440,    0.2147,   -0.2147,    0.3246,   -0.3246,         0,         0,         0,         0,
          0,    0.6809,   -0.6809,    0.2865,   -0.2865,   -0.2111,    0.2111,    0.0459,   -0.0459,   -0.1574,    0.1574,    0.0619,   -0.0619,   -0.0911,    0.0911,    0.3269,   -0.3269,         0,         0,
          0,    0.8669,   -0.8669,    0.7222,   -0.7222,    0.2884,   -0.2884,    0.3443,   -0.3443,    0.2273,   -0.2273,    0.0499,   -0.0499,    0.3411,   -0.3411,    0.0095,   -0.0095,    0.1089,   -0.1089;
-	// clang-format on
+    // clang-format on
 
-	constexpr double tol = 1e-5;
-	for (size_t i = 0; i < sig_pts.size(); i++)
-	{
-		BOOST_REQUIRE_LE(diff(sig_pts[i].attitude(), trans_pts[i].attitude()), tol);
-		BOOST_REQUIRE_LE(diff(sig_pts[i].position(), trans_pts[i].position()), tol);
-		BOOST_REQUIRE_LE(diff(sig_pts[i].velocity(), trans_pts[i].velocity()), tol);
-		compare_states(sig_pts[i], sigma_points.col(i));
-	}
+    constexpr double tol = 1e-5;
+    for (size_t i = 0; i < sig_pts.size(); i++)
+    {
+        BOOST_REQUIRE_LE(diff(sig_pts[i].attitude(), trans_pts[i].attitude()), tol);
+        BOOST_REQUIRE_LE(diff(sig_pts[i].position(), trans_pts[i].position()), tol);
+        BOOST_REQUIRE_LE(diff(sig_pts[i].velocity(), trans_pts[i].velocity()), tol);
+        compare_states(sig_pts[i], sigma_points.col(i));
+    }
 }
 // TODO: Add more complex transformations

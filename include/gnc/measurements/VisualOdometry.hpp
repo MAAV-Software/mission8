@@ -14,9 +14,9 @@ namespace measurements
  */
 struct VisualOdometryMeasurement
 {
-	Eigen::Vector3d translation;
-	Sophus::SO3d rotation;
-	uint64_t time_usec;
+    Eigen::Vector3d translation;
+    Sophus::SO3d rotation;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements

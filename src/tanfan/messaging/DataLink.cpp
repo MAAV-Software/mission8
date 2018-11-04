@@ -28,43 +28,43 @@ using namespace std;
 
 DataLink::DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm) : msgHandler(zcm)
 {
-	// Initialize LCM and handlers
-	msgSender = TransmitHandler(f);
-	lcmlite_init(&lcm, transmitPacket, &msgSender);
+    // Initialize LCM and handlers
+    msgSender = TransmitHandler(f);
+    lcmlite_init(&lcm, transmitPacket, &msgSender);
 
-	// Initialize LCM subscriptions
-	lidarSub.callback = callback;
-	lidarSub.channel = strdup("LID");
-	lidarSub.user = &msgHandler;
-	imuSub.callback = callback;
-	imuSub.channel = strdup("IMU");
-	imuSub.user = &msgHandler;
-	emsSub.callback = callback;
-	emsSub.channel = strdup("EMS");
-	emsSub.user = &msgHandler;
+    // Initialize LCM subscriptions
+    lidarSub.callback = callback;
+    lidarSub.channel = strdup("LID");
+    lidarSub.user = &msgHandler;
+    imuSub.callback = callback;
+    imuSub.channel = strdup("IMU");
+    imuSub.user = &msgHandler;
+    emsSub.callback = callback;
+    emsSub.channel = strdup("EMS");
+    emsSub.user = &msgHandler;
 
-	// Subscribe LCM subscriptions
-	lcmlite_subscribe(&lcm, &lidarSub);
-	lcmlite_subscribe(&lcm, &imuSub);
-	lcmlite_subscribe(&lcm, &emsSub);
+    // Subscribe LCM subscriptions
+    lcmlite_subscribe(&lcm, &lidarSub);
+    lcmlite_subscribe(&lcm, &imuSub);
+    lcmlite_subscribe(&lcm, &emsSub);
 }
 
 void DataLink::processRecv(const uint8_t raw)
 {
-	d.push(raw);
+    d.push(raw);
 
-	if (d.isError()) d.reset();  // check for error
+    if (d.isError()) d.reset();  // check for error
 
-	if (d.isDone())  // check for done
-	{
-		lcmlite_receive_packet(&lcm, d.packetData(), d.packetDataSize(), ATOM_ADDR);
-		d.reset();
-	}
+    if (d.isDone())  // check for done
+    {
+        lcmlite_receive_packet(&lcm, d.packetData(), d.packetDataSize(), ATOM_ADDR);
+        d.reset();
+    }
 }
 
 DataLink::~DataLink()
 {
-	free(lidarSub.channel);
-	free(imuSub.channel);
-	free(emsSub.channel);
+    free(lidarSub.channel);
+    free(imuSub.channel);
+    free(emsSub.channel);
 }

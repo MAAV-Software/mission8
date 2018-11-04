@@ -37,9 +37,8 @@ using std::ref;
 
 void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController);
 void sendToTivaLoop(PhysicalController &physicalController,
-					ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
-					ZCMHandler<zcm::gains_t> &gainsZcmHandler,
-					ZCMHandler<zcm::dji_t> &djiZcmHandler);
+    ZCMHandler<zcm::setpt_t> &setpointZcmHandler, ZCMHandler<zcm::gains_t> &gainsZcmHandler,
+    ZCMHandler<zcm::dji_t> &djiZcmHandler);
 void recvLcmLoop(ZCM &zcm);
 void sendGarbage(ZCM &zcm);
 void transmitPlaceholder(const uint8_t *, uint32_t);
@@ -59,56 +58,56 @@ sig_atomic_t isAlive = 1;
  */
 int main()
 {
-	maav::Log::init("maav.log", maav::Log::Level::info);
+    maav::Log::init("maav.log", maav::Log::Level::info);
 
-	// on any of the following signals, quit
-	signal(SIGINT, gracefulKill);
-	signal(SIGQUIT, gracefulKill);
-	signal(SIGTERM, gracefulKill);
+    // on any of the following signals, quit
+    signal(SIGINT, gracefulKill);
+    signal(SIGQUIT, gracefulKill);
+    signal(SIGTERM, gracefulKill);
 
-	// ZCM Message handling queues (thread safe)
+    // ZCM Message handling queues (thread safe)
 
-	// ZCMHandler<zcm::feedback_t> feedbackLcmHandler;
+    // ZCMHandler<zcm::feedback_t> feedbackLcmHandler;
 
-	// These handlers are from Atom to Tiva, passed into sendToTiva
-	ZCMHandler<zcm::setpt_t> setpointZcmHandler;
-	ZCMHandler<zcm::gains_t> gainsZcmHandler;
-	ZCMHandler<zcm::dji_t> djiZcmHandler;
+    // These handlers are from Atom to Tiva, passed into sendToTiva
+    ZCMHandler<zcm::setpt_t> setpointZcmHandler;
+    ZCMHandler<zcm::gains_t> gainsZcmHandler;
+    ZCMHandler<zcm::dji_t> djiZcmHandler;
 
-	// Instantiate ZCM
-	const char *URL = "ipc";
-	ZCM zcm{URL};
+    // Instantiate ZCM
+    const char *URL = "ipc";
+    ZCM zcm{URL};
 
-	// subscribe to the "POS" (position) channel. Whenever we get a position
-	// update, send send it to LCMHandleruartlcm
-	zcm.subscribe("SET", &ZCMHandler<zcm::setpt_t>::recv, &setpointZcmHandler);
-	zcm.subscribe("GNS", &ZCMHandler<zcm::gains_t>::recv, &gainsZcmHandler);
-	zcm.subscribe("DJI", &ZCMHandler<zcm::dji_t>::recv, &djiZcmHandler);
+    // subscribe to the "POS" (position) channel. Whenever we get a position
+    // update, send send it to LCMHandleruartlcm
+    zcm.subscribe("SET", &ZCMHandler<zcm::setpt_t>::recv, &setpointZcmHandler);
+    zcm.subscribe("GNS", &ZCMHandler<zcm::gains_t>::recv, &gainsZcmHandler);
+    zcm.subscribe("DJI", &ZCMHandler<zcm::dji_t>::recv, &djiZcmHandler);
 
-	if (!zcm.good())
-	{
-		cerr << "LCM Error\n";
-		return -1;
-	}
+    if (!zcm.good())
+    {
+        cerr << "LCM Error\n";
+        return -1;
+    }
 
-	PhysicalController physicalController;
+    PhysicalController physicalController;
 
-	physicalController.connect("/dev/ttyUSB0");
+    physicalController.connect("/dev/ttyUSB0");
 
-	thread sendToTivaThread(sendToTivaLoop, ref(physicalController), ref(setpointZcmHandler),
-							ref(gainsZcmHandler), ref(djiZcmHandler));
-	thread recvLcmThread(recvLcmLoop, ref(zcm));
+    thread sendToTivaThread(sendToTivaLoop, ref(physicalController), ref(setpointZcmHandler),
+        ref(gainsZcmHandler), ref(djiZcmHandler));
+    thread recvLcmThread(recvLcmLoop, ref(zcm));
 
-	tivaToAtomLoop(ref(zcm), ref(physicalController));
+    tivaToAtomLoop(ref(zcm), ref(physicalController));
 
-	// the above functions block, so this is just cleanup for when the program
-	// exits.
-	// sendToTivaThread.join();
-	// recvLcmThread.join();
+    // the above functions block, so this is just cleanup for when the program
+    // exits.
+    // sendToTivaThread.join();
+    // recvLcmThread.join();
 
-	physicalController.disconnect();
+    physicalController.disconnect();
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -124,16 +123,16 @@ int main()
  */
 void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController)
 {
-	while (isAlive)
-	{
-		void (*placeholder)(const uint8_t *, uint32_t);
-		placeholder = &transmitPlaceholder;
-		DataLink dlink(placeholder, &zcm);
+    while (isAlive)
+    {
+        void (*placeholder)(const uint8_t *, uint32_t);
+        placeholder = &transmitPlaceholder;
+        DataLink dlink(placeholder, &zcm);
 
-		physicalController.process(dlink);
-	}
+        physicalController.process(dlink);
+    }
 
-	physicalController.stop();
+    physicalController.stop();
 }
 
 /*
@@ -153,53 +152,52 @@ void tivaToAtomLoop(ZCM &zcm, PhysicalController &physicalController)
  *
  */
 void sendToTivaLoop(PhysicalController &physicalController,
-					ZCMHandler<zcm::setpt_t> &setpointZcmHandler,
-					ZCMHandler<zcm::gains_t> &gainsZcmHandler,
-					ZCMHandler<zcm::dji_t> &djiZcmHandler)
+    ZCMHandler<zcm::setpt_t> &setpointZcmHandler, ZCMHandler<zcm::gains_t> &gainsZcmHandler,
+    ZCMHandler<zcm::dji_t> &djiZcmHandler)
 {
-	while (isAlive)
-	{
-		if (setpointZcmHandler.ready())
-		{
-			// note that sendSetpoint sends utime
-			zcm::setpt_t msg = setpointZcmHandler.msg();
+    while (isAlive)
+    {
+        if (setpointZcmHandler.ready())
+        {
+            // note that sendSetpoint sends utime
+            zcm::setpt_t msg = setpointZcmHandler.msg();
 
-			cout << msg.x << endl;
+            cout << msg.x << endl;
 
-			// send and pop
-			physicalController.sendSetpoint(msg.x, msg.y, msg.z, msg.yaw, msg.flags);
-			setpointZcmHandler.pop();
-		}
+            // send and pop
+            physicalController.sendSetpoint(msg.x, msg.y, msg.z, msg.yaw, msg.flags);
+            setpointZcmHandler.pop();
+        }
 
-		if (gainsZcmHandler.ready())
-		{
-			// get the next message
-			zcm::gains_t msg = gainsZcmHandler.msg();
+        if (gainsZcmHandler.ready())
+        {
+            // get the next message
+            zcm::gains_t msg = gainsZcmHandler.msg();
 
-			gains_t liteMsg;
+            gains_t liteMsg;
 
-			// copy all of the data from the zcm type to the lite type
-			std::copy(msg.xGains, msg.xGains + 6, liteMsg.xGains);
-			std::copy(msg.yGains, msg.yGains + 6, liteMsg.yGains);
-			std::copy(msg.zGains, msg.zGains + 6, liteMsg.zGains);
-			std::copy(msg.yawGains, msg.yawGains + 3, liteMsg.yawGains);
-			liteMsg.utime = msg.utime;
+            // copy all of the data from the zcm type to the lite type
+            std::copy(msg.xGains, msg.xGains + 6, liteMsg.xGains);
+            std::copy(msg.yGains, msg.yGains + 6, liteMsg.yGains);
+            std::copy(msg.zGains, msg.zGains + 6, liteMsg.zGains);
+            std::copy(msg.yawGains, msg.yawGains + 3, liteMsg.yawGains);
+            liteMsg.utime = msg.utime;
 
-			// send and pop
-			physicalController.sendGains(&liteMsg);
-			gainsZcmHandler.pop();
-		}
+            // send and pop
+            physicalController.sendGains(&liteMsg);
+            gainsZcmHandler.pop();
+        }
 
-		if (djiZcmHandler.ready())
-		{
-			// get the next message
-			zcm::dji_t msg = djiZcmHandler.msg();
+        if (djiZcmHandler.ready())
+        {
+            // get the next message
+            zcm::dji_t msg = djiZcmHandler.msg();
 
-			// send and pop
-			physicalController.sendDji(msg.roll, msg.pitch, msg.yawRate, msg.thrust);
-			djiZcmHandler.pop();
-		}
-	}
+            // send and pop
+            physicalController.sendDji(msg.roll, msg.pitch, msg.yawRate, msg.thrust);
+            djiZcmHandler.pop();
+        }
+    }
 }
 
 /*
@@ -214,7 +212,7 @@ void sendToTivaLoop(PhysicalController &physicalController,
  */
 void recvLcmLoop(ZCM &zcm)
 {
-	while (isAlive) zcm.handle();
+    while (isAlive) zcm.handle();
 }
 
 /*
@@ -228,8 +226,8 @@ void recvLcmLoop(ZCM &zcm)
 void gracefulKill(int) { isAlive = false; }
 void transmitPlaceholder(const uint8_t *buffer, uint32_t size)
 {
-	throw std::runtime_error(
-		"This function should not have been called. This DataLink object exists solely to process "
-		"data from the Tiva. PhysicalController should be used to receive and send data from the "
-		"Tiva");
+    throw std::runtime_error(
+        "This function should not have been called. This DataLink object exists solely to process "
+        "data from the Tiva. PhysicalController should be used to receive and send data from the "
+        "Tiva");
 }

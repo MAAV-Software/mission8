@@ -24,24 +24,24 @@
 class PlaneFitterPCL
 {
    public:
-	PlaneFitterPCL(float inlierThreshold);
-	// Used mainly for testing converts from dz point
-	// cloud to pcl point cloud
-	void convertCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, std::vector<pf::Point3f> &points);
-	// Provide a point cloud, will provide plane coefficients
-	// or zero dimension matrix if failure
-	Eigen::MatrixXf fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
-	// Calculate the zdepth and the zdot
-	bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
-						 float &roll, float &pitch);
-	// Obtain all the plane information needed by driver
-	bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
-					  float &roll, float &pitch, Eigen::MatrixXf &coefs);
-	// Get the last height
-	float getLastHeight() const;
+    PlaneFitterPCL(float inlierThreshold);
+    // Used mainly for testing converts from dz point
+    // cloud to pcl point cloud
+    void convertCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, std::vector<pf::Point3f> &points);
+    // Provide a point cloud, will provide plane coefficients
+    // or zero dimension matrix if failure
+    Eigen::MatrixXf fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
+    // Calculate the zdepth and the zdot
+    bool runPlaneFitting(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
+        float &roll, float &pitch);
+    // Obtain all the plane information needed by driver
+    bool getPlaneInfo(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud, float &zdot, float &zdepth,
+        float &roll, float &pitch, Eigen::MatrixXf &coefs);
+    // Get the last height
+    float getLastHeight() const;
 
    private:
-	float inlierThresh;
-	float lastHeight;
-	Eigen::MatrixXf junkMatrix;
+    float inlierThresh;
+    float lastHeight;
+    Eigen::MatrixXf junkMatrix;
 };

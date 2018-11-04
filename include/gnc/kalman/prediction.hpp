@@ -16,24 +16,24 @@ namespace kalman
 class UkfPrediction
 {
    public:
-	UkfPrediction(YAML::Node config);
+    UkfPrediction(YAML::Node config);
 
-	void operator()(const History::ConstIterator prev, const History::Iterator next);
+    void operator()(const History::ConstIterator prev, const History::Iterator next);
 
    private:
-	History::ConstIterator _prev;
-	History::Iterator _next;
+    History::ConstIterator _prev;
+    History::Iterator _next;
 
-	KalmanState predict(const KalmanState& state);
+    KalmanState predict(const KalmanState& state);
 
-	using PredictionUT = UnscentedTransform<KalmanState>;
+    using PredictionUT = UnscentedTransform<KalmanState>;
 
-	PredictionUT transformation;
-	Eigen::Matrix<double, KalmanState::DoF, KalmanState::DoF> Q;
+    PredictionUT transformation;
+    Eigen::Matrix<double, KalmanState::DoF, KalmanState::DoF> Q;
 
    protected:
-	// For testing
-	const PredictionUT& getUT() const { return transformation; }
+    // For testing
+    const PredictionUT& getUT() const { return transformation; }
 };
 }
 }

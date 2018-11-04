@@ -20,11 +20,11 @@ namespace measurements
  */
 struct Measurement
 {
-	std::shared_ptr<const ImuMeasurement> imu;
-	std::shared_ptr<const LidarMeasurement> lidar;
-	std::shared_ptr<const PlaneFitMeasurement> plane_fit;
-	std::shared_ptr<const VisualOdometryMeasurement> visual_odometry;
-	std::shared_ptr<const GlobalUpdateMeasurement> global_update;
+    std::shared_ptr<const ImuMeasurement> imu;
+    std::shared_ptr<const LidarMeasurement> lidar;
+    std::shared_ptr<const PlaneFitMeasurement> plane_fit;
+    std::shared_ptr<const VisualOdometryMeasurement> visual_odometry;
+    std::shared_ptr<const GlobalUpdateMeasurement> global_update;
 };
 
 /*

@@ -22,29 +22,29 @@ using namespace maav::gnc;
 
 BOOST_AUTO_TEST_CASE(RunTest)
 {
-	KalmanState state(1000);
-	state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
-	state.position() = {0, 1, -1};
-	state.velocity() = Vector3d::Zero();
-	state.angular_velocity() = Vector3d::Zero();
-	state.acceleration() = Vector3d::Zero();
+    KalmanState state(1000);
+    state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
+    state.position() = {0, 1, -1};
+    state.velocity() = Vector3d::Zero();
+    state.angular_velocity() = Vector3d::Zero();
+    state.acceleration() = Vector3d::Zero();
 
-	measurements::Measurement measurement;
-	measurements::ImuMeasurement imu;
-	imu.time_usec = 1000;
-	imu.acceleration = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
-	imu.angular_rates = Vector3d::Zero();
-	imu.magnetometer = {0, 0, 1};
+    measurements::Measurement measurement;
+    measurements::ImuMeasurement imu;
+    imu.time_usec = 1000;
+    imu.acceleration = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
+    imu.angular_rates = Vector3d::Zero();
+    imu.magnetometer = {0, 0, 1};
 
-	measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
+    measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
 
-	measurements::LidarMeasurement lidar;
-	lidar.distance = 1;
-	lidar.time_usec = 1000;
-	measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
+    measurements::LidarMeasurement lidar;
+    lidar.distance = 1;
+    lidar.time_usec = 1000;
+    measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
 
-	History::Snapshot snapshot(state, measurement);
+    History::Snapshot snapshot(state, measurement);
 
-	LidarUpdate update;
-	update(snapshot);
+    LidarUpdate update;
+    update(snapshot);
 }

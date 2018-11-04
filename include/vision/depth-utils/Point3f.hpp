@@ -5,9 +5,9 @@ namespace pf
 {
 struct Point3f
 {
-	float x;
-	float y;
-	float z;
+    float x;
+    float y;
+    float z;
 };
 }
 

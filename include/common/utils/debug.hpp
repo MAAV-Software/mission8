@@ -16,16 +16,16 @@ void maav_debug_lock();
 void maav_debug_unlock();
 
 #define MAAV_DEBUG(...)                       \
-	do                                        \
-	{                                         \
-		if (MAAV_DEBUG_ENABLED)               \
-		{                                     \
-			maav_debug_lock();                \
-			fprintf(stderr, "[MAAV DEBUG] "); \
-			fprintf(stderr, __VA_ARGS__);     \
-			fprintf(stderr, "\n");            \
-			fflush(stderr);                   \
-			maav_debug_unlock();              \
-		}                                     \
-	} while (0)
+    do                                        \
+    {                                         \
+        if (MAAV_DEBUG_ENABLED)               \
+        {                                     \
+            maav_debug_lock();                \
+            fprintf(stderr, "[MAAV DEBUG] "); \
+            fprintf(stderr, __VA_ARGS__);     \
+            fprintf(stderr, "\n");            \
+            fflush(stderr);                   \
+            maav_debug_unlock();              \
+        }                                     \
+    } while (0)
 #endif

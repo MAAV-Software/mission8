@@ -117,203 +117,203 @@ namespace gcs
 template <typename Status>
 class StatCmd : public GlibZCM::Handler<Status>
 {
-	// a convenient alias for the long parent class name
-	using super = GlibZCM::Handler<Status>;
+    // a convenient alias for the long parent class name
+    using super = GlibZCM::Handler<Status>;
 
-	// the current reported status, old_stat, and the desired status, new_stat
-	Status old_stat, new_stat;
+    // the current reported status, old_stat, and the desired status, new_stat
+    Status old_stat, new_stat;
 
-	// which channel to use to send command messages
-	std::string cmd_channel;
+    // which channel to use to send command messages
+    std::string cmd_channel;
 
-	// the signal for status updates
-	sigc::signal<void, const Status&> update_signal;
+    // the signal for status updates
+    sigc::signal<void, const Status&> update_signal;
 
-	// is the corresponding command channel primed
-	bool primed{false};
+    // is the corresponding command channel primed
+    bool primed{false};
 
-	// how to update the desired status and correctly emit the signal
-	void update_new(const Status& stat)
-	{
-		update_signal.emit(stat);
-		new_stat = stat;
-	}
+    // how to update the desired status and correctly emit the signal
+    void update_new(const Status& stat)
+    {
+        update_signal.emit(stat);
+        new_stat = stat;
+    }
 
    protected:
-	/**
-	 * @brief Handles new messages and updates the internal status
-	 * @param msg The new message that has come in
-	 */
-	void on_message(const Status& msg) override
-	{
-		// if there's an update in progress and the status still hasn't been
-		// updated, resend the command message
-		if (old_stat != new_stat)
-		{
-			if (msg != new_stat) super::get_zcm().publish(cmd_channel, new_stat);
-		}
+    /**
+     * @brief Handles new messages and updates the internal status
+     * @param msg The new message that has come in
+     */
+    void on_message(const Status& msg) override
+    {
+        // if there's an update in progress and the status still hasn't been
+        // updated, resend the command message
+        if (old_stat != new_stat)
+        {
+            if (msg != new_stat) super::get_zcm().publish(cmd_channel, new_stat);
+        }
 
-		// otherwise, if there isn't an update in progress, update the desired
-		// message if there's a new status
-		else if (msg != new_stat)
-			update_new(msg);
+        // otherwise, if there isn't an update in progress, update the desired
+        // message if there's a new status
+        else if (msg != new_stat)
+            update_new(msg);
 
-		// always update the reported status
-		old_stat = msg;
+        // always update the reported status
+        old_stat = msg;
 
-		// call back up to emit the message signal
-		super::on_message(msg);
-	}
+        // call back up to emit the message signal
+        super::on_message(msg);
+    }
 
    public:
-	/**
-	 * @brief Creates a status/command handler
-	 * @param zcm The GlibZCM instance to use for communicating with ZCM
-	 * @param channel The channel prefix to use for status and command messages:
-	 * "_CMD" is appended to get the command channel and "_STAT" is appended for
-	 * the status channel
-	 * @param init The initial status value
-	 */
-	StatCmd(GlibZCM& zcm, const std::string& channel, const Status& init = Status())
-		: super{zcm, channel + "_STAT"},
-		  old_stat{init},
-		  new_stat{init},
-		  cmd_channel{channel + "_CMD"}
-	{
-	}
+    /**
+     * @brief Creates a status/command handler
+     * @param zcm The GlibZCM instance to use for communicating with ZCM
+     * @param channel The channel prefix to use for status and command messages:
+     * "_CMD" is appended to get the command channel and "_STAT" is appended for
+     * the status channel
+     * @param init The initial status value
+     */
+    StatCmd(GlibZCM& zcm, const std::string& channel, const Status& init = Status())
+        : super{zcm, channel + "_STAT"},
+          old_stat{init},
+          new_stat{init},
+          cmd_channel{channel + "_CMD"}
+    {
+    }
 
-	/**
-	* @brief Alternate constructor enabling explicit specification of command
-	* and status channels.
-	*
-	 * @param zcm The GlibZCM instance to use for communicating with ZCM
-	 * @param cnd_channel_in The command channel
-	 * @param stat_channel_on The status channel
-	 * @param init The initial status value
-	*/
-	StatCmd(GlibZCM& zcm, const std::string& cmd_channel_in, const std::string& stat_channel_in,
-			const Status& init = Status())
-		: super{zcm, stat_channel_in}, old_stat{init}, new_stat{init}, cmd_channel{cmd_channel_in}
-	{
-	}
+    /**
+    * @brief Alternate constructor enabling explicit specification of command
+    * and status channels.
+    *
+     * @param zcm The GlibZCM instance to use for communicating with ZCM
+     * @param cnd_channel_in The command channel
+     * @param stat_channel_on The status channel
+     * @param init The initial status value
+    */
+    StatCmd(GlibZCM& zcm, const std::string& cmd_channel_in, const std::string& stat_channel_in,
+        const Status& init = Status())
+        : super{zcm, stat_channel_in}, old_stat{init}, new_stat{init}, cmd_channel{cmd_channel_in}
+    {
+    }
 
-	/**
-	* @ brief Prime the corresponding command channel. This actually primes the
-	* ipc channel on gcsClient since udpm does not need to be primed.
-	*/
-	void prime()
-	{
-		if (!primed)
-		{
-			super::get_zcm().publish(cmd_channel, new_stat);
-			primed = true;
-		}
-	}
+    /**
+    * @ brief Prime the corresponding command channel. This actually primes the
+    * ipc channel on gcsClient since udpm does not need to be primed.
+    */
+    void prime()
+    {
+        if (!primed)
+        {
+            super::get_zcm().publish(cmd_channel, new_stat);
+            primed = true;
+        }
+    }
 
-	/**
-	* @brief Move constructor
-	*
-	* @param other The other StatCmd to move data from
-	*/
-	StatCmd(StatCmd<Status>&& other) noexcept
-	{
-		old_stat = std::move(other.old_stat);
-		new_stat = std::move(other.new_stat);
-		cmd_channel = std::move(other.cmd_channel);
-		update_signal = std::move(other.update_signal);
-		primed = other.primed;
-	}
+    /**
+    * @brief Move constructor
+    *
+    * @param other The other StatCmd to move data from
+    */
+    StatCmd(StatCmd<Status>&& other) noexcept
+    {
+        old_stat = std::move(other.old_stat);
+        new_stat = std::move(other.new_stat);
+        cmd_channel = std::move(other.cmd_channel);
+        update_signal = std::move(other.update_signal);
+        primed = other.primed;
+    }
 
-	/**
-	* @brief Move assignment operator
-	*
-	* @param other The other StatCmd to move data from
-	*
-	* @return This StatCmd
-	*/
-	StatCmd<Status>& operator=(StatCmd<Status>&& other) noexcept
-	{
-		if (this != &other)
-		{
-			old_stat = std::move(other.old_stat);
-			new_stat = std::move(other.new_stat);
-			cmd_channel = std::move(other.cmd_channel);
-			update_signal = std::move(other.update_signal);
-			primed = other.primed;
-		}
-		return *this;
-	}
+    /**
+    * @brief Move assignment operator
+    *
+    * @param other The other StatCmd to move data from
+    *
+    * @return This StatCmd
+    */
+    StatCmd<Status>& operator=(StatCmd<Status>&& other) noexcept
+    {
+        if (this != &other)
+        {
+            old_stat = std::move(other.old_stat);
+            new_stat = std::move(other.new_stat);
+            cmd_channel = std::move(other.cmd_channel);
+            update_signal = std::move(other.update_signal);
+            primed = other.primed;
+        }
+        return *this;
+    }
 
-	/**
-	* @brief Sets initial old_stat and new_stat to the given Status
-	*
-	* @param stat_in The Status to set old_stat and new_stat to
-	*/
-	void initStat(Status stat_in)
-	{
-		new_stat = stat_in;
-		old_stat = stat_in;
-	}
+    /**
+    * @brief Sets initial old_stat and new_stat to the given Status
+    *
+    * @param stat_in The Status to set old_stat and new_stat to
+    */
+    void initStat(Status stat_in)
+    {
+        new_stat = stat_in;
+        old_stat = stat_in;
+    }
 
-	/**
-	 * @brief Retreives the current status, which will be the one set by cmd if an
-	 * update is in progress
-	 * @return The current status
-	 */
-	const Status& stat() const { return new_stat; }
-	/**
-	 * @brief Updates the status and starts sending command messages
-	 * @param cmd The value to update the status to
-	 */
-	void cmd(const Status& cmd)
-	{
-		//	if (cmd == new_stat) return;
-		update_new(cmd);
-		super::get_zcm().publish(cmd_channel, new_stat);
-	}
+    /**
+     * @brief Retreives the current status, which will be the one set by cmd if an
+     * update is in progress
+     * @return The current status
+     */
+    const Status& stat() const { return new_stat; }
+    /**
+     * @brief Updates the status and starts sending command messages
+     * @param cmd The value to update the status to
+     */
+    void cmd(const Status& cmd)
+    {
+        //	if (cmd == new_stat) return;
+        update_new(cmd);
+        super::get_zcm().publish(cmd_channel, new_stat);
+    }
 
-	/**
-	* @brief Updates the status without sending command sessages
-	*
-	* @param update The current status
-	*/
-	void update(const Status& update)
-	{
-		if (update == new_stat) return;
-		update_new(update);
-	}
+    /**
+    * @brief Updates the status without sending command sessages
+    *
+    * @param update The current status
+    */
+    void update(const Status& update)
+    {
+        if (update == new_stat) return;
+        update_new(update);
+    }
 
-	/**
-	* @brief Publishes the most recent command message
-	*/
-	void publish_new() { super::get_zcm().publish(cmd_channel, new_stat); }
-	/**
-	 * @brief Exposes the status update signal
-	 * @return The signal; connect to this to get status updates
-	 *
-	 * @details The handler here is called just before the StatCmd is actually
-	 * updated, so the status value from calling stat() on the StatCmd within the
-	 * handler will be the old value while the parameter which is passed in is the
-	 * new one. This behavior is very helpful for implementing UI elements that
-	 * should track the status if they aren't changed but stop tracking if they
-	 * are:
-	 *
-	 * ```
-	 * my_status.signal_update().connect([this](const my_status_t& new_stat) {
-	 *
-	 *     //the old status is available here, so it can be used to see if the ui
-	 *     //is matching my_status before the update takes place
-	 *     const auto old_stat = my_status.stat();
-	 *     if (get_ui_status() == old_stat) {
-	 *
-	 *         //the new status passed as a parameter can then be used to make the
-	 *         //UI track the status update
-	 *         set_ui_status(new_stat);
-	 *     }
-	 * });
-	 * ```
-	 */
-	sigc::signal<void, const Status&>& signal_update() { return update_signal; }
+    /**
+    * @brief Publishes the most recent command message
+    */
+    void publish_new() { super::get_zcm().publish(cmd_channel, new_stat); }
+    /**
+     * @brief Exposes the status update signal
+     * @return The signal; connect to this to get status updates
+     *
+     * @details The handler here is called just before the StatCmd is actually
+     * updated, so the status value from calling stat() on the StatCmd within the
+     * handler will be the old value while the parameter which is passed in is the
+     * new one. This behavior is very helpful for implementing UI elements that
+     * should track the status if they aren't changed but stop tracking if they
+     * are:
+     *
+     * ```
+     * my_status.signal_update().connect([this](const my_status_t& new_stat) {
+     *
+     *     //the old status is available here, so it can be used to see if the ui
+     *     //is matching my_status before the update takes place
+     *     const auto old_stat = my_status.stat();
+     *     if (get_ui_status() == old_stat) {
+     *
+     *         //the new status passed as a parameter can then be used to make the
+     *         //UI track the status update
+     *         set_ui_status(new_stat);
+     *     }
+     * });
+     * ```
+     */
+    sigc::signal<void, const Status&>& signal_update() { return update_signal; }
 };
 }
 }

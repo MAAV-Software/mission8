@@ -9,40 +9,40 @@ GetOpt::~GetOpt() { getopt_destroy(gopt); }
 void GetOpt::swap(GetOpt &other) noexcept { std::swap(gopt, other.gopt); }
 GetOpt::GetOpt(GetOpt &&original) : GetOpt()
 {
-	swap(original);  // move ctor is just construct and swap from original
+    swap(original);  // move ctor is just construct and swap from original
 }
 
 GetOpt &GetOpt::operator=(GetOpt &&rhs)
 {
-	swap(rhs);  // use swap idiom to move the data
-	return *this;
+    swap(rhs);  // use swap idiom to move the data
+    return *this;
 }
 
 bool GetOpt::parse(int argc, char *argv[], bool showErrors)
 {
-	return getopt_parse(gopt, argc, argv, showErrors ? 1 : 0) == 1;
+    return getopt_parse(gopt, argc, argv, showErrors ? 1 : 0) == 1;
 }
 
 void GetOpt::printHelp() { getopt_do_usage(gopt); }
 void GetOpt::addSpacer(const char *s) { getopt_add_spacer(gopt, s); }
 void GetOpt::addBool(char sopt, const char *lname, bool def, const char *help)
 {
-	getopt_add_bool(gopt, sopt, lname, def ? 1 : 0, help);
+    getopt_add_bool(gopt, sopt, lname, def ? 1 : 0, help);
 }
 
 void GetOpt::addInt(char sopt, const char *lname, const char *def, const char *help)
 {
-	getopt_add_int(gopt, sopt, lname, def, help);
+    getopt_add_int(gopt, sopt, lname, def, help);
 }
 
 void GetOpt::addString(char sopt, const char *lname, const char *def, const char *help)
 {
-	getopt_add_string(gopt, sopt, lname, def, help);
+    getopt_add_string(gopt, sopt, lname, def, help);
 }
 
 void GetOpt::addDouble(char sopt, const char *lname, const char *def, const char *help)
 {
-	getopt_add_double(gopt, sopt, lname, def, help);
+    getopt_add_double(gopt, sopt, lname, def, help);
 }
 
 const char *GetOpt::getString(const char *lname) { return getopt_get_string(gopt, lname); }

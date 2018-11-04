@@ -13,10 +13,10 @@ namespace measurements
  */
 struct ImuMeasurement
 {
-	Eigen::Vector3d acceleration;
-	Eigen::Vector3d angular_rates;
-	Eigen::Vector3d magnetometer;
-	uint64_t time_usec;
+    Eigen::Vector3d acceleration;
+    Eigen::Vector3d angular_rates;
+    Eigen::Vector3d magnetometer;
+    uint64_t time_usec;
 };
 
 }  // namespace measurements

@@ -11,6 +11,6 @@ void maav_debug_unlock() { mtx.unlock(); }
 // checks if the environment variable has been set
 struct BeforeMain
 {
-	BeforeMain() { MAAV_DEBUG_ENABLED = (nullptr != getenv("MAAV_DEBUG")); }
+    BeforeMain() { MAAV_DEBUG_ENABLED = (nullptr != getenv("MAAV_DEBUG")); }
 };
 static BeforeMain run;

@@ -10,17 +10,17 @@ namespace gnc
 class Planner
 {
    public:
-	Planner(const std::string& path_config);
+    Planner(const std::string& path_config);
 
-	// TODO: Add path/target
-	void set_target();
+    // TODO: Add path/target
+    void set_target();
 
-	void add_state(const State& state);
+    void add_state(const State& state);
 
-	void add_map(/*const Map& map*/);
+    void add_map(/*const Map& map*/);
 
    private:
-	std::string config_file;
+    std::string config_file;
 };
 
 }  // namespace gnc

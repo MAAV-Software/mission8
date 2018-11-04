@@ -67,90 +67,90 @@ namespace gcs
  */
 class GlibZCM : zcm::ZCM
 {
-	// the connection used to recieve events when input is available on the ZCM
-	// FD
-	sigc::connection zcm_connection;
+    // the connection used to recieve events when input is available on the ZCM
+    // FD
+    sigc::connection zcm_connection;
 
-	// the callback for that connection
-	bool handle_input();
+    // the callback for that connection
+    bool handle_input();
 
    public:
-	/**
-	 * @brief Creates an sets up a Glib-enabled ZCM connection
-	 */
-	explicit GlibZCM(const std::string& url);
+    /**
+     * @brief Creates an sets up a Glib-enabled ZCM connection
+     */
+    explicit GlibZCM(const std::string& url);
 
-	~GlibZCM();
+    ~GlibZCM();
 
-	template <typename Message>
-	void publish(const std::string& channel, const Message& msg)
-	{
-		MAAV_DEBUG("Publishing %s message on channel %s", msg.getTypeName(), channel.c_str());
-		ZCM::publish(channel, &msg);
-	}
+    template <typename Message>
+    void publish(const std::string& channel, const Message& msg)
+    {
+        MAAV_DEBUG("Publishing %s message on channel %s", msg.getTypeName(), channel.c_str());
+        ZCM::publish(channel, &msg);
+    }
 
-	/**
-	 * @brief A helper type template for subscribing to messages
-	 * @param Message the message type to use
-	 *
-	 * @details See GlibZCM for usage details
-	 */
-	template <typename Message>
-	class Handler
-	{
-		// the corresponding GlibZCM instance
-		GlibZCM& zcm;
+    /**
+     * @brief A helper type template for subscribing to messages
+     * @param Message the message type to use
+     *
+     * @details See GlibZCM for usage details
+     */
+    template <typename Message>
+    class Handler
+    {
+        // the corresponding GlibZCM instance
+        GlibZCM& zcm;
 
-		// the subscription that this manages
-		zcm::Subscription* subscription;
+        // the subscription that this manages
+        zcm::Subscription* subscription;
 
-		// the signal used for handling messages by default
-		sigc::signal<void, const Message&> message_signal;
+        // the signal used for handling messages by default
+        sigc::signal<void, const Message&> message_signal;
 
-		// the callback for invoking on_message when ZCM finds messages
-		void handle_message(const zcm::ReceiveBuffer*, const std::string& channel,
-							const Message* msg)
-		{
-			MAAV_DEBUG("ZCM found a message of type %s on channel %s", msg->getTypeName(),
-					   channel.c_str());
-			return on_message(*msg);
-		}
+        // the callback for invoking on_message when ZCM finds messages
+        void handle_message(
+            const zcm::ReceiveBuffer*, const std::string& channel, const Message* msg)
+        {
+            MAAV_DEBUG("ZCM found a message of type %s on channel %s", msg->getTypeName(),
+                channel.c_str());
+            return on_message(*msg);
+        }
 
-	   protected:
-		/**
-		 * @brief The virtual function used for handling messages
-		 * @param msg The message to handle
-		 */
-		virtual void on_message(const Message& msg) { message_signal.emit(msg); }
-		// the channel used for this subscription
-		const std::string channel;
+       protected:
+        /**
+         * @brief The virtual function used for handling messages
+         * @param msg The message to handle
+         */
+        virtual void on_message(const Message& msg) { message_signal.emit(msg); }
+        // the channel used for this subscription
+        const std::string channel;
 
-	   public:
-		/**
-		 * @brief Creates a handler for handling messages from a given channel
-		 * @param zcm_in The GlibZCM object to use the handle with
-		 * @param channel The ZCM channel to subscribe to
-		 */
-		Handler(GlibZCM& zcm_in, const std::string& channel_in)
-			: zcm{zcm_in},
-			  subscription{zcm.subscribe(channel_in, &Handler::handle_message, this)},
-			  channel{channel_in}
-		{
-			MAAV_DEBUG("GlibZCM set to handle messages on channel %s.", channel.c_str());
-		}
+       public:
+        /**
+         * @brief Creates a handler for handling messages from a given channel
+         * @param zcm_in The GlibZCM object to use the handle with
+         * @param channel The ZCM channel to subscribe to
+         */
+        Handler(GlibZCM& zcm_in, const std::string& channel_in)
+            : zcm{zcm_in},
+              subscription{zcm.subscribe(channel_in, &Handler::handle_message, this)},
+              channel{channel_in}
+        {
+            MAAV_DEBUG("GlibZCM set to handle messages on channel %s.", channel.c_str());
+        }
 
-		~Handler() { zcm.unsubscribe(subscription); }
-		/**
-		 * @brief Exposes this handler's signal
-		 * @return The signal; connect to this to handle messages
-		 */
-		sigc::signal<void, const Message&>& signal_message() { return message_signal; }
-		/**
-		 * @brief Retreives the GlibZCM that this Handler belongs to
-		 * @return The Handler's GlibZCM
-		 */
-		GlibZCM& get_zcm() const { return zcm; }
-	};
+        ~Handler() { zcm.unsubscribe(subscription); }
+        /**
+         * @brief Exposes this handler's signal
+         * @return The signal; connect to this to handle messages
+         */
+        sigc::signal<void, const Message&>& signal_message() { return message_signal; }
+        /**
+         * @brief Retreives the GlibZCM that this Handler belongs to
+         * @return The Handler's GlibZCM
+         */
+        GlibZCM& get_zcm() const { return zcm; }
+    };
 };
 }
 }

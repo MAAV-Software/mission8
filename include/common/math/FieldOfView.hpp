@@ -12,40 +12,40 @@ namespace maav
 class FieldOfView
 {
    public:
-	/**
-	 * @brief Constructor
-	 * @param hFOV the horizontal, or x field of view in radians.
-	 * @param vFOV the vertical, or y field of view in radians.
-	 */
-	FieldOfView(double hFOV, double vFOV);
+    /**
+     * @brief Constructor
+     * @param hFOV the horizontal, or x field of view in radians.
+     * @param vFOV the vertical, or y field of view in radians.
+     */
+    FieldOfView(double hFOV, double vFOV);
 
-	/**
-	 * @brief Constructor
-	 * @param xResolution the number of pixels along the width of the image.
-	 * @param yResolution the number of pixels along the height of the image.
-	 * @param dFOV the diagonal field of view in radians.
-	 */
-	FieldOfView(int xResolution, int yResolution, double dFOV);
+    /**
+     * @brief Constructor
+     * @param xResolution the number of pixels along the width of the image.
+     * @param yResolution the number of pixels along the height of the image.
+     * @param dFOV the diagonal field of view in radians.
+     */
+    FieldOfView(int xResolution, int yResolution, double dFOV);
 
-	/**
-	 * @return the hortizontal or x field of view in radians.
-	 */
-	double hFOV() const;
+    /**
+     * @return the hortizontal or x field of view in radians.
+     */
+    double hFOV() const;
 
-	/**
-	 * @return the vertical or y field of view in radians.
-	 */
-	double vFOV() const;
+    /**
+     * @return the vertical or y field of view in radians.
+     */
+    double vFOV() const;
 
-	/**
-	 * @return the diagonal field of view in radians.
-	 */
-	double dFOV() const;
+    /**
+     * @return the diagonal field of view in radians.
+     */
+    double dFOV() const;
 
    private:
-	double horizontalFOV;
-	double verticalFOV;
-	double diagonalFOV;
+    double horizontalFOV;
+    double verticalFOV;
+    double diagonalFOV;
 };
 
 }  // namespace maav

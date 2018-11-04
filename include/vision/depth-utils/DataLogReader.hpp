@@ -8,29 +8,29 @@
 class DataLogReader
 {
    public:
-	DataLogReader() = delete;
+    DataLogReader() = delete;
 
-	// Creates a DataLogReader to read from the given directory
-	DataLogReader(std::string dir, int camNum);
+    // Creates a DataLogReader to read from the given directory
+    DataLogReader(std::string dir, int camNum);
 
-	// gets the RGB frame at the current count
-	// returns whether a valid image was returned
-	bool getRGB(cv::Mat& mat);
+    // gets the RGB frame at the current count
+    // returns whether a valid image was returned
+    bool getRGB(cv::Mat& mat);
 
-	// gets the Depth frame at the current count
-	// returns whether a valid image was returned
-	bool getDepth(cv::Mat& mat);
+    // gets the Depth frame at the current count
+    // returns whether a valid image was returned
+    bool getDepth(cv::Mat& mat);
 
-	// increments the counter
-	void increment();
+    // increments the counter
+    void increment();
 
-	// allows for jumping to a certain counter position
-	void setCounter(int count);
+    // allows for jumping to a certain counter position
+    void setCounter(int count);
 
    private:
-	std::string directory;
-	int counter;
-	int cameraNumber;
+    std::string directory;
+    int counter;
+    int cameraNumber;
 };
 
 #endif

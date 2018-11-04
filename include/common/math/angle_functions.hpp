@@ -17,14 +17,14 @@ namespace eecs467
 */
 inline double wrap_to_pi(double angle)
 {
-	if (angle < -M_PI)
-		for (; angle < -M_PI; angle += (2.0 * M_PI))
-			;
-	else if (angle > M_PI)
-		for (; angle > M_PI; angle -= (2.0 * M_PI))
-			;
+    if (angle < -M_PI)
+        for (; angle < -M_PI; angle += (2.0 * M_PI))
+            ;
+    else if (angle > M_PI)
+        for (; angle > M_PI; angle -= (2.0 * M_PI))
+            ;
 
-	return angle;
+    return angle;
 }
 
 /**
@@ -35,14 +35,14 @@ inline double wrap_to_pi(double angle)
 */
 inline double wrap_to_2pi(double angle)
 {
-	if (angle < 0)
-		for (; angle < 0; angle += (2.0 * M_PI))
-			;
-	else if (angle > (2.0 * M_PI))
-		for (; angle > (2.0 * M_PI); angle -= (2.0 * M_PI))
-			;
+    if (angle < 0)
+        for (; angle < 0; angle += (2.0 * M_PI))
+            ;
+    else if (angle > (2.0 * M_PI))
+        for (; angle > (2.0 * M_PI); angle -= (2.0 * M_PI))
+            ;
 
-	return angle;
+    return angle;
 }
 
 /**
@@ -57,14 +57,14 @@ inline double wrap_to_2pi(double angle)
 */
 inline double wrap_to_pi_2(double angle)
 {
-	double wrapped = wrap_to_pi(angle);
+    double wrapped = wrap_to_pi(angle);
 
-	if (wrapped < -M_PI_2)
-		wrapped += M_PI;
-	else if (wrapped > M_PI_2)
-		wrapped -= M_PI;
+    if (wrapped < -M_PI_2)
+        wrapped += M_PI;
+    else if (wrapped > M_PI_2)
+        wrapped -= M_PI;
 
-	return wrapped;
+    return wrapped;
 }
 
 /**
@@ -77,11 +77,11 @@ inline double wrap_to_pi_2(double angle)
 */
 inline double angle_diff(double leftAngle, double rightAngle)
 {
-	double diff = leftAngle - rightAngle;
+    double diff = leftAngle - rightAngle;
 
-	if (std::abs(diff) > M_PI) diff -= (diff > 0) ? M_PI * 2.0 : M_PI * -2.0;
+    if (std::abs(diff) > M_PI) diff -= (diff > 0) ? M_PI * 2.0 : M_PI * -2.0;
 
-	return diff;
+    return diff;
 }
 
 /**
@@ -95,7 +95,7 @@ inline double angle_diff(double leftAngle, double rightAngle)
 */
 inline double angle_diff_abs(double leftAngle, double rightAngle)
 {
-	return std::abs(angle_diff(leftAngle, rightAngle));
+    return std::abs(angle_diff(leftAngle, rightAngle));
 }
 
 /**
@@ -113,9 +113,9 @@ inline double angle_diff_abs(double leftAngle, double rightAngle)
 */
 inline double angle_diff_abs_pi_2(double lhs, double rhs)
 {
-	double diff = std::abs(angle_diff(lhs, rhs));
+    double diff = std::abs(angle_diff(lhs, rhs));
 
-	return (diff < (M_PI / 2.0)) ? diff : M_PI - diff;
+    return (diff < (M_PI / 2.0)) ? diff : M_PI - diff;
 }
 
 /**
@@ -127,11 +127,11 @@ inline double angle_diff_abs_pi_2(double lhs, double rhs)
 */
 inline double angle_sum(double angleA, double angleB)
 {
-	double sum = angleA + angleB;
+    double sum = angleA + angleB;
 
-	if (std::abs(sum) > M_PI) sum -= (sum > 0) ? M_PI * 2.0 : M_PI * -2.0;
+    if (std::abs(sum) > M_PI) sum -= (sum > 0) ? M_PI * 2.0 : M_PI * -2.0;
 
-	return sum;
+    return sum;
 }
 
 }  // namespace eecs467
