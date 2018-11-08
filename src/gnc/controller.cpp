@@ -52,7 +52,10 @@ void Controller::set_control_params(const ctrl_params_t& ctrl_params)
     z_position_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
     z_rate_pid.setGains(ctrl_params.rate[2].p, ctrl_params.rate[2].i, ctrl_params.rate[2].d);
     yaw_pid.setGains(ctrl_params.value[3].p, ctrl_params.value[3].i, ctrl_params.value[3].d);
-    pitch_pid.setGains(ctrl_params.rate[0].p, ctrl_params.rate[0].i, ctrl_params.rate[0].d);
+    pitch_pid.setGains(
+        ctrl_params.rate[0].p, ctrl_params.rate[0].i, ctrl_params.rate[0].d);  // x rate
+    roll_pid.setGains(
+        ctrl_params.rate[1].p, ctrl_params.rate[1].i, ctrl_params.rate[1].d);  // y rate
 }
 
 void Controller::set_control_params(const ctrl_params_t& ctrl_params, const Parameters& _veh_params)
@@ -140,12 +143,10 @@ bool Controller::set_control_state(const ControlState new_control_state)
 
 mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 {
-    static double xy_disp_last_norm;
     InnerLoopSetpoint new_setpoint;
 
     Eigen::Vector2d xy_error = {current_state.position().x() - current_target.position.x(),
         current_state.position().y() - current_target.position.y()};
-
     // Functionality to pause a waypoints
     // this is to slow down the movement along path during testing
     if (!set_pause && xy_error.norm() < convergence_tolerance)
@@ -155,20 +156,23 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
         converged_on_waypoint = true;
     }
 
-    double xy_disp_dot = (xy_error.norm() - xy_disp_last_norm) / dt;
-    xy_disp_last_norm = xy_error.norm();
-    double angle = pitch_pid.run(xy_error.norm(), xy_disp_dot);
-    Eigen::Vector2d rot = {-xy_error.normalized().y(), xy_error.normalized().x()};
+    double y_error = (current_target.position.y() - current_state.position().y());
+    double y_error_dot = current_state.velocity().y();
+    double roll = roll_pid.run(y_error, -y_error_dot);
+    roll = bounded(roll, veh_params.angle_limits[0]);
+    Eigen::Quaterniond q_roll = {cos(roll / 2), sin(roll / 2), 0, 0};
 
-    angle = bounded(angle, veh_params.angle_limits[0]);
+    double x_error = (current_target.position.x() - current_state.position().x());
+    double x_error_dot = current_state.velocity().x();
+    double pitch = pitch_pid.run(-x_error, x_error_dot);
+    pitch = bounded(pitch, veh_params.angle_limits[1]);
+    Eigen::Quaterniond q_pitch = {cos(pitch / 2), 0, sin(pitch / 2), 0};
 
     Eigen::Quaterniond q_yaw = {
         cos(current_target.yaw * M_PI / 180 / 2), 0, 0, sin(current_target.yaw * M_PI / 180 / 2)};
-    Eigen::Quaterniond q_pitch = {
-        cos(angle / 2), rot.x() * sin(angle / 2), rot.y() * sin(angle / 2), 0};
 
     new_setpoint.thrust = calculate_thrust(current_target.position.z());
-    new_setpoint.q = static_cast<Eigen::Quaternion<float>>(q_pitch * q_yaw);
+    new_setpoint.q = static_cast<Eigen::Quaternion<float>>(q_roll * q_pitch * q_yaw);
 
     return new_setpoint;
 }

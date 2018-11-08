@@ -20,6 +20,7 @@
 #include <gnc/utils/zcm_conversion.hpp>
 
 using maav::STATE_CHANNEL;
+using maav::SIM_STATE_CHANNEL;
 using maav::PATH_CHANNEL;
 using maav::CTRL_PARAMS_CHANNEL;
 using maav::gnc::Controller;
@@ -84,6 +85,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
+
     zcm::ZCM zcm{"ipc"};
     zcm.start();
 
@@ -91,12 +94,18 @@ int main(int argc, char** argv)
     ZCMHandler<state_t> state_handler;
     ZCMHandler<ctrl_params_t> gains_handler;
 
+    if (gains_config["sim-state"].as<bool>())
+    {
+        zcm.subscribe(SIM_STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+    }
+    else
+    {
+        zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+    }
     zcm.subscribe(PATH_CHANNEL, &ZCMHandler<path_t>::recv, &path_handler);
-    zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
     zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
 
     Controller controller;
-    YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
     controller.set_control_params(
         load_gains_from_yaml(gains_config), load_vehicle_params(gains_config));
     OffboardControl offboard_control(CommunicationType::UDP);

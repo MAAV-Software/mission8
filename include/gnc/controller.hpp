@@ -69,6 +69,7 @@ class Controller
     control::Pid z_position_pid;
     control::Pid z_rate_pid;
     control::Pid pitch_pid;
+    control::Pid roll_pid;
     control::Pid yaw_pid;
     Parameters veh_params;
 

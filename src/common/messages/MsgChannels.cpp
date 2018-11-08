@@ -5,6 +5,7 @@ namespace maav
 const char* const CTRL_CHANNEL = "CTRL";
 const char* const CTRL_PARAMS_CHANNEL = "CTRL_PARAMS";
 const char* const STATE_CHANNEL = "STATE";
+const char* const SIM_STATE_CHANNEL = "SIM_STATE";
 const char* const MAP_CHANNEL = "MAP";
 const char* const OBSTS_CHANNEL = "OBSTACLES";
 const char* const IMU_CHANNEL = "IMU";

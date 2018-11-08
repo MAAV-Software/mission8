@@ -6,6 +6,7 @@ namespace maav
 extern const char* const CTRL_CHANNEL;          ///< controller output to inner loop through tanfan
 extern const char* const CTRL_PARAMS_CHANNEL;   ///< PID gains from GCS client to controller
 extern const char* const STATE_CHANNEL;         ///< state output from localization to system
+extern const char* const SIM_STATE_CHANNEL;     ///< state output from sim to system
 extern const char* const MAP_CHANNEL;           ///< map output from localization to system
 extern const char* const OBSTS_CHANNEL;         ///< localization's obstacle output to system
 extern const char* const IMU_CHANNEL;           ///< imu channel from tanfan to system
