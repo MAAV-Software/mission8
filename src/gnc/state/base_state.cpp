@@ -29,6 +29,7 @@ const Eigen::Vector3d& BaseState::velocity() const { return _velocity; }
 Eigen::Vector3d& BaseState::velocity() { return _velocity; }
 const Eigen::Vector3d& BaseState::acceleration() const { return _acceleration; }
 Eigen::Vector3d& BaseState::acceleration() { return _acceleration; }
+void BaseState::set_time(uint64_t usec) { _time_usec = usec; }
 uint64_t BaseState::time_usec() const { return _time_usec; }
 double BaseState::time_sec() const
 {

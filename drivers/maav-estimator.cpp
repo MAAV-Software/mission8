@@ -1,5 +1,10 @@
+#include <csignal>
+
+#include <yaml-cpp/yaml.h>
 #include <Eigen/Core>
 #include <Eigen/Eigen>
+#include <zcm/zcm-cpp.hpp>
+
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/imu_t.hpp>
 #include <common/messages/lidar_t.hpp>
@@ -7,12 +12,11 @@
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
-#include <csignal>
+#include <gnc/constants.hpp>
 #include <gnc/estimator.hpp>
 #include <gnc/measurements/Imu.hpp>
 #include <gnc/measurements/Measurement.hpp>
 #include <gnc/utils/zcm_conversion.hpp>
-#include <zcm/zcm-cpp.hpp>
 
 using maav::HEIGHT_LIDAR_CHANNEL;
 using maav::IMU_CHANNEL;
@@ -57,38 +61,18 @@ int main(int argc, char** argv)
     zcm.subscribe(IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
     zcm.subscribe(HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
     zcm.subscribe(PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
-    // The Kalman filter also updates with data from itself, but this is taken care of
-    // within the Kalman filter.
 
-    // KalmanInitializer init;
-    // init.config_file = gopt.getString("config");
-    Estimator estimator;
+    zcm.start();
 
-    MeasurementSet set;
+    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
+    Estimator estimator(config);
 
     // Main Loop
     KILL = false;
     while (!KILL)
     {
-        // Kalman Update Rate = IMU's Update rate,
-        // so we ONLY update the Kalman Filter when the IMU Updates.
-        if (imu_handler.ready())
-        {
-            const imu_t msg = imu_handler.msg();
-            imu_handler.pop();
+        MeasurementSet set;
 
-            ImuMeasurement imu;
-            imu.acceleration =
-                Eigen::Vector3d(msg.acceleration[0], msg.acceleration[1], msg.acceleration[2]);
-            imu.magnetometer =
-                Eigen::Vector3d(msg.angular_rates[0], msg.angular_rates[1], msg.angular_rates[2]);
-            imu.time_usec = msg.utime;
-            set.imu = std::make_shared<ImuMeasurement>(imu);
-
-            const State& state = estimator.add_measurement_set(set);
-            state_t zcm_state = convert_state(state);
-            zcm.publish(STATE_CHANNEL, &zcm_state);
-        }
         if (lidar_handler.ready())
         {
             const lidar_t msg = lidar_handler.msg();
@@ -114,7 +98,39 @@ int main(int argc, char** argv)
 
             set.plane_fit = std::make_shared<PlaneFitMeasurement>(planeFit);
         }
+
+        // Kalman Update Rate = IMU's Update rate,
+        // so we ONLY update the Kalman Filter when the IMU Updates.
+        if (imu_handler.ready())
+        {
+            const imu_t msg = imu_handler.msg();
+            imu_handler.pop();
+
+            ImuMeasurement imu;
+            imu.angular_rates = {msg.angular_rates[0], msg.angular_rates[1], msg.angular_rates[2]};
+            imu.acceleration = {msg.acceleration[0], msg.acceleration[1], msg.acceleration[2]};
+            imu.time_usec = msg.utime;
+            set.imu = std::make_shared<ImuMeasurement>(imu);
+
+            const State& state = estimator.add_measurement_set(set);
+            state_t zcm_state = convert_state(state);
+
+            const Eigen::Quaterniond& att = state.attitude().unit_quaternion();
+            const Eigen::Vector3d& pos = state.position();
+            const Eigen::Vector3d& vel = state.velocity();
+
+            std::cout << "Estimated state:\n";
+            std::cout << "Attitude: " << att.w() << ", " << att.x() << ", " << att.y() << ", "
+                      << att.z() << '\n';
+            std::cout << "Position: " << pos.x() << ", " << pos.y() << ", " << pos.z() << '\n';
+            std::cout << "Velocity: " << vel.x() << ", " << vel.y() << ", " << vel.z() << std::endl;
+
+            // TODO: Add back the state channel. Need to use a different channel for ground truth
+            // zcm.publish(STATE_CHANNEL, &zcm_state);
+        }
     }
+
+    zcm.stop();
 
     return 0;
 }

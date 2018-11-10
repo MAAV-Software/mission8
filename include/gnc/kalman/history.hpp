@@ -21,7 +21,7 @@ namespace kalman
 class History
 {
     public:
-    explicit History(YAML::Node config);
+    explicit History(YAML::Node config, YAML::Node initial_state_config);
 
     public:
     /**
@@ -50,7 +50,7 @@ class History
      *
      * IMU must be populated
      */
-    std::pair<Iterator, Iterator> add_measurement(measurements::MeasurementSet& measurements);
+    std::pair<Iterator, Iterator> add_measurement(const measurements::MeasurementSet& measurements);
 
     size_t size();
 
@@ -58,7 +58,7 @@ class History
     void resize(Iterator last_modified);
 
     /***
-     * Finds a snapshot within tolerance of the given time or creates a new
+     * Finds a snapshot within _tolerance of the given time or creates a new
      * snapshot with an interpolated IMU measurement.
      * @param time
      * @return
@@ -70,11 +70,17 @@ class History
 
     Iterator set_last_modified(const Iterator last_modified, const Iterator modified) const;
 
+    void moveMeasurements(const measurements::MeasurementSet& measurements);
+
     private:
     size_t _size;
-    uint64_t tolerance;
+    uint64_t _tolerance;
 
     std::list<History::Snapshot> _history;
+
+    KalmanState _initial_state;
+
+    measurements::MeasurementSet _insert;
 };
 
 }  // namespace kalman

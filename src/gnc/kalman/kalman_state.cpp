@@ -41,8 +41,11 @@ KalmanState::CovarianceMatrix& KalmanState::covariance() { return _covar; }
 KalmanState KalmanState::mean(
     const std::array<KalmanState, N>& sigma_points, const std::array<double, N>& weights)
 {
-    uint64_t time = sigma_points[0].time_usec();
-    KalmanState mean_state(time);
+    const KalmanState& first = sigma_points[0];
+    uint64_t time = first.time_usec();
+    KalmanState mean_state = KalmanState::zero(time);
+    mean_state.acceleration() = first.acceleration();
+    mean_state.angular_velocity() = first.angular_velocity();
 
     // Use only the previous mean's transformed point because this is linear with respect to the
     // attitude
@@ -54,6 +57,9 @@ KalmanState KalmanState::mean(
 
         // TODO: Determine if other values are necessary to average.
         // TODO: Use other estimated parameters
+        // Propagate bias
+        mean_state.accel_bias() = sigma_points[i].accel_bias() * weights[i];
+        mean_state.gyro_bias() = sigma_points[i].gyro_bias() * weights[i];
     }
     return mean_state;
 }

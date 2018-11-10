@@ -35,7 +35,7 @@ void UkfPrediction::operator()(const History::ConstIterator prev, const History:
     _prev = prev;
     _next = next;
 
-    // Propagate state
+    // Propagate previous state
     _next->state = transformation(prev->state);
 
     // Add process noise
@@ -81,9 +81,9 @@ KalmanState UkfPrediction::predict(const KalmanState& state)
     const Eigen::Vector3d v_mid = (v_next + v_prev) / 2.0;
     next_state.position() = _prev->state.position() + (v_mid * dt);
 
-    // Move bias corrected sensor readings
-    next_state.angular_velocity() = w_next;
-    next_state.acceleration() = a_next;
+    // Move corrected sensor readings
+    next_state.angular_velocity() = w_mid;
+    next_state.acceleration() = a_mid;
 
     return next_state;
 }

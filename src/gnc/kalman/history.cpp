@@ -1,7 +1,8 @@
-#include <gnc/kalman/history.hpp>
+#include <iostream>
 #include <iterator>
 #include <memory>
 
+#include <common/utils/yaml_matrix.hpp>
 #include <gnc/kalman/history.hpp>
 
 using maav::gnc::measurements::ImuMeasurement;
@@ -15,12 +16,58 @@ namespace gnc
 {
 namespace kalman
 {
-History::History(YAML::Node config)
-    : _size(config["size"].as<size_t>()), tolerance(config["tolerance"].as<uint64_t>())
+History::History(YAML::Node config, YAML::Node initial_state_config)
+    : _size(config["size"].as<size_t>()),
+      _tolerance(config["tolerance"].as<uint64_t>()),
+      _initial_state(KalmanState::zero(0))
 {
+    Eigen::Vector4d initial_attitude = initial_state_config["attitude"].as<Eigen::Vector4d>();
+    Eigen::Quaterniond initial_quat = {
+        initial_attitude.x(), initial_attitude.y(), initial_attitude.z(), initial_attitude.w()};
+    Eigen::Vector3d initial_position = initial_state_config["position"].as<Eigen::Vector3d>();
+    Eigen::Vector3d initial_velocity = initial_state_config["velocity"].as<Eigen::Vector3d>();
+    Eigen::Matrix<double, KalmanState::DoF, 1> diag_covariance =
+        initial_state_config["covariance"].as<Eigen::Matrix<double, KalmanState::DoF, 1>>();
+
+    _initial_state.attitude() = Sophus::SO3d(Eigen::Quaterniond(initial_quat));
+    _initial_state.position() = initial_position;
+    _initial_state.velocity() = initial_velocity;
+
+    _initial_state.covariance() = Eigen::DiagonalMatrix<double, KalmanState::DoF>(diag_covariance);
 }
 
-pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementSet &measurements)
+void printTimingWarning(std::string sensor)
+{
+    std::cout << "WARNING: " << sensor << " measurement was overriden. Are your timings correct?"
+              << std::endl;
+}
+
+void History::moveMeasurements(const MeasurementSet &measurements)
+{
+    if (measurements.lidar)
+    {
+        if (_insert.lidar) printTimingWarning("lidar");
+        _insert.lidar = measurements.lidar;
+    }
+    if (measurements.plane_fit)
+    {
+        if (_insert.plane_fit) printTimingWarning("plane fitting");
+        _insert.plane_fit = measurements.plane_fit;
+    }
+    if (measurements.visual_odometry)
+    {
+        if (_insert.visual_odometry) printTimingWarning("visual odometry");
+        _insert.visual_odometry = measurements.visual_odometry;
+    }
+    if (measurements.global_update)
+    {
+        if (_insert.global_update) printTimingWarning("global update");
+        _insert.global_update = measurements.global_update;
+    }
+}
+
+pair<History::Iterator, History::Iterator> History::add_measurement(
+    const MeasurementSet &measurements)
 {
     // Insert zero state if empty
     if (_history.empty())
@@ -28,9 +75,9 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
         uint64_t start_time = measurements.imu->time_usec;
         Measurement start_measurement;
         start_measurement.imu = measurements.imu;
-        KalmanState initial_state = KalmanState::zero(start_time);
+        _initial_state.set_time(start_time);
 
-        _history.emplace_back(initial_state, start_measurement);
+        _history.emplace_back(_initial_state, start_measurement);
         return {_history.end(), _history.end()};
     }
 
@@ -39,60 +86,56 @@ pair<History::Iterator, History::Iterator> History::add_measurement(MeasurementS
     Measurement imu_measurement;
     imu_measurement.imu = measurements.imu;
     _history.emplace_back(KalmanState(imu_time), imu_measurement);
-    measurements.imu = nullptr;
     auto last_modified = std::prev(_history.end());
 
-    // Microsecond tolerance to merge measurements
+    // Microsecond _tolerance to merge measurements
     // IMU will be running on a 10000 microsecond period
 
-    if (measurements.lidar)
+    moveMeasurements(measurements);
+    if (_insert.lidar)
     {
-        uint64_t lidar_time = measurements.lidar->time_usec;
+        uint64_t lidar_time = _insert.lidar->time_usec;
         auto snap_iter = find_snapshot(lidar_time);
         if (snap_iter != _history.end())
         {
-            snap_iter->measurement.lidar = measurements.lidar;
-            measurements.lidar = nullptr;
-
+            snap_iter->measurement.lidar = _insert.lidar;
+            _insert.lidar = nullptr;
             last_modified = set_last_modified(last_modified, snap_iter);
         }
     }
 
-    if (measurements.plane_fit)
+    if (_insert.plane_fit)
     {
-        uint64_t plane_fit_time = measurements.plane_fit->time_usec;
+        uint64_t plane_fit_time = _insert.plane_fit->time_usec;
         auto snap_iter = find_snapshot(plane_fit_time);
         if (snap_iter != _history.end())
         {
-            snap_iter->measurement.plane_fit = measurements.plane_fit;
-            measurements.plane_fit = nullptr;
-
+            snap_iter->measurement.plane_fit = _insert.plane_fit;
+            _insert.plane_fit = nullptr;
             last_modified = set_last_modified(last_modified, snap_iter);
         }
     }
 
-    if (measurements.visual_odometry)
+    if (_insert.visual_odometry)
     {
-        uint64_t vo_time = measurements.visual_odometry->time_usec;
+        uint64_t vo_time = _insert.visual_odometry->time_usec;
         auto snap_iter = find_snapshot(vo_time);
         if (snap_iter != _history.end())
         {
-            snap_iter->measurement.visual_odometry = measurements.visual_odometry;
-            measurements.visual_odometry = nullptr;
-
+            snap_iter->measurement.visual_odometry = _insert.visual_odometry;
+            _insert.visual_odometry = nullptr;
             last_modified = set_last_modified(last_modified, snap_iter);
         }
     }
 
-    if (measurements.global_update)
+    if (_insert.global_update)
     {
-        uint64_t gu_time = measurements.global_update->time_usec;
+        uint64_t gu_time = _insert.global_update->time_usec;
         auto snap_iter = find_snapshot(gu_time);
         if (snap_iter != _history.end())
         {
-            snap_iter->measurement.global_update = measurements.global_update;
-            measurements.global_update = nullptr;
-
+            snap_iter->measurement.global_update = _insert.global_update;
+            _insert.global_update = nullptr;
             last_modified = set_last_modified(last_modified, snap_iter);
         }
     }
@@ -122,14 +165,21 @@ void History::resize(Iterator last_modified)
     }
 }
 
+void printLateWarning()
+{
+    std::cout << "Warning: measurement was not inserted because it arrived too late to be placed "
+                 "in the history."
+              << std::endl;
+}
+
 History::Iterator History::find_snapshot(uint64_t time)
 {
     auto end = _history.rbegin();
     if (time > end->get_time())
     {
-        if (time - end->get_time() < tolerance)
+        if (time - end->get_time() < _tolerance)
         {
-            // If within tolerance of last IMU, add it
+            // If within _tolerance of last IMU, add it
             return std::prev(_history.end());
         }
         else
@@ -151,11 +201,11 @@ History::Iterator History::find_snapshot(uint64_t time)
             uint64_t prev_t = prev_iter->get_time();
 
             // Check tolerances and insert interpolated IMU if necessary
-            if (time - prev_t <= tolerance)
+            if (time - prev_t <= _tolerance)
             {
                 return prev_iter;
             }
-            else if (next_t - time <= tolerance)
+            else if (next_t - time <= _tolerance)
             {
                 return next_iter;
             }
@@ -171,6 +221,7 @@ History::Iterator History::find_snapshot(uint64_t time)
         }
     }
 
+    printLateWarning();
     // If older than oldest measurement, discard
     return _history.end();
 }
@@ -192,6 +243,7 @@ ImuMeasurement History::interpolate_imu(
 
     return interpolated;
 }
+
 History::Iterator History::set_last_modified(
     const History::Iterator last_modified, const History::Iterator modified) const
 {
@@ -204,6 +256,7 @@ History::Iterator History::set_last_modified(
         return last_modified;
     }
 }
+
 size_t History::size() { return _history.size(); }
 }  // namespace kalman
 }  // namespace gnc

@@ -52,6 +52,8 @@ class BaseState
     const Eigen::Vector3d& acceleration() const;
     Eigen::Vector3d& acceleration();
 
+    void set_time(uint64_t usec);
+
     uint64_t time_usec() const;
     double time_sec() const;
 

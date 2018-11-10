@@ -1,7 +1,11 @@
 #pragma once
 
-#include "gnc/measurements/Measurement.hpp"
-#include "gnc/state.hpp"
+#include <yaml-cpp/yaml.h>
+
+#include <gnc/kalman/history.hpp>
+#include <gnc/kalman/prediction.hpp>
+#include <gnc/measurements/Measurement.hpp>
+#include <gnc/state.hpp>
 
 namespace maav
 {
@@ -10,12 +14,16 @@ namespace gnc
 class Estimator
 {
     public:
-    Estimator();
+    Estimator(YAML::Node config);
 
-    const State& add_measurement_set(const measurements::MeasurementSet& meas);
+    const State& add_measurement_set(measurements::MeasurementSet& meas);
 
     private:
-    State state;
+    State empty_state;
+
+    kalman::History history;
+
+    kalman::UkfPrediction prediction;
 };
 
 }  // namespace gnc
