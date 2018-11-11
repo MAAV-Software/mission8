@@ -31,4 +31,5 @@ const char* const START_VISION = "START_VISION";
 const char* const PLANE_FIT_CHANNEL = "PLANE_FIT_CHANNEL";
 const char* const VISUAL_ODOMETRY_CHANNEL = "VISUAL_ODOMETRY";
 const char* const SIM_TRUE_VISUAL_ODOMETRY_CHANNEL = "VISUAL_ODOMETRY";
+const char* const RGBD_CHANNEL = "RGBD_CHANNEL";
 }

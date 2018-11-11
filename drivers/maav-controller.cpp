@@ -66,12 +66,12 @@ path_t create_test_path();
 
 int main(int argc, char** argv)
 {
+    std::cout << "Controller Driver" << std::endl;
+
     signal(SIGINT, sig_handler);
     signal(SIGABRT, sig_handler);
     signal(SIGSEGV, sig_handler);
     signal(SIGTERM, sig_handler);
-
-    std::cout << "Controller Driver" << std::endl;
 
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");

@@ -4,8 +4,9 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "gnc/measurements/Imu.hpp"
-#include "gnc/slam/System.h"
+#include <gnc/slam/System.h>
+#include <common/messages/map_t.hpp>
+#include <gnc/measurements/Imu.hpp>
 
 namespace maav
 {
@@ -26,10 +27,13 @@ class Localizer
 
     ~Localizer();
 
-    void add_image(const cv::Mat& color, const cv::Mat& depth, uint64_t timestamp);
+    void addImage(const cv::Mat& color, const cv::Mat& depth, uint64_t timestamp);
 
     // TODO: Add imu to graph
-    void add_imu(/*const measurements::ImuMeasurement& imu*/);
+    void addImu(/*const measurements::ImuMeasurement& imu*/);
+
+    // TODO: return a map
+    map_t getMap();
 
     private:
     slam::System slam;

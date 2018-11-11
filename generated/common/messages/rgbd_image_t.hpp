@@ -24,6 +24,8 @@ class rgbd_image_t
 
         depth_image_t depth_image;
 
+        int64_t    utime;
+
     public:
         /**
          * Destructs a message properly if anything inherits from it
@@ -134,6 +136,9 @@ int rgbd_image_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) con
     thislen = this->depth_image._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
+    thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
     return pos;
 }
 
@@ -148,6 +153,9 @@ int rgbd_image_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxle
     thislen = this->depth_image._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
+    thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
     return pos;
 }
 
@@ -156,6 +164,7 @@ uint32_t rgbd_image_t::_getEncodedSizeNoHash() const
     uint32_t enc_size = 0;
     enc_size += this->rgb_image._getEncodedSizeNoHash();
     enc_size += this->depth_image._getEncodedSizeNoHash();
+    enc_size += __int64_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
@@ -167,7 +176,7 @@ uint64_t rgbd_image_t::_computeHash(const __zcm_hash_ptr* p)
             return 0;
     const __zcm_hash_ptr cp = { p, (void*)rgbd_image_t::getHash };
 
-    uint64_t hash = (uint64_t)0x5d7a4c34247a90d3LL +
+    uint64_t hash = (uint64_t)0xa1f92380d680cc7bLL +
          rgb_image_t::_computeHash(&cp) +
          depth_image_t::_computeHash(&cp);
 

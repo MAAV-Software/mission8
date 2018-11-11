@@ -5,4 +5,5 @@ struct rgbd_image_t
 {
 	rgb_image_t rgb_image;
 	depth_image_t depth_image;
+	int64_t utime;
 }

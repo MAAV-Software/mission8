@@ -32,4 +32,11 @@ target_link_libraries(maav-estimator
         maav-msg
 )
 
+add_executable(maav-localizer maav-localizer.cpp)
 
+target_link_libraries(maav-localizer
+        maav-gnc
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+)
