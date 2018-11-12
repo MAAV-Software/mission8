@@ -6,41 +6,57 @@ namespace gnc
 {
 namespace kalman
 {
-LidarMeasurement LidarUpdate::predicted(const KalmanState& state)
+using ErrorStateVector = SensorMeasurement::ErrorStateVector;
+using CovarianceMatrix = SensorMeasurement::CovarianceMatrix;
+using SensorVector = SensorMeasurement::SensorVector;
+
+ErrorStateVector SensorMeasurement::operator-(const SensorMeasurement& other) const
 {
-    // TODO: Implement
-    LidarMeasurement meas;
-    meas.distance = 0;
-    return meas;
+    return distance_ - other.distance_;
 }
 
-LidarMeasurement LidarUpdate::measured(const measurements::Measurement& meas)
+SensorMeasurement& SensorMeasurement::operator+=(const ErrorStateVector& other)
 {
-    // TODO: Implement
-    LidarMeasurement measured_reading;
-    measured_reading.distance = meas.lidar->distance;
-    return measured_reading;
-}
-
-LidarMeasurement::ErrorStateVector LidarMeasurement::operator-(const LidarMeasurement& other) const
-{
-    LidarMeasurement::ErrorStateVector ret;
-    ret(0) = distance - other.distance;
-    return ret;
-}
-
-LidarMeasurement& LidarMeasurement::operator+=(
-    const LidarMeasurement::ErrorStateVector& error_state)
-{
-    distance += error_state(0);
+    distance_ += other;
     return *this;
 }
 
-const LidarMeasurement::CovarianceMatrix& LidarMeasurement::covariance() const
+const CovarianceMatrix& SensorMeasurement::covariance() const { return covariance_; }
+CovarianceMatrix& SensorMeasurement::covariance() { return covariance_; }
+const SensorVector& SensorMeasurement::distance() const { return distance_; }
+SensorVector& SensorMeasurement::distance() { return distance_; }
+LidarUpdate::LidarUpdate(YAML::Node config) : BaseUpdate(config["lidar"]) {}
+SensorMeasurement LidarUpdate::predicted(const KalmanState& state)
 {
-    return _covariance;
+    /*
+        Here, we predict the length of a lidar beam given our state. With some trigonometry, you can
+       observe that the length of a beam going down is -z / cos(theta). We rotate a unit z vector
+       and dot it with the unit z vector to find cos(theta)
+    */
+    SensorMeasurement predicted_measurement;
+    const Eigen::Vector3d vertical_vec = Eigen::Vector3d::UnitZ();
+    double cos_theta = (state.attitude() * vertical_vec).dot(vertical_vec);
+    predicted_measurement.distance()(0) = -state.position().z() / cos_theta;
+    return predicted_measurement;
 }
-LidarMeasurement::CovarianceMatrix& LidarMeasurement::covariance() { return _covariance; }
+
+SensorMeasurement LidarUpdate::measured(const measurements::Measurement& meas)
+{
+    SensorMeasurement sensor_measurement;
+    sensor_measurement.distance()(0) = meas.lidar->distance;
+    return sensor_measurement;
 }
+
+void LidarUpdate::operator()(History::Snapshot& snapshot)
+{
+    // Check the validity of the lidar measurements
+    if (!snapshot.measurement.lidar) return;
+    double distance = snapshot.measurement.lidar->distance;
+    if (std::isfinite(distance))
+    {
+        correct(snapshot);
+    }
 }
-}
+}  // namespace kalman
+}  // namespace gnc
+}  // namespace maav

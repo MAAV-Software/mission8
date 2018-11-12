@@ -1,5 +1,8 @@
 #pragma once
 
+#include <yaml-cpp/yaml.h>
+
+#include <common/utils/yaml_matrix.hpp>
 #include <gnc/kalman/history.hpp>
 #include <gnc/kalman/unscented_transform.hpp>
 #include <gnc/measurements/Measurement.hpp>
@@ -28,11 +31,14 @@ class BaseUpdate
     using KalmanGainMatrix = CrossCovarianceMatrix;
 
     public:
-    BaseUpdate()
-        : _unscented_transform(std::bind(&BaseUpdate::predicted, this, _1), 0.1, 2, 0.0),
-          R(CovarianceMatrix::Zero())  // TODO: Read in from yaml
+    BaseUpdate(YAML::Node config)
+        : unscented_transform_(config["UT"]),
+          R_(config["R"].as<typename TargetSpace::CovarianceMatrix>())
     {
+        unscented_transform_.set_transformation(std::bind(&BaseUpdate::predicted, this, _1));
     }
+
+    protected:
     /**
      * Nonlinear h function.
      * Maps the current state to some element of the target space
@@ -47,19 +53,19 @@ class BaseUpdate
     /**
      * Updates the state based on the measurements in a snapshot.
      */
-    virtual void operator()(History::Snapshot& snapshot)
+    void correct(History::Snapshot& snapshot)
     {
         KalmanState& state = snapshot.state;
 
-        const TargetSpace predicted_meas = _unscented_transform(state);
+        const TargetSpace predicted_meas = unscented_transform_(state);
 
         // Extract necessary variables from the UT
-        const typename UT::Weights& c_weights = _unscented_transform.c_weights();
-        const typename UT::SigmaPoints& sigma_points = _unscented_transform.last_sigma_points();
+        const typename UT::Weights& c_weights = unscented_transform_.c_weights();
+        const typename UT::SigmaPoints& sigma_points = unscented_transform_.last_sigma_points();
         const typename UT::TransformedPoints& transformed_points =
-            _unscented_transform.last_transformed_points();
+            unscented_transform_.last_transformed_points();
 
-        const CovarianceMatrix S = predicted_meas.covariance() + R;
+        const CovarianceMatrix S = predicted_meas.covariance() + R_;
         CrossCovarianceMatrix Sigma_x_z = CrossCovarianceMatrix::Zero();
         for (size_t i = 0; i < UnscentedTransform<TargetSpace>::N; i++)
         {
@@ -68,16 +74,15 @@ class BaseUpdate
         }
         const KalmanGainMatrix K = Sigma_x_z * S.inverse();
         ErrorStateVector residual = measured(snapshot.measurement) - predicted_meas;
-
         // Update the state gaussian in place
-        snapshot.state += K * residual;
-        snapshot.state.covariance() -= K * S * K.transpose();
+        state += K * residual;
+        state.covariance() -= K * S * K.transpose();
     }
 
     private:
-    UT _unscented_transform;
-    CovarianceMatrix R;
+    UT unscented_transform_;
+    CovarianceMatrix R_;
 };
-}
-}
-}
+}  // namespace kalman
+}  // namespace gnc
+}  // namespace maav

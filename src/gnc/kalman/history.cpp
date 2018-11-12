@@ -33,6 +33,8 @@ History::History(YAML::Node config, YAML::Node initial_state_config)
     _initial_state.position() = initial_position;
     _initial_state.velocity() = initial_velocity;
 
+    std::cout << "Initiali position: " << _initial_state.position().transpose() << std::endl;
+
     _initial_state.covariance() = Eigen::DiagonalMatrix<double, KalmanState::DoF>(diag_covariance);
 }
 
@@ -78,6 +80,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
         _initial_state.set_time(start_time);
 
         _history.emplace_back(_initial_state, start_measurement);
+        std::cout << "Starting pos: " << _history.back().state.position().transpose() << std::endl;
         return {_history.end(), _history.end()};
     }
 

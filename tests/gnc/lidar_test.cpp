@@ -45,6 +45,107 @@ BOOST_AUTO_TEST_CASE(RunTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    LidarUpdate update;
+    LidarUpdate update(YAML::Load(
+        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
     update(snapshot);
+}
+
+BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
+{
+    KalmanState state(1000);
+    state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
+    state.position() = {0, 1, -1};
+    state.velocity() = Vector3d::Zero();
+    state.angular_velocity() = Vector3d::Zero();
+    state.acceleration() = Vector3d::Zero();
+
+    measurements::Measurement measurement;
+    measurements::ImuMeasurement imu;
+    imu.time_usec = 1000;
+    imu.acceleration = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
+    imu.angular_rates = Vector3d::Zero();
+    imu.magnetometer = {0, 0, 1};
+
+    measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
+
+    measurements::LidarMeasurement lidar;
+    lidar.distance = 1;
+    lidar.time_usec = 1000;
+    measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
+
+    History::Snapshot snapshot(state, measurement);
+
+    LidarUpdate update(YAML::Load(
+        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+
+    double pred = update.predicted(state).distance()(0);
+    double correct_pred = 1;
+    BOOST_CHECK_EQUAL(pred, correct_pred);
+}
+
+BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
+{
+    KalmanState state(1000);
+    state.attitude() = Sophus::SO3d(Quaterniond{0.982, 0, 0.191, 0});
+    state.attitude().normalize();
+    state.position() = {10.1, -23.2, -3.25};
+    state.velocity() = Vector3d::Zero();
+    state.angular_velocity() = Vector3d::Zero();
+    state.acceleration() = Vector3d::Zero();
+
+    measurements::Measurement measurement;
+    measurements::ImuMeasurement imu;
+    imu.time_usec = 1000;
+    imu.acceleration = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
+    imu.angular_rates = Vector3d::Zero();
+    imu.magnetometer = {0, 0, 1};
+
+    measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
+
+    measurements::LidarMeasurement lidar;
+    lidar.distance = 1;
+    lidar.time_usec = 1000;
+    measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
+
+    History::Snapshot snapshot(state, measurement);
+
+    LidarUpdate update(YAML::Load(
+        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+
+    double pred = update.predicted(state).distance()(0);
+    double correct_pred = 3.5052379137;
+    BOOST_CHECK_CLOSE(pred, correct_pred, 0.01);
+}
+
+BOOST_AUTO_TEST_CASE(SensorMeasuredTest)
+{
+    KalmanState state(1000);
+    state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
+    state.position() = {0, 1, -1};
+    state.velocity() = Vector3d::Zero();
+    state.angular_velocity() = Vector3d::Zero();
+    state.acceleration() = Vector3d::Zero();
+
+    measurements::Measurement measurement;
+    measurements::ImuMeasurement imu;
+    imu.time_usec = 1000;
+    imu.acceleration = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
+    imu.angular_rates = Vector3d::Zero();
+    imu.magnetometer = {0, 0, 1};
+
+    measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
+
+    measurements::LidarMeasurement lidar;
+    lidar.distance = 1;
+    lidar.time_usec = 1000;
+    measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
+
+    History::Snapshot snapshot(state, measurement);
+
+    LidarUpdate update(YAML::Load(
+        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+
+    double pred = update.measured(measurement).distance()(0);
+    double correct_pred = 1;
+    BOOST_CHECK_EQUAL(pred, correct_pred);
 }

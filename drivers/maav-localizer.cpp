@@ -14,14 +14,14 @@
 #include <gnc/slam/System.h>
 #include <gnc/localizer.hpp>
 
-using std::cout;
-using maav::RGBD_CHANNEL;
 using maav::MAP_CHANNEL;
+using maav::RGBD_CHANNEL;
+using maav::gnc::Localizer;
 using maav::gnc::SlamInitializer;
 using maav::gnc::slam::System;
-using maav::gnc::Localizer;
-using std::chrono::system_clock;
+using std::cout;
 using std::chrono::duration_cast;
+using std::chrono::system_clock;
 
 cv::Mat convertRgb(const rgb_image_t&);
 cv::Mat convertDepth(const depth_image_t&);
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 
 /*
  * Converts RGB image message into cv::Mat for localizer
-*/
+ */
 cv::Mat convertRgb(const rgb_image_t&)
 {
     assert(false);
@@ -91,7 +91,7 @@ cv::Mat convertRgb(const rgb_image_t&)
 
 /*
  * Converts depth image message into cv::Mat for localizer
-*/
+ */
 cv::Mat convertDepth(const depth_image_t&)
 {
     assert(false);

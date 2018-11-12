@@ -67,16 +67,16 @@ KalmanState KalmanState::mean(
 KalmanState::CovarianceMatrix KalmanState::cov(const KalmanState& mean,
     const std::array<KalmanState, N>& sigma_points, const std::array<double, N>& weights)
 {
-    std::vector<ErrorStateVector> points;
-    for (const KalmanState& state : sigma_points)
+    std::array<ErrorStateVector, N> points;
+    for (size_t i = 0; i < N; i++)
     {
-        ErrorStateVector e_state;
+        const KalmanState& state = sigma_points[i];
+        ErrorStateVector& e_state = points[i];
         Eigen::Vector3d q_err = (mean.attitude().inverse() * state.attitude()).log();
         e_state.block<3, 1>(0, 0) = q_err;
         e_state.block<3, 1>(3, 0) = state.position();
         e_state.block<3, 1>(6, 0) = state.velocity();
 
-        points.push_back(e_state);
         // TODO: add more states to estimate
     }
 

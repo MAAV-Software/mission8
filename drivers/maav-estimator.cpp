@@ -22,13 +22,13 @@ using maav::HEIGHT_LIDAR_CHANNEL;
 using maav::IMU_CHANNEL;
 using maav::PLANE_FIT_CHANNEL;
 using maav::STATE_CHANNEL;
+using maav::gnc::convert_state;
 using maav::gnc::Estimator;
-using maav::gnc::measurements::MeasurementSet;
+using maav::gnc::State;
 using maav::gnc::measurements::ImuMeasurement;
 using maav::gnc::measurements::LidarMeasurement;
+using maav::gnc::measurements::MeasurementSet;
 using maav::gnc::measurements::PlaneFitMeasurement;
-using maav::gnc::State;
-using maav::gnc::convert_state;
 
 using namespace std;
 
@@ -69,8 +69,13 @@ int main(int argc, char** argv)
 
     // Main Loop
     KILL = false;
+
     while (!KILL)
     {
+        // Kalman Update Rate = IMU's Update rate,
+        // so we ONLY update the Kalman Filter when the IMU Updates.
+        if (!imu_handler.ready()) continue;
+
         MeasurementSet set;
 
         if (lidar_handler.ready())
@@ -84,6 +89,7 @@ int main(int argc, char** argv)
 
             set.lidar = std::make_shared<LidarMeasurement>(lidar);
         }
+
         if (plane_fit_handler.ready())
         {
             const plane_fit_t msg = plane_fit_handler.msg();
@@ -99,35 +105,24 @@ int main(int argc, char** argv)
             set.plane_fit = std::make_shared<PlaneFitMeasurement>(planeFit);
         }
 
-        // Kalman Update Rate = IMU's Update rate,
-        // so we ONLY update the Kalman Filter when the IMU Updates.
-        if (imu_handler.ready())
-        {
-            const imu_t msg = imu_handler.msg();
-            imu_handler.pop();
+        const imu_t msg = imu_handler.msg();
+        imu_handler.pop();
 
-            ImuMeasurement imu;
-            imu.angular_rates = {msg.angular_rates[0], msg.angular_rates[1], msg.angular_rates[2]};
-            imu.acceleration = {msg.acceleration[0], msg.acceleration[1], msg.acceleration[2]};
-            imu.time_usec = msg.utime;
-            set.imu = std::make_shared<ImuMeasurement>(imu);
+        ImuMeasurement imu;
+        imu.angular_rates = {msg.angular_rates[0], msg.angular_rates[1], msg.angular_rates[2]};
+        imu.acceleration = {msg.acceleration[0], msg.acceleration[1], msg.acceleration[2]};
+        imu.time_usec = msg.utime;
+        set.imu = std::make_shared<ImuMeasurement>(imu);
 
-            const State& state = estimator.add_measurement_set(set);
-            state_t zcm_state = convert_state(state);
+        const State& state = estimator.add_measurement_set(set);
+        state_t zcm_state = convert_state(state);
 
-            const Eigen::Quaterniond& att = state.attitude().unit_quaternion();
-            const Eigen::Vector3d& pos = state.position();
-            const Eigen::Vector3d& vel = state.velocity();
+        zcm_state.position[0] = 0;
+        zcm_state.position[1] = 0;
+        zcm_state.velocity[0] = 0;
+        zcm_state.velocity[1] = 0;
 
-            std::cout << "Estimated state:\n";
-            std::cout << "Attitude: " << att.w() << ", " << att.x() << ", " << att.y() << ", "
-                      << att.z() << '\n';
-            std::cout << "Position: " << pos.x() << ", " << pos.y() << ", " << pos.z() << '\n';
-            std::cout << "Velocity: " << vel.x() << ", " << vel.y() << ", " << vel.z() << std::endl;
-
-            // TODO: Add back the state channel. Need to use a different channel for ground truth
-            // zcm.publish(STATE_CHANNEL, &zcm_state);
-        }
+        zcm.publish(STATE_CHANNEL, &zcm_state);
     }
 
     zcm.stop();
