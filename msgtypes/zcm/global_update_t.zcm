@@ -3,6 +3,7 @@
  */
 struct global_update_t
 {
+    int64_t utime;
 	double position[3];
     double attitude[4];
 }
