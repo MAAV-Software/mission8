@@ -36,6 +36,7 @@ extern const char* const VISUAL_ODOMETRY_CHANNEL;  ///< visual odometry updates
 extern const char* const
     SIM_TRUE_VISUAL_ODOMETRY_CHANNEL;   ///< "true" visual odometry from simulator
 extern const char* const RGBD_CHANNEL;  ///< rgbd images sent to slam
+extern const char* const GLOBAL_UPDATE_CHANNEL; ///< channel for global update to kalman filter
 }
 
 #endif
