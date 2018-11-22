@@ -50,7 +50,7 @@
  */
 class GetOpt
 {
-    public:
+public:
     /**
      * @brief Contructs a GetOpt object
      * @details Underlying implementation allocates memory on the heap.
@@ -197,7 +197,7 @@ class GetOpt
      */
     const zarray_t *getExtraArgs();
 
-    private:
+private:
     getopt_t *gopt;  ///< underlying getopt pointer
 
     /**

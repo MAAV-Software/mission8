@@ -51,7 +51,7 @@ class LoopClosing;
 
 class System
 {
-    public:
+public:
     // Input sensor
     enum eSensor
     {
@@ -60,7 +60,7 @@ class System
         RGBD = 2
     };
 
-    public:
+public:
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing
     // and Viewer threads.
     System(const string& strVocFile, const string& strSettingsFile, const eSensor sensor,
@@ -130,7 +130,7 @@ class System
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
-    private:
+private:
     // Input sensor
     eSensor mSensor;
 

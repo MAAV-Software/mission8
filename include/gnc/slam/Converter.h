@@ -35,7 +35,7 @@ namespace slam
 {
 class Converter
 {
-    public:
+public:
     static std::vector<cv::Mat> toDescriptorVector(const cv::Mat& Descriptors);
 
     static g2o::SE3Quat toSE3Quat(const cv::Mat& cvT);

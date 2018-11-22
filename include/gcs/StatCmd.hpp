@@ -139,7 +139,7 @@ class StatCmd : public GlibZCM::Handler<Status>
         new_stat = stat;
     }
 
-    protected:
+protected:
     /**
      * @brief Handles new messages and updates the internal status
      * @param msg The new message that has come in
@@ -165,7 +165,7 @@ class StatCmd : public GlibZCM::Handler<Status>
         super::on_message(msg);
     }
 
-    public:
+public:
     /**
      * @brief Creates a status/command handler
      * @param zcm The GlibZCM instance to use for communicating with ZCM

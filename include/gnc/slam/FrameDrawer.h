@@ -41,7 +41,7 @@ class Viewer;
 
 class FrameDrawer
 {
-    public:
+public:
     FrameDrawer(Map* pMap);
 
     // Update info from the last processed frame.
@@ -50,7 +50,7 @@ class FrameDrawer
     // Draw last processed frame.
     cv::Mat DrawFrame();
 
-    protected:
+protected:
     void DrawTextInfo(cv::Mat& im, int nState, cv::Mat& imText);
 
     // Info of the frame to be drawn

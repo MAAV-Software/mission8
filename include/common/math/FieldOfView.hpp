@@ -11,7 +11,7 @@ namespace maav
  */
 class FieldOfView
 {
-    public:
+public:
     /**
      * @brief Constructor
      * @param hFOV the horizontal, or x field of view in radians.
@@ -42,7 +42,7 @@ class FieldOfView
      */
     double dFOV() const;
 
-    private:
+private:
     double horizontalFOV;
     double verticalFOV;
     double diagonalFOV;

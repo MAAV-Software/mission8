@@ -41,7 +41,7 @@ class Map;
 
 class LocalMapping
 {
-    public:
+public:
     LocalMapping(Map* pMap, const float bMonocular);
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
@@ -75,7 +75,7 @@ class LocalMapping
         return mlNewKeyFrames.size();
     }
 
-    protected:
+protected:
     bool CheckNewKeyFrames();
     void ProcessNewKeyFrame();
     void CreateNewMapPoints();

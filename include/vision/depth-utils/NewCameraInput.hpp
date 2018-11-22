@@ -16,7 +16,7 @@
 // and provides the RGBD data in various forms
 class NewCameraInput : public CameraInputBase
 {
-    public:
+public:
     // A CameraInput instance cannot be created without
     // at least a given camera id
     NewCameraInput() = delete;
@@ -49,7 +49,7 @@ class NewCameraInput : public CameraInputBase
     // Returns the CameraInput instance following the increment
     virtual NewCameraInput &operator++() override;
 
-    private:
+private:
     const uint16_t *depthImage;
     const uint16_t *colorImage;
 

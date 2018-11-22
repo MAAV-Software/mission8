@@ -54,7 +54,7 @@ class System;
 
 class Tracking
 {
-    public:
+public:
     Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
         Map* pMap, KeyFrameDatabase* pKFDB, const string& strSettingPath, const int sensor);
 
@@ -79,7 +79,7 @@ class Tracking
     // to localize the camera.
     void InformOnlyTracking(const bool& flag);
 
-    public:
+public:
     // Tracking states
     enum eTrackingState
     {
@@ -121,7 +121,7 @@ class Tracking
 
     void Reset();
 
-    protected:
+protected:
     // Main tracking function. It is independent of the input sensor.
     void Track();
 

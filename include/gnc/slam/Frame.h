@@ -46,7 +46,7 @@ class KeyFrame;
 
 class Frame
 {
-    public:
+public:
     Frame();
 
     // Copy constructor.
@@ -106,7 +106,7 @@ class Frame
     // coordinates.
     cv::Mat UnprojectStereo(const int& i);
 
-    public:
+public:
     // Vocabulary used for relocalization.
     ORBVocabulary* mpORBvocabulary;
 
@@ -197,7 +197,7 @@ class Frame
 
     static bool mbInitialComputations;
 
-    private:
+private:
     // Undistort keypoints given OpenCV distortion parameters.
     // Only for the RGB-D case. Stereo must be already rectified!
     // (called in the constructor).

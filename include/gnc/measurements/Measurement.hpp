@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "gnc/measurements/GlobalUpdate.hpp"
-#include "gnc/measurements/Imu.hpp"
-#include "gnc/measurements/Lidar.hpp"
-#include "gnc/measurements/PlaneFit.hpp"
-#include "gnc/measurements/VisualOdometry.hpp"
+#include <gnc/measurements/GlobalUpdate.hpp>
+#include <gnc/measurements/Imu.hpp>
+#include <gnc/measurements/Lidar.hpp>
+#include <gnc/measurements/PlaneFit.hpp>
+#include <gnc/measurements/VisualOdometry.hpp>
 
 namespace maav
 {
@@ -36,7 +36,7 @@ struct Measurement
  * not have happened at the same moment, mostly for convenience so we don't
  * have to split up measurements into many arguments.
  */
-typedef Measurement MeasurementSet;
+using MeasurementSet = Measurement;
 
 }  // namespace measurements
 }  // namespace gnc

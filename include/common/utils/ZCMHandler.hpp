@@ -16,7 +16,7 @@
 template <typename T>
 class ZCMHandler
 {
-    public:
+public:
     /**
      * @brief Constructs a default MessageHander with an empty message queue.
      */
@@ -82,7 +82,7 @@ class ZCMHandler
         return msgs.size();
     }
 
-    private:
+private:
     std::queue<T> msgs;  ///< message queue
     std::mutex mtx;      ///< mutex for locking the queue (use with std::lock_guard)
 };
@@ -97,7 +97,7 @@ class ZCMHandler
 template <typename T>
 class ZCMSingleHandler
 {
-    public:
+public:
     /**
      * @brief Constructs a default MessageHander with an empty message queue.
      */
@@ -134,7 +134,7 @@ class ZCMSingleHandler
         return msg_;
     }
 
-    private:
+private:
     T msg_;          ///< latest message
     std::mutex mtx;  ///< mutex for locking the queue (use with std::lock_guard)
 };

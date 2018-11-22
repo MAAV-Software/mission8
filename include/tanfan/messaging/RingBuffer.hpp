@@ -14,7 +14,7 @@
 template <uint32_t N>
 class RingBuffer
 {
-    public:
+public:
     // Constructs RingBuffer with allocated memory of N bytes
     RingBuffer() : writer(0), reader(0), mask(N - 1) { data = new uint8_t[N]; }
     ~RingBuffer() { delete[] data; }
@@ -45,7 +45,7 @@ class RingBuffer
     // EFFECTS:  Clears the RingBuffer
     void clear();
 
-    private:
+private:
     uint8_t* data;
     uint32_t writer;
     uint32_t reader;

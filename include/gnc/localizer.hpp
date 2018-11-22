@@ -22,7 +22,7 @@ struct SlamInitializer
 
 class Localizer
 {
-    public:
+public:
     Localizer(SlamInitializer& slam_init);
 
     ~Localizer();
@@ -35,7 +35,7 @@ class Localizer
     // TODO: return a map
     map_t getMap();
 
-    private:
+private:
     slam::System slam;
 };
 

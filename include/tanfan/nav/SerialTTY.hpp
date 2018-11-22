@@ -15,7 +15,7 @@ namespace maav
  */
 class SerialTTY
 {
-    public:
+public:
     SerialTTY();
 
     explicit SerialTTY(const char *fname);
@@ -68,7 +68,7 @@ class SerialTTY
 
     void registerCallback(void (*func)(const char *, size_t));
 
-    private:
+private:
     void (*cb)(const char *, size_t);
     bool connected;
     maav::Log::Logger log;

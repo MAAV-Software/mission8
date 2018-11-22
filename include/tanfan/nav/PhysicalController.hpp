@@ -21,7 +21,7 @@ namespace maav
  */
 class PhysicalController : public Controller
 {
-    public:
+public:
     /**
      * @brief Does the needful
      */
@@ -89,7 +89,7 @@ class PhysicalController : public Controller
      */
     void sendDji(float roll, float pitch, float yaw, float thrust);
 
-    private:
+private:
     std::function<void(const feedback_t *)> handler;
     maav::Log::Logger log;
     maav::SerialTTY port;

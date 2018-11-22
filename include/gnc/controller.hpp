@@ -8,9 +8,9 @@
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/ctrl_params_t.hpp>
 #include <common/messages/path_t.hpp>
+#include <gnc/State.hpp>
 #include <gnc/control/pid.hpp>
 #include <gnc/measurements/Waypoint.hpp>
-#include <gnc/state.hpp>
 
 namespace maav
 {
@@ -26,7 +26,7 @@ enum class ControlState
 
 class Controller
 {
-    public:
+public:
     struct Parameters
     {
         double mass;          //< vehicle mass
@@ -47,7 +47,7 @@ class Controller
     ControlState get_control_state() const;
     bool set_control_state(const ControlState new_control_state);
 
-    private:
+private:
     mavlink::InnerLoopSetpoint move_to_current_target();
     double calculate_thrust(const double height_setpoint);
 

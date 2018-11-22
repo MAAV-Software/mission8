@@ -10,7 +10,7 @@
 
 class CameraInputBase
 {
-    public:
+public:
     CameraInputBase();
 
     virtual void getRGB(cv::Mat& mat) const = 0;
@@ -29,7 +29,7 @@ class CameraInputBase
 
     virtual ~CameraInputBase() = default;
 
-    private:
+private:
     int tag;
     static int GLOBAL_TAG;
 };

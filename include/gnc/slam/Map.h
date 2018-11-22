@@ -38,7 +38,7 @@ class KeyFrame;
 
 class Map
 {
-    public:
+public:
     Map();
 
     void AddKeyFrame(KeyFrame* pKF);
@@ -68,7 +68,7 @@ class Map
     // (id conflict)
     std::mutex mMutexPointCreation;
 
-    protected:
+protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
 

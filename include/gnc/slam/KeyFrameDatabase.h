@@ -42,7 +42,7 @@ class Frame;
 
 class KeyFrameDatabase
 {
-    public:
+public:
     KeyFrameDatabase(const ORBVocabulary& voc);
 
     void add(KeyFrame* pKF);
@@ -57,7 +57,7 @@ class KeyFrameDatabase
     // Relocalization
     std::vector<KeyFrame*> DetectRelocalizationCandidates(Frame* F);
 
-    protected:
+protected:
     // Associated vocabulary
     const ORBVocabulary* mpVoc;
 

@@ -40,7 +40,7 @@
 
 class DataLink
 {
-    public:
+public:
     DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm);
     ~DataLink();
 
@@ -51,7 +51,7 @@ class DataLink
     lidar_t getLidarMsg() const { return msgHandler.lidar; }
     imu_t getImuMsg() const { return msgHandler.imu; }
     emergency_t getEmergencyMsg() const { return msgHandler.ems; }
-    private:
+private:
     lcmlite_t lcm;  // lcmlite struct
 
     // subscription types for the messages received

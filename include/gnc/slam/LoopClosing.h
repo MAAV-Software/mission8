@@ -45,13 +45,13 @@ class KeyFrameDatabase;
 
 class LoopClosing
 {
-    public:
+public:
     typedef pair<set<KeyFrame*>, int> ConsistentGroup;
     typedef map<KeyFrame*, g2o::Sim3, std::less<KeyFrame*>,
         Eigen::aligned_allocator<std::pair<const KeyFrame*, g2o::Sim3>>>
         KeyFrameAndPose;
 
-    public:
+public:
     LoopClosing(Map* pMap, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, const bool bFixScale);
 
     void SetTracker(Tracking* pTracker);
@@ -85,7 +85,7 @@ class LoopClosing
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    protected:
+protected:
     bool CheckNewKeyFrames();
 
     bool DetectLoop();

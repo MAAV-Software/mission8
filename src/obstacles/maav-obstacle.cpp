@@ -26,7 +26,7 @@ double LIDAR_MAX_RANGE = 4.0;
 
 class LidarHandler
 {
-    public:
+public:
     LidarHandler(shared_ptr<zcm::ZCM> zcmptr_in, shared_ptr<ZCMSingleHandler<state_t>> state_ptr_in)
         : zcmptr{zcmptr_in}, state_ptr{state_ptr_in}, myViewer{false}
 
@@ -104,7 +104,7 @@ class LidarHandler
         zcmptr->publish(maav::OBSTS_CHANNEL, &obstacleList);
     }
 
-    private:
+private:
     shared_ptr<zcm::ZCM> zcmptr;
     shared_ptr<ZCMSingleHandler<state_t>> state_ptr;
 

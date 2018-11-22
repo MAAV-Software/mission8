@@ -9,7 +9,7 @@
 
 class PlaneFitter
 {
-    public:
+public:
     PlaneFitter() = delete;
     explicit PlaneFitter(float inlierDistanceIn);
     // Pass in a matrix that stores all the points
@@ -25,7 +25,7 @@ class PlaneFitter
     // Calculate the least mean squares error
     double calculateError(const Eigen::Vector4f &sampledCoefficients);
 
-    private:
+private:
     float inlierDistance;
     std::vector<Eigen::Vector3f> pointsVectors;
 };

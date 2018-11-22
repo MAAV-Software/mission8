@@ -13,7 +13,7 @@ namespace gcs
 */
 class GCSConsts
 {
-    public:
+public:
     // Spacing for GUI
     const int SMALL_SPACE;
     const int MED_SPACE;

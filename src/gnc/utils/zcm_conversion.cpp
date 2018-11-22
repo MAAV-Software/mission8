@@ -7,7 +7,7 @@ namespace gnc
 state_t convert_state(const State& state)
 {
     state_t zcm_state;
-    zcm_state.utime = state.time_usec();
+    zcm_state.utime = state.timeUSec();
     const Eigen::Quaterniond& q = state.attitude().unit_quaternion();
     zcm_state.attitude[0] = q.w();
     zcm_state.attitude[1] = q.x();
@@ -22,9 +22,9 @@ state_t convert_state(const State& state)
     zcm_state.velocity[1] = state.velocity().y();
     zcm_state.velocity[2] = state.velocity().z();
 
-    zcm_state.angular_velocity[0] = state.angular_velocity().x();
-    zcm_state.angular_velocity[1] = state.angular_velocity().y();
-    zcm_state.angular_velocity[2] = state.angular_velocity().z();
+    zcm_state.angular_velocity[0] = state.angularVelocity().x();
+    zcm_state.angular_velocity[1] = state.angularVelocity().y();
+    zcm_state.angular_velocity[2] = state.angularVelocity().z();
 
     zcm_state.acceleration[0] = state.acceleration().x();
     zcm_state.acceleration[1] = state.acceleration().y();
@@ -37,7 +37,7 @@ state_t convert_state(const State& state)
 
 State convert_state(const state_t& zcm_state)
 {
-    // Convert to BaseState
+    // Convert to State
     State state(zcm_state.utime);
     Eigen::Vector3d av(zcm_state.angular_velocity[0], zcm_state.angular_velocity[1],
         zcm_state.angular_velocity[2]);
@@ -45,7 +45,7 @@ State convert_state(const state_t& zcm_state)
     Eigen::Vector3d vel(zcm_state.velocity[0], zcm_state.velocity[1], zcm_state.velocity[2]);
     Eigen::Vector3d accel(
         zcm_state.acceleration[0], zcm_state.acceleration[1], zcm_state.acceleration[2]);
-    state.angular_velocity() = av;
+    state.angularVelocity() = av;
     state.position() = pos;
     state.velocity() = vel;
     state.acceleration() = accel;
@@ -65,6 +65,21 @@ Waypoint convert_waypoint(const waypoint_t& zcm_waypoint)
     waypoint.yaw = zcm_waypoint.pose[3];
 
     return waypoint;
+}
+
+measurements::LidarMeasurement convertLidar(const lidar_t& zcm_lidar)
+{
+    measurements::LidarMeasurement lidar;
+    lidar.distance()(0) = zcm_lidar.distance;
+    lidar.setTime(zcm_lidar.utime);
+    return lidar;
+}
+lidar_t convertLidar(const measurements::LidarMeasurement& lidar)
+{
+    lidar_t zcm_lidar;
+    zcm_lidar.distance = lidar.distance()(0);
+    zcm_lidar.utime = lidar.timeUSec();
+    return zcm_lidar;
 }
 }
 }

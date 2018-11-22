@@ -41,7 +41,7 @@ class System;
 
 class Viewer
 {
-    public:
+public:
     Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking* pTracking,
         const string& strSettingPath);
 
@@ -60,7 +60,7 @@ class Viewer
 
     void Release();
 
-    private:
+private:
     bool Stop();
 
     System* mpSystem;

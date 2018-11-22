@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE StateTest
 /**
- * Tests for both BaseState and Kalman State
+ * Tests for both State and Kalman State
  */
 
 #include <cmath>
@@ -10,54 +10,38 @@
 #include <boost/test/unit_test.hpp>
 #include <sophus/so3.hpp>
 
-#include <gnc/kalman/kalman_state.hpp>
-#include <gnc/state/base_state.hpp>
+#include <gnc/State.hpp>
+#include <gnc/constants.hpp>
 #include "test_helpers.hpp"
 
 using namespace boost::unit_test;
 using namespace Eigen;
 
-using namespace maav::gnc::state;
-using namespace maav::gnc::kalman;
+using namespace maav::gnc;
 
-BOOST_AUTO_TEST_CASE(ZeroBaseStateTest)
+BOOST_AUTO_TEST_CASE(ZeroStateTest)
 {
-    BaseState base = BaseState::zero(0);
+    State base = State::zero(0);
 
     double quaternion_error = diff(base.attitude().unit_quaternion(), Quaterniond::Identity());
     BOOST_REQUIRE_CLOSE(quaternion_error, 0.0, 1e-5);
 
-    BOOST_REQUIRE_EQUAL(base.angular_velocity(), Vector3d::Zero());
+    BOOST_REQUIRE_EQUAL(base.angularVelocity(), Vector3d::Zero());
     BOOST_REQUIRE_EQUAL(base.position(), Vector3d::Zero());
     BOOST_REQUIRE_EQUAL(base.velocity(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.acceleration(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.time_sec(), 0.0);
-    BOOST_REQUIRE_EQUAL(base.time_usec(), 0);
-}
+    BOOST_REQUIRE_EQUAL(base.acceleration(), Vector3d(0, 0, -constants::STANDARD_GRAVITY));
+    BOOST_REQUIRE_EQUAL(base.timeSec(), 0.0);
+    BOOST_REQUIRE_EQUAL(base.timeUSec(), 0);
 
-BOOST_AUTO_TEST_CASE(ZeroKalmanStateTest)
-{
-    KalmanState base = KalmanState::zero(0);
-
-    double quaternion_error = diff(base.attitude().unit_quaternion(), Quaterniond::Identity());
-    BOOST_REQUIRE_CLOSE(quaternion_error, 0.0, 1e-5);
-
-    BOOST_REQUIRE_EQUAL(base.angular_velocity(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.position(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.velocity(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.acceleration(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.time_sec(), 0.0);
-    BOOST_REQUIRE_EQUAL(base.time_usec(), 0);
-
-    BOOST_REQUIRE_EQUAL(base.gyro_bias(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.accel_bias(), Vector3d::Zero());
-    BOOST_REQUIRE_EQUAL(base.gravity_vector(), Vector3d(0, 0, -9.80665));
-    BOOST_REQUIRE_EQUAL(base.magnetic_field_vector(), Vector3d(1, 0, 0));
+    BOOST_REQUIRE_EQUAL(base.gyroBias(), Vector3d::Zero());
+    BOOST_REQUIRE_EQUAL(base.accelBias(), Vector3d::Zero());
+    BOOST_REQUIRE_EQUAL(base.gravity(), Vector3d(0, 0, -9.80665));
+    BOOST_REQUIRE_EQUAL(base.magneticFieldVector(), constants::ANN_ARBOR_MAGNETIC_FIELD);
 }
 
 BOOST_AUTO_TEST_CASE(StateModificationTest)
 {
-    KalmanState base = KalmanState::zero(0);
+    State base = State::zero(0);
 
     Vector3d vec(1, 2, 3);
     base.position() = vec;
@@ -66,10 +50,10 @@ BOOST_AUTO_TEST_CASE(StateModificationTest)
 
 BOOST_AUTO_TEST_CASE(UnweightedGaussianTest)
 {
-    std::array<KalmanState, KalmanState::N> states;
-    states.fill(KalmanState::zero(200));
-    std::array<double, KalmanState::N> weights;
-    weights.fill(1.0 / static_cast<double>(KalmanState::N));
+    std::array<State, State::N> states;
+    states.fill(State::zero(200));
+    std::array<double, State::N> weights;
+    weights.fill(1.0 / static_cast<double>(State::N));
 
     Sophus::SO3d mean_rot(Eigen::Quaterniond(0.503, -0.002, -0.820, 0.273));
     mean_rot.normalize();
@@ -79,7 +63,7 @@ BOOST_AUTO_TEST_CASE(UnweightedGaussianTest)
     /**
      * Values computed in Matlab
      */
-    KalmanState::CovarianceMatrix output;
+    State::CovarianceMatrix output;
     output << 0.0305, 0.0344, 0.0221, 0.0313, 0.0275, 0.0229, 0.0246, 0.0328, 0.0372, 0.0344,
         0.0499, 0.0298, 0.0402, 0.0319, 0.0332, 0.0342, 0.0457, 0.0480, 0.0221, 0.0298, 0.0205,
         0.0240, 0.0201, 0.0174, 0.0221, 0.0292, 0.0325, 0.0313, 0.0402, 0.0240, 0.0432, 0.0346,
@@ -89,7 +73,7 @@ BOOST_AUTO_TEST_CASE(UnweightedGaussianTest)
         0.0292, 0.0379, 0.0332, 0.0332, 0.0465, 0.0597, 0.0506, 0.0372, 0.0480, 0.0325, 0.0483,
         0.0413, 0.0338, 0.0382, 0.0506, 0.0627;
 
-    Eigen::Matrix<double, KalmanState::DoF, KalmanState::N> points;
+    Eigen::Matrix<double, State::DoF, State::N> points;
     points << 0, 0.2050, -0.2525, 0.0964, 0.0356, -0.1462, -0.0485, 0.0383, 0.3999, 0.3095, -0.1509,
         0.3392, 0.0811, -0.0070, 0.0799, -0.0229, -0.0139, 0.1665, 0.0601, 0, 0.3555, -0.2217,
         -0.0005, 0.1039, -0.0173, -0.0103, 0.1353, 0.5113, 0.3183, -0.1421, 0.3081, 0.1699, -0.1105,
@@ -110,9 +94,9 @@ BOOST_AUTO_TEST_CASE(UnweightedGaussianTest)
     states[0].attitude() = mean_rot;
     states[0].position() = {1, 4, -1.2};
     states[0].velocity() = {0.1, 0.2, -0.05};
-    for (size_t i = 1; i < KalmanState::N; i++)
+    for (size_t i = 1; i < State::N; i++)
     {
-        const KalmanState::ErrorStateVector& vec = points.block<KalmanState::DoF, 1>(0, i);
+        const State::ErrorStateVector& vec = points.block<State::DoF, 1>(0, i);
         states[i].attitude() = mean_rot * Sophus::SO3d::exp(vec.segment<3>(0));
         states[i].position() = vec.segment<3>(3);
         states[i].velocity() = vec.segment<3>(6);
@@ -120,7 +104,7 @@ BOOST_AUTO_TEST_CASE(UnweightedGaussianTest)
 
     constexpr double tol = 1e-3;
 
-    KalmanState computed_gaussian = KalmanState::compute_gaussian(states, weights, weights);
+    State computed_gaussian = State::compute_gaussian(states, weights, weights);
     BOOST_CHECK_LE(
         diff(computed_gaussian.attitude().unit_quaternion(), mean_rot.unit_quaternion()), tol);
     BOOST_CHECK_LE((computed_gaussian.position() - mean_position).norm(), tol);

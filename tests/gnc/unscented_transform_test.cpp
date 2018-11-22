@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE UnscentedTransformTest
 /**
- * Tests for both BaseState and Kalman State
+ * Tests for both State and Kalman State
  */
 
 #include <cmath>
@@ -11,24 +11,24 @@
 #include <boost/test/unit_test.hpp>
 #include <sophus/so3.hpp>
 
-#include <gnc/kalman/kalman_state.hpp>
+#include <gnc/State.hpp>
 #include <gnc/kalman/unscented_transform.hpp>
 #include "test_helpers.hpp"
 
 using namespace boost::unit_test;
 using namespace Eigen;
 
-using namespace maav::gnc::state;
 using namespace maav::gnc::kalman;
+using namespace maav::gnc;
 
-KalmanState identity(const KalmanState& state) { return state; }
+State identity(const State& state) { return state; }
 BOOST_AUTO_TEST_CASE(IdentityTransformTest)
 {
-    UnscentedTransform<KalmanState> id(identity, 0.1, 2, 0);
+    UnscentedTransform<State> id(identity, 0.1, 2, 0);
 
-    KalmanState state = KalmanState::zero(0);
+    State state = State::zero(0);
 
-    KalmanState transformed_state = id(state);
+    State transformed_state = id(state);
 
     constexpr double tol = 1e-5;
     BOOST_CHECK_LE(std::abs(diff(state.attitude(), transformed_state.attitude())), tol);
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(IdentityTransformTest)
 BOOST_AUTO_TEST_CASE(YAMLRead)
 {
     YAML::Node config = YAML::Load("alpha: 0.1\nbeta: 2.0\nkappa: 0.1");
-    UnscentedTransform<KalmanState> id(config);
+    UnscentedTransform<State> id(config);
     id.set_transformation(identity);
 
     double w_m_0 = -97.9011;
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(YAMLRead)
     BOOST_CHECK_LE(std::abs(w - id.c_weights()[1]), tol);
 }
 
-void compare_states(const KalmanState& state, const KalmanState::ErrorStateVector& error_state)
+void compare_states(const State& state, const State::ErrorStateVector& error_state)
 {
     Sophus::SO3d e_attitude = Sophus::SO3d::exp(error_state.segment<3>(0));
     Eigen::Vector3d e_position = error_state.segment<3>(3);
@@ -68,13 +68,13 @@ void compare_states(const KalmanState& state, const KalmanState::ErrorStateVecto
 
 BOOST_AUTO_TEST_CASE(SigmaPointsTest)
 {
-    using UT = UnscentedTransform<KalmanState>;
+    using UT = UnscentedTransform<State>;
 
     UT id(identity, 0.25, 2, 0);
 
-    KalmanState state = KalmanState::zero(0);
+    State state = State::zero(0);
 
-    KalmanState::CovarianceMatrix Sigma;
+    State::CovarianceMatrix Sigma;
     // clang-format off
 	Sigma << 
 		1.9371,    2.0888,    1.4652,    1.2174,    1.5518,    1.2272,    1.6696,    1.2636,    1.6087,

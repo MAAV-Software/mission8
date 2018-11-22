@@ -1,5 +1,4 @@
 add_library(maav-kalman SHARED
-    kalman_state.cpp
     history.cpp
     unscented_transform.cpp
     updates/lidar_update.cpp
@@ -15,6 +14,7 @@ target_include_directories(maav-kalman PUBLIC
 
 target_link_libraries(maav-kalman
     maav-state
+    maav-measurements
     ${YAMLCPP_LIBRARY}
 
 )

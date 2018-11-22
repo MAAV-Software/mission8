@@ -16,8 +16,18 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
+add_library(maav-state SHARED
+    State.cpp
+)
+
+target_include_directories(maav-state PUBLIC
+    ${SW_INCLUDE_DIR}
+    ${SOPHUS_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
+)
+
 # Add source directories
-add_subdirectory(state)
+add_subdirectory(measurements)
 add_subdirectory(control)
 add_subdirectory(kalman)
 add_subdirectory(slam)

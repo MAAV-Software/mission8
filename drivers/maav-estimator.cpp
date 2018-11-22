@@ -23,6 +23,7 @@ using maav::IMU_CHANNEL;
 using maav::PLANE_FIT_CHANNEL;
 using maav::STATE_CHANNEL;
 using maav::gnc::convert_state;
+using maav::gnc::convertLidar;
 using maav::gnc::Estimator;
 using maav::gnc::State;
 using maav::gnc::measurements::ImuMeasurement;
@@ -83,11 +84,7 @@ int main(int argc, char** argv)
             const lidar_t msg = lidar_handler.msg();
             lidar_handler.pop();
 
-            LidarMeasurement lidar;
-            lidar.distance = msg.distance;
-            lidar.time_usec = msg.utime;
-
-            set.lidar = std::make_shared<LidarMeasurement>(lidar);
+            set.lidar = std::make_shared<LidarMeasurement>(convertLidar(msg));
         }
 
         if (plane_fit_handler.ready())

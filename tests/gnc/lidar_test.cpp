@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE LidarTest
 /**
- * Tests for both BaseState and Kalman State
+ * Tests for both State and Kalman State
  */
 
 #include <cmath>
@@ -16,17 +16,17 @@
 using namespace boost::unit_test;
 using namespace Eigen;
 
-using namespace maav::gnc::state;
 using namespace maav::gnc::kalman;
 using namespace maav::gnc;
+using namespace maav::gnc::measurements;
 
 BOOST_AUTO_TEST_CASE(RunTest)
 {
-    KalmanState state(1000);
+    State state(1000);
     state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
     state.position() = {0, 1, -1};
     state.velocity() = Vector3d::Zero();
-    state.angular_velocity() = Vector3d::Zero();
+    state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
     measurements::Measurement measurement;
@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE(RunTest)
 
     measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
 
-    measurements::LidarMeasurement lidar;
-    lidar.distance = 1;
-    lidar.time_usec = 1000;
+    LidarMeasurement lidar;
+    lidar.distance() = LidarMeasurement::SensorVector{1};
+    lidar.setTime(1000);
     measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
 
     History::Snapshot snapshot(state, measurement);
@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE(RunTest)
 
 BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
 {
-    KalmanState state(1000);
+    State state(1000);
     state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
     state.position() = {0, 1, -1};
     state.velocity() = Vector3d::Zero();
-    state.angular_velocity() = Vector3d::Zero();
+    state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
     measurements::Measurement measurement;
@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
 
     measurements::LidarMeasurement lidar;
-    lidar.distance = 1;
-    lidar.time_usec = 1000;
+    lidar.distance() = LidarMeasurement::SensorVector{1};
+    lidar.setTime(1000);
     measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
 
     History::Snapshot snapshot(state, measurement);
@@ -85,12 +85,12 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
 
 BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
 {
-    KalmanState state(1000);
+    State state(1000);
     state.attitude() = Sophus::SO3d(Quaterniond{0.982, 0, 0.191, 0});
     state.attitude().normalize();
     state.position() = {10.1, -23.2, -3.25};
     state.velocity() = Vector3d::Zero();
-    state.angular_velocity() = Vector3d::Zero();
+    state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
     measurements::Measurement measurement;
@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
 
     measurements::LidarMeasurement lidar;
-    lidar.distance = 1;
-    lidar.time_usec = 1000;
+    lidar.distance() = LidarMeasurement::SensorVector{1};
+    lidar.setTime(1000);
     measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
 
     History::Snapshot snapshot(state, measurement);
@@ -119,11 +119,11 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
 
 BOOST_AUTO_TEST_CASE(SensorMeasuredTest)
 {
-    KalmanState state(1000);
+    State state(1000);
     state.attitude() = Sophus::SO3d(Quaterniond{1, 0, 0, 0});
     state.position() = {0, 1, -1};
     state.velocity() = Vector3d::Zero();
-    state.angular_velocity() = Vector3d::Zero();
+    state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
     measurements::Measurement measurement;
@@ -136,8 +136,8 @@ BOOST_AUTO_TEST_CASE(SensorMeasuredTest)
     measurement.imu = std::make_shared<measurements::ImuMeasurement>(imu);
 
     measurements::LidarMeasurement lidar;
-    lidar.distance = 1;
-    lidar.time_usec = 1000;
+    lidar.distance() = LidarMeasurement::SensorVector{1};
+    lidar.setTime(1000);
     measurement.lidar = std::make_shared<measurements::LidarMeasurement>(lidar);
 
     History::Snapshot snapshot(state, measurement);

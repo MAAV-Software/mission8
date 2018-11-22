@@ -43,7 +43,7 @@ class StatusFrame : public Gtk::Frame
     template <typename Message>
     class StatusDisplay : public Gtk::Box, GlibZCM::Handler<Message>
     {
-        public:
+    public:
         // creates a status display on a given channel with some particular
         // subsystem label text
         StatusDisplay(
@@ -60,7 +60,7 @@ class StatusFrame : public Gtk::Frame
         }
 
         virtual ~StatusDisplay() { timer_connection.disconnect(); }
-        protected:
+    protected:
         // overrides the message-handling virtual function to reset the state to
         // online whenever a message is received
         virtual void on_message(const Message&) override { update_status(Status::online); }
@@ -74,7 +74,7 @@ class StatusFrame : public Gtk::Frame
         // Constants container
         const GCSConsts& CONSTS;
 
-        private:
+    private:
         // a connection which is used to control the timer callback
         sigc::connection timer_connection;
 
@@ -115,7 +115,7 @@ class StatusFrame : public Gtk::Frame
 
     class PlannerDisplay : public StatusDisplay<waypoint_t>
     {
-        public:
+    public:
         PlannerDisplay(GlibZCM& zcm, const char* channel, const GCSConsts& consts_in)
             : StatusDisplay<waypoint_t>(zcm, channel, "Current Mission:", consts_in)
         {
@@ -123,7 +123,7 @@ class StatusFrame : public Gtk::Frame
         }
 
         virtual ~PlannerDisplay() {}
-        protected:
+    protected:
         virtual void on_message(const waypoint_t& msg) override
         {
             std::string mode_str;
@@ -164,7 +164,7 @@ class StatusFrame : public Gtk::Frame
             update_status(Status::online, mode_str.c_str());
         }
 
-        private:
+    private:
         void update_status(Status, const char* status_text)
         {
             status.set_markup(std::string{"<tt>"} + status_text + "</tt>");
@@ -173,7 +173,7 @@ class StatusFrame : public Gtk::Frame
 
     class CameraDisplay : public StatusDisplay<camera_disc_t>
     {
-        public:
+    public:
         CameraDisplay(GlibZCM& zcm, const char* channel, const GCSConsts& consts_in)
             : StatusDisplay<camera_disc_t>(zcm, channel, "Cameras:", consts_in)
         {
@@ -181,7 +181,7 @@ class StatusFrame : public Gtk::Frame
         }
 
         virtual ~CameraDisplay() {}
-        protected:
+    protected:
         virtual void on_message(const camera_disc_t& msg) override
         {
             std::stringstream ss;
@@ -190,7 +190,7 @@ class StatusFrame : public Gtk::Frame
             update_status(Status::calibrated, ss.str().c_str());
         }
 
-        private:
+    private:
         void update_status(Status new_status, const char* extra = "")
         {
             cur_status = new_status;
@@ -209,7 +209,7 @@ class StatusFrame : public Gtk::Frame
 
     class ControllerDisplay : public StatusDisplay<waypoint_t>
     {
-        public:
+    public:
         ControllerDisplay(GlibZCM& zcm, const char* channel, const GCSConsts& consts_in)
             : StatusDisplay<waypoint_t>(zcm, channel, "Controller Target:", consts_in)
         {
@@ -217,7 +217,7 @@ class StatusFrame : public Gtk::Frame
         }
 
         virtual ~ControllerDisplay() {}
-        protected:
+    protected:
         virtual void on_message(const waypoint_t& msg) override
         {
             std::string mode_str;
@@ -230,7 +230,7 @@ class StatusFrame : public Gtk::Frame
             update_status(Status::online, mode_str.c_str());
         }
 
-        private:
+    private:
         void update_status(Status, const char* status_text)
         {
             status.set_markup(std::string{"<tt>"} + status_text + "</tt>");
@@ -257,7 +257,7 @@ class StatusFrame : public Gtk::Frame
     PlannerDisplay planner_info;
     ControllerDisplay controller_info;
 
-    public:
+public:
     /**
      * @brief Sets up a status frame
      * @param zcm The GlibZCM that this status frame should use to monitor

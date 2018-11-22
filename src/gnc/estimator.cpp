@@ -1,7 +1,7 @@
 #include <cmath>
 
+#include <gnc/State.hpp>
 #include <gnc/estimator.hpp>
-#include <gnc/state/base_state.hpp>
 
 using maav::gnc::measurements::MeasurementSet;
 
@@ -41,11 +41,11 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
 
         // Limit covariance for now
         double cap = 0.1;
-        KalmanState::CovarianceMatrix& cov = next->state.covariance();
-        cov.block<2, KalmanState::DoF>(3, 0) = Eigen::Matrix<double, 2, KalmanState::DoF>::Zero();
-        cov.block<2, KalmanState::DoF>(6, 0) = Eigen::Matrix<double, 2, KalmanState::DoF>::Zero();
-        cov.block<KalmanState::DoF, 2>(0, 3) = Eigen::Matrix<double, KalmanState::DoF, 2>::Zero();
-        cov.block<KalmanState::DoF, 2>(0, 6) = Eigen::Matrix<double, KalmanState::DoF, 2>::Zero();
+        State::CovarianceMatrix& cov = next->state.covariance();
+        cov.block<2, State::DoF>(3, 0) = Eigen::Matrix<double, 2, State::DoF>::Zero();
+        cov.block<2, State::DoF>(6, 0) = Eigen::Matrix<double, 2, State::DoF>::Zero();
+        cov.block<State::DoF, 2>(0, 3) = Eigen::Matrix<double, State::DoF, 2>::Zero();
+        cov.block<State::DoF, 2>(0, 6) = Eigen::Matrix<double, State::DoF, 2>::Zero();
         cov.block<2, 2>(3, 3) = cap * Eigen::Matrix2d::Identity();
         cov.block<2, 2>(6, 6) = cap * Eigen::Matrix2d::Identity();
 

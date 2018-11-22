@@ -22,15 +22,15 @@ namespace kalman
 template <class TargetSpace>
 class BaseUpdate
 {
-    private:
+private:
     using UT = UnscentedTransform<TargetSpace>;
     constexpr static size_t TargetDoF = TargetSpace::DoF;
     using CovarianceMatrix = typename TargetSpace::CovarianceMatrix;
     using ErrorStateVector = typename TargetSpace::ErrorStateVector;
-    using CrossCovarianceMatrix = Eigen::Matrix<double, KalmanState::DoF, TargetDoF>;
+    using CrossCovarianceMatrix = Eigen::Matrix<double, State::DoF, TargetDoF>;
     using KalmanGainMatrix = CrossCovarianceMatrix;
 
-    public:
+public:
     BaseUpdate(YAML::Node config)
         : unscented_transform_(config["UT"]),
           R_(config["R"].as<typename TargetSpace::CovarianceMatrix>())
@@ -38,12 +38,12 @@ class BaseUpdate
         unscented_transform_.set_transformation(std::bind(&BaseUpdate::predicted, this, _1));
     }
 
-    protected:
+protected:
     /**
      * Nonlinear h function.
      * Maps the current state to some element of the target space
      */
-    virtual TargetSpace predicted(const KalmanState& state) = 0;
+    virtual TargetSpace predicted(const State& state) = 0;
 
     /**
      * Maps the actual sensor measurements to some element of the target space.
@@ -55,7 +55,7 @@ class BaseUpdate
      */
     void correct(History::Snapshot& snapshot)
     {
-        KalmanState& state = snapshot.state;
+        State& state = snapshot.state;
 
         const TargetSpace predicted_meas = unscented_transform_(state);
 
@@ -79,7 +79,7 @@ class BaseUpdate
         state.covariance() -= K * S * K.transpose();
     }
 
-    private:
+private:
     UT unscented_transform_;
     CovarianceMatrix R_;
 };

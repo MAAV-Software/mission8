@@ -36,7 +36,7 @@ namespace slam
 {
 class MapDrawer
 {
-    public:
+public:
     MapDrawer(Map* pMap, const string& strSettingPath);
 
     Map* mpMap;
@@ -48,7 +48,7 @@ class MapDrawer
     void SetReferenceKeyFrame(KeyFrame* pKF);
     void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix& M);
 
-    private:
+private:
     float mKeyFrameSize;
     float mKeyFrameLineWidth;
     float mGraphLineWidth;

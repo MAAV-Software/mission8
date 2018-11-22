@@ -19,15 +19,15 @@ namespace kalman
 History::History(YAML::Node config, YAML::Node initial_state_config)
     : _size(config["size"].as<size_t>()),
       _tolerance(config["tolerance"].as<uint64_t>()),
-      _initial_state(KalmanState::zero(0))
+      _initial_state(State::zero(0))
 {
     Eigen::Vector4d initial_attitude = initial_state_config["attitude"].as<Eigen::Vector4d>();
     Eigen::Quaterniond initial_quat = {
         initial_attitude.x(), initial_attitude.y(), initial_attitude.z(), initial_attitude.w()};
     Eigen::Vector3d initial_position = initial_state_config["position"].as<Eigen::Vector3d>();
     Eigen::Vector3d initial_velocity = initial_state_config["velocity"].as<Eigen::Vector3d>();
-    Eigen::Matrix<double, KalmanState::DoF, 1> diag_covariance =
-        initial_state_config["covariance"].as<Eigen::Matrix<double, KalmanState::DoF, 1>>();
+    Eigen::Matrix<double, State::DoF, 1> diag_covariance =
+        initial_state_config["covariance"].as<Eigen::Matrix<double, State::DoF, 1>>();
 
     _initial_state.attitude() = Sophus::SO3d(Eigen::Quaterniond(initial_quat));
     _initial_state.position() = initial_position;
@@ -35,7 +35,7 @@ History::History(YAML::Node config, YAML::Node initial_state_config)
 
     std::cout << "Initiali position: " << _initial_state.position().transpose() << std::endl;
 
-    _initial_state.covariance() = Eigen::DiagonalMatrix<double, KalmanState::DoF>(diag_covariance);
+    _initial_state.covariance() = Eigen::DiagonalMatrix<double, State::DoF>(diag_covariance);
 }
 
 void printTimingWarning(std::string sensor)
@@ -77,7 +77,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
         uint64_t start_time = measurements.imu->time_usec;
         Measurement start_measurement;
         start_measurement.imu = measurements.imu;
-        _initial_state.set_time(start_time);
+        _initial_state.setTime(start_time);
 
         _history.emplace_back(_initial_state, start_measurement);
         std::cout << "Starting pos: " << _history.back().state.position().transpose() << std::endl;
@@ -88,7 +88,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
     uint64_t imu_time = measurements.imu->time_usec;
     Measurement imu_measurement;
     imu_measurement.imu = measurements.imu;
-    _history.emplace_back(KalmanState(imu_time), imu_measurement);
+    _history.emplace_back(State(imu_time), imu_measurement);
     auto last_modified = std::prev(_history.end());
 
     // Microsecond _tolerance to merge measurements
@@ -97,7 +97,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
     moveMeasurements(measurements);
     if (_insert.lidar)
     {
-        uint64_t lidar_time = _insert.lidar->time_usec;
+        uint64_t lidar_time = _insert.lidar->timeUSec();
         auto snap_iter = find_snapshot(lidar_time);
         if (snap_iter != _history.end())
         {
@@ -218,7 +218,7 @@ History::Iterator History::find_snapshot(uint64_t time)
                     *(prev_iter->measurement.imu), *(next_iter->measurement.imu), time);
                 Measurement interp_measurement;
                 interp_measurement.imu = std::make_shared<ImuMeasurement>(interp_imu);
-                Snapshot interp_snapshot{KalmanState(time), interp_measurement};
+                Snapshot interp_snapshot{State(time), interp_measurement};
                 return _history.insert(next_iter, interp_snapshot);
             }
         }

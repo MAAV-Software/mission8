@@ -2,11 +2,11 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <gnc/State.hpp>
 #include <gnc/kalman/history.hpp>
 #include <gnc/kalman/prediction.hpp>
 #include <gnc/kalman/updates/lidar_update.hpp>
 #include <gnc/measurements/Measurement.hpp>
-#include <gnc/state.hpp>
 
 namespace maav
 {
@@ -14,7 +14,7 @@ namespace gnc
 {
 class Estimator
 {
-    public:
+public:
     /**
      * @param config This yaml node requires at leas 4 keys: 'history', 'state', 'prediction',
      * and 'updates'
@@ -28,7 +28,7 @@ class Estimator
      */
     const State& add_measurement_set(const measurements::MeasurementSet& meas);
 
-    private:
+private:
     State empty_state_;
     kalman::History history_;
     kalman::UkfPrediction prediction_;

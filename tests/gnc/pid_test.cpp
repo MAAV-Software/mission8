@@ -17,7 +17,7 @@ using maav::gnc::control::Pid;
 
 class Fixture
 {
-    public:
+public:
     Fixture()
         : pidZeros(), pidPreset(Pid(1.00, 0.01, 0.10)), p(1.00), i(0.01), d(0.10), tol(0.0000001)
     {

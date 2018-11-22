@@ -69,7 +69,7 @@ InnerLoopSetpoint Controller::run(const State& state)
 {
     previous_state = current_state;
     current_state = state;
-    dt = current_state.time_sec() - previous_state.time_sec();
+    dt = current_state.timeSec() - previous_state.timeSec();
     // Calculate discrete error derivatives?
     // Low pass filter?
 

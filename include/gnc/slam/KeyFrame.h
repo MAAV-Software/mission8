@@ -44,7 +44,7 @@ class KeyFrameDatabase;
 
 class KeyFrame
 {
-    public:
+public:
     KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB);
 
     // Pose functions
@@ -114,7 +114,7 @@ class KeyFrame
     static bool lId(KeyFrame* pKF1, KeyFrame* pKF2) { return pKF1->mnId < pKF2->mnId; }
     // The following variables are accesed from only 1 thread or never change
     // (no mutex needed).
-    public:
+public:
     static long unsigned int nNextId;
     long unsigned int mnId;
     const long unsigned int mnFrameId;
@@ -185,7 +185,7 @@ class KeyFrame
 
     // The following variables need to be accessed trough a mutex to be thread
     // safe.
-    protected:
+protected:
     // SE3 Pose and camera center
     cv::Mat Tcw;
     cv::Mat Twc;

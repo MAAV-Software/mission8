@@ -65,7 +65,7 @@ namespace slam
 {
 class PnPsolver
 {
-    public:
+public:
     PnPsolver(const Frame& F, const std::vector<MapPoint*>& vpMapPointMatches);
 
     ~PnPsolver();
@@ -77,7 +77,7 @@ class PnPsolver
 
     cv::Mat iterate(int nIterations, bool& bNoMore, std::vector<bool>& vbInliers, int& nInliers);
 
-    private:
+private:
     void CheckInliers();
     bool Refine();
 

@@ -33,7 +33,7 @@ namespace slam
 {
 class ExtractorNode
 {
-    public:
+public:
     ExtractorNode() : bNoMore(false) {}
     void DivideNode(ExtractorNode& n1, ExtractorNode& n2, ExtractorNode& n3, ExtractorNode& n4);
 
@@ -45,7 +45,7 @@ class ExtractorNode
 
 class ORBextractor
 {
-    public:
+public:
     enum
     {
         HARRIS_SCORE = 0,
@@ -70,7 +70,7 @@ class ORBextractor
     std::vector<float> inline GetInverseScaleSigmaSquares() { return mvInvLevelSigma2; }
     std::vector<cv::Mat> mvImagePyramid;
 
-    protected:
+protected:
     void ComputePyramid(cv::Mat image);
     void ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint>>& allKeypoints);
     std::vector<cv::KeyPoint> DistributeOctTree(const std::vector<cv::KeyPoint>& vToDistributeKeys,

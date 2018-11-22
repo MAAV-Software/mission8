@@ -8,7 +8,7 @@
 #include <yaml-cpp/yaml.h>
 #include <Eigen/Cholesky>
 
-#include <gnc/kalman/kalman_state.hpp>
+#include <gnc/State.hpp>
 
 namespace maav
 {
@@ -19,11 +19,11 @@ namespace kalman
 template <class TargetSpace>
 class UnscentedTransform
 {
-    public:
-    constexpr static size_t N = 1 + 2 * KalmanState::DoF;
+public:
+    constexpr static size_t N = 1 + 2 * State::DoF;
 
-    using Transform = std::function<TargetSpace(const KalmanState&)>;
-    using SigmaPoints = std::array<KalmanState, N>;
+    using Transform = std::function<TargetSpace(const State&)>;
+    using SigmaPoints = std::array<State, N>;
     using TransformedPoints = std::array<TargetSpace, N>;
     using Weights = std::array<double, N>;
 
@@ -47,19 +47,19 @@ class UnscentedTransform
      * Transforms the gaussian from the state space to a gaussian in some target
      * space
      */
-    TargetSpace operator()(const KalmanState& state);
+    TargetSpace operator()(const State& state);
 
     void set_parameters(double alpha, double beta, double kappa);
 
     void set_transformation(Transform transform);
 
-    private:
+private:
     TransformedPoints _transformed_points;
     SigmaPoints _sigma_points;
 
-    void generate_sigma_points(const KalmanState& state);
+    void generate_sigma_points(const State& state);
 
-    private:
+private:
     Transform _transformation;
 
     double _lambda;
@@ -70,7 +70,7 @@ class UnscentedTransform
     Weights _m_weights;
     Weights _c_weights;
 
-    public:
+public:
     const Weights& m_weights() const { return _m_weights; }
     const Weights& c_weights() const { return _c_weights; }
     const SigmaPoints& last_sigma_points() const { return _sigma_points; }
@@ -78,7 +78,7 @@ class UnscentedTransform
 };
 
 template <class TargetSpace>
-TargetSpace UnscentedTransform<TargetSpace>::operator()(const KalmanState& state)
+TargetSpace UnscentedTransform<TargetSpace>::operator()(const State& state)
 {
     generate_sigma_points(state);
     // Pass all sigma points through the transform
@@ -91,20 +91,20 @@ TargetSpace UnscentedTransform<TargetSpace>::operator()(const KalmanState& state
 }
 
 template <class TargetSpace>
-void UnscentedTransform<TargetSpace>::generate_sigma_points(const KalmanState& state)
+void UnscentedTransform<TargetSpace>::generate_sigma_points(const State& state)
 {
-    Eigen::LLT<KalmanState::CovarianceMatrix> decomp(
-        (static_cast<double>(KalmanState::DoF) + _lambda) * state.covariance());
-    const KalmanState::CovarianceMatrix L = decomp.matrixL();
+    Eigen::LLT<State::CovarianceMatrix> decomp(
+        (static_cast<double>(State::DoF) + _lambda) * state.covariance());
+    const State::CovarianceMatrix L = decomp.matrixL();
 
     // Set the starting point to the current mean
     _sigma_points[0] = state;
-    for (size_t i = 0; i < KalmanState::DoF; i++)
+    for (size_t i = 0; i < State::DoF; i++)
     {
-        const KalmanState::ErrorStateVector& sigma_point_offset = L.col(i);
+        const State::ErrorStateVector& sigma_point_offset = L.col(i);
 
-        KalmanState additive_point = state;
-        KalmanState subtractive_point = state;
+        State additive_point = state;
+        State subtractive_point = state;
 
         additive_point += sigma_point_offset;
         subtractive_point += (-1) * sigma_point_offset;
@@ -121,7 +121,7 @@ void UnscentedTransform<TargetSpace>::set_parameters(double alpha, double beta, 
     _beta = beta;
     _kappa = kappa;
 
-    constexpr auto n_d = static_cast<double>(KalmanState::DoF);
+    constexpr auto n_d = static_cast<double>(State::DoF);
 
     _lambda = _alpha * _alpha * (n_d + _kappa) - n_d;
     const double w_m_0 = _lambda / (n_d + _lambda);

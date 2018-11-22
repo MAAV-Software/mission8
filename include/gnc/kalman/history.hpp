@@ -5,7 +5,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <gnc/kalman/kalman_state.hpp>
+#include <gnc/State.hpp>
 #include <gnc/measurements/Measurement.hpp>
 
 namespace maav
@@ -20,24 +20,24 @@ namespace kalman
  */
 class History
 {
-    public:
+public:
     explicit History(YAML::Node config, YAML::Node initial_state_config);
 
-    public:
+public:
     /**
      * Snapshots store all information about a state at a specific time.
      */
     struct Snapshot
     {
-        Snapshot(const KalmanState& state_, const measurements::Measurement& meas_)
+        Snapshot(const State& state_, const measurements::Measurement& meas_)
             : state(state_), measurement(meas_)
         {
         }
 
-        KalmanState state;
+        State state;
         measurements::Measurement measurement;
 
-        uint64_t get_time() const { return state.time_usec(); }
+        uint64_t get_time() const { return state.timeUSec(); }
     };
 
     using Iterator = std::list<History::Snapshot>::iterator;
@@ -54,7 +54,7 @@ class History
 
     size_t size();
 
-    private:
+private:
     void resize(Iterator last_modified);
 
     /***
@@ -72,13 +72,13 @@ class History
 
     void moveMeasurements(const measurements::MeasurementSet& measurements);
 
-    private:
+private:
     size_t _size;
     uint64_t _tolerance;
 
     std::list<History::Snapshot> _history;
 
-    KalmanState _initial_state;
+    State _initial_state;
 
     measurements::MeasurementSet _insert;
 };

@@ -39,6 +39,7 @@ foreach (testSrc ${TEST_SRCS})
     #link to Boost libraries AND your targets and dependencies
     target_link_libraries(${testName} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
             maav-state
+            maav-measurements
             maav-gnc
             maav-kalman
             maav-control

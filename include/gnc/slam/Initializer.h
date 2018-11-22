@@ -35,7 +35,7 @@ class Initializer
 {
     typedef pair<int, int> Match;
 
-    public:
+public:
     // Fix the reference frame
     Initializer(const Frame& ReferenceFrame, float sigma = 1.0, int iterations = 200);
 
@@ -45,7 +45,7 @@ class Initializer
     bool Initialize(const Frame& CurrentFrame, const std::vector<int>& vMatches12, cv::Mat& R21,
         cv::Mat& t21, std::vector<cv::Point3f>& vP3D, std::vector<bool>& vbTriangulated);
 
-    private:
+private:
     void FindHomography(vector<bool>& vbMatchesInliers, float& score, cv::Mat& H21);
     void FindFundamental(vector<bool>& vbInliers, float& score, cv::Mat& F21);
 

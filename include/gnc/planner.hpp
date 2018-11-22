@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gnc/state.hpp"
+#include <gnc/State.hpp>
 //#include "gnc/Map.h"
 
 namespace maav
@@ -9,7 +9,7 @@ namespace gnc
 {
 class Planner
 {
-    public:
+public:
     Planner(const std::string& path_config);
 
     // TODO: Add path/target
@@ -19,7 +19,7 @@ class Planner
 
     void add_map(/*const Map& map*/);
 
-    private:
+private:
     std::string config_file;
 };
 

@@ -5,7 +5,10 @@ struct state_t
 {
 	int64_t utime;
 
-	double covariance[15][15];
+	// TODO: Increase this to estimate more variables
+	const int32_t DoF = 9;
+
+	double covariance[DoF][DoF];
 
 	// State variables
 	double attitude[4];
@@ -19,4 +22,8 @@ struct state_t
 	// Biases
 	double gyro_biases[3];
 	double accel_biases[3];
+
+	// World properties
+	double gravity[3];
+	double magnetic_field[3];
 }

@@ -16,7 +16,7 @@
 template <typename T>
 class LCMHandler
 {
-    public:
+public:
     /**
      * @brief Constructs a default MessageHander with an empty message queue.
      */
@@ -82,7 +82,7 @@ class LCMHandler
         return msgs.size();
     }
 
-    private:
+private:
     std::queue<T> msgs;  ///< message queue
     std::mutex mtx;      ///< mutex for locking the queue (use with std::lock_guard)
 };

@@ -34,20 +34,20 @@ namespace gcs
  */
 class CommandFrame : public Gtk::Frame
 {
-    public:
+public:
     /**
      * @brief Sets up a command frame
      */
     CommandFrame(GlibZCM&, const GCSConsts& consts_in);
 
-    private:
+private:
     // Constants container
     const GCSConsts& CONSTS;
 
     // a Gtk::Entry which allows only numbers to be entered.
     class NumberEntry : public Gtk::Entry
     {
-        public:
+    public:
         /**
         * @brief Sets up a Gtk::Entry that takes in inly numbers
         *
@@ -58,7 +58,7 @@ class CommandFrame : public Gtk::Frame
         // Override of Gtk::Entry to ensure only numbers are inserted in the entry
         void on_insert_text(const Glib::ustring& text, int* position) override;
 
-        private:
+    private:
         // Checks if every character in text is a numeral
         // allows a single dot ('.') for floating point numbers
         bool is_numeral(const Glib::ustring& text);
@@ -76,7 +76,7 @@ class CommandFrame : public Gtk::Frame
         NumberEntry entry;
         const GCSConsts& CONSTS;
 
-        public:
+    public:
         // constructs a labeled entry; name is used for the label text
         // and entr is used as the default display on the entry.
         explicit LabeledNumEntry(const GCSConsts& consts_in, const char* name,
@@ -116,7 +116,7 @@ class CommandFrame : public Gtk::Frame
 
     class LabeledSwitch : public Gtk::Box
     {
-        public:
+    public:
         explicit LabeledSwitch(const GCSConsts& consts_in, const char* name)
             : label{name}, CONSTS{consts_in}
         {
@@ -129,7 +129,7 @@ class CommandFrame : public Gtk::Frame
 
         bool get_active() { return swt.get_active(); }
         Gtk::Switch& get_switch() { return swt; }
-        private:
+    private:
         Gtk::Label label;
         Gtk::Switch swt;
         const GCSConsts& CONSTS;

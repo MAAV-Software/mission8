@@ -35,7 +35,7 @@ class GCS : public Gtk::Window
     // the boxes that all of those go into
     Gtk::Box outer_box{Gtk::ORIENTATION_VERTICAL}, inner_box;
 
-    public:
+public:
     /**
      * @brief Sets up a Ground Control Station window for display
      */

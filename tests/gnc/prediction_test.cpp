@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE StateTest
 /**
- * Tests for both BaseState and Kalman State
+ * Tests for both State and Kalman State
  */
 
 #include <cmath>
@@ -19,16 +19,15 @@
 using namespace boost::unit_test;
 using namespace Eigen;
 
-using namespace maav::gnc::state;
 using namespace maav::gnc::kalman;
 using namespace maav::gnc;
 
 class TestUkfPrediction : public UkfPrediction
 {
-    public:
+public:
     using UkfPrediction::UkfPrediction;
     using UkfPrediction::operator();
-    const KalmanState& get_transformed_mean()
+    const State& get_transformed_mean()
     {
         const auto& ut = UkfPrediction::getUT();
         return ut.last_transformed_points()[0];
@@ -62,10 +61,10 @@ BOOST_AUTO_TEST_CASE(PredictionStep)
     imu2.acceleration = {2.0, -1.012, -9.72};
     imu2.magnetometer = Eigen::Vector3d::Zero();
 
-    KalmanState state1 = KalmanState::zero(0);
+    State state1 = State::zero(0);
     state1.covariance() *= 0.05;
 
-    KalmanState state2 = KalmanState::zero(1000000);
+    State state2 = State::zero(1000000);
 
     measurements::Measurement meas1;
     meas1.imu = std::make_shared<measurements::ImuMeasurement>(imu1);
@@ -82,7 +81,7 @@ BOOST_AUTO_TEST_CASE(PredictionStep)
     TestUkfPrediction pred(config);
     pred(history.begin(), ++history.begin());
 
-    const KalmanState& s2 = pred.get_transformed_mean();
+    const State& s2 = pred.get_transformed_mean();
 
     Eigen::Vector3d next_velocity = {1.0262, 0.5215, 0.0504};
     Eigen::Vector3d next_position = {0.5131, 0.2607, 0.0252};

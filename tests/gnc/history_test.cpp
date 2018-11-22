@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(HistoryInitializeTest)
     ImuMeasurement imu;
     imu.time_usec = 0;
     LidarMeasurement lidar;
-    lidar.time_usec = 1500;
+    lidar.setTime(1500);
 
     set.imu = std::make_shared<ImuMeasurement>(imu);
     set.lidar = std::make_shared<LidarMeasurement>(lidar);
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(HistorySimpleTest)
     ImuMeasurement imu1;
     imu1.time_usec = 0;
     LidarMeasurement lidar1;
-    lidar1.time_usec = 0;
+    lidar1.setTime(0);
     set1.imu = std::make_shared<const ImuMeasurement>(imu1);
     set1.lidar = std::make_shared<const LidarMeasurement>(lidar1);
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance)
     ImuMeasurement imu1;
     LidarMeasurement lidar1;
     imu1.time_usec = 40000;
-    lidar1.time_usec = 30900;
+    lidar1.setTime(30900);
     set1.imu = std::make_shared<ImuMeasurement>(imu1);
     set1.lidar = std::make_shared<LidarMeasurement>(lidar1);
     auto iter_pair1 = history.add_measurement(set1);
@@ -145,14 +145,14 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance)
     BOOST_CHECK(history_vec1[0].measurement.lidar == nullptr);
     BOOST_CHECK(history_vec1[1].measurement.lidar != nullptr);
     BOOST_CHECK(history_vec1[2].measurement.lidar == nullptr);
-    BOOST_CHECK_EQUAL(history_vec1[1].measurement.lidar->time_usec, 30900);
+    BOOST_CHECK_EQUAL(history_vec1[1].measurement.lidar->timeUSec(), 30900);
 
     // Add set with lidar at 39900
     MeasurementSet set2;
     ImuMeasurement imu2;
     LidarMeasurement lidar2;
     imu2.time_usec = 50000;
-    lidar2.time_usec = 39900;
+    lidar2.setTime(39900);
     set2.imu = std::make_shared<ImuMeasurement>(imu2);
     set2.lidar = std::make_shared<LidarMeasurement>(lidar2);
 
@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance)
     BOOST_CHECK(history_vec2[0].measurement.lidar != nullptr);
     BOOST_CHECK(history_vec2[1].measurement.lidar != nullptr);
     BOOST_CHECK(history_vec2[2].measurement.lidar == nullptr);
-    BOOST_CHECK_EQUAL(history_vec2[0].measurement.lidar->time_usec, 30900);
-    BOOST_CHECK_EQUAL(history_vec2[1].measurement.lidar->time_usec, 39900);
+    BOOST_CHECK_EQUAL(history_vec2[0].measurement.lidar->timeUSec(), 30900);
+    BOOST_CHECK_EQUAL(history_vec2[1].measurement.lidar->timeUSec(), 39900);
 }
 
 BOOST_AUTO_TEST_CASE(HistoryInerpolateTest)
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(HistoryInerpolateTest)
     LidarMeasurement lidar;
     imu.time_usec = 40000;
     imu.angular_rates = Eigen::Vector3d(1, 1, 1) * 4;
-    lidar.time_usec = 24000;
+    lidar.setTime(24000);
     set.imu = std::make_shared<ImuMeasurement>(imu);
     set.lidar = std::make_shared<LidarMeasurement>(lidar);
 
@@ -221,7 +221,7 @@ MeasurementSet create_meas(uint64_t imu_t, uint64_t lid_t)
     ImuMeasurement imu;
     LidarMeasurement lidar;
     imu.time_usec = imu_t;
-    lidar.time_usec = lid_t;
+    lidar.setTime(lid_t);
     set.imu = std::make_shared<ImuMeasurement>(imu);
     set.lidar = std::make_shared<LidarMeasurement>(lidar);
     return set;
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest)
 
     BOOST_CHECK_EQUAL(history_vec3[0].measurement.imu->time_usec, 10000);
     BOOST_CHECK_EQUAL(history_vec3[1].measurement.imu->time_usec, 20000);
-    BOOST_CHECK_EQUAL(history_vec3[1].measurement.lidar->time_usec, 20500);
+    BOOST_CHECK_EQUAL(history_vec3[1].measurement.lidar->timeUSec(), 20500);
 
     auto set4 = create_meas(30000, 34000);
     auto it_pair4 = history.add_measurement(set4);
@@ -267,6 +267,6 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest)
     BOOST_CHECK_EQUAL(history_vec5.size(), 3);
     BOOST_CHECK_EQUAL(history_vec5[0].measurement.imu->time_usec, 30000);
     BOOST_CHECK_EQUAL(history_vec5[1].measurement.imu->time_usec, 34000);
-    BOOST_CHECK_EQUAL(history_vec5[1].measurement.lidar->time_usec, 34000);
+    BOOST_CHECK_EQUAL(history_vec5[1].measurement.lidar->timeUSec(), 34000);
     BOOST_CHECK_EQUAL(history_vec5[2].measurement.imu->time_usec, 40000);
 }

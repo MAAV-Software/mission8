@@ -40,7 +40,7 @@ class Frame;
 
 class MapPoint
 {
-    public:
+public:
     MapPoint(const cv::Mat& Pos, KeyFrame* pRefKF, Map* pMap);
     MapPoint(const cv::Mat& Pos, Map* pMap, Frame* pFrame, const int& idxF);
 
@@ -80,7 +80,7 @@ class MapPoint
     int PredictScale(const float& currentDist, KeyFrame* pKF);
     int PredictScale(const float& currentDist, Frame* pF);
 
-    public:
+public:
     long unsigned int mnId;
     static long unsigned int nNextId;
     long int mnFirstKFid;
@@ -110,7 +110,7 @@ class MapPoint
 
     static std::mutex mGlobalMutex;
 
-    protected:
+protected:
     // Position in absolute coordinates
     cv::Mat mWorldPos;
 

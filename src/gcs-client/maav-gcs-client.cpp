@@ -20,7 +20,7 @@ class MessageForwarder
 {
     zcm::ZCM& zcm;
 
-    public:
+public:
     explicit MessageForwarder(ZCM& zcm_in) : zcm{zcm_in} {}
     template <typename T>
     void forward_message(const zcm::ReceiveBuffer*, const string& channel, const T* msg)

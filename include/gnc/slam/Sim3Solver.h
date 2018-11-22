@@ -34,7 +34,7 @@ namespace slam
 {
 class Sim3Solver
 {
-    public:
+public:
     Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2, const std::vector<MapPoint*>& vpMatched12,
         const bool bFixScale = true);
 
@@ -49,7 +49,7 @@ class Sim3Solver
     cv::Mat GetEstimatedTranslation();
     float GetEstimatedScale();
 
-    protected:
+protected:
     void ComputeCentroid(cv::Mat& P, cv::Mat& Pr, cv::Mat& C);
 
     void ComputeSim3(cv::Mat& P1, cv::Mat& P2);
@@ -61,7 +61,7 @@ class Sim3Solver
     void FromCameraToImage(
         const std::vector<cv::Mat>& vP3Dc, std::vector<cv::Mat>& vP2D, cv::Mat K);
 
-    protected:
+protected:
     // KeyFrames and matches
     KeyFrame* mpKF1;
     KeyFrame* mpKF2;
