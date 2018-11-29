@@ -25,7 +25,7 @@ class rgb_image_t
 
         int32_t    size;
 
-        std::vector< std::vector< int8_t > > raw_image;
+        std::vector< int8_t > raw_image;
 
     public:
         /**
@@ -140,8 +140,8 @@ int rgb_image_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) cons
     thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    for (int a0 = 0; a0 < this->size; ++a0) {
-        thislen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->raw_image[a0][0], 3);
+    if(this->size > 0) {
+        thislen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
         if(thislen < 0) return thislen; else pos += thislen;
     }
 
@@ -162,13 +162,10 @@ int rgb_image_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen
     thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    this->raw_image.resize(this->size);
-    for (int a0 = 0; a0 < this->size; ++a0) {
-        if(3 > 0) {
-            this->raw_image[a0].resize(3);
-            thislen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->raw_image[a0][0], 3);
-            if(thislen < 0) return thislen; else pos += thislen;
-        }
+    if(this->size > 0) {
+        this->raw_image.resize(this->size);
+        thislen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
+        if(thislen < 0) return thislen; else pos += thislen;
     }
 
     return pos;
@@ -180,13 +177,13 @@ uint32_t rgb_image_t::_getEncodedSizeNoHash() const
     enc_size += __int32_t_encoded_array_size(NULL, 1);
     enc_size += __int32_t_encoded_array_size(NULL, 1);
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += this->size * __int8_t_encoded_array_size(NULL, 3);
+    enc_size += __int8_t_encoded_array_size(NULL, this->size);
     return enc_size;
 }
 
 uint64_t rgb_image_t::_computeHash(const __zcm_hash_ptr*)
 {
-    uint64_t hash = (uint64_t)0x1725a96198cf99c6LL;
+    uint64_t hash = (uint64_t)0x1831c9e8da569e67LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

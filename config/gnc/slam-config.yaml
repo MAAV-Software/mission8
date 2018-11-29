@@ -7,22 +7,22 @@
 # THESES ARE NOT SET UP FOR MAAV, THEY ARE COPIED OVER FROM TUMS EXAMPLE!!!!!!
 
 # Camera calibration and distortion parameters (OpenCV) 
-Camera.fx: 517.306408
-Camera.fy: 516.469215
-Camera.cx: 318.643040
-Camera.cy: 255.313989
+Camera.fx: 500
+Camera.fy: 500
+Camera.cx: 320
+Camera.cy: 240
 
-Camera.k1: 0.262383
-Camera.k2: -0.953104
-Camera.p1: -0.005358
-Camera.p2: 0.002628
-Camera.k3: 1.163314
+Camera.k1: 0
+Camera.k2: 0
+Camera.k3: 0
+Camera.p1: 0
+Camera.p2: 0
 
 Camera.width: 640
 Camera.height: 480
 
 # Camera frames per second 
-Camera.fps: 30.0
+Camera.fps: 20.0
 
 # IR projector baseline times fx (aprox.)
 Camera.bf: 40.0
@@ -62,7 +62,7 @@ ORBextractor.minThFAST: 7
 Viewer.KeyFrameSize: 0.05
 Viewer.KeyFrameLineWidth: 1
 Viewer.GraphLineWidth: 0.9
-Viewer.PointSize:2
+Viewer.PointSize: 2
 Viewer.CameraSize: 0.08
 Viewer.CameraLineWidth: 3
 Viewer.ViewpointX: 0

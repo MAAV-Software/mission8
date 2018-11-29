@@ -72,8 +72,8 @@ int main(int argc, char** argv)
             rgbd_image_t img = image_handler.msg();
             image_handler.pop();
             localizer.addImage(convertRgb(img.rgb_image), convertDepth(img.depth_image), img.utime);
-            map_t map = localizer.getMap();
-            zcm.publish(MAP_CHANNEL, &map);
+            // map_t map = localizer.getMap();
+            // zcm.publish(MAP_CHANNEL, &map);
         }
     }
 
@@ -83,17 +83,15 @@ int main(int argc, char** argv)
 /*
  * Converts RGB image message into cv::Mat for localizer
  */
-cv::Mat convertRgb(const rgb_image_t&)
+cv::Mat convertRgb(const rgb_image_t& rgb_image)
 {
-    assert(false);
-    return cv::Mat();
+    return cv::Mat(cv::Size(640, 480), CV_8UC3, (uint8_t*) rgb_image.raw_image.data(), cv::Mat::AUTO_STEP).clone();
 }
 
 /*
  * Converts depth image message into cv::Mat for localizer
  */
-cv::Mat convertDepth(const depth_image_t&)
+cv::Mat convertDepth(const depth_image_t& depth_image)
 {
-    assert(false);
-    return cv::Mat();
+    return cv::Mat(cv::Size(640, 480), CV_16UC1, (uint16_t*) depth_image.raw_image.data(), cv::Mat::AUTO_STEP).clone();
 }

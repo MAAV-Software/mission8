@@ -272,26 +272,26 @@ path_t create_test_path()
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
 
-    wpt.pose[0] = 1;
-    wpt.pose[1] = 1;
-    wpt.pose[2] = -3;
+    wpt.pose[0] = 0;
+    wpt.pose[1] = -3;
+    wpt.pose[2] = -2;
+    wpt.pose[3] = 45;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = -3;
+    wpt.pose[1] = 0;
+    wpt.pose[2] = -2;
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
 
-    wpt.pose[0] = 1;
-    wpt.pose[1] = -1;
-    wpt.pose[2] = -4;
-    wpt.pose[3] = 0;
+    wpt.pose[0] = 0;
+    wpt.pose[1] = 3;
+    wpt.pose[2] = -2;
+    wpt.pose[3] = -45;
     path.waypoints.push_back(wpt);
 
-    wpt.pose[0] = -1;
-    wpt.pose[1] = -1;
-    wpt.pose[2] = -3;
-    wpt.pose[3] = 0;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = -1;
-    wpt.pose[1] = 1;
+    wpt.pose[0] = 0;
+    wpt.pose[1] = 0;
     wpt.pose[2] = -2;
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
