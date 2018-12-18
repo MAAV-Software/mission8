@@ -39,8 +39,8 @@ int main(int argc, char** argv)
 
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
-    gopt.addString('c', "config", "", "Path to config.");
-    gopt.addString('v', "vocab", "", "Path to vocab");
+    gopt.addString('c', "config", "../config/gnc/slam-config.yaml", "Path to config.");
+    gopt.addString('v', "vocab", "../config/gnc/ORBvoc.txt", "Path to vocab");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -97,7 +97,7 @@ cv::Mat convertRgb(const rgb_image_t& rgb_image)
  */
 cv::Mat convertDepth(const depth_image_t& depth_image)
 {
-    return cv::Mat(cv::Size(640, 480), CV_16SC1, (int16_t*)depth_image.raw_image.data(),
+    return cv::Mat(cv::Size(640, 480), CV_16UC1, (uint16_t*)depth_image.raw_image.data(),
                cv::Mat::AUTO_STEP)
         .clone();
 }

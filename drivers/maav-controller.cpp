@@ -8,6 +8,7 @@
 
 #include <zcm/zcm-cpp.hpp>
 
+#include <gnc/xbox-controller/gamepad.h>
 #include <yaml-cpp/yaml.h>
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
@@ -24,6 +25,7 @@ using maav::SIM_STATE_CHANNEL;
 using maav::PATH_CHANNEL;
 using maav::CTRL_PARAMS_CHANNEL;
 using maav::gnc::Controller;
+using maav::gnc::XboxController;
 using maav::gnc::convert_state;
 using maav::gnc::convert_waypoint;
 using maav::mavlink::OffboardControl;
@@ -38,7 +40,8 @@ using maav::gnc::ControlState;
 using YAML::Node;
 using std::make_pair;
 using std::string;
-using maav::gnc::CONTROL_STATE_SETPOINT;
+using maav::gnc::Waypoint;
+using std::to_string;
 
 /*
  * Temporary Operating Procedure (to start work on controller)
@@ -47,6 +50,8 @@ using maav::gnc::CONTROL_STATE_SETPOINT;
  * 2. run "./maav-controller" - the controller will try to
  * 	  establish offboard control.  If it fails, restart it and
  * 	  it should work.
+ * Optional: provide flag "-x" to use xbox controller instead of
+ *    manually typing in waypoints.
  * 3. The program will indicate that offboard control has been
  *    established and armed.
  * 4. If the pixhawk does not receive setpoint commands (thrust,
@@ -58,26 +63,38 @@ using maav::gnc::CONTROL_STATE_SETPOINT;
 
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
 Controller::Parameters load_vehicle_params(const Node& config);
+XboxController read_controller_input();
 
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
-void get_setpoint();
-path_t create_test_path();
+Waypoint SETPOINT = Waypoint{Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0};
+std::atomic<bool> MANUAL_SETPOINT_INPUT{true};
+void get_setpoint(Controller*);
+path_t create_test_path(const YAML::Node& path_file);
 
 int main(int argc, char** argv)
 {
     std::cout << "Controller Driver" << std::endl;
 
+    /*
+     *      Signal handlers
+     */
     signal(SIGINT, sig_handler);
     signal(SIGABRT, sig_handler);
     signal(SIGSEGV, sig_handler);
     signal(SIGTERM, sig_handler);
 
+    /*
+     *      Command line arguments
+     */
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
-    gopt.addString('c', "config", "", "Path to YAML control config");
-    // TODO: Add getopt arguments as necessary
-
+    gopt.addString(
+        'c', "config", "../config/gnc/control-config.yaml", "Path to YAML control config");
+    gopt.addBool('x', "xbox360", false, "Use xbox controller for control");
+    gopt.addBool(
+        's', "command-line-input", true, "Manually input waypoints using command line interface");
+    gopt.addString('p', "test-path", "../config/gnc/test-path.yaml", "Read custom test path");
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
         std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -86,10 +103,13 @@ int main(int argc, char** argv)
     }
 
     YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
+    YAML::Node path_file = YAML::LoadFile(gopt.getString("test-path"));
 
+    /*
+     *      Start zcm and subscribe to proper channels
+     */
     zcm::ZCM zcm{"ipc"};
     zcm.start();
-
     ZCMHandler<path_t> path_handler;
     ZCMHandler<state_t> state_handler;
     ZCMHandler<ctrl_params_t> gains_handler;
@@ -97,21 +117,28 @@ int main(int argc, char** argv)
     if (gains_config["sim-state"].as<bool>())
     {
         zcm.subscribe(SIM_STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+        cout << "Reading state from simulator\n";
     }
     else
     {
         zcm.subscribe(STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+        cout << "Reading state from kalman filter\n";
     }
     zcm.subscribe(PATH_CHANNEL, &ZCMHandler<path_t>::recv, &path_handler);
     zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
 
+    /*
+     *      Initialize controller class and offboard control
+     */
     Controller controller;
     controller.set_control_params(
         load_gains_from_yaml(gains_config), load_vehicle_params(gains_config));
     OffboardControl offboard_control(CommunicationType::UDP);
     InnerLoopSetpoint inner_loop_setpoint;
 
-    // establish state
+    /*
+     *      Establish the initial state of the vehicle
+     */
     cout << "Establishing initial state...\n";
     int counter = 0;
     auto timeout = system_clock::now() + 10s;
@@ -127,16 +154,36 @@ int main(int argc, char** argv)
     }
     cout << "Initial state established\n";
 
-    // Command line input for tests
-    thread tid(get_setpoint);
+    /*
+     *      Read command line control input
+     *      and set control as either through cli
+     *      or xbox controller
+     */
+    path_t test_path = create_test_path(path_file);
+    ;
+    thread tid;
+    const bool xbox_input = gopt.getBool("xbox360");
+    const bool setpoint_input = gopt.getBool("command-line-input");
+    if (xbox_input)
+    {
+        GamepadInit();
+    }
+    else if (setpoint_input)
+    {
+        controller.set_control_state(ControlState::TEST_WAYPOINT);
+        tid = thread(std::bind(get_setpoint, &controller));
+    }
 
-    // Create a test path;
-    path_t test_path = create_test_path();
-
+    /*
+     *      Main run loop
+     *      Runs until receives proper signal
+     *      Checks for messages, runs controller as appropriate
+     *      and updates inner loop setpoint on px4
+     */
     while (!KILL)
     {
-        // Command line input logic (with global variables...sorry)
-        if (CONTROL_STATE_SETPOINT)
+        // Command line input logic (with global variables...#sorrynotsorry)
+        if (MANUAL_SETPOINT_INPUT)
         {
             if (controller.get_control_state() != ControlState::TEST_WAYPOINT)
             {
@@ -173,7 +220,10 @@ int main(int argc, char** argv)
             // What happens when states DONT come in at all?
             const auto msg = state_handler.msg();
             state_handler.pop();
-            inner_loop_setpoint = controller.run(convert_state(msg));
+            if (xbox_input)
+                inner_loop_setpoint = controller.run(read_controller_input(), convert_state(msg));
+            else
+                inner_loop_setpoint = controller.run(convert_state(msg));
         }
 
         // Continues setting the same inner loop setpoint even if there is no input from the
@@ -182,10 +232,13 @@ int main(int argc, char** argv)
         std::this_thread::sleep_for(1ms);
     }
 
-    tid.join();
+    if (setpoint_input) tid.join();
     zcm.stop();
 }
 
+/*
+ *      Reads vehicle and control params from yaml
+ */
 ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
 {
     ctrl_params_t gains;
@@ -260,81 +313,38 @@ Controller::Parameters load_vehicle_params(const Node& config)
 }
 
 /*
- *	Test path for testing tests
-*/
-path_t create_test_path()
+ *	    Test path for testing tests
+ *      Reads from yaml file (path can be provided)
+ *      Make sure that the waypoints in yaml are named
+ *      sequentially with integer values starting at 0
+ */
+path_t create_test_path(const Node& path_file)
 {
     path_t path;
-
     waypoint_t wpt;
-    wpt.pose[0] = 0;
-    wpt.pose[1] = 0;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = 0;
-    path.waypoints.push_back(wpt);
+    int waypoint_count = 0;
+    string waypoint_key;
 
-    wpt.pose[0] = 3;
-    wpt.pose[1] = 2;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = -45;
-    path.waypoints.push_back(wpt);
+    const Node& path_node = path_file["path"];
+    for (auto it = path_node.begin(); it != path_file["path"].end(); ++it)
+    {
+        waypoint_key = to_string(waypoint_count);
+        wpt.pose[0] = path_node[waypoint_key][0].as<double>();
+        wpt.pose[1] = path_node[waypoint_key][1].as<double>();
+        wpt.pose[2] = path_node[waypoint_key][2].as<double>();
+        wpt.pose[3] = path_node[waypoint_key][3].as<double>();
+        path.waypoints.push_back(wpt);
+        ++waypoint_count;
+    }
 
-    wpt.pose[0] = 0;
-    wpt.pose[1] = -3;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = 45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 3;
-    wpt.pose[1] = 0;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = -45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 5;
-    wpt.pose[1] = -3;
-    wpt.pose[2] = -3;
-    wpt.pose[3] = 45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 0;
-    wpt.pose[1] = -5;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = 90;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 1;
-    wpt.pose[1] = -5;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = -45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 5;
-    wpt.pose[1] = -2;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = 45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 0;
-    wpt.pose[1] = 0;
-    wpt.pose[2] = -2.5;
-    wpt.pose[3] = 0;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 0;
-    wpt.pose[1] = 0;
-    wpt.pose[2] = 0;
-    wpt.pose[3] = 0;
-    path.waypoints.push_back(wpt);
-
-    path.NUM_WAYPOINTS = 10;
+    path.NUM_WAYPOINTS = waypoint_count;
 
     return path;
 }
 
 // Function for testing altitude controller, intent
 // is to remove when no longer needed for testing.
-void get_setpoint()
+void get_setpoint(Controller* controller)
 {
     cout << "Enter \">> test\" to run test path\n";
     cout << "  <or>\n";
@@ -347,7 +357,7 @@ void get_setpoint()
         cin >> command;
         if (command == "test")
         {
-            CONTROL_STATE_SETPOINT = false;
+            MANUAL_SETPOINT_INPUT = false;
         }
         else
         {
@@ -361,9 +371,33 @@ void get_setpoint()
                 continue;
             }
 
-            CONTROL_STATE_SETPOINT = true;
+            MANUAL_SETPOINT_INPUT = true;
             cin >> b >> c >> d;
-            maav::gnc::SETPOINT = {Eigen::Vector3d(a, b, c), Eigen::Vector3d(0, 0, 0), d};
+            controller->set_current_target({Eigen::Vector3d(a, b, c), Eigen::Vector3d(0, 0, 0), d});
         }
     }
+}
+
+/*
+ *      Reads xbox controller is options is selected from cli
+ */
+XboxController read_controller_input()
+{
+    XboxController xbox_controller;
+    GamepadUpdate();
+    if (GamepadIsConnected(GAMEPAD_0))
+    {
+        GamepadStickXY(GAMEPAD_0, STICK_LEFT, &(xbox_controller.left_joystick_x),
+            &(xbox_controller.left_joystick_y));
+        GamepadStickXY(GAMEPAD_0, STICK_RIGHT, &(xbox_controller.right_joystick_x),
+            &(xbox_controller.right_joystick_y));
+        xbox_controller.left_trigger = GamepadTriggerValue(GAMEPAD_0, TRIGGER_LEFT);
+        xbox_controller.right_trigger = GamepadTriggerValue(GAMEPAD_0, TRIGGER_RIGHT);
+    }
+    else
+    {
+        cout << "Controller connection error!";
+    }
+
+    return xbox_controller;
 }

@@ -21,6 +21,7 @@ target_link_libraries(maav-controller
         maav-utils
         maav-msg
         maav-mavlink
+        maav-gamepad
 )
 
 add_executable(maav-estimator maav-estimator.cpp)

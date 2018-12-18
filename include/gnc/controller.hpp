@@ -20,8 +20,19 @@ enum class ControlState
 {
     STANDBY = 0,
     HOLD_ALT,
+    XBOX_CONTROLL,
     TEST_WAYPOINT,
     TEST_PATH  // migrate to PLANNER
+};
+
+struct XboxController
+{
+    int left_joystick_x;
+    int left_joystick_y;
+    int right_joystick_x;
+    int right_joystick_y;
+    int left_trigger;
+    int right_trigger;
 };
 
 class Controller
@@ -41,7 +52,9 @@ public:
     Controller();
     ~Controller();
     void set_path(const path_t& _path);
+    void set_current_target(const Waypoint& new_target);
     mavlink::InnerLoopSetpoint run(const State& state);
+    mavlink::InnerLoopSetpoint run(const XboxController& xbox_controller, const State& state);
     void set_control_params(const ctrl_params_t&);
     void set_control_params(const ctrl_params_t&, const Parameters&);
     ControlState get_control_state() const;
@@ -76,12 +89,15 @@ private:
     Waypoint hold_altitude_setpoint;
     std::chrono::time_point<std::chrono::system_clock> pause_timer;
     bool set_pause;
-};
 
-// global altitude for testing
-// This needs to become "hold_altitude" a member variable in controller class
-Waypoint SETPOINT = Waypoint{Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0};
-std::atomic<bool> CONTROL_STATE_SETPOINT{true};
+    // For controller
+    float yaw = 0;
+
+    std::chrono::high_resolution_clock::time_point controller_run_loop_1 =
+        std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point controller_run_loop_2 =
+        std::chrono::high_resolution_clock::now();
+};
 
 }  // namespace gnc
 }  // namespace maav
