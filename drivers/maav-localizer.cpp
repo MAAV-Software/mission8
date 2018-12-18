@@ -75,6 +75,8 @@ int main(int argc, char** argv)
             // map_t map = localizer.getMap();
             // zcm.publish(MAP_CHANNEL, &map);
         }
+
+        std::this_thread::sleep_for(1ms);
     }
 
     zcm.stop();
@@ -85,7 +87,9 @@ int main(int argc, char** argv)
  */
 cv::Mat convertRgb(const rgb_image_t& rgb_image)
 {
-    return cv::Mat(cv::Size(640, 480), CV_8UC3, (uint8_t*) rgb_image.raw_image.data(), cv::Mat::AUTO_STEP).clone();
+    return cv::Mat(cv::Size(640, 480), CV_8UC3, (uint8_t*)rgb_image.raw_image.data(),
+               cv::Mat::AUTO_STEP)
+        .clone();
 }
 
 /*
@@ -93,5 +97,7 @@ cv::Mat convertRgb(const rgb_image_t& rgb_image)
  */
 cv::Mat convertDepth(const depth_image_t& depth_image)
 {
-    return cv::Mat(cv::Size(640, 480), CV_16UC1, (uint16_t*) depth_image.raw_image.data(), cv::Mat::AUTO_STEP).clone();
+    return cv::Mat(cv::Size(640, 480), CV_16SC1, (int16_t*)depth_image.raw_image.data(),
+               cv::Mat::AUTO_STEP)
+        .clone();
 }

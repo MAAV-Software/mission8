@@ -179,6 +179,7 @@ int main(int argc, char** argv)
         // Continues setting the same inner loop setpoint even if there is no input from the
         // controller
         offboard_control.set_attitude_target(inner_loop_setpoint);
+        std::this_thread::sleep_for(1ms);
     }
 
     tid.join();
@@ -268,37 +269,55 @@ path_t create_test_path()
     waypoint_t wpt;
     wpt.pose[0] = 0;
     wpt.pose[1] = 0;
-    wpt.pose[2] = -2;
+    wpt.pose[2] = -2.5;
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
 
-    wpt.pose[0] = 0;
-    wpt.pose[1] = -3;
-    wpt.pose[2] = -2;
-    wpt.pose[3] = 45;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = -3;
-    wpt.pose[1] = 0;
-    wpt.pose[2] = -2;
-    wpt.pose[3] = 0;
-    path.waypoints.push_back(wpt);
-
-    wpt.pose[0] = 0;
-    wpt.pose[1] = 3;
-    wpt.pose[2] = -2;
+    wpt.pose[0] = 3;
+    wpt.pose[1] = 2;
+    wpt.pose[2] = -2.5;
     wpt.pose[3] = -45;
     path.waypoints.push_back(wpt);
 
     wpt.pose[0] = 0;
+    wpt.pose[1] = -3;
+    wpt.pose[2] = -2.5;
+    wpt.pose[3] = 45;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = 3;
     wpt.pose[1] = 0;
-    wpt.pose[2] = -2;
-    wpt.pose[3] = 0;
+    wpt.pose[2] = -2.5;
+    wpt.pose[3] = -45;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = 5;
+    wpt.pose[1] = -3;
+    wpt.pose[2] = -3;
+    wpt.pose[3] = 45;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = 0;
+    wpt.pose[1] = -5;
+    wpt.pose[2] = -2.5;
+    wpt.pose[3] = 90;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = 1;
+    wpt.pose[1] = -5;
+    wpt.pose[2] = -2.5;
+    wpt.pose[3] = -45;
+    path.waypoints.push_back(wpt);
+
+    wpt.pose[0] = 5;
+    wpt.pose[1] = -2;
+    wpt.pose[2] = -2.5;
+    wpt.pose[3] = 45;
     path.waypoints.push_back(wpt);
 
     wpt.pose[0] = 0;
     wpt.pose[1] = 0;
-    wpt.pose[2] = -1;
+    wpt.pose[2] = -2.5;
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
 
@@ -308,7 +327,7 @@ path_t create_test_path()
     wpt.pose[3] = 0;
     path.waypoints.push_back(wpt);
 
-    path.NUM_WAYPOINTS = 7;
+    path.NUM_WAYPOINTS = 10;
 
     return path;
 }

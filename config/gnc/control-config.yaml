@@ -22,8 +22,8 @@ limits:
     y: [5, -5]
     z: [5, -5]
   angle: # limits are in degrees
-    roll: [10, -10]
-    pitch: [10, -10]
+    roll: [5, -5]
+    pitch: [5, -5]
 
 # vehicle params that won't be tuned
 mass: 3.0 # kg
