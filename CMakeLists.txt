@@ -26,10 +26,16 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 # Set all compiled executables to be placed in software/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
+# Find all globally required libraries
+find_package(YAML REQUIRED)
+find_package(ZCM REQUIRED)
+find_package(libusb-1.0 REQUIRED)
+
 # Include generated zcm messages and mavlink headers
 include_directories(SYSTEM
     ${PROJECT_SOURCE_DIR}/generated
     ${PROJECT_SOURCE_DIR}/thirdparty/mavlink/include
+    ${LIBUSB_1_INCLUDE_DIRS}
 )
 
 # Set include directory
@@ -52,10 +58,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-
-# Find all globally required libraries
-find_package(YAML REQUIRED)
-find_package(ZCM REQUIRED)
 
 # Add source directory
 add_subdirectory(src)

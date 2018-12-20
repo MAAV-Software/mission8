@@ -41,3 +41,13 @@ target_link_libraries(maav-localizer
         maav-utils
         maav-msg
 )
+
+add_executable(maav-imu maav-imu.cpp)
+
+target_link_libraries(maav-imu
+        ${ZCM_LIBRARIES}
+        ${YAMLCPP_LIBRARY}
+        maav-imu-device
+        maav-utils
+        maav-msg
+)
