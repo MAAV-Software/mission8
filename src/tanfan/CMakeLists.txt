@@ -6,7 +6,7 @@ include_directories(
     ${ZCM_INCLUDE_DIR}
 )
 
-add_library(nav-dep
+add_library(tanfan-nav-dep
     nav/PhysicalController.cpp
     nav/SerialTTY.cpp
     nav/Controller.cpp
@@ -17,7 +17,7 @@ add_library(nav-dep
     nav/msg/feedback_t.c
 )
 
-add_library(messaging
+add_library(tanfan-messaging
     messaging/DataLink.cpp
     messaging/Decoder.cpp
     messaging/MessageHandler.cpp
@@ -32,14 +32,3 @@ add_library(messaging
     lcmlite.cpp
 )
 
-add_executable(tanfan
-    tanfan.cpp
-)
-
-target_link_libraries(tanfan
-    nav-dep
-    messaging
-    maav-msg
-    maav-utils
-    ${ZCM_LIBRARY}
-)

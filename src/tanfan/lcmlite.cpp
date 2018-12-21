@@ -217,7 +217,7 @@ int lcmlite_receive_packet(lcmlite_t *lcm, const void *_buf, int buf_len, uint64
             if (fbuf == NULL) return -7;  // this should never happen
 
             // initialize the fragment buffer
-            for (int i = 0; i < fragments_in_msg; i++)
+            for (size_t i = 0; i < fragments_in_msg; i++)
             {
                 fbuf->frag_received[i] = 0;
             }
@@ -269,7 +269,7 @@ void lcmlite_subscribe(lcmlite_t *lcm, lcmlite_subscription_t *sub)
     lcm->first_subscription = sub;
 }
 
-int lcmlite_publish(lcmlite_t *lcm, const char *channel, const void *_buf, int buf_len)
+int lcmlite_publish(lcmlite_t *lcm, const char *channel, const void *_buf, size_t buf_len)
 {
     if (buf_len < LCM_PUBLISH_BUFFER_SIZE - MAXIMUM_HEADER_LENGTH)
     {

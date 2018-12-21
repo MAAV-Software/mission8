@@ -7,12 +7,12 @@ include_directories(
 )
 
 include_directories(SYSTEM
-    ${APRILTAGS_INCLUDE_DIR}
+    ${APRILTAGS_INCLUDE_DIRS}
 )
 
 add_executable(opencv_demo opencv_demo.cc)
 
 target_link_libraries(opencv_demo
     ${OpenCV_LIBS}
-    ${APRILTAGS_LIBRARY}
+    ${APRILTAGS_LIBRARIES}
 )
