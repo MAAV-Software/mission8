@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SSH_OPTS="-t"
-PATHS_TO_SYNC="CMakeLists.txt cmake/ doc/ lib/ src/ atomcore/ config/ april/"
+PATHS_TO_SYNC="CMakeLists.txt cmake/ doc/ include/ generated/ thirdparty/ src/ config/ drivers/"
 
 for h in $(cat res/admin/hosts)
 do
@@ -9,11 +9,11 @@ do
 
 	if [ $? -eq 0 ]
 	then
-		ssh ${SSH_OPTS} maav@${h} "test -d /home/maav/nav || mkdir /home/maav/nav"
+		ssh ${SSH_OPTS} maav@${h} "test -d /home/maav/software || mkdir /home/maav/software"
 
 		for path in ${PATHS_TO_SYNC}
 		do
-			rsync -av --delete ${path} maav@${h}:/home/maav/nav/${path}
+			rsync -av --delete ${path} maav@${h}:/home/maav/software/${path}
 		done
 
 		ssh ${SSH_OPTS} maav@${h} /usr/local/bin/nav_build_install
