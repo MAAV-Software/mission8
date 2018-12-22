@@ -35,8 +35,11 @@ public:
     // TODO: return a map
     map_t getMap();
 
+    cv::Mat getPose();
+
 private:
     slam::System slam;
+    cv::Mat current_pose;
 };
 
 }  // namespace gnc

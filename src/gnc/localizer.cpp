@@ -17,12 +17,16 @@ void Localizer::addImage(const Mat& color, const Mat& depth, uint64_t timestamp)
 {
     constexpr double MICROSECONDS_PER_SECOND = 1000000;
     double seconds = static_cast<double>(timestamp) / MICROSECONDS_PER_SECOND;
-    slam.TrackRGBD(color, depth, seconds);
+    current_pose = slam.TrackRGBD(color, depth, seconds);
 }
 
 void Localizer::addImu(/*const measurements::ImuMeasurement& imu*/)
 {
     // TODO: IMU frontend + On Manifold Preintegration + Bias
+}
+
+cv::Mat Localizer::getPose(){
+    return current_pose;
 }
 
 map_t Localizer::getMap()

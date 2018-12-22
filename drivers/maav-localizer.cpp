@@ -15,7 +15,7 @@
 #include <gnc/localizer.hpp>
 
 using maav::MAP_CHANNEL;
-using maav::RGBD_CHANNEL;
+using maav::RGBD_FORWARD_CHANNEL;
 using maav::gnc::Localizer;
 using maav::gnc::SlamInitializer;
 using maav::gnc::slam::System;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     zcm.start();
 
     ZCMHandler<rgbd_image_t> image_handler;
-    zcm.subscribe(RGBD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
+    zcm.subscribe(maav::RGBD_DOWNWARD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
 
     SlamInitializer slam_init;
     slam_init.vocabulary_file = gopt.getString("vocab");
@@ -62,6 +62,7 @@ int main(int argc, char** argv)
     slam_init.use_viewer = true;
 
     Localizer localizer(slam_init);
+    cv::Mat pose;
 
     while (!KILL)
     {
@@ -69,14 +70,23 @@ int main(int argc, char** argv)
         // framework to work off of
         if (image_handler.ready())
         {
+            // cout << image_handler.size() << '\n';
             rgbd_image_t img = image_handler.msg();
             image_handler.pop();
             localizer.addImage(convertRgb(img.rgb_image), convertDepth(img.depth_image), img.utime);
+            // pose = localizer.getPose();
+            // cout << image_handler.size() << '\n';
+            // for(size_t i = 0; i < 4; ++i){
+            //     for(size_t j = 0; j < 4; ++j){
+            //         cout << pose.at<float>(i,j) << '\t';
+            //     }
+            //     cout << '\n';
+            // }
             // map_t map = localizer.getMap();
             // zcm.publish(MAP_CHANNEL, &map);
         }
 
-        std::this_thread::sleep_for(1ms);
+        // std::this_thread::sleep_for(1ms);
     }
 
     zcm.stop();

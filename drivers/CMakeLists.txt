@@ -1,10 +1,12 @@
+find_package(LibRealSense)
+find_package(LibRealSense2)
+
 include_directories(
         ${ZCM_INCLUDE_DIRS}
         ${SW_INCLUDE_DIR}
         ${YAMLCPP_INCLUDE_DIRS}
 )
 
-if(BUILD_GNC)
 add_executable(maav-planner maav-guidance.cpp)
 
 target_link_libraries(maav-planner 
@@ -42,30 +44,24 @@ target_link_libraries(maav-localizer
         maav-utils
         maav-msg
 )
-endif()
 
-if(BUILD_IMU)
-add_executable(maav-imu maav-imu.cpp)
+if(EXISTS ${LIBREALSENSE_LIBRARIES})
+    include_directories(
+        ${LIBREALSENSE_INCLUDE_DIRS}
+        ${LIBREALSENSE2_INCLUDE_DIRS}
+        ${OPENCV_INCLUDE_DIR}
+    )
 
-target_link_libraries(maav-imu
+    add_executable(manual
+        main.cpp
+    )
+
+    target_link_libraries(manual
+        ${LIBREALSENSE_LIBRARIES}
+        ${LIBREALSENSE2_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${Pangolin_LIBRARIES}
         ${ZCM_LIBRARIES}
-        ${YAMLCPP_LIBRARY}
-        maav-imu-device
-        maav-utils
         maav-msg
-)
+    )
 endif()
-
-if(BUILD_TANFAN)
-add_executable(tanfan tanfan.cpp)
-
-target_link_libraries(tanfan
-        ${ZCM_LIBRARIES}
-        ${YAMLCPP_LIBRARY}
-        tanfan-nav-dep
-        tanfan-messaging
-        maav-msg
-        maav-utils
-)
-endif()
-
