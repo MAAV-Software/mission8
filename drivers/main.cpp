@@ -137,11 +137,6 @@ int main(int, char**) {
     rs2::sensor sensor_3(profile_downward.get_device().query_sensors()[0]);
     rs2::sensor sensor_4(profile_downward.get_device().query_sensors()[1]);
 
-    sensor_1.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-    sensor_2.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-    sensor_3.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-    sensor_4.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-
     std::cout << "Depth scale: " << depth_scale_forward << std::endl;
     std::cout << "Depth scale: " << depth_scale_downward << std::endl;
 
@@ -167,11 +162,36 @@ int main(int, char**) {
     rgbd_image_downward.depth_image.raw_image.resize(rgbd_image_downward.depth_image.size);
 
 
-    // Capture 10 frames to give autoexposure, etc. a chance to settle
-    for (auto i = 0; i < 10; ++i){ 
+    // Capture 60 frames to give autoexposure, etc. a chance to settle
+    for (auto i = 0; i < 60; ++i){ 
         pipe_forward.wait_for_frames();
         pipe_downward.wait_for_frames();
     }
+
+    sensor_1.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_2.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_3.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_4.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+
+    for (auto i = 0; i < 60; ++i){ 
+        pipe_forward.wait_for_frames();
+        pipe_downward.wait_for_frames();
+    }
+
+    sensor_1.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+    sensor_2.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+    sensor_3.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+    sensor_4.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+
+    for (auto i = 0; i < 60; ++i){ 
+        pipe_forward.wait_for_frames();
+        pipe_downward.wait_for_frames();
+    }
+
+    sensor_1.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_2.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_3.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_4.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
     
     // int count = 0;
     while (!KILL) {
