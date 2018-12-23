@@ -27,7 +27,8 @@ set(TEST_SRCS
         unscented_transform_test.cpp
         pid_test.cpp
         lidar_test.cpp
-        prediction_test.cpp)
+        prediction_test.cpp
+        planefit_test.cpp)
 
 foreach (testSrc ${TEST_SRCS})
     #Extract the filename without an extension (NAME_WE)

@@ -15,7 +15,8 @@ Estimator::Estimator(YAML::Node config)
     : empty_state_(0),
       history_(config["history"], config["state"]),
       prediction_(config["prediction"]),
-      lidar_update_(config["updates"])
+      lidar_update_(config["updates"]),
+      planefit_update_(config["updates"])
 {
 }
 
@@ -37,7 +38,8 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     while (next != end)
     {
         prediction_(prev, next);
-        lidar_update_(*next);
+        //lidar_update_(*next);
+        planefit_update_(*next);
 
         // Limit covariance for now
         double cap = 0.1;

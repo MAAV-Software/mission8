@@ -2,6 +2,7 @@ add_library(maav-kalman SHARED
     history.cpp
     unscented_transform.cpp
     updates/lidar_update.cpp
+    updates/planefit_update.cpp
     prediction.cpp
 )
 
