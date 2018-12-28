@@ -1,5 +1,5 @@
 #include "gnc/controller.hpp"
-#include <gnc/utils/zcm_conversion.hpp>
+#include <gnc/utils/ZcmConversion.hpp>
 #include <iostream>
 
 using std::cout;
@@ -61,7 +61,7 @@ void Controller::set_path(const path_t& _path)
     set_pause = false;
     path = _path;
     path_counter = 0;
-    current_target = convert_waypoint(path.waypoints[path_counter]);
+    current_target = ConvertWaypoint(path.waypoints[path_counter]);
 }
 
 void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
@@ -125,7 +125,7 @@ InnerLoopSetpoint Controller::run(const State& state)
             if (converged_on_waypoint && path_counter < path.NUM_WAYPOINTS - 1)
             {
                 ++path_counter;
-                current_target = convert_waypoint(path.waypoints[path_counter]);
+                current_target = ConvertWaypoint(path.waypoints[path_counter]);
                 converged_on_waypoint = false;
             }
             return move_to_current_target();

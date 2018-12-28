@@ -133,7 +133,7 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
 
     if (_insert.global_update)
     {
-        uint64_t gu_time = _insert.global_update->time_usec;
+        uint64_t gu_time = _insert.global_update->timeUSec();
         auto snap_iter = find_snapshot(gu_time);
         if (snap_iter != _history.end())
         {

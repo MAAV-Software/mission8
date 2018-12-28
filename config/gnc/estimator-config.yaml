@@ -12,7 +12,7 @@ state:
   velocity: [0, 0, 0] # [m/s]
 
   # Starting covariance
-  covariance: [0.000001, 0.000001, 0.000001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001]
+  covariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001, 0.000001, 0.000001, 0.000001]
 
 
 prediction:
@@ -23,7 +23,7 @@ prediction:
     kappa: 2
 
   # Process noise covariance
-  Q_i: [0.000001, 0.000001, 0.000001, 0.0001, 0.00001, 0.00001]
+  Q_i: [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
 
 updates:
 
@@ -35,10 +35,11 @@ updates:
       kappa: 0.0
 
     # Sensor noise covariance
-    R: [0.000001]
+    R: [0.0001]
 
   planefit:
-    # Unscented transform params
+
+      # Unscented transform params
     UT:
       alpha: 0.1
       beta: 2.0
@@ -46,3 +47,18 @@ updates:
 
     # Sensor noise covariance
     R: [0.000001, 0.000001, 0.000001, 0.000001]
+
+
+  global_update:
+
+    # Unscented transform params
+    UT:
+      alpha: 0.1
+      beta: 2.0
+      kappa: 0.0
+
+    # Sensor noise covariance
+    R: [0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]
+
+sim_planefit_update: true
+sim_global_update: true

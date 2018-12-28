@@ -4,6 +4,8 @@ add_library(maav-kalman SHARED
     updates/lidar_update.cpp
     updates/planefit_update.cpp
     prediction.cpp
+    updates/lidar_update.cpp
+    updates/GlobalUpdate.cpp
 )
 
 target_include_directories(maav-kalman PUBLIC
@@ -17,5 +19,4 @@ target_link_libraries(maav-kalman
     maav-state
     maav-measurements
     ${YAMLCPP_LIBRARY}
-
 )

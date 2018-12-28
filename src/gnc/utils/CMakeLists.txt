@@ -5,5 +5,5 @@ include_directories(maav-gnc-utils
 )
 
 add_library(maav-gnc-utils SHARED
-    zcm_conversion.cpp
+    ZcmConversion.cpp
 )

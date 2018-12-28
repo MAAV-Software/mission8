@@ -28,7 +28,9 @@ set(TEST_SRCS
         pid_test.cpp
         lidar_test.cpp
         prediction_test.cpp
-        planefit_test.cpp)
+        planefit_test.cpp
+        ZcmConversionTest.cpp
+        GlobalUpdateTest.cpp)
 
 foreach (testSrc ${TEST_SRCS})
     #Extract the filename without an extension (NAME_WE)

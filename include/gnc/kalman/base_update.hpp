@@ -31,10 +31,10 @@ private:
     using KalmanGainMatrix = CrossCovarianceMatrix;
 
 public:
-    BaseUpdate(YAML::Node config)
-        : unscented_transform_(config["UT"])
+    BaseUpdate(YAML::Node config) : unscented_transform_(config["UT"])
     {
-        Eigen::Matrix<double, TargetDoF, 1> R_diag = config["R"].as<Eigen::Matrix<double, TargetDoF, 1>>();
+        Eigen::Matrix<double, TargetDoF, 1> R_diag =
+            config["R"].as<Eigen::Matrix<double, TargetDoF, 1>>();
         R_ = Eigen::DiagonalMatrix<double, TargetDoF>(R_diag);
         unscented_transform_.set_transformation(std::bind(&BaseUpdate::predicted, this, _1));
     }
@@ -70,8 +70,8 @@ protected:
         CrossCovarianceMatrix Sigma_x_z = CrossCovarianceMatrix::Zero();
         for (size_t i = 0; i < UnscentedTransform<TargetSpace>::N; i++)
         {
-            Sigma_x_z +=
-                c_weights[i] * (sigma_points[i] - state) * (transformed_points[i] - predicted_meas).transpose();
+            Sigma_x_z += c_weights[i] * (sigma_points[i] - state) *
+                         (transformed_points[i] - predicted_meas).transpose();
         }
         const KalmanGainMatrix K = Sigma_x_z * S.inverse();
         ErrorStateVector residual = measured(snapshot.measurement) - predicted_meas;

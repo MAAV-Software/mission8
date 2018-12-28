@@ -5,6 +5,7 @@
 #include <gnc/State.hpp>
 #include <gnc/kalman/history.hpp>
 #include <gnc/kalman/prediction.hpp>
+#include <gnc/kalman/updates/GlobalUpdate.hpp>
 #include <gnc/kalman/updates/lidar_update.hpp>
 #include <gnc/kalman/updates/planefit_update.hpp>
 #include <gnc/measurements/Measurement.hpp>
@@ -35,6 +36,7 @@ private:
     kalman::UkfPrediction prediction_;
     kalman::LidarUpdate lidar_update_;
     kalman::PlaneFitUpdate planefit_update_;
+    kalman::GlobalUpdate global_update_;
 };
 
 }  // namespace gnc

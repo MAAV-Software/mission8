@@ -18,7 +18,7 @@
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/controller.hpp>
-#include <gnc/utils/zcm_conversion.hpp>
+#include <gnc/utils/ZcmConversion.hpp>
 
 using maav::STATE_CHANNEL;
 using maav::SIM_STATE_CHANNEL;
@@ -26,8 +26,8 @@ using maav::PATH_CHANNEL;
 using maav::CTRL_PARAMS_CHANNEL;
 using maav::gnc::Controller;
 using maav::gnc::XboxController;
-using maav::gnc::convert_state;
-using maav::gnc::convert_waypoint;
+using maav::gnc::ConvertState;
+using maav::gnc::ConvertWaypoint;
 using maav::mavlink::OffboardControl;
 using maav::mavlink::InnerLoopSetpoint;
 using std::this_thread::sleep_for;
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
         {
             const auto msg = state_handler.msg();
             state_handler.pop();
-            controller.run(convert_state(msg));
+            controller.run(ConvertState(msg));
             ++counter;
         }
     }
@@ -221,9 +221,9 @@ int main(int argc, char** argv)
             const auto msg = state_handler.msg();
             state_handler.pop();
             if (xbox_input)
-                inner_loop_setpoint = controller.run(read_controller_input(), convert_state(msg));
+                inner_loop_setpoint = controller.run(read_controller_input(), ConvertState(msg));
             else
-                inner_loop_setpoint = controller.run(convert_state(msg));
+                inner_loop_setpoint = controller.run(ConvertState(msg));
         }
 
         // Continues setting the same inner loop setpoint even if there is no input from the

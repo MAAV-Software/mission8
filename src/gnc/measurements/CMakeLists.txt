@@ -1,5 +1,6 @@
 add_library(maav-measurements SHARED
     Lidar.cpp
+    GlobalUpdate.cpp
 )
 
 target_include_directories(maav-measurements PUBLIC

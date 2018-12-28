@@ -16,7 +16,8 @@ Estimator::Estimator(YAML::Node config)
       history_(config["history"], config["state"]),
       prediction_(config["prediction"]),
       lidar_update_(config["updates"]),
-      planefit_update_(config["updates"])
+      planefit_update_(config["updates"]),
+      global_update_(config["updates"])
 {
 }
 
@@ -38,20 +39,10 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     while (next != end)
     {
         prediction_(prev, next);
-        //lidar_update_(*next);
+        lidar_update_(*next);
         planefit_update_(*next);
+        global_update_(*next);
 
-        // Limit covariance for now
-        double cap = 0.1;
-        State::CovarianceMatrix& cov = next->state.covariance();
-        cov.block<2, State::DoF>(3, 0) = Eigen::Matrix<double, 2, State::DoF>::Zero();
-        cov.block<2, State::DoF>(6, 0) = Eigen::Matrix<double, 2, State::DoF>::Zero();
-        cov.block<State::DoF, 2>(0, 3) = Eigen::Matrix<double, State::DoF, 2>::Zero();
-        cov.block<State::DoF, 2>(0, 6) = Eigen::Matrix<double, State::DoF, 2>::Zero();
-        cov.block<2, 2>(3, 3) = cap * Eigen::Matrix2d::Identity();
-        cov.block<2, 2>(6, 6) = cap * Eigen::Matrix2d::Identity();
-
-        // TODO: Add updates
         prev++;
         next++;
     }
