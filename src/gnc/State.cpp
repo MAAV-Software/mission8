@@ -136,5 +136,19 @@ const Eigen::Vector3d& State::magneticFieldVector() const { return magnetic_fiel
 Eigen::Vector3d& State::magneticFieldVector() { return magnetic_field_; }
 const State::CovarianceMatrix& State::covariance() const { return covar_; }
 State::CovarianceMatrix& State::covariance() { return covar_; }
+std::ostream& operator<<(std::ostream& os, const State& state)
+{
+    std::cout << "Attitude: " << state.attitude().unit_quaternion().w() << ' '
+              << state.attitude().unit_quaternion().x() << ' '
+              << state.attitude().unit_quaternion().y() << ' '
+              << state.attitude().unit_quaternion().z() << '\n';
+    std::cout << "Position: " << state.position().x() << ' ' << state.position().y() << ' '
+              << state.position().z() << '\n';
+    std::cout << "Velocity: " << state.velocity().x() << ' ' << state.velocity().y() << ' '
+              << state.velocity().z() << '\n';
+    std::cout << "Variance: " << state.covariance().diagonal().transpose() << std::endl;
+    return os;
+}
+
 }  // namespace gnc
 }  // namespace maav

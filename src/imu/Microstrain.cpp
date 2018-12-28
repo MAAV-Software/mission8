@@ -267,9 +267,11 @@ void MicrostrainImu::parseData(unsigned char *data, imu_t &imu)
 
     // Big-Endian?
     // char FirstByte = data[0];
-    imu.acceleration[0] = bytesToFloat(data, 1);
-    imu.acceleration[1] = bytesToFloat(data, 5);
-    imu.acceleration[2] = bytesToFloat(data, 9);
+    constexpr double STANDARD_GRAVITY = 9.80665;
+
+    imu.acceleration[0] = bytesToFloat(data, 1) * STANDARD_GRAVITY;
+    imu.acceleration[1] = bytesToFloat(data, 5) * STANDARD_GRAVITY;
+    imu.acceleration[2] = bytesToFloat(data, 9) * STANDARD_GRAVITY;
     imu.angular_rates[0] = bytesToFloat(data, 13);
     imu.angular_rates[1] = bytesToFloat(data, 17);
     imu.angular_rates[2] = bytesToFloat(data, 21);

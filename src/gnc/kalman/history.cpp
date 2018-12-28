@@ -33,8 +33,6 @@ History::History(YAML::Node config, YAML::Node initial_state_config)
     _initial_state.position() = initial_position;
     _initial_state.velocity() = initial_velocity;
 
-    std::cout << "Initiali position: " << _initial_state.position().transpose() << std::endl;
-
     _initial_state.covariance() = Eigen::DiagonalMatrix<double, State::DoF>(diag_covariance);
 }
 

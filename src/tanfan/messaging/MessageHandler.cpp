@@ -68,12 +68,12 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
 
         zcmLidar.distance = mh->lidar.dist;
 
-        std::cout << "LIdar distance: " << zcmLidar.distance << std::endl;
+        std::cout << "Lidar distance: " << zcmLidar.distance << std::endl;
 
         zcmLidar.utime =
             duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 
-        mh->zcm->publish("LID", &zcmLidar);
+        mh->zcm->publish(maav::HEIGHT_LIDAR_CHANNEL, &zcmLidar);
     }
     else if (strncmp(channel, "IMU", 3) == 0)
     {
@@ -92,7 +92,7 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
 
         zcmImu.utime = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 
-        mh->zcm->publish("IMU", &zcmImu);
+        mh->zcm->publish(maav::IMU_CHANNEL, &zcmImu);
     }
     else if (strncmp(channel, "EMS", 3) == 0)
     {

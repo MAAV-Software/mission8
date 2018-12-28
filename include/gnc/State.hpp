@@ -2,6 +2,7 @@
 #define STATE_HPP
 
 #include <cstdint>
+#include <ostream>
 
 #include <Eigen/Dense>
 #include <sophus/so3.hpp>
@@ -140,6 +141,8 @@ private:
 
     CovarianceMatrix covar_;
 };
+
+std::ostream& operator<<(std::ostream& os, const State& state);
 
 }  // namespace gnc
 }  // namespace maav

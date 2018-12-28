@@ -17,7 +17,10 @@ Estimator::Estimator(YAML::Node config)
       prediction_(config["prediction"]),
       lidar_update_(config["updates"]),
       planefit_update_(config["updates"]),
-      global_update_(config["updates"])
+      global_update_(config["updates"]),
+      enable_lidar(config["en_lidar"].as<bool>()),
+      enable_planefit(config["en_planefit"].as<bool>()),
+      enable_global(config["en_global"].as<bool>())
 {
 }
 
@@ -39,21 +42,14 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     while (next != end)
     {
         prediction_(prev, next);
-        lidar_update_(*next);
-        planefit_update_(*next);
-        global_update_(*next);
+
+        if (enable_lidar) lidar_update_(*next);
+        if (enable_planefit) planefit_update_(*next);
+        if (enable_global) global_update_(*next);
 
         prev++;
         next++;
     }
-
-    std::cout << "Attitude: " << prev->state.attitude().unit_quaternion().w() << ' '
-              << prev->state.attitude().unit_quaternion().x() << ' '
-              << prev->state.attitude().unit_quaternion().y() << ' '
-              << prev->state.attitude().unit_quaternion().z() << '\n';
-    std::cout << "Position: " << prev->state.position().transpose() << '\n';
-    std::cout << "Velocity: " << prev->state.velocity().transpose() << std::endl;
-    std::cout << "Variance:\n" << prev->state.covariance().diagonal().transpose() << std::endl;
     return prev->state;
 }
 

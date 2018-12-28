@@ -1,4 +1,6 @@
 #include <csignal>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <thread>
 
@@ -53,6 +55,7 @@ int main(int argc, char** argv)
 
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
+    gopt.addBool('v', "verbose", false, "Print the state at each iteration");
     gopt.addString('c', "config", "", "Path to config.");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
@@ -62,8 +65,23 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    bool verbose = gopt.getBool("verbose");
+    if (verbose)
+    {
+        ios::sync_with_stdio(false);
+        std::cout << std::showpos << std::setprecision(4) << fixed;
+    }
+
+    cout << "Starting MAAV Estimator" << endl;
+
     // Init ZCM
     zcm::ZCM zcm{"ipc"};
+    if (!zcm.good())
+    {
+        throw "Bad ZCM";
+    }
+
+    cout << "ZCM Good" << endl;
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
     Estimator estimator(config);
@@ -75,6 +93,7 @@ int main(int argc, char** argv)
 
     zcm.subscribe(IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
     zcm.subscribe(HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
+    zcm.subscribe(PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
 
     // Use simulated planefit?
     bool sim_planefit = config["sim_planefit_update"].as<bool>();
@@ -97,6 +116,8 @@ int main(int argc, char** argv)
     // Main Loop
     KILL = false;
 
+    cout << "Starting estimator loop" << endl;
+
     while (!KILL)
     {
         std::this_thread::sleep_for(2ms);
@@ -113,6 +134,8 @@ int main(int argc, char** argv)
             lidar_handler.pop();
 
             set.lidar = convertLidar(msg);
+
+            std::cout << "Lidar Dist: " << set.lidar->distance() << std::endl;
         }
 
         if (plane_fit_handler.ready())
@@ -129,6 +152,8 @@ int main(int argc, char** argv)
             global_update_handler.pop();
 
             set.global_update = convertGlobalUpdate(msg);
+
+            std::cout << "Global Pos: " << set.global_update->position().transpose() << std::endl;
         }
 
         const imu_t msg = imu_handler.msg();
@@ -136,10 +161,24 @@ int main(int argc, char** argv)
 
         set.imu = convertImu(msg);
 
+        if(set.global_update && set.imu) {
+            std::cout << "Time difference: " << set.imu->time_usec - set.global_update->timeUSec() << std::endl;
+        }
+
+        std::cout << "Acc z: " << set.imu->acceleration.z() << std::endl;
+
         const State& state = estimator.add_measurement_set(set);
+
         state_t zcm_state = ConvertState(state);
 
+        if (verbose)
+        {
+            std::cout << state;
+        }
+
         zcm.publish(STATE_CHANNEL, &zcm_state);
+
+        this_thread::sleep_for(2ms);
     }
 
     zcm.stop();

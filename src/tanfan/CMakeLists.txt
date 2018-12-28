@@ -32,3 +32,13 @@ add_library(tanfan-messaging
     lcmlite.cpp
 )
 
+target_link_libraries(tanfan-nav-dep
+    maav-msg
+    tanfan-messaging
+)
+
+target_link_libraries(tanfan-messaging
+    maav-msg
+)
+
+

@@ -7,13 +7,16 @@ include_directories(
         ${YAMLCPP_INCLUDE_DIRS}
 )
 
+if(BUILD_GNC)
+
 add_executable(maav-planner maav-guidance.cpp)
 
 target_link_libraries(maav-planner 
         maav-gnc
         ${ZCM_LIBRARIES}
         maav-utils
-        maav-msg)
+        maav-msg
+)
 
 add_executable(maav-controller maav-controller.cpp)
 
@@ -44,6 +47,36 @@ target_link_libraries(maav-localizer
         maav-utils
         maav-msg
 )
+endif()
+
+if(BUILD_TANFAN)
+
+add_executable(tanfan tanfan.cpp)
+
+target_link_libraries(tanfan
+        ${ZCM_LIBRARIES}
+        maav-utils
+        tanfan-messaging
+        tanfan-nav-dep
+        maav-msg
+)
+
+endif()
+
+if(BUILD_IMU)
+
+add_executable(maav-imu maav-imu.cpp)
+
+target_link_libraries(maav-imu
+        ${ZCM_LIBRARIES} 
+        maav-msg
+        maav-utils
+        ${YAMLCPP_LIBRARY}
+        maav-imu-device
+)
+
+endif()
+
 
 if(EXISTS ${LIBREALSENSE_LIBRARIES})
     include_directories(

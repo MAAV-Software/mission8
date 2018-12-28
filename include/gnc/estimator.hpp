@@ -37,6 +37,10 @@ private:
     kalman::LidarUpdate lidar_update_;
     kalman::PlaneFitUpdate planefit_update_;
     kalman::GlobalUpdate global_update_;
+
+    bool enable_lidar;
+    bool enable_planefit;
+    bool enable_global;
 };
 
 }  // namespace gnc

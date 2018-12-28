@@ -1,6 +1,8 @@
 #include <chrono>
 #include <csignal>
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -74,6 +76,7 @@ int main(int argc, char** argv)
     // constexpr auto period = 1000000us;
     if (verbose)
     {
+        ios::sync_with_stdio(false);
         cout << std::showpos << std::setprecision(3);
     }
 
