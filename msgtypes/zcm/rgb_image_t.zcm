@@ -3,8 +3,8 @@
  */
 struct rgb_image_t
 {
-	int32_t width;
-	int32_t height;
+    int32_t width;
+    int32_t height;
     int32_t size;
-	int8_t raw_image[size];
+    int8_t raw_image[size];
 }

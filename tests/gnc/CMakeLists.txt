@@ -2,24 +2,31 @@ project(tests)
 enable_testing()
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
-
+find_package(ZCM REQUIRED)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 include_directories(
+        ${ZCM_INCLUDE_DIRS}
         ${SW_INCLUDE_DIR}
         ${GNC_SRC_DIR}
         ${Boost_INCLUDE_DIRS}
+        ${OPENCV_INCLUDE_DIR}
         ${EIGEN3_INCLUDE_DIR}
         ${SOPHUS_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIRS}
+        ${PCL_INCLUDE_DIRS}
 )
+
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 add_library(testhelper SHARED test_helpers.cpp)
 
 target_link_libraries(testhelper
         maav-state
         maav-gnc
-        maav-kalman)
+        maav-kalman
+        ${ZCM_LIBRARIES})
 
 set(TEST_SRCS
         state_test.cpp

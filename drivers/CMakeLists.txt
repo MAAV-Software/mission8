@@ -1,17 +1,33 @@
 find_package(LibRealSense)
 find_package(LibRealSense2)
+find_package(PCL 1.7 REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(LibRealSense REQUIRED)
+find_package(LibRealSense2 REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
 include_directories(
         ${ZCM_INCLUDE_DIRS}
         ${SW_INCLUDE_DIR}
-        ${YAMLCPP_INCLUDE_DIRS}
+        ${OPENCV_INCLUDE_DIRS}
+        ${EIGEN3_INCLUDE_DIR}
 )
+
+include_directories(
+    SYSTEM
+    ${PCL_INCLUDE_DIRS}
+)
+
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 if(BUILD_GNC)
 
 add_executable(maav-planner maav-guidance.cpp)
 
-target_link_libraries(maav-planner 
+target_link_libraries(maav-planner
         maav-gnc
         ${ZCM_LIBRARIES}
         maav-utils
@@ -20,7 +36,7 @@ target_link_libraries(maav-planner
 
 add_executable(maav-controller maav-controller.cpp)
 
-target_link_libraries(maav-controller 
+target_link_libraries(maav-controller
         maav-gnc
         ${ZCM_LIBRARIES}
         ${YAMLCPP_LIBRARY}
@@ -32,14 +48,29 @@ target_link_libraries(maav-controller
 
 add_executable(maav-estimator maav-estimator.cpp)
 
-target_link_libraries(maav-estimator 
-	maav-gnc
+target_link_libraries(maav-estimator
+        maav-gnc
         ${ZCM_LIBRARIES}
         maav-utils
         maav-msg
 )
 
 add_executable(maav-localizer maav-localizer.cpp)
+
+link_directories(${PCL_LIBRARY_DIRS})
+
+add_executable(maav-planefit maav-planefit.cpp)
+
+target_link_libraries(maav-planefit
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+        ${PCL_LIBRARIES}
+        ${OpenCV_LIBS}
+        ${LIBREALSENSE_LIBRARIES}
+        ${LIBREALSENSE2_LIBRARIES}
+        PlaneFitter
+)
 
 target_link_libraries(maav-localizer
         maav-gnc
@@ -77,24 +108,20 @@ target_link_libraries(maav-imu
 
 endif()
 
-
 if(EXISTS ${LIBREALSENSE_LIBRARIES})
-    include_directories(
-        ${LIBREALSENSE_INCLUDE_DIRS}
-        ${LIBREALSENSE2_INCLUDE_DIRS}
-        ${OPENCV_INCLUDE_DIR}
-    )
 
-    add_executable(manual
-        main.cpp
-    )
+    add_executable(maav-camera maav-camera.cpp)
 
-    target_link_libraries(manual
+    target_link_libraries(maav-camera
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+        ${PCL_LIBRARIES}
+        ${OpenCV_LIBS}
         ${LIBREALSENSE_LIBRARIES}
         ${LIBREALSENSE2_LIBRARIES}
-        ${OpenCV_LIBS}
-        ${Pangolin_LIBRARIES}
-        ${ZCM_LIBRARIES}
-        maav-msg
+        ${YAMLCPP_LIBRARY}
+        CameraDriverHelper
     )
+
 endif()

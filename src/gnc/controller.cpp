@@ -214,12 +214,6 @@ bool Controller::set_control_state(const ControlState new_control_state)
     return true;
 }
 
-/*
- *      Main controll function
- *      Takes current position and current
- *      target and provides inner loop setpoint
- *      to move to that target
- */
 mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 {
     InnerLoopSetpoint new_setpoint;

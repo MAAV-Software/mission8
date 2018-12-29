@@ -5,6 +5,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(LibRealSense REQUIRED)
 find_package(LibRealSense2 REQUIRED)
+find_package(ZCM REQUIRED)
 
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
@@ -17,6 +18,7 @@ include_directories(
     ${LIBREALSENSE2_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${GLFW3_INCLUDE_DIR}
+    ${ZCM_INCLUDE+DIRS}
 )
 
 include_directories(SYSTEM
@@ -26,43 +28,62 @@ include_directories(SYSTEM
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(RGBDGetter SHARED RGBDGetter.cpp)
+add_library(RealsenseSettings SHARED RealsenseSettings.cpp)
 
-add_library(CameraInput SHARED CameraInputBase.cpp CameraInput.cpp NewCameraInput.cpp)
+# add_library(RGBDPlayback SHARED RGBDPlayback.cpp)
 
-add_executable(data-log data-log.cpp)
+add_library(CameraInterface SHARED
+    CameraInterfaceBase.cpp
+    LegacyCameraInterface.cpp
+    D400CameraInterface.cpp
+)
 
-add_library(PlaneFitterPCL SHARED PlaneFitterPCL.cpp)
+add_library(CameraDriverHelper SHARED CameraDriverHelper.cpp)
 
-add_library(PlaneFitter SHARED PlaneFitter)
+add_library(VisionUtils SHARED utilities.cpp)
 
-target_link_libraries(CameraInput
+# add_executable(data-log data-log.cpp)
+
+add_library(PlaneFitter SHARED PlaneFitter.cpp)
+
+target_link_libraries(CameraInterface
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
     ${LIBREALSENSE2_LIBRARIES}
+    RealsenseSettings
 )
 
-target_link_libraries(CameraInput realsense2)
+target_link_libraries(CameraInterface realsense2)
 
-target_link_libraries(data-log
+target_link_libraries(CameraDriverHelper
+    CameraInterface
+    VisionUtils
+)
+
+# target_link_libraries(data-log
+#     ${OpenCV_LIBS}
+#     ${PCL_LIBRARIES}
+#     ${LIBREALSENSE_LIBRARIES}
+#     ${LIBREALSENSE2_LIBRARIES}
+#     realsense2
+#     CameraInterface
+# )
+
+target_link_libraries(PlaneFitter
+    ${PCL_LIBRARIES}
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
+)
+
+# target_link_libraries(RGBDPlayback
+#     ${OpenCV_LIBS}
+#     ${PCL_LIBRARIES}
+#     ${LIBREALSENSE_LIBRARIES}
+#     ${LIBREALSENSE2_LIBRARIES}
+# )
+
+target_link_libraries(VisionUtils
     ${OpenCV_LIBS}
-    ${PCL_LIBRARIES}
-    ${LIBREALSENSE_LIBRARIES}
-    ${LIBREALSENSE2_LIBRARIES}
-    realsense2
-    CameraInput
 )
 
-target_link_libraries(PlaneFitterPCL
-    ${PCL_LIBRARIES}
-    ${LIBREALSENSE_LIBRARIES}
-    ${LIBREALSENSE2_LIBRARIES}
-)
-
-target_link_libraries(RGBDGetter
-    ${OpenCV_LIBS}
-    ${PCL_LIBRARIES}
-    ${LIBREALSENSE_LIBRARIES}
-    ${LIBREALSENSE2_LIBRARIES}
-)

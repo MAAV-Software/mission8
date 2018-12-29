@@ -3,10 +3,10 @@
  */
 struct plane_fit_t
 {
-	int64_t utime;
-	
-	double z;
-	double z_dot;
-	double roll;
-	double pitch;
+    int64_t utime;
+
+    float z;
+    float z_dot;
+    float roll;
+    float pitch;
 }

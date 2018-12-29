@@ -6,8 +6,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
-#include <fstream>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -15,26 +15,31 @@
 
 #include <librealsense/rs.hpp>
 #include <librealsense2/rs.hpp>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
-#include "vision/depth-utils/CameraInput.hpp"
-#include "vision/depth-utils/CameraInputBase.hpp"
-#include "vision/depth-utils/NewCameraInput.hpp"
+#include "vision/depth-utils/CameraInterfaceBase.hpp"
+#include "vision/depth-utils/D400CameraInterface.hpp"
+#include "vision/depth-utils/LegacyCameraInterface.hpp"
 
-using std::vector;
-using std::mutex;
-using std::condition_variable;
-using std::thread;
 using std::atomic;
+using std::condition_variable;
+using std::mutex;
+using std::shared_ptr;
+using std::thread;
+using std::vector;
+
+using maav::vision::CameraInterfaceBase;
+using maav::vision::D400CameraInterface;
+using maav::vision::LegacyCameraInterface;
 
 atomic<bool> terminate = false;
 std::mutex mtx;
-std::condition_variable condVar;
+std::condition_variable cond_var;
 std::string directory;
 
 void sigHandler(int);
-void camera_thread(CameraInputBase *cam);
+void camera_thread(CameraInterfaceBase *cam);
 void createDirectories();
 void createDirectories(std::string);
 
@@ -53,48 +58,53 @@ int main(int argc, char **argv)
         directory = "ImageData";
     }
 
-    unsigned int oldCams = static_cast<unsigned>(std::stoi(argv[1]));
-    unsigned int newCams = static_cast<unsigned>(std::stoi(argv[2]));
+    unsigned int old_cams = static_cast<unsigned>(std::stoi(argv[1]));
+    unsigned int new_cams = static_cast<unsigned>(std::stoi(argv[2]));
 
     // Initialize cameras
-    vector<CameraInputBase *> cameras;
-    cameras.reserve(oldCams + newCams);
+    vector<CameraInterfaceBase *> cameras;
+    cameras.reserve(old_cams + new_cams);
 
-    if (oldCams > 0)
+    if (old_cams > 0)
     {
-        CameraInput *cam1 = new CameraInput(0);
+        LegacyCameraInterface *cam1 = new LegacyCameraInterface(0);
         cameras.push_back(cam1);
         std::cout << "First rs1 camera made" << std::endl;
         // Retrieve rs::context
-        rs::context *ctx = cam1->getContext();
+        shared_ptr<rs::context> ctx = cam1->getContext();
         // Continue creating cameras
-        for (unsigned i = 1; i < oldCams; ++i)
+        for (unsigned i = 1; i < old_cams; ++i)
         {
-            CameraInput *nextCam = new CameraInput(static_cast<int>(i), ctx);
-            cameras.push_back(nextCam);
+            LegacyCameraInterface *next_cam = new LegacyCameraInterface(static_cast<int>(i), ctx);
+            cameras.push_back(next_cam);
         }
         std::cout << "rs1 Cameras created" << std::endl;
     }
 
-    if (newCams > 0)
+    if (new_cams > 0)
     {
         rs2::context ctx;
         auto list = ctx.query_devices();
         std::cout << list.size() << " rs2 devices connected.\n";
-        for (unsigned int i = 0; i < newCams; ++i)
+        for (unsigned int i = 0; i < new_cams; ++i)
         {
-            NewCameraInput *nextCam =
-                new NewCameraInput(list[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
-            cameras.push_back(nextCam);
+            D400CameraInterface *next_cam = new D400CameraInterface(
+                list[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER), 640, 480, 30);
+            cameras.push_back(next_cam);
         }
         std::cout << "rs2 Cameras created" << std::endl;
     }
 
     // drop first 10 frames
     for (int i = 0; i < 10; ++i)
-        for (auto cam : cameras) cam->loadNext();
+    {
+        for (auto &cam : cameras)
+        {
+            cam->loadNext();
+        }
+    }
 
-    // cameras now contains CameraInput instances for each of the connected cameras
+    // cameras now contains LegacyCameraInterface instances for each of the connected cameras
     // Initialize variables used for thread control
     vector<thread> threads;
     // Set up sighandlers
@@ -103,7 +113,7 @@ int main(int argc, char **argv)
     signal(SIGABRT, sigHandler);
     std::cout << "Got to thread creation" << std::endl;
     // Create threads
-    for (unsigned i = 0; i < oldCams + newCams; ++i)
+    for (unsigned i = 0; i < old_cams + new_cams; ++i)
     {
         threads.emplace_back(camera_thread, cameras[i]);
     }
@@ -111,15 +121,15 @@ int main(int argc, char **argv)
     std::unique_lock<std::mutex> lck(mtx);
     while (terminate == false)
     {
-        condVar.wait(lck);
+        cond_var.wait(lck);
     }
     // Join the threads back to main
-    for (unsigned i = 0; i < oldCams + newCams; ++i)
+    for (unsigned i = 0; i < old_cams + new_cams; ++i)
     {
         threads[i].join();
     }
 
-    for (CameraInputBase *cam : cameras) delete cam;
+    for (CameraInterfaceBase *cam : cameras) delete cam;
     return 0;
 }
 
@@ -127,11 +137,11 @@ void sigHandler(int)
 {
     // Set terminate to true
     terminate = true;
-    condVar.notify_one();
-    condVar.notify_one();
+    cond_var.notify_one();
+    cond_var.notify_one();
 }
 
-void camera_thread(CameraInputBase *cam)
+void camera_thread(CameraInterfaceBase *cam)
 {
     cv::Mat rgb;
     cv::Mat depth;
@@ -142,12 +152,12 @@ void camera_thread(CameraInputBase *cam)
     std::ofstream timestamps(fname);
     for (int frame = 0; !(terminate); ++frame)
     {
-        int64_t startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                std::chrono::system_clock::now().time_since_epoch())
-                                .count();
+        int64_t start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch())
+                                 .count();
 
-        cam->getRGB(rgb);
-        cam->getDepth(depth);
+        rgb = cam->getRGB();
+        depth = cam->getDepth();
 
         std::string fname = directory;
         fname += "/RGB";
@@ -171,20 +181,20 @@ void camera_thread(CameraInputBase *cam)
         outfileDepth.write((char *)depth.data, (long int)(depth.elemSize() * depth.total()));
         outfileDepth.close();
 
-        timestamps << startTime << '\n';
+        timestamps << start_time << '\n';
 
         cam->loadNext();
     }
 }
 
-void createDirectories(std::string dirName)
+void createDirectories(std::string dir_name)
 {
     bool result = true;
     std::string command = "rm -rf ";
-    command += dirName;
+    command += dir_name;
     result = result && system(command.c_str());
     command = "mkdir ";
-    command += dirName;
+    command += dir_name;
     result = result && system(command.c_str());
     command += "/Timestamps";
     result = result && system(command.c_str());
@@ -192,12 +202,12 @@ void createDirectories(std::string dirName)
     for (int i = 0; i < 5; ++i)
     {
         std::string command = "mkdir ";
-        command += dirName;
+        command += dir_name;
         command += "/RGB";
         command += std::to_string(i);
         result = result && system(command.c_str());
         command = "mkdir ";
-        command += dirName;
+        command += dir_name;
         command += "/Depth";
         command += std::to_string(i);
         result = result && system(command.c_str());
@@ -217,12 +227,12 @@ void createDirectories(std::string dirName)
 
 void createDirectories()
 {
-    struct stat statStruct;
+    struct stat stat_struct;
     bool result = true;
-    stat("ImageData", &statStruct);
+    stat("ImageData", &stat_struct);
 
     // if the ImageData directory exists, tar the existing data
-    if (S_ISDIR(statStruct.st_mode))
+    if (S_ISDIR(stat_struct.st_mode))
     {
         int i = 0;
         std::string filename = "ImageData0.tar.gz";

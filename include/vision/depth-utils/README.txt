@@ -1,7 +1,7 @@
 
 This document will explain how to use the camera utility classes.
 
-The CameraInputBase class is an abstract class that provides a workable interface for classes that control
+The CameraInterfaceBase class is an abstract class that provides a workable interface for classes that control
 working with the data recieved from the camera.
 
 It's public methods are used as follows:
@@ -15,15 +15,15 @@ virtual void getDepth(cv::Mat& mat) const = 0;
 virtual void loadNext() = 0;
 	- tells the camera to load in the data from the next (new) frame
 
-virtual CameraInputBase & operator++();
+virtual CameraInterfaceBase & operator++();
 	- same as loadNext
 
 virtual int getTag() const;
 	- gets the tag associated with the given camera object (for separating out data collection)
 
-The CameraInput class and NewCameraInput class both provide implementations of this interface.
-The CameraInput class works with the older realsense cameras and probably won't be very necessary moving forward.
-The NewCameraInput class works with the new realsense2 cameras.
+The LegacyCameraInterface class and D400CameraInterface class both provide implementations of this interface.
+The LegacyCameraInterface class works with the older realsense cameras and probably won't be very necessary moving forward.
+The D400CameraInterface class works with the new realsense2 cameras.
 
 The data-log class is used to collect test data and store it neatly in directories of binaries.
 It is run as follows:

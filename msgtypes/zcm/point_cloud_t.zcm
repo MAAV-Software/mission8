@@ -1,0 +1,7 @@
+struct point_cloud_t
+{
+    int64_t utime;
+
+    int32_t size;
+    point_t point_cloud[size];
+}

@@ -33,18 +33,20 @@ void toVehicle(ZCM& vehicle_zcm, ZCM& gcs_zcm)
 {
     MAAV_DEBUG("Setting up communications with vehicle");
     MessageForwarder forwarder(std::ref(vehicle_zcm));
-    gcs_zcm.subscribe(
-        NAV_RUNSTATE_CMD, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
-    gcs_zcm.subscribe(PLANNER_CMD, &MessageForwarder::forward_message<waypoint_t>, &forwarder);
-    gcs_zcm.subscribe(
-        CAMERA_DISC_CMD, &MessageForwarder::forward_message<camera_disc_t>, &forwarder);
-    gcs_zcm.subscribe(
-        CTRL_PARAMS_CHANNEL, &MessageForwarder::forward_message<ctrl_params_t>, &forwarder);
-    gcs_zcm.subscribe(IDLE_CHANNEL, &MessageForwarder::forward_message<idle_t>, &forwarder);
-    gcs_zcm.subscribe(START_VISION, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
+    // gcs_zcm.subscribe(
+    //     NAV_RUNSTATE_CMD, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
+    // gcs_zcm.subscribe(PLANNER_CMD, &MessageForwarder::forward_message<waypoint_t>, &forwarder);
+    // gcs_zcm.subscribe(
+    //     CAMERA_DISC_CMD, &MessageForwarder::forward_message<camera_disc_t>, &forwarder);
+    // gcs_zcm.subscribe(
+    //     CTRL_PARAMS_CHANNEL, &MessageForwarder::forward_message<ctrl_params_t>, &forwarder);
+    // gcs_zcm.subscribe(IDLE_CHANNEL, &MessageForwarder::forward_message<idle_t>, &forwarder);
+    // gcs_zcm.subscribe(START_VISION, &MessageForwarder::forward_message<nav_runstate_t>,
+    // &forwarder);
 
-    MAAV_DEBUG("Channels to vehicle:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s", NAV_RUNSTATE_CMD, PLANNER_CMD,
-        CAMERA_DISC_CMD, "DJI", START_VISION);
+    // MAAV_DEBUG("Channels to vehicle:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s", NAV_RUNSTATE_CMD,
+    // PLANNER_CMD,
+    //     CAMERA_DISC_CMD, "DJI", START_VISION);
 
     gcs_zcm.run();
 }
@@ -53,22 +55,22 @@ void toGCS(ZCM& vehicle_zcm, ZCM& gcs_zcm)
 {
     MAAV_DEBUG("Setting up communications with GCS");
     MessageForwarder forwarder(std::ref(gcs_zcm));
-    vehicle_zcm.subscribe(
-        NAV_RUNSTATE_STAT, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
-    vehicle_zcm.subscribe(
-        CTRL_HEARTBEAT_CHANNEL, &MessageForwarder::forward_message<waypoint_t>, &forwarder);
-    vehicle_zcm.subscribe(
-        CAMERA_DISC_STAT, &MessageForwarder::forward_message<camera_disc_t>, &forwarder);
-    vehicle_zcm.subscribe(
-        VISION_STAT, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
-    vehicle_zcm.subscribe(PLANNER_STAT, &MessageForwarder::forward_message<waypoint_t>, &forwarder);
-    vehicle_zcm.subscribe(STATE_CHANNEL, &MessageForwarder::forward_message<state_t>, &forwarder);
-    vehicle_zcm.subscribe(
-        OBST_HEARTBEAT_CHANNEL, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
+    // vehicle_zcm.subscribe(
+    //     NAV_RUNSTATE_STAT, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
+    // vehicle_zcm.subscribe(
+    //     CTRL_HEARTBEAT_CHANNEL, &MessageForwarder::forward_message<waypoint_t>, &forwarder);
+    // vehicle_zcm.subscribe(
+    //     CAMERA_DISC_STAT, &MessageForwarder::forward_message<camera_disc_t>, &forwarder);
+    // vehicle_zcm.subscribe(
+    //     VISION_STAT, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
+    // vehicle_zcm.subscribe(PLANNER_STAT, &MessageForwarder::forward_message<waypoint_t>,
+    // &forwarder); vehicle_zcm.subscribe(STATE_CHANNEL,
+    // &MessageForwarder::forward_message<state_t>, &forwarder); vehicle_zcm.subscribe(
+    //     OBST_HEARTBEAT_CHANNEL, &MessageForwarder::forward_message<nav_runstate_t>, &forwarder);
 
-    MAAV_DEBUG("Channels to GCS:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s", NAV_RUNSTATE_STAT,
-        CTRL_HEARTBEAT_CHANNEL, CAMERA_DISC_STAT, VISION_STAT, STATE_CHANNEL,
-        OBST_HEARTBEAT_CHANNEL);
+    // MAAV_DEBUG("Channels to GCS:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s", NAV_RUNSTATE_STAT,
+    //     CTRL_HEARTBEAT_CHANNEL, CAMERA_DISC_STAT, VISION_STAT, STATE_CHANNEL,
+    //     OBST_HEARTBEAT_CHANNEL);
 
     vehicle_zcm.run();
 }
