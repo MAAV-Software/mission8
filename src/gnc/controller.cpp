@@ -265,6 +265,11 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     // std::cout << "q: " << new_setpoint.q.w() << ' ' << new_setpoint.q.x() << ' '
     //           << new_setpoint.q.y() << ' ' << new_setpoint.q.z() << std::endl;
 
+    if (position_error.norm() < veh_params.setpoint_tol)
+    {
+        converged_on_waypoint = true;
+    }
+
     return new_setpoint;
 }
 

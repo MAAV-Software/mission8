@@ -70,17 +70,21 @@ int main(int argc, char** argv)
     {
         if (current_command == "path")
         {
-            try
-            {
-                path_file = YAML::LoadFile(gopt.getString("test-path"));
-                path = create_test_path(path_file);
-                zcm.publish(maav::PATH_CHANNEL, &path);
-            }
-            catch (...)
-            {
-                cout << "Path file not found\nProvide command line option \"-p <path-to-file>\"\n";
-                continue;
-            }
+            path_file = YAML::LoadFile(gopt.getString("test-path"));
+            path = create_test_path(path_file);
+            zcm.publish(maav::PATH_CHANNEL, &path);
+            // try
+            // {
+            //     path_file = YAML::LoadFile(gopt.getString("test-path"));
+            //     path = create_test_path(path_file);
+            //     zcm.publish(maav::PATH_CHANNEL, &path);
+            // }
+            // catch (...)
+            // {
+            //     cout << "Path file not found\nProvide command line option \"-p
+            //     <path-to-file>\"\n";
+            //     continue;
+            // }
         }
 
         else if (current_command == "clear")
@@ -159,6 +163,30 @@ int main(int argc, char** argv)
 *      Make sure that the waypoints in yaml are named
 *      sequentially with integer values starting at 0
 */
+// path_t create_test_path(const Node& path_file)
+// {
+//     path_t path;
+//     waypoint_t wpt;
+//     int waypoint_count = 0;
+//     string waypoint_key;
+
+//     const Node& path_node = path_file["path"];
+//     for (auto it = path_node.begin(); it != path_file["path"].end(); ++it)
+//     {
+//         waypoint_key = to_string(waypoint_count);
+//         wpt.pose[0] = path_node[waypoint_key][0].as<double>();
+//         wpt.pose[1] = path_node[waypoint_key][1].as<double>();
+//         wpt.pose[2] = path_node[waypoint_key][2].as<double>();
+//         wpt.pose[3] = path_node[waypoint_key][3].as<double>();
+//         path.waypoints.push_back(wpt);
+//         ++waypoint_count;
+//     }
+
+//     path.NUM_WAYPOINTS = waypoint_count;
+
+//     return path;
+// }
+
 path_t create_test_path(const Node& path_file)
 {
     path_t path;
@@ -169,11 +197,10 @@ path_t create_test_path(const Node& path_file)
     const Node& path_node = path_file["path"];
     for (auto it = path_node.begin(); it != path_file["path"].end(); ++it)
     {
-        waypoint_key = to_string(waypoint_count);
-        wpt.pose[0] = path_node[waypoint_key][0].as<double>();
-        wpt.pose[1] = path_node[waypoint_key][1].as<double>();
-        wpt.pose[2] = path_node[waypoint_key][2].as<double>();
-        wpt.pose[3] = path_node[waypoint_key][3].as<double>();
+        wpt.pose[0] = path_node[waypoint_count][0].as<double>();
+        wpt.pose[1] = path_node[waypoint_count][1].as<double>();
+        wpt.pose[2] = path_node[waypoint_count][2].as<double>();
+        wpt.pose[3] = path_node[waypoint_count][3].as<double>();
         path.waypoints.push_back(wpt);
         ++waypoint_count;
     }

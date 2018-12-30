@@ -1,11 +1,14 @@
 # Set test path for quad to run through
 # waypoint format is [x, y, z, heading]
-# write waypoints as a sequential list of integers
-#   to support reading them into a path in maav-controller
-#   skipping numbers or providing non integer values will
-#   cause the path to not be read properly
+# path is array of waypoints
 
 path:
-  0: [0, 0, -2, 0]
-  1: [0, 0, -5, 0]
-  2: [0, 0, -2, 0]
+  [
+  [0, 0, -2, 0],
+  [0, 0, -5, 0],
+  [0, 0, -2, 0],
+  [2, 2, -2, 45],
+  [-2, 2, -2, 180],
+  [2, -2, -3, -45],
+  [0, 0, -2, 0]
+  ]

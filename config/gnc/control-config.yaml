@@ -27,7 +27,7 @@ limits:
     pitch: [10, -10]
 
 # vehicle params that won't be tuned
-tol: 0.01 # convergence tolerance (norm of [x, y, z, yaw])
+tol: 0.1 # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
 sim: true        #true - control sim over udp, false - control pixhawk through usb
 sim-state: true  #true - state comes from sim, false - state comes from kalman filter
