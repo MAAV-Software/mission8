@@ -42,6 +42,8 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     while (next != end)
     {
         prediction_(prev, next);
+        // lidar_update_(*next);
+        planefit_update_(*next);
 
         if (enable_lidar) lidar_update_(*next);
         if (enable_planefit) planefit_update_(*next);

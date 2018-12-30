@@ -6,18 +6,24 @@
 #include <string>
 #include <thread>
 
+#include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
 
 #include <gnc/xbox-controller/gamepad.h>
-#include <yaml-cpp/yaml.h>
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/MsgChannels.hpp>
+#include <common/messages/control_commands_t.hpp>
 #include <common/messages/ctrl_params_t.hpp>
+#include <common/messages/killswitch_t.hpp>
+#include <common/messages/localization_status_t.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
+#include <gnc/State.hpp>
+#include <gnc/State.hpp>
 #include <gnc/controller.hpp>
+#include <gnc/utils/LoadParameters.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
 using maav::STATE_CHANNEL;
@@ -42,39 +48,28 @@ using std::make_pair;
 using std::string;
 using maav::gnc::Waypoint;
 using std::to_string;
+using std::this_thread::sleep_for;
+using maav::gnc::State;
+using maav::gnc::utils::LoadParametersFromYAML;
+
+XboxController read_controller_input();
+State ems_state(const OffboardControl& offboard_control);
 
 /*
- * Temporary Operating Procedure (to start work on controller)
- * ================================================================
- * 1. Start simulator and wait for px4 to initialize
- * 2. run "./maav-controller" - the controller will try to
- * 	  establish offboard control.  If it fails, restart it and
- * 	  it should work.
- * Optional: provide flag "-x" to use xbox controller instead of
- *    manually typing in waypoints.
- * 3. The program will indicate that offboard control has been
- *    established and armed.
- * 4. If the pixhawk does not receive setpoint commands (thrust,
- *    attitude, angle rates) at a rate of >2 Hz it will enter failsafe
- *    mode and switch out of offboard control.  It is currently the
- *    responsibility of the controller class to provide these inputs
- *    at a sufficient rate.
-*/
-
-ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file);
-Controller::Parameters load_vehicle_params(const Node& config);
-XboxController read_controller_input();
-
+ *      Signal handling variable/function
+ */
 std::atomic<bool> KILL{false};
 void sig_handler(int) { KILL = true; }
-Waypoint SETPOINT = Waypoint{Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0};
-std::atomic<bool> MANUAL_SETPOINT_INPUT{true};
-void get_setpoint(Controller*);
-path_t create_test_path(const YAML::Node& path_file);
+struct Commands
+{
+    bool gains = false;
+    bool takeoff = false;
+    bool land = false;
+};
 
 int main(int argc, char** argv)
 {
-    std::cout << "Controller Driver" << std::endl;
+    cout << "Controller Driver" << std::endl;
 
     /*
      *      Signal handlers
@@ -92,9 +87,6 @@ int main(int argc, char** argv)
     gopt.addString(
         'c', "config", "../config/gnc/control-config.yaml", "Path to YAML control config");
     gopt.addBool('x', "xbox360", false, "Use xbox controller for control");
-    gopt.addBool(
-        's', "command-line-input", true, "Manually input waypoints using command line interface");
-    gopt.addString('p', "test-path", "../config/gnc/test-path.yaml", "Read custom test path");
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
         std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -102,8 +94,17 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    YAML::Node gains_config = YAML::LoadFile(gopt.getString("config"));
-    YAML::Node path_file = YAML::LoadFile(gopt.getString("test-path"));
+    YAML::Node control_config;
+    try
+    {
+        control_config = YAML::LoadFile(gopt.getString("config"));
+    }
+    catch (...)
+    {
+        cout << "Could not find config file\nPlease provide command line option \"-c "
+                "<path-to-config>\"\n";
+        return 2;
+    }
 
     /*
      *      Start zcm and subscribe to proper channels
@@ -113,8 +114,11 @@ int main(int argc, char** argv)
     ZCMHandler<path_t> path_handler;
     ZCMHandler<state_t> state_handler;
     ZCMHandler<ctrl_params_t> gains_handler;
+    ZCMHandler<control_commands_t> command_handler;
+    ZCMHandler<killswitch_t> killswitch_handler;
+    ZCMHandler<localization_status_t> localizer_status_handler;
 
-    if (gains_config["sim-state"].as<bool>())
+    if (control_config["sim-state"].as<bool>())
     {
         zcm.subscribe(SIM_STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
         cout << "Reading state from simulator\n";
@@ -126,14 +130,40 @@ int main(int argc, char** argv)
     }
     zcm.subscribe(PATH_CHANNEL, &ZCMHandler<path_t>::recv, &path_handler);
     zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
+    zcm.subscribe(
+        maav::CONTROL_COMMANDS_CHANNEL, &ZCMHandler<control_commands_t>::recv, &command_handler);
+    zcm.subscribe(maav::LOCALIZATION_STATUS_CHANNEL, &ZCMHandler<localization_status_t>::recv,
+        &localizer_status_handler);
+    zcm.subscribe(maav::KILLSWITCH_CHANNEL, &ZCMHandler<killswitch_t>::recv, &killswitch_handler);
 
     /*
      *      Initialize controller class and offboard control
+     *      construct offboard controller for sim or irl
      */
-    Controller controller;
-    controller.set_control_params(
-        load_gains_from_yaml(gains_config), load_vehicle_params(gains_config));
-    OffboardControl offboard_control(CommunicationType::UDP);
+    Controller controller;  // sets control state to standby
+    controller.set_control_params(LoadParametersFromYAML(control_config));
+    CommunicationType com_type;
+    if (control_config["sim"].as<bool>())
+    {
+        com_type = CommunicationType::UDP;
+        cout << "Connecting to px4 through UDP (simulator)\n";
+    }
+    else
+    {
+        com_type = CommunicationType::UART;
+        cout << "Connecting to px4 through USB fd: " << control_config["uart-path"].as<string>()
+             << '\n';
+    }
+    OffboardControl offboard_control(com_type, control_config["uart-path"].as<string>());
+    try
+    {
+        offboard_control.init(KILL);  // pass kill variable into init so loops can exit on signal
+    }
+    catch (...)
+    {
+        // Sig handlers in offboard control throw
+        KILL = true;
+    }
     InnerLoopSetpoint inner_loop_setpoint;
 
     /*
@@ -144,34 +174,30 @@ int main(int argc, char** argv)
     auto timeout = system_clock::now() + 10s;
     while (!KILL && counter < 2 && system_clock::now() < timeout)
     {
+        offboard_control.set_attitude_target(InnerLoopSetpoint::zero());
         if (state_handler.ready())
         {
             const auto msg = state_handler.msg();
             state_handler.pop();
-            controller.run(ConvertState(msg));
             ++counter;
         }
     }
-    cout << "Initial state established\n";
+    if (counter > 1)
+        cout << "Initial state established\n";
+    else
+    {
+        cout << "Unable to establish state of vehicle\n";
+        return 3;
+    }
 
     /*
-     *      Read command line control input
-     *      and set control as either through cli
-     *      or xbox controller
+     *      Set control to xbox controller
      */
-    path_t test_path = create_test_path(path_file);
-    ;
-    thread tid;
     const bool xbox_input = gopt.getBool("xbox360");
-    const bool setpoint_input = gopt.getBool("command-line-input");
     if (xbox_input)
     {
         GamepadInit();
-    }
-    else if (setpoint_input)
-    {
-        controller.set_control_state(ControlState::TEST_WAYPOINT);
-        tid = thread(std::bind(get_setpoint, &controller));
+        controller.set_control_state(ControlState::XBOX_CONTROL);
     }
 
     /*
@@ -180,25 +206,25 @@ int main(int argc, char** argv)
      *      Checks for messages, runs controller as appropriate
      *      and updates inner loop setpoint on px4
      */
+    State current_state;
+    Commands commands;
+    State ems_state;
     while (!KILL)
     {
-        // Command line input logic (with global variables...#sorrynotsorry)
-        if (MANUAL_SETPOINT_INPUT)
+        // Killswitch
+        if (killswitch_handler.ready())
         {
-            if (controller.get_control_state() != ControlState::TEST_WAYPOINT)
+            if (killswitch_handler.msg().kill)
             {
-                controller.set_control_state(ControlState::TEST_WAYPOINT);
+                controller.set_control_state(ControlState::KILLSWITCH);
             }
-        }
-        else
-        {
-            if (controller.get_control_state() != ControlState::TEST_PATH)
+            else
             {
-                controller.set_control_state(ControlState::TEST_PATH);
-                controller.set_path(test_path);
+                killswitch_handler.pop();  // pop false message
             }
         }
 
+        // Gains
         if (gains_handler.ready())
         {
             const auto msg = gains_handler.msg();
@@ -206,176 +232,177 @@ int main(int argc, char** argv)
             controller.set_control_params(msg);
         }
 
+        // Path
         if (path_handler.ready())
         {
-            controller.set_path(path_handler.msg());
+            if (!path_handler.msg().waypoints.empty())
+            {
+                cout << "Path received\n";
+                controller.set_path(path_handler.msg());
+                if (controller.get_control_state() == ControlState::STANDBY)
+                {
+                    controller.set_control_state(ControlState::ARMING);
+                }
+            }
             path_handler.pop();
-            // TODO: save path, pass waypoints sequentially to set_target when waiting for new
-            // path!!!
         }
 
+        // State
         if (state_handler.ready())
         {
-            // What happens when states come in faster than this loop runs?
-            // What happens when states DONT come in at all?
             const auto msg = state_handler.msg();
             state_handler.pop();
-            if (xbox_input)
-                inner_loop_setpoint = controller.run(read_controller_input(), ConvertState(msg));
-            else
-                inner_loop_setpoint = controller.run(ConvertState(msg));
+            controller.add_state(ConvertState(msg));
         }
 
-        // Continues setting the same inner loop setpoint even if there is no input from the
-        // controller
-        offboard_control.set_attitude_target(inner_loop_setpoint);
-        std::this_thread::sleep_for(1ms);
-    }
-
-    if (setpoint_input) tid.join();
-    zcm.stop();
-}
-
-/*
- *      Reads vehicle and control params from yaml
- */
-ctrl_params_t load_gains_from_yaml(const YAML::Node& config_file)
-{
-    ctrl_params_t gains;
-
-    const YAML::Node& posGains = config_file["pid-gains"]["pos-ctrl"];
-
-    gains.value[0].p = posGains["x"][0].as<double>();
-    gains.value[0].i = posGains["x"][1].as<double>();
-    gains.value[0].d = posGains["x"][2].as<double>();
-
-    gains.value[1].p = posGains["y"][0].as<double>();
-    gains.value[1].i = posGains["y"][1].as<double>();
-    gains.value[1].d = posGains["y"][2].as<double>();
-
-    gains.value[2].p = posGains["z"][0].as<double>();
-    gains.value[2].i = posGains["z"][1].as<double>();
-    gains.value[2].d = posGains["z"][2].as<double>();
-
-    gains.value[3].p = posGains["yaw"][0].as<double>();
-    gains.value[3].i = posGains["yaw"][1].as<double>();
-    gains.value[3].d = posGains["yaw"][2].as<double>();
-
-    const YAML::Node& rateGains = config_file["pid-gains"]["rate-ctrl"];
-    gains.rate[0].p = rateGains["x"][0].as<double>();
-    gains.rate[0].i = rateGains["x"][1].as<double>();
-    gains.rate[0].d = rateGains["x"][2].as<double>();
-
-    gains.rate[1].p = rateGains["y"][0].as<double>();
-    gains.rate[1].i = rateGains["y"][1].as<double>();
-    gains.rate[1].d = rateGains["y"][2].as<double>();
-
-    gains.rate[2].p = rateGains["z"][0].as<double>();
-    gains.rate[2].i = rateGains["z"][1].as<double>();
-    gains.rate[2].d = rateGains["z"][2].as<double>();
-
-    return gains;
-}
-
-Controller::Parameters load_vehicle_params(const Node& config)
-{
-    Controller::Parameters params;
-
-    params.mass = config["mass"].as<double>();
-    params.setpoint_tol = config["tol"].as<double>();
-    params.min_F_norm = config["min-fnorm"].as<double>();
-    params.thrust_limits = make_pair<double, double>(1, config["min-thrust"].as<double>());
-
-    constexpr double deg2rad = M_PI / 180.0;
-
-    const Node& rateNode = config["limits"]["rate"];
-    params.rate_limits[0] = make_pair(rateNode["x"][0].as<double>(), rateNode["x"][1].as<double>());
-    params.rate_limits[1] = make_pair(rateNode["y"][0].as<double>(), rateNode["y"][1].as<double>());
-    params.rate_limits[2] = make_pair(rateNode["z"][0].as<double>(), rateNode["z"][1].as<double>());
-    params.rate_limits[3] =
-        make_pair(rateNode["yaw"][0].as<double>(), rateNode["yaw"][1].as<double>());
-
-    const Node& accelNode = config["limits"]["accel"];
-    params.accel_limits[0] =
-        make_pair(accelNode["x"][0].as<double>(), accelNode["x"][1].as<double>());
-    params.accel_limits[1] =
-        make_pair(accelNode["y"][0].as<double>(), accelNode["y"][1].as<double>());
-    params.accel_limits[2] =
-        make_pair(accelNode["z"][0].as<double>(), accelNode["z"][1].as<double>());
-
-    const Node& angNode = config["limits"]["angle"];
-    params.angle_limits[0] = make_pair(
-        angNode["roll"][0].as<double>() * deg2rad, angNode["roll"][1].as<double>() * deg2rad);
-    params.angle_limits[1] = make_pair(
-        angNode["pitch"][0].as<double>() * deg2rad, angNode["pitch"][1].as<double>() * deg2rad);
-
-    return params;
-}
-
-/*
- *	    Test path for testing tests
- *      Reads from yaml file (path can be provided)
- *      Make sure that the waypoints in yaml are named
- *      sequentially with integer values starting at 0
- */
-path_t create_test_path(const Node& path_file)
-{
-    path_t path;
-    waypoint_t wpt;
-    int waypoint_count = 0;
-    string waypoint_key;
-
-    const Node& path_node = path_file["path"];
-    for (auto it = path_node.begin(); it != path_file["path"].end(); ++it)
-    {
-        waypoint_key = to_string(waypoint_count);
-        wpt.pose[0] = path_node[waypoint_key][0].as<double>();
-        wpt.pose[1] = path_node[waypoint_key][1].as<double>();
-        wpt.pose[2] = path_node[waypoint_key][2].as<double>();
-        wpt.pose[3] = path_node[waypoint_key][3].as<double>();
-        path.waypoints.push_back(wpt);
-        ++waypoint_count;
-    }
-
-    path.NUM_WAYPOINTS = waypoint_count;
-
-    return path;
-}
-
-// Function for testing altitude controller, intent
-// is to remove when no longer needed for testing.
-void get_setpoint(Controller* controller)
-{
-    cout << "Enter \">> test\" to run test path\n";
-    cout << "  <or>\n";
-    cout << "Enter wayoints (x,y,z,yaw)\n";
-    double a, b, c, d;
-    string command;
-    while (!KILL)
-    {
-        cout << ">> ";
-        cin >> command;
-        if (command == "test")
+        // Commands, more commands to be added
+        if (command_handler.ready())
         {
-            MANUAL_SETPOINT_INPUT = false;
-        }
-        else
-        {
-            try
+            cout << "Command received\n";
+            if (command_handler.msg().takeoff)
             {
-                a = std::stof(command);
+                commands.takeoff = true;
             }
-            catch (...)
+            if (command_handler.msg().land)
             {
-                cout << "INVALID INPUT\n";
+                commands.land = true;
+            }
+            if (command_handler.msg().gains)
+            {
+                try
+                {
+                    control_config = YAML::LoadFile(gopt.getString("config"));
+                    controller.set_control_params(LoadParametersFromYAML(control_config));
+                }
+                catch (...)
+                {
+                    cout << "Could not find config file\nPlease provide command line option \"-c "
+                            "<path-to-config>\"\n";
+                }
+            }
+
+            command_handler.pop();
+        }
+
+        switch (controller.get_control_state())
+        {
+            case ControlState::STANDBY:
+                inner_loop_setpoint = InnerLoopSetpoint::zero();
+                if (commands.takeoff)
+                {
+                    commands.takeoff = false;
+                    controller.set_control_state(ControlState::ARMING);
+                    continue;
+                }
+                break;
+
+            case ControlState::XBOX_CONTROL:
+                assert(false && "xbox control not implemented");
+                break;
+
+            case ControlState::TAKEOFF:
+                inner_loop_setpoint =
+                    controller.takeoff(control_config["takeoff-alt"].as<double>());
+                if (localizer_status_handler.ready() && !localizer_status_handler.msg().localized)
+                {
+                    controller.set_control_state(ControlState::EMS_LAND);
+                    continue;
+                }
+                if (commands.land)
+                {
+                    commands.land = false;
+                    controller.set_control_state(ControlState::LAND);
+                    continue;
+                }
+                if (controller.at_takeoff_alt())
+                {
+                    controller.set_control_state(ControlState::FLIGHT);
+                    continue;
+                }
+                break;
+
+            case ControlState::LAND:
+                if (controller.landing_detected())
+                {
+                    controller.set_control_state(ControlState::DISARMING);
+                    continue;
+                }
+
+                if (localizer_status_handler.ready() && !localizer_status_handler.msg().localized)
+                {
+                    controller.set_control_state(ControlState::EMS_LAND);
+                    continue;
+                }
+
+                inner_loop_setpoint = controller.land();
+
+                break;
+
+            case ControlState::EMS_LAND:
+                ems_state.velocity()(2) = offboard_control.get_ems_state().z_velocity;
+                ems_state.setTime(offboard_control.get_ems_state().usec);
+                controller.add_ems_state(ems_state);
+                inner_loop_setpoint = controller.ems_land();
+                if (controller.landing_detected())
+                {
+                    controller.set_control_state(ControlState::DISARMING);
+                }
+                break;
+
+            case ControlState::FLIGHT:
+                // If localization is lost, set EMS_LAND
+                if (localizer_status_handler.ready() && !localizer_status_handler.msg().localized)
+                {
+                    controller.set_control_state(ControlState::EMS_LAND);
+                    continue;
+                }
+                else if (commands.land)
+                {
+                    commands.land = false;
+                    controller.set_control_state(ControlState::LAND);
+                    continue;
+                }
+                else
+                {
+                    inner_loop_setpoint = controller.flight();
+                }
+                break;
+
+            case ControlState::ARMING:
+                cout << "Pixhawk arming...\n";
+                while (!KILL && !offboard_control.is_armed()) offboard_control.arm();
+                cout << "Pixhawk armed\n";
+                controller.set_control_state(ControlState::TAKEOFF);
+                break;
+
+            case ControlState::DISARMING:
+                cout << "Pixhawk disarming...\n";
+                while (!KILL && offboard_control.is_armed()) offboard_control.disarm();
+                cout << "Pixhawk disarmed\n";
+                controller.set_control_state(ControlState::STANDBY);
+                break;
+
+            case ControlState::KILLSWITCH:
+                inner_loop_setpoint = InnerLoopSetpoint::zero();
+                offboard_control.set_attitude_target(inner_loop_setpoint);
+                sleep_for(1s);
+                while (offboard_control.is_armed() && !KILL) offboard_control.disarm();
+                KILL = true;
                 continue;
-            }
 
-            MANUAL_SETPOINT_INPUT = true;
-            cin >> b >> c >> d;
-            controller->set_current_target({Eigen::Vector3d(a, b, c), Eigen::Vector3d(0, 0, 0), d});
+            default:
+                assert(false);  // make sure all states get handled
+        }
+
+        // Dont perform actions iff kill set (a goto would probably be more useful than KILL)
+        if (!KILL)
+        {
+            offboard_control.set_attitude_target(inner_loop_setpoint);
+            sleep_for(1ms);
         }
     }
+
+    zcm.stop();
 }
 
 /*
@@ -400,4 +427,10 @@ XboxController read_controller_input()
     }
 
     return xbox_controller;
+}
+
+State ems_state(const OffboardControl& offboard_control)
+{
+    assert(false);
+    return State();
 }

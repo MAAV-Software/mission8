@@ -2,7 +2,9 @@ struct ctrl_params_t
 {
 	int64_t utime;
 	pid_gains_t value[4];
-	pid_gains_t rate[3];
+	pid_gains_t rate[4];
+	double roll_limits[2];
+	double pitch_limits[2];
 
 	const int8_t X   = 0;
 	const int8_t Y   = 1;

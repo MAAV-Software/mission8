@@ -75,7 +75,7 @@ public:
     State& operator+=(const ErrorStateVector& e_state);
 
     /**
-     * @brief Takes teh difference between two states in the tangent space
+     * @brief Takes the difference between two states in the tangent space
      *
      * @param other Other state to take the difference
      * @return A small change between two states represented in the tangent space

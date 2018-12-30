@@ -3,32 +3,32 @@ pid-gains:
   pos-ctrl:
     x: [1, 0, 0]
     y: [1, 0, 0]
-    z: [3, 0, 0]
-    yaw: [0.5, 0, 0.001]
+    z: [1, 0, 0.5]
+    yaw: [1, 0, 0]
   rate-ctrl:
-    x: [0.4, 0.00002, 0.2]
-    y: [0.4, 0.00002, 0.2]
-    z: [1, 0.001, -0.05]
+    x: [0.3, 0.0004, 0.05]
+    y: [0.3, 0.0004, 0.05]
+    z: [0.5, 0.0004, 0.008]
+    ems-z: [0.1, 0, -0.05]
 
 # rate saturation limits for each position controller are in the format of [upper, lower]
 limits:
   rate: # limits are m/s for x, y, z and rad/s for yaw
-    x: [3, -3]
-    y: [3, -3]
+    x: [1, -1]
+    y: [1, -1]
     z: [0.5, -0.5]
     yaw: [1, -1]
   accel: # limits are m/s^2
     x: [5, -5]
     y: [5, -5]
-    z: [5, -5]
+    z: [1, -1]
   angle: # limits are in degrees
-    roll: [5, -5]
-    pitch: [5, -5]
+    roll: [10, -10]
+    pitch: [10, -10]
 
 # vehicle params that won't be tuned
-mass: 3.0 # kg
 tol: 0.01 # convergence tolerance (norm of [x, y, z, yaw])
-min-fnorm: 0.001 # minimum allowed body-force norm (L2) on the vehicle: || [Fx, Fy, Fz] ||
 uart-path: "/dev/ttyACM1"
-min-thrust: 0
-sim-state: false #true- state comes from sim, false- state comes from kalman filter
+sim: true        #true - control sim over udp, false - control pixhawk through usb
+sim-state: true  #true - state comes from sim, false - state comes from kalman filter
+takeoff-alt: 1 #meters

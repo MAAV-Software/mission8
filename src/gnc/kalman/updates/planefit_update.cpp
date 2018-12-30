@@ -28,13 +28,14 @@ SensorVector& PFSensorMeasurement::readings() { return readings_; }
 PlaneFitUpdate::PlaneFitUpdate(YAML::Node config) : BaseUpdate(config["planefit"]) {}
 PFSensorMeasurement PlaneFitUpdate::predicted(const State& state)
 {
-    const Eigen::Vector3d euler = state.attitude().unit_quaternion().toRotationMatrix().eulerAngles(2,1,0);
+    const Eigen::Vector3d euler =
+        state.attitude().unit_quaternion().toRotationMatrix().eulerAngles(2, 1, 0);
     double roll = euler[2];
-    double pitch = euler[1];   
-    double height_z = state.position().z();   
-    double z_dot = state.velocity().z();       
+    double pitch = euler[1];
+    double height_z = state.position().z();
+    double z_dot = state.velocity().z();
 
-    PFSensorMeasurement predicted_measurement;    
+    PFSensorMeasurement predicted_measurement;
     predicted_measurement.readings()(0) = roll;
     predicted_measurement.readings()(1) = pitch;
     predicted_measurement.readings()(2) = height_z;
@@ -56,8 +57,7 @@ PFSensorMeasurement PlaneFitUpdate::measured(const measurements::Measurement& me
 void PlaneFitUpdate::operator()(History::Snapshot& snapshot)
 {
     // Check the validity of the plane_fit measurements
-    if (snapshot.measurement.plane_fit) 
-        correct(snapshot);
+    if (snapshot.measurement.plane_fit) correct(snapshot);
 }
 
 }  // namespace kalman

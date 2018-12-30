@@ -18,7 +18,7 @@ namespace kalman
  */
 class PFSensorMeasurement
 {
-    public:
+public:
     /**
      * Necessary definitions
      */
@@ -85,17 +85,17 @@ class PFSensorMeasurement
         return gaussian;
     }
 
-    private:
+private:
     SensorVector readings_;
     CovarianceMatrix covariance_;
 };
 
-
 class PlaneFitUpdate : public BaseUpdate<PFSensorMeasurement>
 {
-    public:
+public:
     /**
-     *  @param config This yaml node must have a "planefit" key with unscented transform parameters and
+     *  @param config This yaml node must have a "planefit" key with unscented transform parameters
+     * and
      * a sensor covariance matrix, R
      */
     PlaneFitUpdate(YAML::Node config);
@@ -120,7 +120,7 @@ class PlaneFitUpdate : public BaseUpdate<PFSensorMeasurement>
      */
     void operator()(History::Snapshot& snapshot);
 
-    private:
+private:
     using BaseUpdate<PFSensorMeasurement>::correct;
 };
 }  // namespace kalman

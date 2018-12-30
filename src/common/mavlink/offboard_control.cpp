@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cassert>
 #include <chrono>
+#include <csignal>
 #include <iostream>
 #include <mutex>
 
@@ -16,19 +17,23 @@ namespace maav
 {
 namespace mavlink
 {
-std::atomic<bool> KILL{false};
+std::atomic<bool> END{false};
 
 // Creates thread and passing read_messages loop into thread
 OffboardControl::OffboardControl(const CommunicationType com_type, const std::string& port_path)
-    : com_port(com_type, port_path)
+    : com_port(com_type, port_path), alt_filter(0.2), vel_filter(0.2)
+{
+}
+
+void OffboardControl::init(std::atomic<bool>& kill)
 {
     offboard_control_active = false;
 
     // Read messages until we get a heartbeat
     cout << "Checking for heartbeat...\n";
-    while (!read_message())
+    while (!read_message() && !kill)
         ;
-
+    if (kill) throw 1;
     cout << "Heartbeat received\n";
 
     // Start read thread and heartbeat (TODO: datalink like Qgroundcontrol)
@@ -39,39 +44,27 @@ OffboardControl::OffboardControl(const CommunicationType com_type, const std::st
     hold_zero_attitude(1);
 
     cout << "Requesting offboard control...\n";
-    if (activate_offboard_control())
-    {
-        cout << "Established offboard control on pixhawk\n";
-    }
+    while (!activate_offboard_control() && !kill)
+        ;
+    if (kill) throw 1;
+    if (offboard_control_active)
+        cout << "Established offboard control on Pixhawk\n";
     else
-    {
-        cout << "Unable to establish off board control!\n";
-    }
+        cout << "Unable to establish offboard control\n";
 
     // Spam more setpoints
     hold_zero_attitude(1);
-
-    // Arm quad, this is for real.
-    cout << "Arming system\n";
-    if (arm())
-    {
-        cout << "System armed\n";
-    }
-    else
-    {
-        cout << "System failed to arm\n";
-    }
 }
 
 OffboardControl::~OffboardControl()
 {
-    KILL = true;
-    read_tid.join();
+    END = true;
+    if (read_tid.joinable()) read_tid.join();
 }
 
 void OffboardControl::read_thread()
 {
-    while (!KILL)
+    while (!END)
     {
         read_message();  // read incomming messages
 
@@ -98,12 +91,27 @@ bool OffboardControl::read_message()
                 case MAVLINK_MSG_ID_HEARTBEAT:
                     mavlink_msg_heartbeat_decode(&message, &(current_messages_in.heartbeat));
                     check_offboard_control();  // check each heartbeat
-                    // TODO: handle loss of heartbeat
                     heartbeat_received = true;
                     break;
                 case MAVLINK_MSG_ID_SYSTEM_TIME:
                     mavlink_msg_system_time_decode(&message, &(current_messages_in.system_time));
                     ping(current_messages_in.system_time.time_boot_ms * 1000);  // convert to us
+                    break;
+                case MAVLINK_MSG_ID_ALTITUDE:
+                    altitude_last = alt_filter.getState();
+                    usec_last = ems_state.usec;
+                    z_velocity_last = ems_state.z_velocity;
+
+                    mavlink_msg_altitude_decode(&message, &(current_messages_in.altitude));
+                    ems_state.usec = current_messages_in.altitude.time_usec;
+                    alt_filter.run(current_messages_in.altitude.altitude_monotonic);
+
+                    dt = static_cast<double>(ems_state.usec - usec_last) / 1.e6;
+
+                    vel_filter.run(-1 * (alt_filter.getState() - altitude_last) / dt);
+                    ems_state.z_velocity = vel_filter.getState();
+                    // cout << std::fixed <<  alt_filter.getState() << '\t' << ems_state.z_velocity
+                    // << '\n';
                     break;
                 default:
                     break;
@@ -121,13 +129,15 @@ void OffboardControl::write_message(const mavlink_message_t& message)
     com_port.write_message(message);
 }
 
-void OffboardControl::check_offboard_control()
+bool OffboardControl::check_offboard_control()
 {
     if (current_messages_in.heartbeat.custom_mode != custom_mode && offboard_control_active)
     {
         offboard_control_active = false;
         cout << "Lost offboard control on pixhawk\n";
+        return false;
     }
+    return true;
 }
 
 void OffboardControl::hold_zero_attitude(const uint64_t seconds)
@@ -135,7 +145,6 @@ void OffboardControl::hold_zero_attitude(const uint64_t seconds)
     for (uint64_t i = 0; i < 100 * seconds; ++i)
     {
         set_attitude_target(InnerLoopSetpoint());
-        ;
         sleep_for(10ms);
     }
 }
@@ -183,57 +192,51 @@ bool OffboardControl::activate_offboard_control()
     mavlink_message_t message;
     mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
-    auto timeout = system_clock::now() + 10s;
-    while (!offboard_control_active)
+    set_attitude_target(InnerLoopSetpoint());
+    sleep_for(100ms);
+
+    write_message(message);
+
+    sleep_for(100ms);
+
+    if (current_messages_in.heartbeat.custom_mode == custom_mode)
     {
-        set_attitude_target(InnerLoopSetpoint());
-        sleep_for(100ms);
-
-        write_message(message);
-
-        sleep_for(100ms);
-
-        if (current_messages_in.heartbeat.custom_mode == custom_mode)
-        {
-            offboard_control_active = true;
-            break;
-        }
-
-        // Timeout
-        if (system_clock::now() > timeout)
-        {
-            cout << "Timeout establishing offboard control of pixhawk\n\n";
-            return false;
-        }
+        offboard_control_active = true;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
-bool OffboardControl::arm()
+bool OffboardControl::arm() { return arm_disarm(true); }
+bool OffboardControl::disarm() { return arm_disarm(false); }
+bool OffboardControl::arm_disarm(const bool arm)
 {
     mavlink_command_long_t command;
     command.command = MAV_CMD_COMPONENT_ARM_DISARM;
     command.target_system = system_id;
     command.target_component = autopilot_id;
     command.confirmation = 0;  // idk what this is doing
-    command.param1 = 1.;       // 1 arm, 0 disarm
+    if (arm)
+        command.param1 = 1.;  // 1 arm, 0 disarm
+    else
+        command.param1 = 0.;
 
     mavlink_message_t message;
     mavlink_msg_command_long_encode(system_id, companion_id, &message, &command);
 
-    auto timeout = system_clock::now() + 10s;
-    while (system_clock::now() < timeout)
+    write_message(message);
+    if (is_armed())
     {
-        write_message(message);
-        set_attitude_target(InnerLoopSetpoint());
-        if (current_messages_in.heartbeat.base_mode == armed_base_mode)
-        {
-            return true;
-        }
+        return true;
     }
 
     return false;
+}
+
+bool OffboardControl::is_armed()
+{
+    return current_messages_in.heartbeat.base_mode == armed_base_mode;
 }
 
 void OffboardControl::set_attitude_target(
@@ -261,11 +264,6 @@ void OffboardControl::set_attitude_target(
     write_message(message);
 }
 
-void OffboardControl::takeoff(const float takeoff_altitude)
-{
-    assert(false);
-    // NOTE: auto:takeoff requires gps, implement using height controller
-}
-
+const EmsState& OffboardControl::get_ems_state() { return ems_state; }
 }  // maav
 }  // gnc

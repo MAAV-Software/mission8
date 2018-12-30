@@ -44,6 +44,7 @@ target_link_libraries(maav-controller
         maav-msg
         maav-mavlink
         maav-gamepad
+        maav-math
 )
 
 add_executable(maav-estimator maav-estimator.cpp)
@@ -107,6 +108,23 @@ target_link_libraries(maav-imu
 )
 
 endif()
+
+
+add_executable(maav-control-input maav-control-input.cpp)
+
+target_link_libraries(maav-control-input
+        maav-gnc
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+)
+
+add_executable(maav-killswitch maav-killswitch.cpp)
+
+target_link_libraries(maav-killswitch
+        ${ZCM_LIBRARIES}
+        maav-msg        
+)
 
 if(EXISTS ${LIBREALSENSE_LIBRARIES})
 

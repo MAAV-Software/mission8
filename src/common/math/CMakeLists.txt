@@ -12,6 +12,7 @@ add_library(maav-math SHARED
     FORMapper.cpp
     math.cpp
     math_utils.cpp
+    LowPass.cpp
 )
 
 target_link_libraries(maav-math

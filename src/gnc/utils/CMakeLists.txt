@@ -6,4 +6,9 @@ include_directories(maav-gnc-utils
 
 add_library(maav-gnc-utils SHARED
     ZcmConversion.cpp
+    LoadParameters.cpp
+)
+
+target_link_libraries(maav-gnc-utils
+    maav-measurements
 )

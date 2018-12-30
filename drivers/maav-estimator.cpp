@@ -161,8 +161,10 @@ int main(int argc, char** argv)
 
         set.imu = convertImu(msg);
 
-        if(set.global_update && set.imu) {
-            std::cout << "Time difference: " << set.imu->time_usec - set.global_update->timeUSec() << std::endl;
+        if (set.global_update && set.imu)
+        {
+            std::cout << "Time difference: " << set.imu->time_usec - set.global_update->timeUSec()
+                      << std::endl;
         }
 
         std::cout << "Acc z: " << set.imu->acceleration.z() << std::endl;

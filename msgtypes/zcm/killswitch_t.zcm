@@ -1,0 +1,5 @@
+struct killswitch_t
+{
+    boolean kill;
+    int64_t utime;
+}

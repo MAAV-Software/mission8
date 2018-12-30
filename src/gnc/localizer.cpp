@@ -25,10 +25,7 @@ void Localizer::addImu(/*const measurements::ImuMeasurement& imu*/)
     // TODO: IMU frontend + On Manifold Preintegration + Bias
 }
 
-cv::Mat Localizer::getPose(){
-    return current_pose;
-}
-
+cv::Mat Localizer::getPose() { return current_pose; }
 map_t Localizer::getMap()
 {
     assert(false);

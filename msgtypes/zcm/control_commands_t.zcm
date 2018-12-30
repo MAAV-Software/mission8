@@ -1,0 +1,7 @@
+struct control_commands_t
+{
+    boolean takeoff;
+    boolean land;
+    boolean gains;
+    int64_t utime;
+}

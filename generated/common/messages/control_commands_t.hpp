@@ -6,32 +6,27 @@
 
 #include <zcm/zcm_coretypes.h>
 
-#ifndef __rgb_image_t_hpp__
-#define __rgb_image_t_hpp__
-
-#include <vector>
+#ifndef __control_commands_t_hpp__
+#define __control_commands_t_hpp__
 
 
-/**
- * ZCM type for an rgb image
- *
- */
-class rgb_image_t
+
+class control_commands_t
 {
     public:
-        int32_t    width;
+        int8_t     takeoff;
 
-        int32_t    height;
+        int8_t     land;
 
-        int32_t    size;
+        int8_t     gains;
 
-        std::vector< int8_t > raw_image;
+        int64_t    utime;
 
     public:
         /**
          * Destructs a message properly if anything inherits from it
         */
-        virtual ~rgb_image_t() {}
+        virtual ~control_commands_t() {}
 
         /**
          * Encode a message into binary form.
@@ -68,7 +63,7 @@ class rgb_image_t
         inline static int64_t getHash();
 
         /**
-         * Returns "rgb_image_t"
+         * Returns "control_commands_t"
          */
         inline static const char* getTypeName();
 
@@ -79,7 +74,7 @@ class rgb_image_t
         inline static uint64_t _computeHash(const __zcm_hash_ptr* p);
 };
 
-int rgb_image_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
+int control_commands_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
@@ -94,7 +89,7 @@ int rgb_image_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
     return pos;
 }
 
-int rgb_image_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
+int control_commands_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
 {
     uint32_t pos = 0;
     int thislen;
@@ -110,80 +105,75 @@ int rgb_image_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
     return pos;
 }
 
-uint32_t rgb_image_t::getEncodedSize() const
+uint32_t control_commands_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t rgb_image_t::getHash()
+int64_t control_commands_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* rgb_image_t::getTypeName()
+const char* control_commands_t::getTypeName()
 {
-    return "rgb_image_t";
+    return "control_commands_t";
 }
 
-int rgb_image_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
-{
-    uint32_t pos = 0;
-    int thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->height, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    if(this->size > 0) {
-        thislen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
-
-    return pos;
-}
-
-int rgb_image_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
+int control_commands_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
+    thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->takeoff, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->height, 1);
+    thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->land, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
+    thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->gains, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    if(this->size > 0) {
-        this->raw_image.resize(this->size);
-        thislen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
+    thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
 
     return pos;
 }
 
-uint32_t rgb_image_t::_getEncodedSizeNoHash() const
+int control_commands_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
+{
+    uint32_t pos = 0;
+    int thislen;
+
+    thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->takeoff, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->land, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->gains, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    return pos;
+}
+
+uint32_t control_commands_t::_getEncodedSizeNoHash() const
 {
     uint32_t enc_size = 0;
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, this->size);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __int64_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t rgb_image_t::_computeHash(const __zcm_hash_ptr*)
+uint64_t control_commands_t::_computeHash(const __zcm_hash_ptr*)
 {
-    uint64_t hash = (uint64_t)0x1831c9e8da569e67LL;
+    uint64_t hash = (uint64_t)0xf869effc7c60e24cLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

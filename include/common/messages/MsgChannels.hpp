@@ -37,6 +37,9 @@ extern const char* const PATH_PROGRESS_CHANNEL;             ///< The outer loop 
 extern const char* const NAV_RUNSTATE_CMD_CHANNEL;          ///< GCS mission state command to mission planner
 extern const char* const NAV_RUNSTATE_STAT_CHANNEL;         ///< Mission planner heartbeat
 extern const char* const IDLE_CHANNEL;                      ///< channel on which idle commands are broadcast
+extern const char* const CONTROL_COMMANDS_CHANNEL;      ///< controll commands to controller
+extern const char* const KILLSWITCH_CHANNEL;            ///< killswitch channel
+extern const char* const LOCALIZATION_STATUS_CHANNEL;   ///< status of localization
 // clang-format on
 }  // namespace maav
 

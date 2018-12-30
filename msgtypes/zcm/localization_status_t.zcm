@@ -1,0 +1,5 @@
+struct localization_status_t
+{
+    boolean localized;
+    int64_t utime;
+}

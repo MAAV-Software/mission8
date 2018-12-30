@@ -42,14 +42,15 @@ BOOST_AUTO_TEST_CASE(RunTest)
     planefit.height = -1;
     planefit.vertical_speed = 0;
     planefit.roll = 0;
-    planefit.pitch = 0; 
+    planefit.pitch = 0;
     planefit.time_usec = 1000;
     measurement.plane_fit = std::make_shared<measurements::PlaneFitMeasurement>(planefit);
 
     History::Snapshot snapshot(state, measurement);
 
-    PlaneFitUpdate update(YAML::Load(
-        "planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+    PlaneFitUpdate update(
+        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
     update(snapshot);
 }
 
@@ -77,16 +78,17 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    PlaneFitUpdate update(YAML::Load(
-        "planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+    PlaneFitUpdate update(
+        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
 
-    Eigen::Matrix<double,4,1> pred = update.predicted(state).readings(); 
-    Eigen::Matrix<double,4,1> correct_pred;
+    Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();
+    Eigen::Matrix<double, 4, 1> correct_pred;
     correct_pred(0) = 0;
     correct_pred(1) = 0;
     correct_pred(2) = -1;
-    correct_pred(3) = 0; 
-    BOOST_CHECK_LE((pred - correct_pred).norm(), 0.000001); 
+    correct_pred(3) = 0;
+    BOOST_CHECK_LE((pred - correct_pred).norm(), 0.000001);
 }
 
 BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
@@ -114,14 +116,15 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    PlaneFitUpdate update(YAML::Load(
-        "planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+    PlaneFitUpdate update(
+        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
 
-    Eigen::Matrix<double,4,1> pred = update.predicted(state).readings(); 
-    Eigen::Matrix<double,4,1> correct_pred;
+    Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();
+    Eigen::Matrix<double, 4, 1> correct_pred;
     correct_pred(0) = 0;
     correct_pred(1) = 0.383972;
     correct_pred(2) = -3.25;
-    correct_pred(3) = 0; 
-    BOOST_CHECK_LE((pred - correct_pred).norm(), 0.0005); 
+    correct_pred(3) = 0;
+    BOOST_CHECK_LE((pred - correct_pred).norm(), 0.0005);
 }
