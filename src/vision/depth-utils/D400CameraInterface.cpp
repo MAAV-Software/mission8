@@ -31,6 +31,7 @@ D400CameraInterface::D400CameraInterface(YAML::Node config)
     // get the scale
     auto sensor = selection.get_device().first<rs2::depth_sensor>();
     scale_ = sensor.get_depth_scale();
+    std::cout << "Camera scale: " << scale_ << std::endl;
 
     // get the extrinsics (very hacky)
     // rs2_error* memory = (rs2_error*)malloc(5000);
@@ -101,7 +102,7 @@ void D400CameraInterface::loadNext()
     {
         depth_image_ = static_cast<const uint16_t*>(depth_frame_.get_data());
     }
-    utime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+    utime_ = std::chrono::duration_cast<std::chrono::microseconds>(
                  std::chrono::system_clock::now().time_since_epoch())
                  .count();
 }
@@ -169,4 +170,4 @@ const void* D400CameraInterface::getRawDepth() const { return depth_image_; }
 const void* D400CameraInterface::getRawColor() const { return color_image_; }
 int D400CameraInterface::getStreamWidth() const { return width_; }
 int D400CameraInterface::getStreamHeight() const { return height_; }
-long long D400CameraInterface::getUTime() const { return utime_; }
+uint64_t D400CameraInterface::getUTime() const { return utime_; }

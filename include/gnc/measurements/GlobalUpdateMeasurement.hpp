@@ -1,7 +1,10 @@
-#pragma once
+#ifndef GLOBAL_UPDATE_MEASUREMENT
+#define GLOBAL_UPDATE_MEASUREMENT
+
+#include <ostream>
 
 #include <Eigen/Dense>
-#include "sophus/so3.hpp"
+#include <sophus/so3.hpp>
 
 #include <gnc/State.hpp>
 
@@ -96,6 +99,10 @@ private:
     CovarianceMatrix covariance_;
 };
 
+std::ostream& operator<<(std::ostream& os, const GlobalUpdateMeasurement& meas);
+
 }  // namespace measurements
 }  // namespace gnc
 }  // namespace maav
+
+#endif

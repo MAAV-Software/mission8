@@ -43,7 +43,8 @@ int main(int argc, char** argv)
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
     gopt.addString('c', "config", "../config/gnc/slam-config.yaml", "Path to config.");
-    gopt.addString('v', "vocab", "../config/gnc/ORBvoc.txt", "Path to vocab");
+    gopt.addString('b', "vocab", "../config/gnc/ORBvoc.txt", "Path to vocab");
+    gopt.addBool('v', "verbose", false, "Print extra info");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -53,16 +54,24 @@ int main(int argc, char** argv)
     }
 
     zcm::ZCM zcm{"ipc"};
-    zcm.start();
+
+    bool verbose = gopt.getBool("verbose");
+    if (verbose)
+    {
+        ios::sync_with_stdio(false);
+        std::cout << std::showpos << std::setprecision(4) << fixed;
+    }
 
     ZCMHandler<rgbd_image_t> image_handler;
     zcm.subscribe(maav::RGBD_FORWARD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
+
+    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 
     SlamInitializer slam_init;
     slam_init.vocabulary_file = gopt.getString("vocab");
     slam_init.config_file = gopt.getString("config");
     slam_init.sensor = System::eSensor::RGBD;
-    slam_init.use_viewer = true;
+    slam_init.use_viewer = config["use_viewer"].as<bool>();
 
     Localizer localizer(slam_init);
     cv::Mat pose;
@@ -71,6 +80,8 @@ int main(int argc, char** argv)
     std::cout << std::showpos << std::setprecision(4);
 
     global_update_t msg;
+
+    zcm.start();
 
     while (!KILL)
     {
@@ -81,6 +92,8 @@ int main(int argc, char** argv)
 
             cv::Mat rgb_image = convertRgb(img.rgb_image);
             cv::Mat depth_image = convertDepth(img.depth_image);
+            cv::rotate(rgb_image, rgb_image, cv::ROTATE_180);
+            cv::rotate(depth_image, depth_image, cv::ROTATE_180);
             localizer.addImage(rgb_image, depth_image, img.utime);
             pose = localizer.getPose();
 
@@ -101,13 +114,23 @@ int main(int argc, char** argv)
                 msg.attitude[0] = qatt.w();
                 msg.attitude[1] = -qatt.z();
                 msg.attitude[2] = -qatt.x();
-                msg.attitude[2] = -qatt.y();
+                msg.attitude[3] = -qatt.y();
 
                 msg.position[0] = -position.z();
                 msg.position[1] = -position.x();
                 msg.position[2] = -position.y();
 
                 msg.utime = img.utime;
+
+                if (verbose)
+                {
+                    std::cout << "Attitude Corr: " << msg.attitude[0] << ' ' << msg.attitude[1]
+                              << ' ' << msg.attitude[2] << ' ' << msg.attitude[3] << ' ' << '\n';
+                    std::cout << "Attitude UCor: " << qatt.w() << ' ' << qatt.x() << ' ' << qatt.y()
+                              << ' ' << qatt.z() << ' ' << '\n';
+                    std::cout << "Position: " << msg.position[0] << ' ' << msg.position[1] << ' '
+                              << msg.position[2] << ' ' << std::endl;
+                }
 
                 zcm.publish(GLOBAL_UPDATE_CHANNEL, &msg);
             }

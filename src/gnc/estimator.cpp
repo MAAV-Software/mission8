@@ -17,11 +17,25 @@ Estimator::Estimator(YAML::Node config)
       prediction_(config["prediction"]),
       lidar_update_(config["updates"]),
       planefit_update_(config["updates"]),
-      global_update_(config["updates"]),
-      enable_lidar(config["en_lidar"].as<bool>()),
-      enable_planefit(config["en_planefit"].as<bool>()),
-      enable_global(config["en_global"].as<bool>())
+      global_update_(config["updates"])
 {
+    std::cout << "Lidar Update:     ";
+    if (lidar_update_.enabled())
+        std::cout << "ENABLED\n";
+    else
+        std::cout << "DISABLED\n";
+
+    std::cout << "Plane Fit Update: ";
+    if (planefit_update_.enabled())
+        std::cout << "ENABLED\n";
+    else
+        std::cout << "DISABLED\n";
+
+    std::cout << "Global Update:    ";
+    if (global_update_.enabled())
+        std::cout << "ENABLED\n";
+    else
+        std::cout << "DISABLED\n";
 }
 
 const State& Estimator::add_measurement_set(const MeasurementSet& meas)
@@ -42,12 +56,10 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     while (next != end)
     {
         prediction_(prev, next);
-        // lidar_update_(*next);
-        planefit_update_(*next);
 
-        if (enable_lidar) lidar_update_(*next);
-        if (enable_planefit) planefit_update_(*next);
-        if (enable_global) global_update_(*next);
+        lidar_update_(*next);
+        planefit_update_(*next);
+        global_update_(*next);
 
         prev++;
         next++;

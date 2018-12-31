@@ -1,8 +1,10 @@
 #pragma once
 
+#include <yaml-cpp/node/detail/bool_type.h>
 #include <yaml-cpp/yaml.h>
 
 #include <common/utils/yaml_matrix.hpp>
+#include <gnc/kalman/Extrinsics.hpp>
 #include <gnc/kalman/history.hpp>
 #include <gnc/kalman/unscented_transform.hpp>
 #include <gnc/measurements/Measurement.hpp>
@@ -31,7 +33,10 @@ private:
     using KalmanGainMatrix = CrossCovarianceMatrix;
 
 public:
-    BaseUpdate(YAML::Node config) : unscented_transform_(config["UT"])
+    BaseUpdate(YAML::Node config)
+        : enabled_(config["enabled"].as<bool>()),
+          unscented_transform_(config["UT"]),
+          extrinsics_(config["extrinsics"])
     {
         Eigen::Matrix<double, TargetDoF, 1> R_diag =
             config["R"].as<Eigen::Matrix<double, TargetDoF, 1>>();
@@ -39,6 +44,7 @@ public:
         unscented_transform_.set_transformation(std::bind(&BaseUpdate::predicted, this, _1));
     }
 
+    bool enabled() { return enabled_; }
 protected:
     /**
      * Nonlinear h function.
@@ -51,14 +57,36 @@ protected:
      */
     virtual TargetSpace measured(const measurements::Measurement& meas) = 0;
 
+    // Outlier protection. Bad data association causes the filter to diverge quickly.
+    // Discard any measurement more than 3 standard deviations away from the estimate.
+    bool rejectOutlier(const typename TargetSpace::ErrorStateVector& residual,
+        const typename TargetSpace::CovarianceMatrix& covariance)
+    {
+        double mahl_dist = std::sqrt((residual.transpose() * covariance * residual)(0));
+        std::cout << "Mahl Dist: " << mahl_dist << std::endl;
+        // return mahl_dist > 0.01;
+        return false;
+    }
+
     /**
      * Updates the state based on the measurements in a snapshot.
      */
     void correct(History::Snapshot& snapshot)
     {
+        if (!enabled_) return;
+
         State& state = snapshot.state;
 
         const TargetSpace predicted_meas = unscented_transform_(state);
+        const TargetSpace measured_mes = measured(snapshot.measurement);
+        ErrorStateVector residual = measured_mes - predicted_meas;
+
+        // Reject outliers
+        if (rejectOutlier(residual, predicted_meas.covariance()))
+        {
+            std::cout << "WARNING: Outlier rejected." << std::endl;
+            return;
+        }
 
         // Extract necessary variables from the UT
         const typename UT::Weights& c_weights = unscented_transform_.c_weights();
@@ -74,15 +102,16 @@ protected:
                          (transformed_points[i] - predicted_meas).transpose();
         }
         const KalmanGainMatrix K = Sigma_x_z * S.inverse();
-        ErrorStateVector residual = measured(snapshot.measurement) - predicted_meas;
         // Update the state gaussian in place
         state += K * residual;
         state.covariance() -= K * S * K.transpose();
     }
 
 private:
+    bool enabled_;
     UT unscented_transform_;
     CovarianceMatrix R_;
+    Extrinsics extrinsics_;
 };
 }  // namespace kalman
 }  // namespace gnc

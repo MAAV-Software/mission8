@@ -52,14 +52,14 @@ Eigen::MatrixXf PlaneFitter::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     return Eigen::MatrixXf(0, 0);  // No coefficients, return failure
 }
 
-bool PlaneFitter::runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-    float &zdot, float &zdepth, float &roll, float &pitch)
+bool PlaneFitter::runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
+    float &zdepth, float &roll, float &pitch)
 {
     return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, junk_matrix_);
 }
 
-bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-    float &zdot, float &zdepth, float &roll, float &pitch, Eigen::MatrixXf &coefs)
+bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
+    float &zdepth, float &roll, float &pitch, Eigen::MatrixXf &coefs)
 {
     coefs = fitPlane(cloud);
     if (coefs.size() == 0)

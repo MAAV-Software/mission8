@@ -93,6 +93,7 @@ private:
     CovarianceMatrix covariance_;
 };
 
+std::ostream& operator<<(std::ostream& os, const LidarMeasurement& meas);
 }  // namespace measurements
 }  // namespace gnc
 }  // namespace maav

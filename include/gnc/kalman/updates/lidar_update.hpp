@@ -4,7 +4,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <gnc/kalman/base_update.hpp>
-#include <gnc/measurements/Lidar.hpp>
+#include <gnc/measurements/LidarMeasurement.hpp>
 
 namespace maav
 {

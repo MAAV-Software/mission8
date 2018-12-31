@@ -19,6 +19,8 @@ struct ImuMeasurement
     uint64_t time_usec;
 };
 
+std::ostream& operator<<(std::ostream& os, const ImuMeasurement& meas);
+
 }  // namespace measurements
 }  // namespace gnc
 }  // namespace maav

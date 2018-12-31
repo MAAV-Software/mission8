@@ -24,7 +24,6 @@ add_library(testhelper SHARED test_helpers.cpp)
 
 target_link_libraries(testhelper
         maav-state
-        maav-gnc
         maav-kalman
         ${ZCM_LIBRARIES})
 
@@ -50,7 +49,7 @@ foreach (testSrc ${TEST_SRCS})
     target_link_libraries(${testName} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
             maav-state
             maav-measurements
-            maav-gnc
+            maav-gnc-utils
             maav-kalman
             maav-control
             ${YAML_CPP_LIBRARY}

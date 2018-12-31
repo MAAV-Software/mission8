@@ -45,8 +45,9 @@ BOOST_AUTO_TEST_CASE(RunTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    LidarUpdate update(YAML::Load(
-        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+    LidarUpdate update(
+        YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
+                   "kappa: 0.0\n    R: [0.01]\n"));
     update(snapshot);
 }
 
@@ -75,8 +76,9 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    LidarUpdate update(YAML::Load(
-        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+    LidarUpdate update(
+        YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
+                   "kappa: 0.0\n    R: [0.01]\n"));
 
     double pred = update.predicted(state).distance()(0);
     double correct_pred = 1;
@@ -109,8 +111,9 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    LidarUpdate update(YAML::Load(
-        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+    LidarUpdate update(
+        YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
+                   "kappa: 0.0\n    R: [0.01]\n"));
 
     double pred = update.predicted(state).distance()(0);
     double correct_pred = 3.5052379137;
@@ -142,8 +145,9 @@ BOOST_AUTO_TEST_CASE(SensorMeasuredTest)
 
     History::Snapshot snapshot(state, measurement);
 
-    LidarUpdate update(YAML::Load(
-        "lidar:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    R: [0.01]\n"));
+    LidarUpdate update(
+        YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
+                   "kappa: 0.0\n    R: [0.01]\n"));
 
     double pred = update.measured(measurement).distance()(0);
     double correct_pred = 1;

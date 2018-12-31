@@ -29,7 +29,7 @@ const string CameraDriverHelper::FORMAT_IPC = "ipc";
 
 CameraDriverHelper::CameraDriverHelper(YAML::Node config, const string& zcm_format,
     const string& rgbd_channel_in, const string& pointcloud_channel_in, bool rgbd, bool pointcloud)
-    : public_rgbd_(rgbd),
+    : publish_rgbd_(rgbd),
       publish_pc_(pointcloud),
       zcm_{zcm_format},
       camera_(config),
@@ -60,7 +60,7 @@ void CameraDriverHelper::publish(CameraDriverHelper* cd_ptr)
     while (cd_ptr->isRunning())
     {
         cd_ptr->camera_.loadNext();
-        if (cd_ptr->public_rgbd_) rgbdPublish(cd_ptr);
+        if (cd_ptr->publish_rgbd_) rgbdPublish(cd_ptr);
         if (cd_ptr->publish_pc_) pointcloudPublish(cd_ptr);
     }
 }

@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_CASE(RunTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+                   " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
     update(snapshot);
 }
@@ -79,7 +80,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+                   " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
 
     Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();
@@ -117,7 +119,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    "
+        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+                   " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
 
     Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();

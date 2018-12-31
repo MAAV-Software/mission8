@@ -163,8 +163,8 @@ std::shared_ptr<GlobalUpdateMeasurement> convertGlobalUpdate(const global_update
 
     global_update->position() = {
         zcm_global.position[0], zcm_global.position[1], zcm_global.position[2]};
-    global_update->attitude().setQuaternion({zcm_global.attitude[0], zcm_global.attitude[1],
-        zcm_global.attitude[2], zcm_global.attitude[3]});
+    global_update->attitude().setQuaternion(Eigen::Quaterniond(zcm_global.attitude[0],
+        zcm_global.attitude[1], zcm_global.attitude[2], zcm_global.attitude[3]));
 
     return global_update;
 }

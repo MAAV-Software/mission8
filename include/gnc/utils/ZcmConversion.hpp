@@ -11,10 +11,10 @@
 #include <common/messages/state_t.hpp>
 #include <common/messages/waypoint_t.hpp>
 #include <gnc/State.hpp>
-#include <gnc/measurements/GlobalUpdate.hpp>
-#include <gnc/measurements/Imu.hpp>
-#include <gnc/measurements/Lidar.hpp>
-#include <gnc/measurements/PlaneFit.hpp>
+#include <gnc/measurements/GlobalUpdateMeasurement.hpp>
+#include <gnc/measurements/ImuMeasurement.hpp>
+#include <gnc/measurements/LidarMeasurement.hpp>
+#include <gnc/measurements/PlaneFitMeasurement.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 namespace maav
 {

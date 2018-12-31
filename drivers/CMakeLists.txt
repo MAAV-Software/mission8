@@ -28,7 +28,10 @@ if(BUILD_GNC)
 add_executable(maav-planner maav-guidance.cpp)
 
 target_link_libraries(maav-planner
-        maav-gnc
+        maav-guidance
+        maav-gnc-utils
+        maav-measurements
+        ${YAMLCPP_LIBRARY}
         ${ZCM_LIBRARIES}
         maav-utils
         maav-msg
@@ -37,7 +40,9 @@ target_link_libraries(maav-planner
 add_executable(maav-controller maav-controller.cpp)
 
 target_link_libraries(maav-controller
-        maav-gnc
+        maav-control
+        maav-gnc-utils
+        maav-measurements
         ${ZCM_LIBRARIES}
         ${YAMLCPP_LIBRARY}
         maav-utils
@@ -50,13 +55,37 @@ target_link_libraries(maav-controller
 add_executable(maav-estimator maav-estimator.cpp)
 
 target_link_libraries(maav-estimator
-        maav-gnc
+        maav-kalman
+        maav-gnc-utils
         ${ZCM_LIBRARIES}
         maav-utils
         maav-msg
 )
 
 add_executable(maav-localizer maav-localizer.cpp)
+
+target_link_libraries(maav-localizer
+        maav-slam
+        maav-state
+        maav-gnc-utils
+        maav-measurements                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+)
+
+add_executable(maav-control-input maav-control-input.cpp)
+
+target_link_libraries(maav-control-input
+        maav-control
+        maav-gnc-utils
+        maav-measurements
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+)
+
+endif()
 
 link_directories(${PCL_LIBRARY_DIRS})
 
@@ -73,13 +102,6 @@ target_link_libraries(maav-planefit
         PlaneFitter
 )
 
-target_link_libraries(maav-localizer
-        maav-gnc
-        ${ZCM_LIBRARIES}
-        maav-utils
-        maav-msg
-)
-endif()
 
 if(BUILD_TANFAN)
 
@@ -110,14 +132,6 @@ target_link_libraries(maav-imu
 endif()
 
 
-add_executable(maav-control-input maav-control-input.cpp)
-
-target_link_libraries(maav-control-input
-        maav-gnc
-        ${ZCM_LIBRARIES}
-        maav-utils
-        maav-msg
-)
 
 add_executable(maav-killswitch maav-killswitch.cpp)
 

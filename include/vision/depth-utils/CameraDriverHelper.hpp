@@ -33,7 +33,7 @@ public:
     static const std::string FORMAT_IPC;
 
 private:
-    bool public_rgbd_;
+    bool publish_rgbd_;
     bool publish_pc_;
     zcm::ZCM zcm_;
     maav::vision::D400CameraInterface camera_;

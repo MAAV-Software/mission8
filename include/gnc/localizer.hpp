@@ -6,7 +6,7 @@
 
 #include <gnc/slam/System.h>
 #include <common/messages/map_t.hpp>
-#include <gnc/measurements/Imu.hpp>
+#include <gnc/measurements/ImuMeasurement.hpp>
 
 namespace maav
 {

@@ -7,11 +7,11 @@
 #include <boost/test/unit_test.hpp>
 
 #include "gnc/kalman/history.hpp"
-#include "gnc/measurements/GlobalUpdate.hpp"
-#include "gnc/measurements/Imu.hpp"
-#include "gnc/measurements/Lidar.hpp"
+#include "gnc/measurements/GlobalUpdateMeasurement.hpp"
+#include "gnc/measurements/ImuMeasurement.hpp"
+#include "gnc/measurements/LidarMeasurement.hpp"
 #include "gnc/measurements/Measurement.hpp"
-#include "gnc/measurements/PlaneFit.hpp"
+#include "gnc/measurements/PlaneFitMeasurement.hpp"
 #include "gnc/measurements/VisualOdometry.hpp"
 
 using maav::gnc::kalman::History;

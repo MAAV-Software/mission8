@@ -1,4 +1,4 @@
-#include <gnc/measurements/Lidar.hpp>
+#include <gnc/measurements/LidarMeasurement.hpp>
 
 namespace maav
 {
@@ -27,6 +27,12 @@ const SensorVector& LidarMeasurement::distance() const { return distance_; }
 SensorVector& LidarMeasurement::distance() { return distance_; }
 uint64_t LidarMeasurement::timeUSec() const { return time_usec_; }
 void LidarMeasurement::setTime(uint64_t time_usec) { time_usec_ = time_usec; }
+std::ostream& operator<<(std::ostream& os, const LidarMeasurement& meas)
+{
+    os << "Lidar - Time: " << meas.timeUSec() << '\n';
+    os << "Lidar Dist: " << meas.distance() << '\n';
+    return os;
+}
 }
 }
 }

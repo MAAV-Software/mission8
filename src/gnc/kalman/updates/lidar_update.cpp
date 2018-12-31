@@ -33,7 +33,7 @@ void LidarUpdate::operator()(History::Snapshot& snapshot)
     // Check the validity of the lidar measurements
     if (!snapshot.measurement.lidar) return;
     double distance = snapshot.measurement.lidar->distance()(0);
-    if (std::isfinite(distance) && distance >= 0)
+    if (std::isfinite(distance) && distance >= 0 && distance <= 1.25)
     {
         correct(snapshot);
     }

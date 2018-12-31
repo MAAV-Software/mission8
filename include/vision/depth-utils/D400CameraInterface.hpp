@@ -73,7 +73,7 @@ public:
     int getStreamWidth() const;
     int getStreamHeight() const;
 
-    long long getUTime() const;
+    uint64_t getUTime() const;
 
 private:
     std::string serial_;
@@ -84,7 +84,7 @@ private:
     const uint16_t* depth_image_;
     const uint16_t* color_image_;
 
-    long long utime_;
+    uint64_t utime_;
 
     rs2::pipeline pipe_;
     rs2::config cfg_;

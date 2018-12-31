@@ -1,4 +1,4 @@
-#include <gnc/measurements/GlobalUpdate.hpp>
+#include <gnc/measurements/GlobalUpdateMeasurement.hpp>
 
 namespace maav
 {
@@ -32,6 +32,15 @@ const Eigen::Vector3d& GlobalUpdateMeasurement::position() const { return positi
 Eigen::Vector3d& GlobalUpdateMeasurement::position() { return position_; }
 uint64_t GlobalUpdateMeasurement::timeUSec() const { return time_usec_; }
 void GlobalUpdateMeasurement::setTime(uint64_t time_usec) { time_usec_ = time_usec; }
+std::ostream& operator<<(std::ostream& os, const GlobalUpdateMeasurement& meas)
+{
+    std::cout << "Global - Time: " << meas.timeUSec() << '\n';
+    const Eigen::Quaterniond& q = meas.attitude().unit_quaternion();
+    std::cout << "Global - Attitude: " << q.w() << ' ' << q.x() << ' ' << q.y() << ' ' << q.z()
+              << '\n';
+    std::cout << "Global - Position: " << meas.position().transpose() << '\n';
+    return os;
+}
 }
 }
 }

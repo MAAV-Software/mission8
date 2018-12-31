@@ -44,7 +44,7 @@ void UkfPrediction::operator()(const History::ConstIterator prev, const History:
 State UkfPrediction::predict(const State& state)
 {
     const State& prev_state = state;
-    State& next_state = _next->state;
+    State next_state(_next->state.timeUSec());
 
     const measurements::ImuMeasurement& prev_imu = *(_prev->measurement.imu);
     const measurements::ImuMeasurement& next_imu = *(_next->measurement.imu);

@@ -19,7 +19,7 @@
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/constants.hpp>
 #include <gnc/estimator.hpp>
-#include <gnc/measurements/Imu.hpp>
+#include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/Measurement.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     if (verbose)
     {
         ios::sync_with_stdio(false);
-        std::cout << std::showpos << std::setprecision(4) << fixed;
+        std::cout << std::showpos << std::setprecision(3) << fixed;
     }
 
     cout << "Starting MAAV Estimator" << endl;
@@ -84,37 +84,74 @@ int main(int argc, char** argv)
     cout << "ZCM Good" << endl;
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
-    Estimator estimator(config);
 
     ZCMHandler<imu_t> imu_handler;
     ZCMHandler<lidar_t> lidar_handler;
     ZCMHandler<plane_fit_t> plane_fit_handler;
     ZCMHandler<global_update_t> global_update_handler;
 
-    zcm.subscribe(IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
-    zcm.subscribe(HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
-    zcm.subscribe(PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
+    std::cout << "==========================" << std::endl;
 
-    // Use simulated planefit?
-    bool sim_planefit = config["sim_planefit_update"].as<bool>();
-    if (sim_planefit)
-        zcm.subscribe(SIM_PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
+    std::cout << "IMU:              ";
+    if (config["sim_imu"].as<bool>())
+    {
+        zcm.subscribe(maav::SIM_IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
+        std::cout << "SIM" << std::endl;
+    }
     else
-        zcm.subscribe(PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
+    {
+        zcm.subscribe(maav::IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
+        std::cout << "REGULAR" << std::endl;
+    }
 
-    // Use simulated slam?
-    bool sim_slam = config["sim_global_update"].as<bool>();
-    if (sim_slam)
-        zcm.subscribe(
-            SIM_GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv, &global_update_handler);
+    std::cout << "Lidar:            ";
+    if (config["sim_lidar"].as<bool>())
+    {
+        zcm.subscribe(maav::SIM_HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
+        std::cout << "SIM" << std::endl;
+    }
     else
-        zcm.subscribe(
-            GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv, &global_update_handler);
+    {
+        zcm.subscribe(maav::HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
+        std::cout << "REGULAR" << std::endl;
+    }
 
-    zcm.start();
+    std::cout << "Plane Fit:        ";
+    if (config["sim_planefit"].as<bool>())
+    {
+        zcm.subscribe(
+            maav::SIM_PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
+        std::cout << "SIM" << std::endl;
+    }
+    else
+    {
+        zcm.subscribe(maav::PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
+        std::cout << "REGULAR" << std::endl;
+    }
+
+    std::cout << "Global Update:    ";
+    if (config["sim_global_update"].as<bool>())
+    {
+        zcm.subscribe(maav::SIM_GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv,
+            &global_update_handler);
+        std::cout << "SIM" << std::endl;
+    }
+    else
+    {
+        zcm.subscribe(maav::GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv,
+            &global_update_handler);
+        std::cout << "REGULAR" << std::endl;
+    }
+
+    std::cout << "--------------------------" << std::endl;
+
+    Estimator estimator(config);
+
+    std::cout << "==========================" << std::endl;
 
     // Main Loop
     KILL = false;
+    zcm.start();
 
     cout << "Starting estimator loop" << endl;
 
@@ -128,14 +165,17 @@ int main(int argc, char** argv)
 
         MeasurementSet set;
 
+        const imu_t msg = imu_handler.msg();
+        imu_handler.pop();
+
+        set.imu = convertImu(msg);
+
         if (lidar_handler.ready())
         {
             const lidar_t msg = lidar_handler.msg();
             lidar_handler.pop();
 
             set.lidar = convertLidar(msg);
-
-            std::cout << "Lidar Dist: " << set.lidar->distance() << std::endl;
         }
 
         if (plane_fit_handler.ready())
@@ -152,22 +192,7 @@ int main(int argc, char** argv)
             global_update_handler.pop();
 
             set.global_update = convertGlobalUpdate(msg);
-
-            std::cout << "Global Pos: " << set.global_update->position().transpose() << std::endl;
         }
-
-        const imu_t msg = imu_handler.msg();
-        imu_handler.pop();
-
-        set.imu = convertImu(msg);
-
-        if (set.global_update && set.imu)
-        {
-            std::cout << "Time difference: " << set.imu->time_usec - set.global_update->timeUSec()
-                      << std::endl;
-        }
-
-        std::cout << "Acc z: " << set.imu->acceleration.z() << std::endl;
 
         const State& state = estimator.add_measurement_set(set);
 
@@ -175,6 +200,10 @@ int main(int argc, char** argv)
 
         if (verbose)
         {
+            std::cout << *(set.imu);
+            if (set.lidar) std::cout << *(set.lidar);
+            if (set.plane_fit) std::cout << *(set.plane_fit);
+            if (set.global_update) std::cout << *(set.global_update);
             std::cout << state;
         }
 

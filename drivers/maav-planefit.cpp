@@ -126,6 +126,7 @@ void runFitPlane(shared_ptr<JobDispatcher> dispatcher, shared_ptr<ZCM> zcm)
         // Run the plane fitter, upon success, send out new orientation data
         if (planeFitter.runPlaneFitting(cloud, output.z_dot, output.z, output.roll, output.pitch))
         {
+            output.utime = utime;
             zcm->publish(maav::PLANE_FIT_CHANNEL, &output);
         }
     }

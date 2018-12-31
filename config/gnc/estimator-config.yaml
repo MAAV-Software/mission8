@@ -23,47 +23,54 @@ prediction:
     kappa: 2
 
   # Process noise covariance
-  Q_i: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001]
+  Q_i: [0.00001, 0.00001, 0.00001, 0.0001, 0.0001, 0.0001]
 
 updates:
 
   lidar:
+    enabled: true
     # Unscented transform params
     UT:
       alpha: 0.1
       beta: 2.0
       kappa: 0.0
-
     # Sensor noise covariance
     R: [0.00001]
+    # Pose relative to IMU
+    extrinsics:
+      rot: [1, 0, 0, 0]
+      pos: [0, 0, 0]
 
   planefit:
-
-      # Unscented transform params
-    UT:
-      alpha: 0.1
-      beta: 2.0
-      kappa: 0.0
-
-    # Sensor noise covariance
-    R: [0.000001, 0.000001, 0.000001, 0.000001]
-
-
-  global_update:
-
+    enabled: false
     # Unscented transform params
     UT:
       alpha: 0.1
       beta: 2.0
       kappa: 0.0
-
     # Sensor noise covariance
-    R: [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.01]
+    R: [0.000001, 0.000001, 0.000001, 0.000001]
+    # Pose relative to IMU
+    extrinsics:
+      rot: [1, 0, 0, 0]
+      pos: [0, 0, 0]
 
-sim_planefit_update: true
+  global_update:
+    enabled: true
+    # Unscented transform params
+    UT:
+      alpha: 0.1
+      beta: 2.0
+      kappa: 0.0
+    # Sensor noise covariance
+    R: [0.00001, 0.00001, 0.00001, 0.0005, 0.0005, 0.01]
+    # Pose relative to IMU
+    extrinsics:
+      rot: [1, 0, 0, 0]
+      pos: [0, 0, 0]
+
+sim_imu: false
+sim_lidar: false
+sim_planefit: false
 sim_global_update: false
-
-en_lidar: true
-en_planefit: false
-en_global: true
 

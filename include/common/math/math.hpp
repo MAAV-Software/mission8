@@ -10,8 +10,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
 
 /**
  * @file math.hpp
@@ -341,17 +339,6 @@ Eigen::Matrix3d getTransformMatrix(const std::vector<Eigen::Vector2d> &expected,
     const std::vector<Eigen::Vector2d> &camera, double yaw);
 
 /**
- * @brief Returns all the points on lines in the given image
- * @param src Source image
- * @return An array of array of cv::Point. Each array of points is a single
- * "contour", or line
- *
- * @details This function does not do any color thresholding. Pass in an
- * already thresholded image if that is desired.
- */
-std::vector<Eigen::Vector2d> get_line_points(const cv::Mat &src);
-
-/**
  * @brief Updates current vehicle position using localization
  * @param pos Current position
  * @param expected Expected feature image coordinates based on current position
@@ -367,9 +354,9 @@ Eigen::Vector3d localizePosition(const Eigen::Vector3d &pos, double yaw,
 
 template <size_t T>
 double MahalanobisDistance(const Eigen::Matrix<double, T, 1> &x,
-    const Eigen::Matrix<double, T, 1> &y, const Eigen::Matrix<double, T, T> &P)
+    const Eigen::Matrix<double, T, 1> &mu, const Eigen::Matrix<double, T, T> &P)
 {
-    return ((x - y).transpose() * P.inverse() * (x - y))(0);
+    return std::sqrt((x - mu).transpose() * P.inverse() * (x - mu)(0));
 }
 
 #endif  // MAAV_MATH_HPP

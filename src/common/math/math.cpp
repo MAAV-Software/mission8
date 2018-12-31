@@ -17,14 +17,6 @@ using Eigen::Vector2d;
 using Eigen::Vector2i;
 using Eigen::Vector3d;
 using Eigen::VectorXd;
-using cv::Canny;
-using cv::GaussianBlur;
-using cv::Mat;
-using cv::Point;
-using cv::Scalar;
-using cv::findContours;
-using cv::inRange;
-using cv::Size;
 using std::vector;
 using std::random_device;
 using std::seed_seq;
@@ -70,7 +62,7 @@ void maav::matchCorners(vector<Vector2d> &expected, vector<Vector2d> &camera)
     for (unsigned i = 0; i < expected.size(); ++i)
     {
         int bestIdx = 0;
-        double bestDist = DBL_MAX;
+        double bestDist = std::numeric_limits<double>::infinity();
 
         // find the closest camera point to this expected point
         for (unsigned j = 0; j < camera.size(); ++j)
@@ -139,27 +131,6 @@ Matrix3d maav::getTransformMatrix(
     transform << M1, M2, x[1], M4, M5, x[2], 0, 0, 1;
 
     return transform;
-}
-
-vector<Vector2d> maav::get_line_points(const Mat &src)
-{
-    vector<vector<Point>> all_contours;
-    vector<Vector2d> contours;
-    Mat tmp;
-
-    GaussianBlur(src, tmp, Size(9, 9), 2, 2);
-    Canny(tmp, tmp, 50, 50);
-    findContours(tmp, all_contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-
-    for (const auto &contour : all_contours)
-    {
-        for (const auto &pt : contour)
-        {
-            contours.push_back(Vector2d{pt.x, pt.y});
-        }
-    }
-
-    return contours;
 }
 
 Eigen::Vector3d maav::localizePosition(const Eigen::Vector3d &pos, double yaw,

@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
-    GlobalUpdate update(
-        YAML::Load("  global_update:\n    # Unscented transform params\n    UT:\n      alpha: "
-                   "0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise covariance\n    R: "
-                   "[0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]\n"));
+    GlobalUpdate update(YAML::Load(
+        "  global_update:\n    enabled: true\n    # Unscented transform params\n    "
+        "UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise covariance\n "
+        "   R: [0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]\n"));
 
     auto pred = update.predicted(state);
     BOOST_CHECK_LE((pred.position() - state.position()).norm(), 0.000001);
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     state.angularVelocity() = Vector3d::Zero();
     state.acceleration() = Vector3d::Zero();
 
-    GlobalUpdate update(
-        YAML::Load("  global_update:\n    # Unscented transform params\n    UT:\n      alpha: "
-                   "0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise covariance\n    R: "
-                   "[0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]\n"));
+    GlobalUpdate update(YAML::Load(
+        "  global_update:\n    enabled: true\n    # Unscented transform params\n    "
+        "UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise "
+        "covariance\n    R: [0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]\n"));
 
     auto pred = update.predicted(state);
     BOOST_CHECK_LE((pred.position() - state.position()).norm(), 0.000001);

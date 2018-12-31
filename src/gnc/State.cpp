@@ -30,8 +30,6 @@ State State::mean(const std::array<State, N>& sigma_points, const std::array<dou
     const State& first = sigma_points[0];
     uint64_t time = first.timeUSec();
     State mean_state = State::zero(time);
-    mean_state.acceleration() = first.acceleration();
-    mean_state.angularVelocity() = first.angularVelocity();
 
     // Use only the previous mean's transformed point because this is linear with respect to the
     // attitude
@@ -40,6 +38,9 @@ State State::mean(const std::array<State, N>& sigma_points, const std::array<dou
     {
         mean_state.position() += sigma_points[i].position() * weights[i];
         mean_state.velocity() += sigma_points[i].velocity() * weights[i];
+
+        mean_state.acceleration() += sigma_points[i].acceleration() * weights[i];
+        mean_state.angularVelocity() += sigma_points[i].angularVelocity() * weights[i];
 
         // TODO: Determine if other values are necessary to average.
         // TODO: Use other estimated parameters
@@ -138,15 +139,17 @@ const State::CovarianceMatrix& State::covariance() const { return covar_; }
 State::CovarianceMatrix& State::covariance() { return covar_; }
 std::ostream& operator<<(std::ostream& os, const State& state)
 {
-    std::cout << "Attitude: " << state.attitude().unit_quaternion().w() << ' '
+    std::cout << "State - Attitude: " << state.attitude().unit_quaternion().w() << ' '
               << state.attitude().unit_quaternion().x() << ' '
               << state.attitude().unit_quaternion().y() << ' '
               << state.attitude().unit_quaternion().z() << '\n';
-    std::cout << "Position: " << state.position().x() << ' ' << state.position().y() << ' '
+    std::cout << "State - Position: " << state.position().x() << ' ' << state.position().y() << ' '
               << state.position().z() << '\n';
-    std::cout << "Velocity: " << state.velocity().x() << ' ' << state.velocity().y() << ' '
+    std::cout << "State - Velocity: " << state.velocity().x() << ' ' << state.velocity().y() << ' '
               << state.velocity().z() << '\n';
-    std::cout << "Variance: " << state.covariance().diagonal().transpose() << std::endl;
+    std::cout << "State - Acceleration: " << state.acceleration().x() << ' '
+              << state.acceleration().y() << ' ' << state.acceleration().z() << '\n';
+    std::cout << "State - Variance: " << state.covariance().diagonal().transpose() << std::endl;
     return os;
 }
 

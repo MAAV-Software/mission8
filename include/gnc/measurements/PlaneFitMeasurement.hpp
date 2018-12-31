@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace maav
 {
 namespace gnc
@@ -17,6 +19,8 @@ struct PlaneFitMeasurement
     double pitch;
     uint64_t time_usec;
 };
+
+std::ostream& operator<<(std::ostream& os, const PlaneFitMeasurement& meas);
 
 }  // namespace measurements
 }  // namespace gnc
