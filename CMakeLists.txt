@@ -20,6 +20,7 @@ option(BUILD_TANFAN "Build the TivA nuc Network Forwarding ApplicatioN (TANFAN)"
 option(BUILD_IMU "Build the IMU driver" ON)
 option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
+option(BUILD_PLOTTER "Build plotting tool" ON)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -64,6 +65,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 add_subdirectory(src)
 add_subdirectory(thirdparty)
 add_subdirectory(drivers)
+add_subdirectory(tools)
 # Setup testing options
 if(BUILD_TESTS)
     enable_testing()

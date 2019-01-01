@@ -2,6 +2,7 @@
 #include <csignal>
 #include <iostream>
 
+#include <yaml-cpp/node/detail/bool_type.h>
 #include <yaml-cpp/yaml.h>
 #include <Eigen/Dense>
 #include <zcm/zcm-cpp.hpp>
@@ -71,7 +72,8 @@ int main(int argc, char** argv)
     slam_init.vocabulary_file = gopt.getString("vocab");
     slam_init.config_file = gopt.getString("config");
     slam_init.sensor = System::eSensor::RGBD;
-    slam_init.use_viewer = config["use_viewer"].as<bool>();
+    slam_init.use_viewer = false;
+    // config["use_viewer"].as<bool>();
 
     Localizer localizer(slam_init);
     cv::Mat pose;
