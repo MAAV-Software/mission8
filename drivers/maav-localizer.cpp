@@ -11,6 +11,8 @@
 #include <common/messages/global_update_t.hpp>
 #include <common/messages/map_t.hpp>
 #include <common/messages/rgbd_image_t.hpp>
+#include <common/messages/slam_localization_mode_t.hpp>
+#include <common/messages/slam_reset_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
 
@@ -64,7 +66,12 @@ int main(int argc, char** argv)
     }
 
     ZCMHandler<rgbd_image_t> image_handler;
+    ZCMHandler<slam_localization_mode_t> loc_mode_handler;
+    ZCMHandler<slam_reset_t> reset_handler;
     zcm.subscribe(maav::RGBD_FORWARD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
+    zcm.subscribe(maav::SLAM_LOCALIZATION_MODE_CHANNEL, &ZCMHandler<slam_localization_mode_t>::recv,
+        &loc_mode_handler);
+    zcm.subscribe(maav::SLAM_RESET_CHANNEL, &ZCMHandler<slam_reset_t>::recv, &reset_handler);
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 
@@ -86,6 +93,29 @@ int main(int argc, char** argv)
 
     while (!KILL)
     {
+        if (loc_mode_handler.ready())
+        {
+            auto msg = loc_mode_handler.msg();
+            loc_mode_handler.pop();
+            if (msg.mode)
+            {
+                localizer.slam.ActivateLocalizationMode();
+            }
+            else
+            {
+                localizer.slam.DeactivateLocalizationMode();
+            }
+        }
+        if (reset_handler.ready())
+        {
+            auto msg = reset_handler.msg();
+            reset_handler.pop();
+
+            if (msg.reset)
+            {
+                localizer.slam.Reset();
+            }
+        }
         if (image_handler.ready())
         {
             rgbd_image_t img = image_handler.msg();

@@ -26,6 +26,8 @@ const char* const SIM_GLOBAL_UPDATE_CHANNEL = "SIM_GLOBAL_UPDATE";
 const char* const CTRL_PARAMS_CHANNEL = "CTRL_PARAMS";
 const char* const MAP_CHANNEL = "MAP";
 const char* const PATH_CHANNEL = "PATH";
+const char* const SLAM_RESET_CHANNEL = "SLAM_RESET";
+const char* const SLAM_LOCALIZATION_MODE_CHANNEL = "SLAM_LOC_MODE";
 
 // Planefitter messages     
 const char* const PLANE_FITTER_HEARTBEAT_CHANNEL = "PLANE_FITTER_HEARTBEAT";

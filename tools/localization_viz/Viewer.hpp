@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <queue>
 #include <string>
 
 #include <pangolin/pangolin.h>
@@ -80,6 +81,9 @@ private:
     CheckboxPtr menuKalmanVelocity;
     CheckboxPtr menuReset;
 
+    std::unique_ptr<pangolin::Var<int>> fpsCounter;
+    std::queue<std::chrono::time_point<std::chrono::system_clock>> time_stamps;
+
     // Stopping utilities
     bool Stop();
     bool CheckFinish();
@@ -98,6 +102,8 @@ private:
 
     std::mutex data_mutex_;
     visualizer_log_t data;
+
+    zcm::ZCM priv_node;
 };
 }
 }

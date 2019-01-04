@@ -1,0 +1,11 @@
+/**
+ * ZCM type for a tracked image
+ */
+
+struct slam_reset_t {
+    boolean reset;
+}
+
+struct slam_localization_mode_t {
+    boolean mode;
+}

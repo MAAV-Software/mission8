@@ -5,6 +5,8 @@
 #include <opencv2/highgui.hpp>
 
 #include <common/messages/MsgChannels.hpp>
+#include <common/messages/slam_localization_mode_t.hpp>
+#include <common/messages/slam_reset_t.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
 using namespace std::chrono_literals;
@@ -28,7 +30,8 @@ Viewer::Viewer(YAML::Node config, std::shared_ptr<FrameDrawer> frame_drawer,
       stop_requested_(false),
       stopped_(true),
       frame_drawer_(frame_drawer),
-      map_drawer_(map_drawer)
+      map_drawer_(map_drawer),
+      priv_node{"ipc"}
 {
     zcm_node.subscribe(maav::VISUALIZER_CHANNEL, &Viewer::updateLocalizer, this);
     zcm_node.subscribe(maav::STATE_CHANNEL, &Viewer::updateEstimator, this);
@@ -38,6 +41,17 @@ void Viewer::updateLocalizer(
     const zcm::ReceiveBuffer*, const std::string&, const visualizer_log_t* msg)
 {
     std::unique_lock<std::mutex> lock(data_mutex_);
+
+    auto last = std::chrono::system_clock::now();
+    time_stamps.push(last);
+    float num_frames = 20;
+    if (time_stamps.size() > num_frames)
+    {
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::duration<float>>(last - time_stamps.front());
+        *fpsCounter = static_cast<int>(num_frames / static_cast<float>(elapsed.count()));
+        time_stamps.pop();
+    }
     data = *msg;
     frame_drawer_->update(data);
     if (!(*menuKalmanState)) map_drawer_->update(data, false);
@@ -125,6 +139,9 @@ void Viewer::createWindow()
     menuKalmanVelocity = std::make_unique<Checkbox>(Checkbox("menu.Kalman Velocity", false, true));
     menuReset = std::make_unique<Checkbox>(Checkbox("menu.Reset", false, false));
 
+    fpsCounter = std::make_unique<pangolin::Var<int>>(
+        pangolin::Var<int>("menu.fps", 0, pangolin::META_FLAG_READONLY));
+
     Twc.SetIdentity();
 
     // Start frame viewer
@@ -203,7 +220,9 @@ void Viewer::setLocalizationMode(bool on)
 {
     *menuLocalizationMode = on;
     localization_mode_ = on;
-    // TODO: send zcm
+    slam_localization_mode_t msg;
+    msg.mode = on;
+    priv_node.publish(maav::SLAM_LOCALIZATION_MODE_CHANNEL, &msg);
 }
 
 void Viewer::reset()
@@ -215,6 +234,9 @@ void Viewer::reset()
     follow_ = true;
     *menuFollowCamera = true;
     *menuReset = false;
+    slam_reset_t msg;
+    msg.reset = true;
+    priv_node.publish(maav::SLAM_RESET_CHANNEL, &msg);
 }
 
 void Viewer::RequestFinish()

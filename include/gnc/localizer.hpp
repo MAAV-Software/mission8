@@ -37,8 +37,9 @@ public:
 
     cv::Mat getPose();
 
-private:
     slam::System slam;
+
+private:
     cv::Mat current_pose;
 };
 
