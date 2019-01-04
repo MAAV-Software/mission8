@@ -1,1 +1,2 @@
 add_subdirectory(plotter)
+add_subdirectory(localization_viz)

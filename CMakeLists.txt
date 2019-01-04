@@ -21,6 +21,7 @@ option(BUILD_IMU "Build the IMU driver" ON)
 option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 option(BUILD_PLOTTER "Build plotting tool" ON)
+option(BUILD_VISUALIZER "Build localization visualization tool" ON)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)

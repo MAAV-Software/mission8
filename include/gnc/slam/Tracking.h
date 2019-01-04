@@ -25,17 +25,15 @@
 #include <opencv2/features2d/features2d.hpp>
 
 #include "Frame.h"
-#include "FrameDrawer.h"
 #include "Initializer.h"
 #include "KeyFrameDatabase.h"
 #include "LocalMapping.h"
 #include "LoopClosing.h"
 #include "Map.h"
-#include "MapDrawer.h"
 #include "ORBVocabulary.h"
 #include "ORBextractor.h"
 #include "System.h"
-#include "Viewer.h"
+#include "VisualizerLink.hpp"
 
 #include <mutex>
 
@@ -45,17 +43,16 @@ namespace gnc
 {
 namespace slam
 {
-class Viewer;
-class FrameDrawer;
 class Map;
 class LocalMapping;
 class LoopClosing;
 class System;
+class VisualizerLink;
 
 class Tracking
 {
 public:
-    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
+    Tracking(System* pSys, ORBVocabulary* pVoc, std::shared_ptr<VisualizerLink> visualizer_link,
         Map* pMap, KeyFrameDatabase* pKFDB, const string& strSettingPath, const int sensor);
 
     // Preprocess the input and call Track(). Extract features and performs
@@ -67,7 +64,6 @@ public:
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
-    void SetViewer(Viewer* pViewer);
 
     // Load new settings
     // The focal lenght should be similar or scale prediction will fail when
@@ -99,6 +95,10 @@ public:
     // Current Frame
     Frame mCurrentFrame;
     cv::Mat mImGray;
+
+    cv::Mat rgb_im;
+    cv::Mat depth_im;
+    uint64_t last_frame_usec;
 
     // Initialization Variables (Monocular)
     std::vector<int> mvIniLastMatches;
@@ -179,10 +179,7 @@ protected:
     // System
     System* mpSystem;
 
-    // Drawers
-    Viewer* mpViewer;
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
+    std::shared_ptr<VisualizerLink> visualizer_link_;
 
     // Map
     Map* mpMap;

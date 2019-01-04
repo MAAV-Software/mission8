@@ -72,8 +72,7 @@ int main(int argc, char** argv)
     slam_init.vocabulary_file = gopt.getString("vocab");
     slam_init.config_file = gopt.getString("config");
     slam_init.sensor = System::eSensor::RGBD;
-    slam_init.use_viewer = false;
-    // config["use_viewer"].as<bool>();
+    slam_init.zcm_url = config["zcm_url"].as<std::string>();
 
     Localizer localizer(slam_init);
     cv::Mat pose;

@@ -25,7 +25,6 @@
 #include <opencv2/features2d/features2d.hpp>
 
 #include "gnc/slam/Converter.h"
-#include "gnc/slam/FrameDrawer.h"
 #include "gnc/slam/Initializer.h"
 #include "gnc/slam/Map.h"
 #include "gnc/slam/ORBmatcher.h"
@@ -41,9 +40,9 @@ namespace gnc
 {
 namespace slam
 {
-Tracking::Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer,
-    MapDrawer* pMapDrawer, Map* pMap, KeyFrameDatabase* pKFDB, const string& strSettingPath,
-    const int sensor)
+Tracking::Tracking(System* pSys, ORBVocabulary* pVoc,
+    std::shared_ptr<VisualizerLink> visualizer_link, Map* pMap, KeyFrameDatabase* pKFDB,
+    const string& strSettingPath, const int sensor)
     : mState(NO_IMAGES_YET),
       mSensor(sensor),
       mbOnlyTracking(false),
@@ -52,9 +51,7 @@ Tracking::Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer,
       mpKeyFrameDB(pKFDB),
       mpInitializer(static_cast<Initializer*>(NULL)),
       mpSystem(pSys),
-      mpViewer(NULL),
-      mpFrameDrawer(pFrameDrawer),
-      mpMapDrawer(pMapDrawer),
+      visualizer_link_(visualizer_link),
       mpMap(pMap),
       mnLastRelocFrameId(0)
 {
@@ -158,7 +155,6 @@ Tracking::Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer,
 
 void Tracking::SetLocalMapper(LocalMapping* pLocalMapper) { mpLocalMapper = pLocalMapper; }
 void Tracking::SetLoopClosing(LoopClosing* pLoopClosing) { mpLoopClosing = pLoopClosing; }
-void Tracking::SetViewer(Viewer* pViewer) { mpViewer = pViewer; }
 cv::Mat Tracking::GrabImageStereo(
     const cv::Mat& imRectLeft, const cv::Mat& imRectRight, const double& timestamp)
 {
@@ -202,28 +198,28 @@ cv::Mat Tracking::GrabImageStereo(
 
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD, const double& timestamp)
 {
-    mImGray = imRGB;
-    cv::Mat imDepth = imD;
+    rgb_im = imRGB;
+    depth_im = imD;
 
-    if (mImGray.channels() == 3)
+    if (rgb_im.channels() == 3)
     {
         if (mbRGB)
-            cvtColor(mImGray, mImGray, CV_RGB2GRAY);
+            cvtColor(rgb_im, mImGray, CV_RGB2GRAY);
         else
-            cvtColor(mImGray, mImGray, CV_BGR2GRAY);
+            cvtColor(rgb_im, mImGray, CV_BGR2GRAY);
     }
-    else if (mImGray.channels() == 4)
+    else if (rgb_im.channels() == 4)
     {
         if (mbRGB)
-            cvtColor(mImGray, mImGray, CV_RGBA2GRAY);
+            cvtColor(rgb_im, mImGray, CV_RGBA2GRAY);
         else
-            cvtColor(mImGray, mImGray, CV_BGRA2GRAY);
+            cvtColor(rgb_im, mImGray, CV_BGRA2GRAY);
     }
 
-    if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
-        imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
+    if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || depth_im.type() != CV_32F)
+        depth_im.convertTo(depth_im, CV_32F, mDepthMapFactor);
 
-    mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, mpORBVocabulary, mK,
+    mCurrentFrame = Frame(mImGray, depth_im, timestamp, mpORBextractorLeft, mpORBVocabulary, mK,
         mDistCoef, mbf, mThDepth);
 
     Track();
@@ -281,7 +277,7 @@ void Tracking::Track()
         else
             MonocularInitialization();
 
-        mpFrameDrawer->Update(this);
+        visualizer_link_->updateTracking(this);
 
         if (mState != OK) return;
     }
@@ -414,7 +410,7 @@ void Tracking::Track()
             mState = LOST;
 
         // Update drawer
-        mpFrameDrawer->Update(this);
+        visualizer_link_->updateTracking(this);
 
         // If tracking were good, check if we insert a keyframe
         if (bOK)
@@ -430,7 +426,7 @@ void Tracking::Track()
             else
                 mVelocity = cv::Mat();
 
-            mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+            visualizer_link_->setCurrentPose(mCurrentFrame.mTcw);
 
             // Clean VO matches
             for (int i = 0; i < mCurrentFrame.N; i++)
@@ -553,7 +549,7 @@ void Tracking::StereoInitialization()
 
         mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
-        mpMapDrawer->SetCurrentCameraPose(mCurrentFrame.mTcw);
+        visualizer_link_->setCurrentPose(mCurrentFrame.mTcw);
 
         mState = OK;
     }
@@ -726,7 +722,7 @@ void Tracking::CreateInitialMapMonocular()
 
     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
 
-    mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
+    visualizer_link_->setCurrentPose(pKFcur->GetPose());
 
     mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
@@ -1503,11 +1499,6 @@ bool Tracking::Relocalization()
 void Tracking::Reset()
 {
     cout << "System Reseting" << endl;
-    if (mpViewer)
-    {
-        mpViewer->RequestStop();
-        while (!mpViewer->isStopped()) usleep(3000);
-    }
 
     // Reset Local Mapping
     cout << "Reseting Local Mapper...";
@@ -1541,8 +1532,6 @@ void Tracking::Reset()
     mlpReferences.clear();
     mlFrameTimes.clear();
     mlbLost.clear();
-
-    if (mpViewer) mpViewer->Release();
 }
 
 void Tracking::ChangeCalibration(const string& strSettingPath)

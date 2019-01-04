@@ -30,6 +30,8 @@ const char* const PATH_CHANNEL = "PATH";
 // Planefitter messages     
 const char* const PLANE_FITTER_HEARTBEAT_CHANNEL = "PLANE_FITTER_HEARTBEAT";
 
+const char* const VISUALIZER_CHANNEL = "VISUALIZER";
+
 // Miscellaneous channels     
 const char* const EMS_CHANNEL = "EMS";
 const char* const PATH_PROGRESS_CHANNEL = "PATH_PROGRESS";

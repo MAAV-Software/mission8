@@ -31,6 +31,8 @@ extern const char* const PATH_CHANNEL;                      ///< Path output fro
 // Planefitter messages     
 extern const char* const PLANE_FITTER_HEARTBEAT_CHANNEL;    ///< Heart beat for the plane fitter
 
+extern const char* const VISUALIZER_CHANNEL;
+
 // Miscellaneous channels     
 extern const char* const EMS_CHANNEL;                       ///< Tiva's emergency message from tanfan to system
 extern const char* const PATH_PROGRESS_CHANNEL;             ///< The outer loop controller's progress through its path

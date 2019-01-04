@@ -8,7 +8,7 @@ namespace maav
 namespace gnc
 {
 Localizer::Localizer(SlamInitializer& slam_init)
-    : slam(slam_init.vocabulary_file, slam_init.config_file, slam_init.sensor, slam_init.use_viewer)
+    : slam(slam_init.vocabulary_file, slam_init.config_file, slam_init.sensor, slam_init.zcm_url)
 {
 }
 

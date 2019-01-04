@@ -104,14 +104,12 @@ target_link_libraries(maav-kalman
 add_library(maav-slam SHARED
     slam/Converter.cc
     slam/Frame.cc
-    slam/FrameDrawer.cc
     slam/Initializer.cc
     slam/KeyFrame.cc
     slam/KeyFrameDatabase.cc
     slam/LocalMapping.cc
     slam/LoopClosing.cc
     slam/Map.cc
-    slam/MapDrawer.cc
     slam/MapPoint.cc
     slam/Optimizer.cc
     slam/ORBextractor.cc
@@ -120,7 +118,7 @@ add_library(maav-slam SHARED
     slam/Sim3Solver.cc
     slam/System.cc
     slam/Tracking.cc
-    slam/Viewer.cc
+    slam/VisualizerLink.cpp
     localizer.cpp
 )
 

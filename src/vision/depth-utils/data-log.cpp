@@ -153,7 +153,7 @@ void camera_thread(CameraInterfaceBase *cam)
     for (int frame = 0; !(terminate); ++frame)
     {
         int64_t start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch())
+                                 std::chrono::system_clock::now().time_since_epoch())
                                  .count();
 
         rgb = cam->getRGB();

@@ -17,7 +17,7 @@ struct SlamInitializer
     std::string vocabulary_file;
     std::string config_file;
     slam::System::eSensor sensor;
-    bool use_viewer = true;
+    std::string zcm_url;
 };
 
 class Localizer

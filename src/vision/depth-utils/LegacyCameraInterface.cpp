@@ -47,7 +47,8 @@ LegacyCameraInterface::LegacyCameraInterface(int id, shared_ptr<context> ctx_in)
     }
     device_ptr_ = ctx_->get_device(camera_id_);
     device_ptr_->enable_stream(stream::depth, STREAM_WIDTH, STREAM_HEIGHT, format::z16, STREAM_FPS);
-    device_ptr_->enable_stream(stream::color, STREAM_WIDTH, STREAM_HEIGHT, format::bgr8, STREAM_FPS);
+    device_ptr_->enable_stream(
+        stream::color, STREAM_WIDTH, STREAM_HEIGHT, format::bgr8, STREAM_FPS);
     device_ptr_->start();
     loadNext();
 }

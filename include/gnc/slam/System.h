@@ -22,19 +22,17 @@
 #define SYSTEM_H
 
 #include <unistd.h>
+#include <memory>
 #include <opencv2/core/core.hpp>
 #include <string>
 #include <thread>
 
-#include "FrameDrawer.h"
 #include "KeyFrameDatabase.h"
 #include "LocalMapping.h"
 #include "LoopClosing.h"
 #include "Map.h"
-#include "MapDrawer.h"
 #include "ORBVocabulary.h"
 #include "Tracking.h"
-#include "Viewer.h"
 
 namespace maav
 {
@@ -42,12 +40,12 @@ namespace gnc
 {
 namespace slam
 {
-class Viewer;
 class FrameDrawer;
 class Map;
 class Tracking;
 class LocalMapping;
 class LoopClosing;
+class VisualizerLink;
 
 class System
 {
@@ -64,7 +62,7 @@ public:
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing
     // and Viewer threads.
     System(const string& strVocFile, const string& strSettingsFile, const eSensor sensor,
-        const bool bUseViewer = true);
+        const std::string& zcm_url);
 
     // Proccess the given stereo frame. Images must be synchronized and
     // rectified. Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is
@@ -158,11 +156,8 @@ private:
     // a new thread) afterwards.
     LoopClosing* mpLoopCloser;
 
-    // The viewer draws the map and the current camera pose. It uses Pangolin.
-    Viewer* mpViewer;
-
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
+    // Connection over zcm to the visualizer
+    std::shared_ptr<VisualizerLink> link_;
 
     // System threads: Local Mapping, Loop Closing, Viewer.
     // The Tracking thread "lives" in the main execution thread that creates the

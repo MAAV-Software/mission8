@@ -6,27 +6,25 @@
 
 #include <zcm/zcm_coretypes.h>
 
-#ifndef __state_tracker_t_hpp__
-#define __state_tracker_t_hpp__
-
-#include <vector>
-#include "tracked_state_t.hpp"
+#ifndef __keyframe_t_hpp__
+#define __keyframe_t_hpp__
 
 
-class state_tracker_t
+
+/**
+ * ZCM type for a tracked image
+ *
+ */
+class keyframe_t
 {
     public:
-        int64_t    utime;
-
-        int16_t    NUM_STATES;
-
-        std::vector< tracked_state_t > states;
+        float      pose[4][3];
 
     public:
         /**
          * Destructs a message properly if anything inherits from it
         */
-        virtual ~state_tracker_t() {}
+        virtual ~keyframe_t() {}
 
         /**
          * Encode a message into binary form.
@@ -63,7 +61,7 @@ class state_tracker_t
         inline static int64_t getHash();
 
         /**
-         * Returns "state_tracker_t"
+         * Returns "keyframe_t"
          */
         inline static const char* getTypeName();
 
@@ -74,7 +72,7 @@ class state_tracker_t
         inline static uint64_t _computeHash(const __zcm_hash_ptr* p);
 };
 
-int state_tracker_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
+int keyframe_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
@@ -89,7 +87,7 @@ int state_tracker_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
     return pos;
 }
 
-int state_tracker_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
+int keyframe_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
 {
     uint32_t pos = 0;
     int thislen;
@@ -105,83 +103,58 @@ int state_tracker_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
     return pos;
 }
 
-uint32_t state_tracker_t::getEncodedSize() const
+uint32_t keyframe_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t state_tracker_t::getHash()
+int64_t keyframe_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* state_tracker_t::getTypeName()
+const char* keyframe_t::getTypeName()
 {
-    return "state_tracker_t";
+    return "keyframe_t";
 }
 
-int state_tracker_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
+int keyframe_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int16_t_encode_array(buf, offset + pos, maxlen - pos, &this->NUM_STATES, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    for (int a0 = 0; a0 < this->NUM_STATES; ++a0) {
-        thislen = this->states[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < 4; ++a0) {
+        thislen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->pose[a0][0], 3);
         if(thislen < 0) return thislen; else pos += thislen;
     }
 
     return pos;
 }
 
-int state_tracker_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
+int keyframe_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
 {
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int16_t_decode_array(buf, offset + pos, maxlen - pos, &this->NUM_STATES, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    this->states.resize(this->NUM_STATES);
-    for (int a0 = 0; a0 < this->NUM_STATES; ++a0) {
-        thislen = this->states[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < 4; ++a0) {
+        thislen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->pose[a0][0], 3);
         if(thislen < 0) return thislen; else pos += thislen;
     }
 
     return pos;
 }
 
-uint32_t state_tracker_t::_getEncodedSizeNoHash() const
+uint32_t keyframe_t::_getEncodedSizeNoHash() const
 {
     uint32_t enc_size = 0;
-    enc_size += __int64_t_encoded_array_size(NULL, 1);
-    enc_size += __int16_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->NUM_STATES; ++a0) {
-        enc_size += this->states[a0]._getEncodedSizeNoHash();
-    }
+    enc_size += 4 * __float_encoded_array_size(NULL, 3);
     return enc_size;
 }
 
-uint64_t state_tracker_t::_computeHash(const __zcm_hash_ptr* p)
+uint64_t keyframe_t::_computeHash(const __zcm_hash_ptr*)
 {
-    const __zcm_hash_ptr* fp;
-    for(fp = p; fp != NULL; fp = fp->parent)
-        if(fp->v == state_tracker_t::getHash)
-            return 0;
-    const __zcm_hash_ptr cp = { p, (void*)state_tracker_t::getHash };
-
-    uint64_t hash = (uint64_t)0xb2fd04428223403dLL +
-         tracked_state_t::_computeHash(&cp);
-
+    uint64_t hash = (uint64_t)0x686e7d0cd469a76bLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 
