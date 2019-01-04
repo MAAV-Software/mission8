@@ -62,10 +62,9 @@ protected:
     bool rejectOutlier(const typename TargetSpace::ErrorStateVector& residual,
         const typename TargetSpace::CovarianceMatrix& covariance)
     {
-        double mahl_dist = std::sqrt((residual.transpose() * covariance * residual)(0));
-        std::cout << "Mahl Dist: " << mahl_dist << std::endl;
-        // return mahl_dist > 0.01;
-        return false;
+        double mahl_dist = std::sqrt((residual.transpose() * covariance.inverse() * residual)(0));
+        if (mahl_dist > 0.5) std::cout << "Mahl Dist: " << mahl_dist << std::endl;
+        return mahl_dist > 5;
     }
 
     /**

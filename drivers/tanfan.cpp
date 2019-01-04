@@ -31,7 +31,7 @@ using std::endl;
 using std::thread;
 using std::ref;
 
-void tivaToNucLoop(ZCM &zcm, PhysicalController &physicalController);
+void tivaToNucLoop(ZCM &zcm, ZCM &zcm_udp, PhysicalController &physicalController);
 void recvLcmLoop(ZCM &zcm);
 void sendGarbage(ZCM &zcm);
 void transmitPlaceholder(const uint8_t *, uint32_t);
@@ -61,11 +61,15 @@ int main()
 
     // Instantiate ZCM
     ZCM zcm{"ipc"};
+    ZCM zcm_udp{"udpm://239.255.76.67:7667?ttl=1"};
 
     if (!zcm.good())
     {
-        cerr << "LCM Error\n";
-        return -1;
+        throw "Bad ZCM";
+    }
+    if (!zcm_udp.good())
+    {
+        throw "Bad ZCM UDP";
     }
 
     zcm.start();
@@ -74,7 +78,7 @@ int main()
 
     physicalController.connect("/dev/ttyUSB0");
 
-    tivaToNucLoop(ref(zcm), ref(physicalController));
+    tivaToNucLoop(ref(zcm), ref(zcm_udp), ref(physicalController));
 
     // the above functions block, so this is just cleanup for when the program
     // exits.
@@ -99,13 +103,13 @@ int main()
  *
  * @param zcmHandler an ZCMHandler which is called on updates
  */
-void tivaToNucLoop(ZCM &zcm, PhysicalController &physicalController)
+void tivaToNucLoop(ZCM &zcm, ZCM &zcm_udp, PhysicalController &physicalController)
 {
     while (is_running)
     {
         void (*placeholder)(const uint8_t *, uint32_t);
         placeholder = &transmitPlaceholder;
-        DataLink dlink(placeholder, &zcm);
+        DataLink dlink(placeholder, &zcm, &zcm_udp);
 
         physicalController.process(dlink);
     }

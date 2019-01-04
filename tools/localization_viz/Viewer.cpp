@@ -53,7 +53,7 @@ void Viewer::updateLocalizer(
         time_stamps.pop();
     }
     data = *msg;
-    frame_drawer_->update(data);
+    if (frame_drawer_) frame_drawer_->update(data);
     if (!(*menuKalmanState)) map_drawer_->update(data, false);
 }
 
@@ -105,14 +105,21 @@ void Viewer::Run()
             break;
         }
 
-        const cv::Mat& im = frame_drawer_->getDrawnFrame();
-        cv::imshow(FORWARD_WINDOW_NAME, im);
-        cv::waitKey(period_);
+        if (frame_drawer_)
+        {
+            const cv::Mat& im = frame_drawer_->getDrawnFrame();
+            cv::imshow(FORWARD_WINDOW_NAME, im);
+            cv::waitKey(period_);
+        }
+        else
+        {
+            std::this_thread::sleep_for(1s / 60.0);
+        }
     }
 
     SetFinish();
     pangolin::DestroyWindow(PANGOLIN_WINDOW_NAME);
-    cv::destroyWindow(FORWARD_WINDOW_NAME);
+    if (frame_drawer_) cv::destroyWindow(FORWARD_WINDOW_NAME);
 }
 
 void Viewer::createWindow()
@@ -145,7 +152,7 @@ void Viewer::createWindow()
     Twc.SetIdentity();
 
     // Start frame viewer
-    cv::namedWindow(FORWARD_WINDOW_NAME);
+    if (frame_drawer_) cv::namedWindow(FORWARD_WINDOW_NAME);
 }
 
 void Viewer::drawWindow(pangolin::OpenGlRenderState& s_cam, pangolin::View& d_cam)

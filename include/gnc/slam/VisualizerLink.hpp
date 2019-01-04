@@ -24,7 +24,7 @@ static constexpr int8_t KP_VO_BIT = 0b01, KP_MAP_BIT = 0b10;
 class VisualizerLink
 {
 public:
-    VisualizerLink(const std::string& zcm_url, Map* map);
+    VisualizerLink(const std::string& zcm_url, Map* map, bool send_images);
 
     void updateTracking(Tracking* tracker);
 
@@ -45,6 +45,8 @@ private:
     visualizer_log_t last_frame;
 
     cv::Mat current_pose_;
+
+    bool send_images_;
 };
 }
 }

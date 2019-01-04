@@ -51,7 +51,9 @@ int main(int argc, char** argv)
     cout << "Starting MAAV IMU Driver.\nConnecting IMU" << endl;
 
     ZCM zcm{"ipc"};
+    ZCM zcm_udp{"udpm://239.255.76.67:7667?ttl=1"};
     if (!zcm.good()) throw runtime_error("maav-controller: Invalid ZCM");
+    if (!zcm_udp.good()) throw runtime_error("maav-controller: Invalid ZCM UDP");
 
     cout << "ZCM good" << endl;
 
@@ -87,6 +89,7 @@ int main(int argc, char** argv)
         device->read(msg);
 
         zcm.publish(maav::IMU_CHANNEL, &msg);
+        zcm_udp.publish(maav::IMU_CHANNEL, &msg);
 
         if (verbose)
         {

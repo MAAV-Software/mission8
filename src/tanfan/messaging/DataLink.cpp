@@ -26,7 +26,8 @@ static const uint64_t ATOM_ADDR = 9001;
 
 using namespace std;
 
-DataLink::DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm) : msgHandler(zcm)
+DataLink::DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm, zcm::ZCM* zcm_udp)
+    : msgHandler(zcm, zcm_udp)
 {
     // Initialize LCM and handlers
     msgSender = TransmitHandler(f);

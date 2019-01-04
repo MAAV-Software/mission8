@@ -22,8 +22,8 @@ using std::strncmp;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-MessageHandler::MessageHandler(zcm::ZCM *zcm_in, double alpha1, double alpha2)
-    : zcm(zcm_in), ts(alpha1, alpha2)
+MessageHandler::MessageHandler(zcm::ZCM *zcm_in, zcm::ZCM *zcm_udp_in, double alpha1, double alpha2)
+    : zcm(zcm_in), zcm_udp(zcm_udp_in), ts(alpha1, alpha2)
 {
     lidar.dist = 0;
     lidar.vel = 0;
@@ -74,6 +74,7 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
             duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 
         mh->zcm->publish(maav::HEIGHT_LIDAR_CHANNEL, &zcmLidar);
+        mh->zcm_udp->publish(maav::HEIGHT_LIDAR_CHANNEL, &zcmLidar);
     }
     else if (strncmp(channel, "IMU", 3) == 0)
     {
@@ -93,6 +94,7 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
         zcmImu.utime = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 
         mh->zcm->publish(maav::IMU_CHANNEL, &zcmImu);
+        mh->zcm_udp->publish(maav::IMU_CHANNEL, &zcmImu);
     }
     else if (strncmp(channel, "EMS", 3) == 0)
     {

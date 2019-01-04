@@ -2,6 +2,7 @@
 #include <chrono>
 #include <csignal>
 #include <memory>
+#include <string>
 #include <thread>
 
 #include <pangolin/pangolin.h>
@@ -47,7 +48,9 @@ int main(int argc, char** argv)
 
     setSigHandlers();
 
-    zcm::ZCM zcm{"ipc"};
+    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
+
+    zcm::ZCM zcm{config["zcm_url"].as<std::string>()};
     if (!zcm.good())
     {
         std::cerr << "Zcm bad" << std::endl;
@@ -55,8 +58,11 @@ int main(int argc, char** argv)
     }
 
     // Construct and start viewer window
-    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
+    bool display_images = config["display_images"].as<bool>();
+
     std::shared_ptr<FrameDrawer> frame_drawer(new FrameDrawer(config));
+    if (!display_images) frame_drawer = nullptr;
+
     std::shared_ptr<MapDrawer> map_drawer(new MapDrawer(config));
     std::shared_ptr<Viewer> viewer(new Viewer(config, frame_drawer, map_drawer, zcm));
 

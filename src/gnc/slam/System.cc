@@ -32,7 +32,7 @@ namespace gnc
 namespace slam
 {
 System::System(const string& strVocFile, const string& strSettingsFile, const eSensor sensor,
-    const std::string& zcm_url)
+    const std::string& zcm_url, bool send_images)
     : mSensor(sensor),
       mbReset(false),
       mbActivateLocalizationMode(false),
@@ -84,7 +84,7 @@ System::System(const string& strVocFile, const string& strSettingsFile, const eS
     // Create the Map
     mpMap = new Map();
 
-    link_ = std::shared_ptr<VisualizerLink>(new VisualizerLink(zcm_url, mpMap));
+    link_ = std::shared_ptr<VisualizerLink>(new VisualizerLink(zcm_url, mpMap, send_images));
 
     // Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this

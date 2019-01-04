@@ -76,9 +76,14 @@ int main(int argc, char** argv)
 
     // Init ZCM
     zcm::ZCM zcm{"ipc"};
+    zcm::ZCM zcm_udp{"udpm://239.255.76.67:7667?ttl=1"};
     if (!zcm.good())
     {
         throw "Bad ZCM";
+    }
+    if (!zcm_udp.good())
+    {
+        throw "Bad ZCM UDP";
     }
 
     cout << "ZCM Good" << endl;
@@ -208,6 +213,7 @@ int main(int argc, char** argv)
         }
 
         zcm.publish(STATE_CHANNEL, &zcm_state);
+        zcm_udp.publish(STATE_CHANNEL, &zcm_state);
 
         this_thread::sleep_for(2ms);
     }

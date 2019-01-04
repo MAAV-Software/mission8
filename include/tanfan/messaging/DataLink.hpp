@@ -41,7 +41,7 @@
 class DataLink
 {
 public:
-    DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm);
+    DataLink(void (*f)(const uint8_t*, uint32_t), zcm::ZCM* zcm, zcm::ZCM* zcm_udp);
     ~DataLink();
 
     // void recv(uint8_t datum) { rb->push(datum); }

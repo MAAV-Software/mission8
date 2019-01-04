@@ -10,10 +10,10 @@ forward:
   width: 640
   height: 480
   fps: 15                # 15, 30, or 60
-  serial: "819112070800" # 12 digit number on bottom of realsense camera
+  serial: "819112072448" # 12 digit number on bottom of realsense camera
 
 downward:
   width: 640
   height: 480
   fps: 30                # 15, 30, or 60
-  serial: "817512071338" # 12 digit number on bottom of realsense camera
+  serial: "819112070694" # 12 digit number on bottom of realsense camera

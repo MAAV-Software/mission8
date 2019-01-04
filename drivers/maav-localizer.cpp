@@ -57,6 +57,15 @@ int main(int argc, char** argv)
     }
 
     zcm::ZCM zcm{"ipc"};
+    zcm::ZCM zcm_udp{"udpm://239.255.76.67:7667?ttl=1"};
+    if (!zcm.good())
+    {
+        throw "Bad ZCM";
+    }
+    if (!zcm_udp.good())
+    {
+        throw "Bad ZCM UDP";
+    }
 
     bool verbose = gopt.getBool("verbose");
     if (verbose)
@@ -66,12 +75,19 @@ int main(int argc, char** argv)
     }
 
     ZCMHandler<rgbd_image_t> image_handler;
+    zcm.subscribe(maav::RGBD_FORWARD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
+
     ZCMHandler<slam_localization_mode_t> loc_mode_handler;
     ZCMHandler<slam_reset_t> reset_handler;
-    zcm.subscribe(maav::RGBD_FORWARD_CHANNEL, &ZCMHandler<rgbd_image_t>::recv, &image_handler);
+    ZCMHandler<slam_localization_mode_t> loc_mode_handler_udp;
+    ZCMHandler<slam_reset_t> reset_handler_udp;
     zcm.subscribe(maav::SLAM_LOCALIZATION_MODE_CHANNEL, &ZCMHandler<slam_localization_mode_t>::recv,
         &loc_mode_handler);
     zcm.subscribe(maav::SLAM_RESET_CHANNEL, &ZCMHandler<slam_reset_t>::recv, &reset_handler);
+    zcm_udp.subscribe(maav::SLAM_LOCALIZATION_MODE_CHANNEL,
+        &ZCMHandler<slam_localization_mode_t>::recv, &loc_mode_handler_udp);
+    zcm_udp.subscribe(
+        maav::SLAM_RESET_CHANNEL, &ZCMHandler<slam_reset_t>::recv, &reset_handler_udp);
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 
@@ -80,6 +96,7 @@ int main(int argc, char** argv)
     slam_init.config_file = gopt.getString("config");
     slam_init.sensor = System::eSensor::RGBD;
     slam_init.zcm_url = config["zcm_url"].as<std::string>();
+    slam_init.send_images = config["send_images"].as<bool>();
 
     Localizer localizer(slam_init);
     cv::Mat pose;
@@ -110,6 +127,29 @@ int main(int argc, char** argv)
         {
             auto msg = reset_handler.msg();
             reset_handler.pop();
+
+            if (msg.reset)
+            {
+                localizer.slam.Reset();
+            }
+        }
+        if (loc_mode_handler_udp.ready())
+        {
+            auto msg = loc_mode_handler_udp.msg();
+            loc_mode_handler_udp.pop();
+            if (msg.mode)
+            {
+                localizer.slam.ActivateLocalizationMode();
+            }
+            else
+            {
+                localizer.slam.DeactivateLocalizationMode();
+            }
+        }
+        if (reset_handler_udp.ready())
+        {
+            auto msg = reset_handler_udp.msg();
+            reset_handler_udp.pop();
 
             if (msg.reset)
             {
@@ -164,6 +204,7 @@ int main(int argc, char** argv)
                 }
 
                 zcm.publish(GLOBAL_UPDATE_CHANNEL, &msg);
+                zcm_udp.publish(GLOBAL_UPDATE_CHANNEL, &msg);
             }
         }
 

@@ -109,7 +109,7 @@ void runHeartbeat(shared_ptr<ZCM> zcm)
     }
 }
 
-void runFitPlane(shared_ptr<JobDispatcher> dispatcher, shared_ptr<ZCM> zcm)
+void runFitPlane(shared_ptr<JobDispatcher> dispatcher, shared_ptr<ZCM> zcm, shared_ptr<ZCM> zcm_udp)
 {
     // Initialize plane fitter
     maav::vision::PlaneFitter planeFitter(0.1f);
@@ -128,6 +128,7 @@ void runFitPlane(shared_ptr<JobDispatcher> dispatcher, shared_ptr<ZCM> zcm)
         {
             output.utime = utime;
             zcm->publish(maav::PLANE_FIT_CHANNEL, &output);
+            zcm_udp->publish(maav::PLANE_FIT_CHANNEL, &output);
         }
     }
 }
@@ -141,13 +142,14 @@ int main()
     signal(SIGTERM, sigHandler);
     // Initialize shared stuff
     shared_ptr<ZCM> zcm = shared_ptr<ZCM>(new ZCM("ipc"));
+    shared_ptr<ZCM> zcm_udp = shared_ptr<ZCM>(new ZCM("udpm://239.255.76.67:7667?ttl=1"));
     shared_ptr<JobDispatcher> dispatcher = shared_ptr<JobDispatcher>(new JobDispatcher());
     // Subscribe and start zcm receive loop
     Handler handler(dispatcher);
     zcm->subscribe(maav::DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL, &Handler::handle, &handler);
     zcm->start();
     // Start processing threads and heartbeat thread
-    thread th1(runFitPlane, dispatcher, zcm);
+    thread th1(runFitPlane, dispatcher, zcm, zcm_udp);
     thread th2(runHeartbeat, zcm);
     // Prevent main from ending until kill signal is received
     th2.join();

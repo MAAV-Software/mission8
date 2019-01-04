@@ -7,8 +7,8 @@ namespace gnc
 {
 namespace slam
 {
-VisualizerLink::VisualizerLink(const std::string& zcm_url, Map* map_data)
-    : zcm{zcm_url}, map_(map_data)
+VisualizerLink::VisualizerLink(const std::string& zcm_url, Map* map_data, bool send_images)
+    : zcm{zcm_url}, map_(map_data), send_images_(send_images)
 {
 }
 void VisualizerLink::updateTracking(Tracking* tracker)
@@ -16,8 +16,18 @@ void VisualizerLink::updateTracking(Tracking* tracker)
     unique_lock<mutex> lock(tracking_mutex_);
 
     // Send tracking info + images
-    convertRgbImage(tracker->rgb_im);
-    convertDepthImage(tracker->depth_im);
+    if (send_images_)
+    {
+        convertRgbImage(tracker->rgb_im);
+        convertDepthImage(tracker->depth_im);
+    }
+    else
+    {
+        last_frame.img.rgb_image.raw_image.resize(0);
+        last_frame.img.depth_image.raw_image.resize(0);
+        last_frame.img.rgb_image.size = 0;
+        last_frame.img.depth_image.size = 0;
+    }
 
     auto keypoints = tracker->mCurrentFrame.mvKeys;
     last_frame.num_keypoints = keypoints.size();
@@ -155,6 +165,7 @@ void VisualizerLink::updateTracking(Tracking* tracker)
     //     }
 
     zcm.publish(maav::VISUALIZER_CHANNEL, &last_frame);
+    zcm.flush();
 }
 
 void VisualizerLink::convertRgbImage(const cv::Mat& im)

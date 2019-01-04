@@ -54,14 +54,11 @@ void MapDrawer::SetCurrentCameraPose(const cv::Mat& Tcw, bool use_estimator)
     std::unique_lock<std::mutex> lock(mMutexCamera);
     if (use_estimator)
     {
-        std::cout << state_;
         mCameraPose = Tcw.clone();
         const Eigen::Quaterniond& q = state_.attitude().unit_quaternion();
         Eigen::Quaterniond q_v(q.w(), -q.y(), -q.z(), -q.x());
         Eigen::Vector3d p_v(-state_.position().y(), -state_.position().z(), -state_.position().x());
         Eigen::Matrix3d mat_v = q_v.matrix();
-        std::cout << mat_v << std::endl;
-        std::cout << p_v.transpose() << std::endl;
         for (size_t i = 0; i < 3; i++)
         {
             for (size_t j = 0; j < 3; j++)
@@ -71,13 +68,10 @@ void MapDrawer::SetCurrentCameraPose(const cv::Mat& Tcw, bool use_estimator)
             mCameraPose.at<float>(i, 3) = p_v(i);
         }
         mCameraPose.at<float>(3, 3) = 1;
-        std::cout << "Using KF" << std::endl;
-        std::cout << "Kalman pose: " << std::endl;
     }
     else
     {
         mCameraPose = Tcw.clone();
-        std::cout << "Using slam" << std::endl;
     }
     std::cout << mCameraPose << std::endl;
 }
