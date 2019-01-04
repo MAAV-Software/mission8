@@ -1,0 +1,32 @@
+# zcm-url: "udpm://239.255.76.67:7667?ttl=1"
+zcm-url: "ipc"
+
+color:
+  lidar: [128, 0, 0]
+  imu-x: [170, 110, 40]
+  imu-y: [128, 128, 0]
+  imu-z: [0, 128, 128]
+  imu-yaw: [0, 0, 128]
+  imu-pitch: [0, 0, 0]
+  imu-roll: [230, 25, 75]
+  pf-pitch: [245, 130, 48]
+  pf-roll: [255, 255, 25]
+  pf-z: [210, 245, 60]
+  pf-z-dot: [60, 180, 75]
+  state-pos-x: [70, 240, 240]
+  state-pos-y: [0, 130, 200]
+  state-pos-z: [145, 30, 180]
+  state-vel-x: [240, 50, 230]
+  state-vel-y: [128, 128, 128]
+  state-vel-z: [250, 190, 190]
+  global-update-x: [255, 215, 180]
+  global-update-y: [255, 250, 200]
+  global-update-z: [160, 245, 185]
+
+
+# Larger line widths will decrease
+# performance, slow down draw loop if 
+# there is lag in the plotting (specifically
+# lag will occur in imu since it is the highest frequency)
+line-width: 2
+draw-timeout: 30 #ms
