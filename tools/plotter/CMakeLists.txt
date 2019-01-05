@@ -29,7 +29,7 @@ set(PLOTTER_SRC
 add_executable(${EXECUTABLE} ${PLOTTER_SRC})
 
 target_include_directories(${EXECUTABLE} PUBLIC
-    qtplotter
+    plotter
     Qt5::Widgets
     Qt5::PrintSupport
     ${ZCM_INCLUDE_DIRS}
@@ -46,4 +46,5 @@ target_link_libraries(${EXECUTABLE}
     ${ZCM_LIBRARIES}
     ${YAMLCPP_LIBRARY}
     ${OPENGL_LIBRARIES}
+    stdc++fs
 )

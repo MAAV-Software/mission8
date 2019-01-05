@@ -19,8 +19,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
-
+    YAML::Node config;
+    try
+    {
+        config = YAML::LoadFile(gopt.getString("config"));
+    }
+    catch (...)
+    {
+        std::cout
+            << "Please provide correct path to configuration file with \"-c <path-to-config>\"\n";
+        return 1;
+    }
     QApplication app(argc, argv);
     MainWindow main_window(config);
     main_window.show();

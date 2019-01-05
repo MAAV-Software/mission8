@@ -1,4 +1,6 @@
+#include <experimental/filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -410,8 +412,145 @@ void MainWindow::on_reset_plots_button_clicked()
     time_value_init();
 }
 
-#include <iostream>
-void MainWindow::on_log_button_clicked() {}
+void MainWindow::on_log_button_clicked()
+{
+    using namespace std::experimental;
+
+    std::string logs_path = QCoreApplication::applicationDirPath().toUtf8().constData();
+    logs_path = logs_path.erase(logs_path.find("bin"), -1) + std::string("logs/");
+
+    std::ofstream lidar_log(logs_path + std::string("lidar.log"));
+    lidar_log << "sec,height\n";
+    for (const auto &lidar_height :
+        *(ui->customPlot->graph(static_cast<int>(Graph::LIDAR))->data()))
+    {
+        lidar_log << lidar_height.key << ',' << lidar_height.value << '\n';
+    }
+    lidar_log.close();
+
+    std::ofstream imu_accel_log(logs_path + std::string("imu_acceleration.log"));
+    imu_accel_log << "sec,accel_x,accel_y,accel_z\n";
+    auto &imu_x = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_X))->data());
+    auto &imu_y = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_Y))->data());
+    auto &imu_z = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_Z))->data());
+    const QCPGraphData *x = imu_x.begin();
+    const QCPGraphData *y = imu_y.begin();
+    const QCPGraphData *z = imu_z.begin();
+    for (; x != imu_x.end() && y != imu_x.end() && z != imu_z.end(); ++x, ++y, ++z)
+    {
+        if (x->key != y->key || y->key != z->key || x->key != z->key)
+        {
+            std::cout << "IMU ACCLERATION VALUES NOT SYNCHRONIZED\n";
+        }
+        imu_accel_log << x->key << ',' << x->value << ',' << y->value << ',' << z->value << '\n';
+    }
+    imu_accel_log.close();
+
+    std::ofstream imu_angl_log(logs_path + std::string("imu_angular_rates.log"));
+    imu_angl_log << "sec,yaw,pitch,roll\n";
+    auto &imu_yaw = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_YAW))->data());
+    auto &imu_pitch = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_PITCH))->data());
+    auto &imu_roll = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_ROLL))->data());
+    const QCPGraphData *yaw = imu_yaw.begin();
+    const QCPGraphData *pitch = imu_pitch.begin();
+    const QCPGraphData *roll = imu_roll.begin();
+    for (; yaw != imu_yaw.end() && pitch != imu_pitch.end() && roll != imu_roll.end();
+         ++yaw, ++pitch, ++roll)
+    {
+        if (yaw->key != pitch->key && yaw->key != roll->key && pitch->key != roll->key)
+        {
+            std::cout << "IMU ANGLE RATES VALUES NOT SYNCHRONIZED\n";
+        }
+        imu_angl_log << yaw->key << ',' << yaw->value << ',' << pitch->value << ',' << roll->value
+                     << '\n';
+    }
+    imu_angl_log.close();
+
+    std::ofstream pf_z_log(logs_path + std::string("plane_fit_z.log"));
+    pf_z_log << "sec,z,z_dot\n";
+    auto &pf_z = *(ui->customPlot->graph(static_cast<int>(Graph::PF_Z))->data());
+    auto &pf_z_dot = *(ui->customPlot->graph(static_cast<int>(Graph::PF_Z_DOT))->data());
+    const QCPGraphData *pfz = pf_z.begin();
+    const QCPGraphData *pfzdot = pf_z_dot.begin();
+    for (; pfz != pf_z.end() && pfzdot != pf_z_dot.end(); ++pfz, ++pfzdot)
+    {
+        if (pfz->key != pfzdot->key) std::cout << "PLANE FIT Z VALUES NOT SYNCHRONIZED\n";
+        pf_z_log << pfz->key << ',' << pfz->value << ',' << pfzdot->value << '\n';
+    }
+    pf_z_log.close();
+
+    std::ofstream pf_ang_log(logs_path + std::string("plane_fit_ang.log"));
+    pf_ang_log << "sec,roll,pitch\n";
+    auto &pf_roll = *(ui->customPlot->graph(static_cast<int>(Graph::PF_ROLL))->data());
+    auto &pf_pitch = *(ui->customPlot->graph(static_cast<int>(Graph::PF_PITCH))->data());
+    const QCPGraphData *pfroll = pf_roll.begin();
+    const QCPGraphData *pfpitch = pf_pitch.begin();
+    for (; pfroll != pf_roll.end() && pfpitch != pf_pitch.end(); ++pfroll, ++pfpitch)
+    {
+        if (pfroll->key != pfpitch->key) std::cout << "PLANE FIT ANGLE VALUES NOT SYNCHRONIZED\n";
+        pf_ang_log << pfroll->value << ',' << pfpitch->value << '\n';
+    }
+    pf_ang_log.close();
+
+    std::ofstream state_pos_log(logs_path + std::string("state_pos.log"));
+    state_pos_log << "sec,x,y,z\n";
+    auto &state_x = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_X))->data());
+    auto &state_y = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_Y))->data());
+    auto &state_z = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_Z))->data());
+    const QCPGraphData *sx = state_x.begin();
+    const QCPGraphData *sy = state_y.begin();
+    const QCPGraphData *sz = state_z.begin();
+    for (; sx != state_x.end() && sy != state_x.end() && sz != state_x.end(); ++sx, ++sy, ++sz)
+    {
+        if (sx->key != sy->key || sy->key != sz->key || sx->key != sz->key)
+        {
+            std::cout << "STATE POSITION VALUES NOT SYNCHRONIZED\n";
+        }
+        state_pos_log << sx->key << ',' << sx->value << ',' << sy->value << ',' << sz->value
+                      << '\n';
+    }
+    state_pos_log.close();
+
+    std::ofstream state_vel_log(logs_path + std::string("state_vel.log"));
+    state_vel_log << "sec,x,y,z\n";
+    auto &state_vx = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_X))->data());
+    auto &state_vy = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_Y))->data());
+    auto &state_vz = *(ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_Z))->data());
+    const QCPGraphData *svx = state_vx.begin();
+    const QCPGraphData *svy = state_vy.begin();
+    const QCPGraphData *svz = state_vz.begin();
+    for (; svx != state_vx.end() && svy != state_vx.end() && svz != state_vx.end();
+         ++svx, ++svy, ++svz)
+    {
+        if (svx->key != svy->key || svy->key != svz->key || svx->key != svz->key)
+        {
+            std::cout << "STATE VELOCITY VALUES NOT SYNCHRONIZED\n";
+        }
+        state_vel_log << svx->key << ',' << svx->value << ',' << svy->value << ',' << svz->value
+                      << '\n';
+    }
+    state_vel_log.close();
+
+    std::ofstream global_pos_log(logs_path + std::string("global_pos.log"));
+    global_pos_log << "sec,x,y,z\n";
+    auto &global_x = *(ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_X))->data());
+    auto &global_y = *(ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_Y))->data());
+    auto &global_z = *(ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_Z))->data());
+    const QCPGraphData *gx = global_x.begin();
+    const QCPGraphData *gy = global_y.begin();
+    const QCPGraphData *gz = global_z.begin();
+    for (; gx != global_x.end() && gy != global_x.end() && gz != global_x.end(); ++gx, ++gy, ++gz)
+    {
+        if (gx->key != gy->key || gy->key != gz->key || gx->key != gz->key)
+        {
+            std::cout << "GLOBAL POSITION VALUES NOT SYNCHRONIZED\n";
+        }
+        global_pos_log << gx->key << ',' << gx->value << ',' << gy->value << ',' << gz->value
+                       << '\n';
+    }
+    global_pos_log.close();
+}
+
 /*
  *
  *        HELPERS

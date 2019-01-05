@@ -21,6 +21,7 @@ int main()
     zcm::ZCM zcm{"ipc"};
     killswitch_t killswitch;
     killswitch.kill = false;
+    killswitch.utime = 0;
     zcm.publish(maav::KILLSWITCH_CHANNEL, &killswitch);
 
     std::string a;
