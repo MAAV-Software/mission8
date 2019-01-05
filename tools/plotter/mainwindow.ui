@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1069</width>
-    <height>694</height>
+    <width>1082</width>
+    <height>741</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>0</y>
          <width>61</width>
          <height>23</height>
         </rect>
@@ -52,7 +52,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>50</y>
+         <y>20</y>
          <width>121</width>
          <height>23</height>
         </rect>
@@ -76,8 +76,8 @@
       <widget class="QCheckBox" name="imu_acc_x">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>80</y>
+         <x>20</x>
+         <y>40</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -98,8 +98,8 @@
       <widget class="QCheckBox" name="imu_acc_y">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>80</y>
+         <x>60</x>
+         <y>40</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -120,8 +120,8 @@
       <widget class="QCheckBox" name="imu_acc_z">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>80</y>
+         <x>100</x>
+         <y>40</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -143,7 +143,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>590</y>
+         <y>490</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -159,7 +159,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>560</y>
+         <y>460</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -178,7 +178,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>60</y>
          <width>171</width>
          <height>23</height>
         </rect>
@@ -199,8 +199,8 @@
       <widget class="QCheckBox" name="imu_yaw_rate">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>140</y>
+         <x>20</x>
+         <y>80</y>
          <width>51</width>
          <height>23</height>
         </rect>
@@ -221,8 +221,8 @@
       <widget class="QCheckBox" name="imu_pitch_rate">
        <property name="geometry">
         <rect>
-         <x>80</x>
-         <y>140</y>
+         <x>70</x>
+         <y>80</y>
          <width>61</width>
          <height>23</height>
         </rect>
@@ -243,8 +243,8 @@
       <widget class="QCheckBox" name="imu_roll_rate">
        <property name="geometry">
         <rect>
-         <x>150</x>
-         <y>140</y>
+         <x>140</x>
+         <y>80</y>
          <width>61</width>
          <height>23</height>
         </rect>
@@ -266,7 +266,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>170</y>
+         <y>100</y>
          <width>161</width>
          <height>23</height>
         </rect>
@@ -287,8 +287,8 @@
       <widget class="QCheckBox" name="pf_roll">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>200</y>
+         <x>20</x>
+         <y>120</y>
          <width>51</width>
          <height>23</height>
         </rect>
@@ -309,8 +309,8 @@
       <widget class="QCheckBox" name="pf_pitch">
        <property name="geometry">
         <rect>
-         <x>90</x>
-         <y>200</y>
+         <x>80</x>
+         <y>120</y>
          <width>61</width>
          <height>23</height>
         </rect>
@@ -332,7 +332,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>230</y>
+         <y>140</y>
          <width>131</width>
          <height>23</height>
         </rect>
@@ -353,8 +353,8 @@
       <widget class="QCheckBox" name="pf_z">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>260</y>
+         <x>20</x>
+         <y>160</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -375,8 +375,8 @@
       <widget class="QCheckBox" name="pf_z_dot">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>260</y>
+         <x>60</x>
+         <y>160</y>
          <width>61</width>
          <height>23</height>
         </rect>
@@ -398,7 +398,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>290</y>
+         <y>180</y>
          <width>151</width>
          <height>23</height>
         </rect>
@@ -419,8 +419,8 @@
       <widget class="QCheckBox" name="state_pos_y">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>320</y>
+         <x>60</x>
+         <y>200</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -441,8 +441,8 @@
       <widget class="QCheckBox" name="state_pos_x">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>320</y>
+         <x>20</x>
+         <y>200</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -463,8 +463,8 @@
       <widget class="QCheckBox" name="state_pos_z">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>320</y>
+         <x>100</x>
+         <y>200</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -486,7 +486,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>350</y>
+         <y>220</y>
          <width>161</width>
          <height>23</height>
         </rect>
@@ -507,8 +507,8 @@
       <widget class="QCheckBox" name="state_vel_y">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>380</y>
+         <x>60</x>
+         <y>240</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -529,8 +529,8 @@
       <widget class="QCheckBox" name="state_vel_x">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>380</y>
+         <x>20</x>
+         <y>240</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -551,8 +551,8 @@
       <widget class="QCheckBox" name="state_vel_z">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>380</y>
+         <x>100</x>
+         <y>240</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -573,8 +573,8 @@
       <widget class="QCheckBox" name="global_update_z">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>440</y>
+         <x>100</x>
+         <y>280</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -596,7 +596,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>410</y>
+         <y>260</y>
          <width>171</width>
          <height>23</height>
         </rect>
@@ -617,8 +617,8 @@
       <widget class="QCheckBox" name="global_update_x">
        <property name="geometry">
         <rect>
-         <x>30</x>
-         <y>440</y>
+         <x>20</x>
+         <y>280</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -639,8 +639,8 @@
       <widget class="QCheckBox" name="global_update_y">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>440</y>
+         <x>60</x>
+         <y>280</y>
          <width>41</width>
          <height>23</height>
         </rect>
@@ -662,7 +662,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>590</y>
+         <y>490</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -678,7 +678,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>560</y>
+         <y>460</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -697,7 +697,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>620</y>
+         <y>520</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -710,13 +710,277 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>620</y>
+         <y>520</y>
          <width>89</width>
          <height>25</height>
         </rect>
        </property>
        <property name="text">
         <string>Log</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_pos_x">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>320</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>x</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_pos_y">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>320</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>y</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_pos_z">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>320</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>z</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_pos_button">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Position Error</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_vel_x">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>360</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>x</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_vel_y">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>360</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>y</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_vel_z">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>360</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>z</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="pid_vel_button">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Velocity Error</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="com_thrust">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>400</y>
+         <width>71</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Thrust</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="com_roll">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>400</y>
+         <width>61</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Roll</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="com_pitch">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>420</y>
+         <width>71</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Pitch</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="com_button">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>380</y>
+         <width>181</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Commanded Values</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </widget>

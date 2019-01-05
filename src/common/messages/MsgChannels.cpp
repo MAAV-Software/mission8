@@ -43,6 +43,7 @@ const char* const IDLE_CHANNEL = "IDLE";
 const char* const CONTROL_COMMANDS_CHANNEL = "CONTROL";
 const char* const KILLSWITCH_CHANNEL = "KILLSWITCH";
 const char* const LOCALIZATION_STATUS_CHANNEL = "LOCALIZATION_STATUS";
+const char* const PID_ERROR_CHANNEL = "PID_ERROR";
 
 // clang-format on
 }  // namespace maav

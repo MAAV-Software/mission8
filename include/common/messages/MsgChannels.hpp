@@ -44,6 +44,7 @@ extern const char* const IDLE_CHANNEL;                      ///< channel on whic
 extern const char* const CONTROL_COMMANDS_CHANNEL;      ///< controll commands to controller
 extern const char* const KILLSWITCH_CHANNEL;            ///< killswitch channel
 extern const char* const LOCALIZATION_STATUS_CHANNEL;   ///< status of localization
+extern const char* const PID_ERROR_CHANNEL;
 // clang-format on
 }  // namespace maav
 

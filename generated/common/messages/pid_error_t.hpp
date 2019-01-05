@@ -6,32 +6,31 @@
 
 #include <zcm/zcm_coretypes.h>
 
-#ifndef __rgb_image_t_hpp__
-#define __rgb_image_t_hpp__
-
-#include <vector>
+#ifndef __pid_error_t_hpp__
+#define __pid_error_t_hpp__
 
 
-/**
- * ZCM type for an rgb image
- *
- */
-class rgb_image_t
+
+class pid_error_t
 {
     public:
-        int32_t    width;
+        double     pos_error[3];
 
-        int32_t    height;
+        double     vel_error[3];
 
-        int32_t    size;
+        double     roll;
 
-        std::vector< int8_t > raw_image;
+        double     pitch;
+
+        double     thrust;
+
+        int64_t    utime;
 
     public:
         /**
          * Destructs a message properly if anything inherits from it
         */
-        virtual ~rgb_image_t() {}
+        virtual ~pid_error_t() {}
 
         /**
          * Encode a message into binary form.
@@ -68,7 +67,7 @@ class rgb_image_t
         inline static int64_t getHash();
 
         /**
-         * Returns "rgb_image_t"
+         * Returns "pid_error_t"
          */
         inline static const char* getTypeName();
 
@@ -79,7 +78,7 @@ class rgb_image_t
         inline static uint64_t _computeHash(const __zcm_hash_ptr* p);
 };
 
-int rgb_image_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
+int pid_error_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
@@ -94,7 +93,7 @@ int rgb_image_t::encode(void* buf, uint32_t offset, uint32_t maxlen) const
     return pos;
 }
 
-int rgb_image_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
+int pid_error_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
 {
     uint32_t pos = 0;
     int thislen;
@@ -110,80 +109,89 @@ int rgb_image_t::decode(const void* buf, uint32_t offset, uint32_t maxlen)
     return pos;
 }
 
-uint32_t rgb_image_t::getEncodedSize() const
+uint32_t pid_error_t::getEncodedSize() const
 {
     return 8 + _getEncodedSizeNoHash();
 }
 
-int64_t rgb_image_t::getHash()
+int64_t pid_error_t::getHash()
 {
     static int64_t hash = _computeHash(NULL);
     return hash;
 }
 
-const char* rgb_image_t::getTypeName()
+const char* pid_error_t::getTypeName()
 {
-    return "rgb_image_t";
+    return "pid_error_t";
 }
 
-int rgb_image_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
-{
-    uint32_t pos = 0;
-    int thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->height, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    thislen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
-    if(thislen < 0) return thislen; else pos += thislen;
-
-    if(this->size > 0) {
-        thislen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
-
-    return pos;
-}
-
-int rgb_image_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
+int pid_error_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) const
 {
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
+    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->pos_error[0], 3);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->height, 1);
+    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->vel_error[0], 3);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->size, 1);
+    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->roll, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    if(this->size > 0) {
-        this->raw_image.resize(this->size);
-        thislen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->raw_image[0], this->size);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
+    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->pitch, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->thrust, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
 
     return pos;
 }
 
-uint32_t rgb_image_t::_getEncodedSizeNoHash() const
+int pid_error_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen)
+{
+    uint32_t pos = 0;
+    int thislen;
+
+    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->pos_error[0], 3);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->vel_error[0], 3);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->roll, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->pitch, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->thrust, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    return pos;
+}
+
+uint32_t pid_error_t::_getEncodedSizeNoHash() const
 {
     uint32_t enc_size = 0;
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __int8_t_encoded_array_size(NULL, this->size);
+    enc_size += __double_encoded_array_size(NULL, 3);
+    enc_size += __double_encoded_array_size(NULL, 3);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __int64_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t rgb_image_t::_computeHash(const __zcm_hash_ptr*)
+uint64_t pid_error_t::_computeHash(const __zcm_hash_ptr*)
 {
-    uint64_t hash = (uint64_t)0x1831c9e8da569e67LL;
+    uint64_t hash = (uint64_t)0x1cc2f8d05dd5266cLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

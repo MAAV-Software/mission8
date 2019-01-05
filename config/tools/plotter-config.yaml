@@ -22,6 +22,15 @@ color:
   global-update-x: [0, 0, 0]
   global-update-y: [0, 255, 255]
   global-update-z: [255, 0, 255]
+  pid-pos-x: [0,0,0]
+  pid-pos-y: [0,0,0]
+  pid-pos-z: [0,0,0]
+  pid-vel-x: [0,0,0]
+  pid-vel-y: [0,0,0]
+  pid-vel-z: [0,0,0]
+  com-thrust: [0,0,0]
+  com-roll: [0,0,0]
+  com-pitch: [0,0,0]
 
 
 # Larger line widths will decrease
@@ -29,4 +38,4 @@ color:
 # there is lag in the plotting (specifically
 # lag will occur in imu since it is the highest frequency)
 line-width: 2
-draw-timeout: 30 #ms
+refresh-rate: 60 #Hz

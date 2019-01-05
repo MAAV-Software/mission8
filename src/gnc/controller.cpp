@@ -1,8 +1,11 @@
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
+#include <common/messages/MsgChannels.hpp>
 #include <gnc/constants.hpp>
 #include <gnc/controller.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
@@ -45,9 +48,12 @@ static double get_heading(const State& state)
     return atan2((q1 * q2) + (q0 * q3), 0.5 - (q2 * q2) - (q3 * q3));
 }
 
-Controller::Controller()
-    : current_state(0), current_target({Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0.})
+Controller::Controller(const std::string& zcm_url)
+    : current_state(0),
+      current_target({Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0.}),
+      zcm(zcm_url)
 {
+    zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
     set_control_state(ControlState::STANDBY);
     current_state.zero(0);
 
@@ -219,10 +225,6 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
         z_position_pid.run(position_error.z(), -velocity.z())};
     // TODO: add rate limits
 
-    // std::cout << "Position: " << position.transpose() << std::endl;
-    // std::cout << "Position Target: " << target_position.transpose() << std::endl;
-    // std::cout << "Position Error: " << position_error.transpose() << std::endl;
-
     target_velocity.x() = bounded(target_velocity.x(), veh_params.rate_limits[0]);
     target_velocity.y() = bounded(target_velocity.y(), veh_params.rate_limits[1]);
     target_velocity.z() = bounded(target_velocity.z(), veh_params.rate_limits[2]);
@@ -232,10 +234,6 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
         x_velocity_pid.run(velocity_error.x(), -acceleration.x()),
         y_velocity_pid.run(velocity_error.y(), -acceleration.y()),
         z_velocity_pid.run(velocity_error.z(), -acceleration.z())};
-
-    // std::cout << "Velocity: " << velocity.transpose() << std::endl;
-    // std::cout << "Velocity Target: " << target_velocity.transpose() << std::endl;
-    // std::cout << "Velocity Error: " << velocity_error.transpose() << std::endl;
 
     float roll = static_cast<float>(target_acceleration.y());
     float pitch = -static_cast<float>(target_acceleration.x());
@@ -249,10 +247,8 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     {
         yaw = origin_yaw;
     }
-    // cout << "rpy: " << roll << ' ' << pitch << ' ' << yaw << '\n';
     roll = bounded(roll, veh_params.angle_limits[0]);
     pitch = bounded(pitch, veh_params.angle_limits[1]);
-    // cout << "rpy_bounded: " << roll << ' ' << pitch << ' ' << yaw << '\n';
 
     Eigen::Quaternionf q_roll(Eigen::AngleAxisf(roll, Eigen::Vector3f::UnitX()));
     Eigen::Quaternionf q_pitch(Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY()));
@@ -261,14 +257,22 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     new_setpoint.q = q_roll * q_pitch * q_yaw;
     new_setpoint.thrust = -target_acceleration.z();
 
-    // cout << "thrust: " << new_setpoint.thrust << '\n';
-    // std::cout << "q: " << new_setpoint.q.w() << ' ' << new_setpoint.q.x() << ' '
-    //           << new_setpoint.q.y() << ' ' << new_setpoint.q.z() << std::endl;
-
     if (position_error.norm() < veh_params.setpoint_tol)
     {
         converged_on_waypoint = true;
     }
+
+    pid_error_msg.pos_error[0] = position_error.x();
+    pid_error_msg.pos_error[1] = position_error.y();
+    pid_error_msg.pos_error[2] = position_error.z();
+    pid_error_msg.vel_error[0] = velocity_error.x();
+    pid_error_msg.vel_error[1] = velocity_error.y();
+    pid_error_msg.vel_error[2] = velocity_error.z();
+    pid_error_msg.roll = roll;
+    pid_error_msg.pitch = pitch;
+    pid_error_msg.thrust = -target_acceleration.z();
+    pid_error_msg.utime = current_state.timeUSec();
+    zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
 
     return new_setpoint;
 }

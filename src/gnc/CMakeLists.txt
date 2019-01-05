@@ -75,6 +75,7 @@ target_link_libraries(maav-control
     maav-state
     maav-gnc-utils
     maav-measurements
+    maav-msg
 )
 
 add_library(maav-kalman SHARED

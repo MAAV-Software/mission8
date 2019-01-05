@@ -1,6 +1,6 @@
-#include <signal.h>
 #include <atomic>
 #include <chrono>
+#include <csignal>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -140,7 +140,8 @@ int main(int argc, char** argv)
      *      Initialize controller class and offboard control
      *      construct offboard controller for sim or irl
      */
-    Controller controller;  // sets control state to standby
+    Controller controller(
+        control_config["zcm-url"].as<std::string>());  // sets control state to standby
     controller.set_control_params(LoadParametersFromYAML(control_config));
     CommunicationType com_type;
     if (control_config["sim"].as<bool>())

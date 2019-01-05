@@ -1,3 +1,4 @@
+#include <string>
 #include <utility>
 
 #include <gnc/constants.hpp>
@@ -73,6 +74,8 @@ Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file)
 
     params.setpoint_tol = config_file["tol"].as<double>();
     params.takeoff_alt = config_file["takeoff-alt"].as<double>();
+
+    params.zcm_url = config_file["zcm-url"].as<std::string>();
 
     return params;
 }

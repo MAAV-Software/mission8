@@ -47,11 +47,13 @@ MainWindow::MainWindow(const YAML::Node &config_in, QWidget *parent)
     setup(ui->customPlot);
     setWindowTitle("Maav Plotter");
     statusBar()->clearMessage();
-    ui->customPlot->replot();
     ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     ui->customPlot->setOpenGl(true);
+
     ui->customPlot->legend->setVisible(true);
     ui->customPlot->legend->setBrush(QBrush(QColor(255, 255, 255, 200)));
+
+    ui->customPlot->replot();
 
     zcm.subscribe(maav::HEIGHT_LIDAR_CHANNEL, &ZCMHandler<lidar_t>::recv, &lidar_handler);
     zcm.subscribe(maav::IMU_CHANNEL, &ZCMHandler<imu_t>::recv, &imu_handler);
@@ -59,6 +61,7 @@ MainWindow::MainWindow(const YAML::Node &config_in, QWidget *parent)
         maav::GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv, &global_update_handler);
     zcm.subscribe(maav::PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
     zcm.subscribe(maav::STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+    zcm.subscribe(maav::PID_ERROR_CHANNEL, &ZCMHandler<pid_error_t>::recv, &pid_error_handler);
     zcm.start();
 }
 
@@ -70,6 +73,9 @@ void MainWindow::setup(QCustomPlot *customPlot)
     customPlot->axisRect()->setupFullAxesBox();
 
     add_graphs(customPlot);
+    customPlot->graph(static_cast<int>(Graph::STATE_POS_X))->setAdaptiveSampling(true);
+    customPlot->graph(static_cast<int>(Graph::STATE_POS_X_U))->setAdaptiveSampling(true);
+    customPlot->graph(static_cast<int>(Graph::STATE_POS_X_L))->setAdaptiveSampling(true);
     set_sliders();
     ui->customPlot->xAxis->setRange(time_med - time_range, time_med + time_range);
     ui->customPlot->yAxis->setRange(value_med - value_range, value_med + value_range);
@@ -83,7 +89,7 @@ void MainWindow::setup(QCustomPlot *customPlot)
     dataTimer.start(0);
 
     connect(&drawTimer, SIGNAL(timeout()), this, SLOT(draw_slot()));
-    drawTimer.start(config["draw-timeout"].as<double>());
+    drawTimer.start(1000. / config["refresh-rate"].as<double>());
 }
 
 void MainWindow::add_graphs(QCustomPlot *customPlot)
@@ -111,12 +117,45 @@ void MainWindow::add_graphs(QCustomPlot *customPlot)
     color_graph(ui->state_vel_x, Graph::STATE_VEL_X, color["state-vel-x"].as<std::vector<int>>());
     color_graph(ui->state_vel_y, Graph::STATE_VEL_Y, color["state-vel-y"].as<std::vector<int>>());
     color_graph(ui->state_vel_z, Graph::STATE_VEL_Z, color["state-vel-z"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_x, Graph::STATE_POS_X_U, color["state-pos-x"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_x, Graph::STATE_POS_X_L, color["state-pos-x"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_y, Graph::STATE_POS_Y_U, color["state-pos-y"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_y, Graph::STATE_POS_Y_L, color["state-pos-y"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_z, Graph::STATE_POS_Z_U, color["state-pos-z"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_pos_z, Graph::STATE_POS_Z_L, color["state-pos-z"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_x, Graph::STATE_VEL_X_U, color["state-vel-x"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_x, Graph::STATE_VEL_X_L, color["state-vel-x"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_y, Graph::STATE_VEL_Y_U, color["state-vel-y"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_y, Graph::STATE_VEL_Y_L, color["state-vel-y"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_z, Graph::STATE_VEL_Z_U, color["state-vel-z"].as<std::vector<int>>());
+    color_graph_bounds(
+        ui->state_vel_z, Graph::STATE_VEL_Z_L, color["state-vel-z"].as<std::vector<int>>());
     color_graph(ui->global_update_x, Graph::GLOBAL_UPDATE_X,
         color["global-update-x"].as<std::vector<int>>());
     color_graph(ui->global_update_y, Graph::GLOBAL_UPDATE_Y,
         color["global-update-y"].as<std::vector<int>>());
     color_graph(ui->global_update_z, Graph::GLOBAL_UPDATE_Z,
         color["global-update-z"].as<std::vector<int>>());
+    color_graph(ui->pid_pos_x, Graph::PID_POS_X, color["pid-pos-x"].as<std::vector<int>>());
+    color_graph(ui->pid_pos_y, Graph::PID_POS_Y, color["pid-pos-y"].as<std::vector<int>>());
+    color_graph(ui->pid_pos_z, Graph::PID_POS_Z, color["pid-pos-z"].as<std::vector<int>>());
+    color_graph(ui->pid_vel_x, Graph::PID_VEL_X, color["pid-vel-x"].as<std::vector<int>>());
+    color_graph(ui->pid_vel_y, Graph::PID_VEL_Y, color["pid-vel-y"].as<std::vector<int>>());
+    color_graph(ui->pid_vel_z, Graph::PID_VEL_Z, color["pid-vel-z"].as<std::vector<int>>());
+    color_graph(ui->com_thrust, Graph::COM_THRUST, color["com-thrust"].as<std::vector<int>>());
+    color_graph(ui->com_roll, Graph::COM_ROLL, color["com-roll"].as<std::vector<int>>());
+    color_graph(ui->com_pitch, Graph::COM_PITCH, color["com-pitch"].as<std::vector<int>>());
 }
 
 void MainWindow::color_graph(QWidget *button, const Graph &graph, const std::vector<int> rgb)
@@ -125,6 +164,15 @@ void MainWindow::color_graph(QWidget *button, const Graph &graph, const std::vec
     graph_pen.setWidthF(config["line-width"].as<float>());
     ui->customPlot->graph(static_cast<int>(graph))->setPen(graph_pen);
     ui->customPlot->graph(static_cast<int>(graph))->setName(button->objectName());
+}
+
+void MainWindow::color_graph_bounds(QWidget *button, const Graph &graph, const std::vector<int> rgb)
+{
+    QPen graph_pen(QColor(rgb[0], rgb[1], rgb[2]));
+    graph_pen.setStyle(Qt::DashLine);
+    graph_pen.setWidthF(config["line-width"].as<float>());
+    ui->customPlot->graph(static_cast<int>(graph))->setPen(graph_pen);
+    ui->customPlot->graph(static_cast<int>(graph))->removeFromLegend();
 }
 
 /*
@@ -139,6 +187,7 @@ void MainWindow::real_time_data_slot()
     plot_plane_fit();
     plot_state();
     plot_global_update();
+    plot_pid();
 
     // make key axis range scroll with the data (at a constant range size of 8):
     if (!ui->pause_button->isChecked())
@@ -151,18 +200,17 @@ void MainWindow::real_time_data_slot()
 void MainWindow::draw_slot()
 {
     if (!(ui->pause_button->isChecked())) update_x_axis();
-    ui->customPlot->replot();
+    ui->customPlot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void MainWindow::plot_lidar()
 {
     if (lidar_handler.ready())
     {
-        double elapsed_time = time_manager(lidar_handler.msg().utime);
+        double et = time_manager(lidar_handler.msg().utime);
         if (ui->lidar_button->isChecked())
         {
-            ui->customPlot->graph(static_cast<int>(Graph::LIDAR))
-                ->addData(elapsed_time, lidar_handler.msg().distance);
+            plot(Graph::LIDAR, et, lidar_handler.msg().distance);
             if (auto_y()) check_value_range(lidar_handler.msg().distance);
         }
 
@@ -175,26 +223,24 @@ void MainWindow::plot_imu()
 {
     if (imu_handler.ready())
     {
-        double elapsed_time = time_manager(imu_handler.msg().utime);
+        const imu_t &msg = imu_handler.msg();
+        double et = time_manager(imu_handler.msg().utime);
         if (ui->imu_button->isChecked())
         {
             if (ui->imu_acc_x->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_X))
-                    ->addData(elapsed_time, imu_handler.msg().acceleration[0]);
-                if (auto_y()) check_value_range(imu_handler.msg().acceleration[0]);
+                plot(Graph::IMU_X, et, msg.acceleration[0]);
+                if (auto_y()) check_value_range(msg.acceleration[0]);
             }
             if (ui->imu_acc_y->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_Y))
-                    ->addData(elapsed_time, imu_handler.msg().acceleration[1]);
-                if (auto_y()) check_value_range(imu_handler.msg().acceleration[1]);
+                plot(Graph::IMU_Y, et, msg.acceleration[1]);
+                if (auto_y()) check_value_range(msg.acceleration[1]);
             }
             if (ui->imu_acc_z->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_Z))
-                    ->addData(elapsed_time, imu_handler.msg().acceleration[2]);
-                if (auto_y()) check_value_range(imu_handler.msg().acceleration[2]);
+                plot(Graph::IMU_Z, et, msg.acceleration[2]);
+                if (auto_y()) check_value_range(msg.acceleration[2]);
             }
         }
 
@@ -202,21 +248,18 @@ void MainWindow::plot_imu()
         {
             if (ui->imu_yaw_rate->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_YAW))
-                    ->addData(elapsed_time, imu_handler.msg().angular_rates[2]);
-                if (auto_y()) check_value_range(imu_handler.msg().angular_rates[2]);
+                plot(Graph::IMU_YAW, et, msg.angular_rates[2]);
+                if (auto_y()) check_value_range(msg.angular_rates[2]);
             }
             if (ui->imu_pitch_rate->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_PITCH))
-                    ->addData(elapsed_time, imu_handler.msg().angular_rates[1]);
-                if (auto_y()) check_value_range(imu_handler.msg().angular_rates[1]);
+                plot(Graph::IMU_PITCH, et, msg.angular_rates[1]);
+                if (auto_y()) check_value_range(msg.angular_rates[1]);
             }
             if (ui->imu_roll_rate->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::IMU_ROLL))
-                    ->addData(elapsed_time, imu_handler.msg().angular_rates[0]);
-                if (auto_y()) check_value_range(imu_handler.msg().angular_rates[0]);
+                plot(Graph::IMU_ROLL, et, msg.angular_rates[0]);
+                if (auto_y()) check_value_range(msg.angular_rates[0]);
             }
         }
 
@@ -229,20 +272,19 @@ void MainWindow::plot_plane_fit()
 {
     if (plane_fit_handler.ready())
     {
-        double elapsed_time = time_manager(plane_fit_handler.msg().utime);
+        const plane_fit_t &msg = plane_fit_handler.msg();
+        double et = time_manager(plane_fit_handler.msg().utime);
         if (ui->pf_angle_button->isChecked())
         {
             if (ui->pf_pitch->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::PF_PITCH))
-                    ->addData(elapsed_time, plane_fit_handler.msg().pitch);
-                if (auto_y()) check_value_range(plane_fit_handler.msg().pitch);
+                plot(Graph::PF_PITCH, et, msg.pitch);
+                if (auto_y()) check_value_range(msg.pitch);
             }
             if (ui->pf_roll->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::PF_ROLL))
-                    ->addData(elapsed_time, plane_fit_handler.msg().roll);
-                if (auto_y()) check_value_range(plane_fit_handler.msg().roll);
+                plot(Graph::PF_ROLL, et, msg.roll);
+                if (auto_y()) check_value_range(msg.roll);
             }
         }
 
@@ -250,15 +292,13 @@ void MainWindow::plot_plane_fit()
         {
             if (ui->pf_z->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::PF_Z))
-                    ->addData(elapsed_time, plane_fit_handler.msg().z);
-                if (auto_y()) check_value_range(plane_fit_handler.msg().z);
+                plot(Graph::PF_Z, et, msg.z);
+                if (auto_y()) check_value_range(msg.z);
             }
             if (ui->pf_z_dot->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::PF_Z_DOT))
-                    ->addData(elapsed_time, plane_fit_handler.msg().z_dot);
-                if (auto_y()) check_value_range(plane_fit_handler.msg().z_dot);
+                plot(Graph::PF_Z_DOT, et, msg.z_dot);
+                if (auto_y()) check_value_range(msg.z_dot);
             }
         }
 
@@ -266,31 +306,48 @@ void MainWindow::plot_plane_fit()
     }
 }
 
+#include <iomanip>
 void MainWindow::plot_state()
 {
     if (state_handler.ready())
     {
-        double elapsed_time = time_manager(state_handler.msg().utime);
+        const state_t &msg = state_handler.msg();
+        double et = time_manager(state_handler.msg().utime);
+        const std::vector<double> pos = {msg.position[0], msg.position[1], msg.position[2]};
+        const std::vector<double> vel = {msg.velocity[0], msg.velocity[1], msg.velocity[2]};
+        const std::vector<double> pos_sd = {
+            sqrt(msg.covariance[3][3]), sqrt(msg.covariance[4][4]), sqrt(msg.covariance[5][5])};
+        const std::vector<double> vel_sd = {
+            sqrt(msg.covariance[6][6]), sqrt(msg.covariance[7][7]), sqrt(msg.covariance[8][8])};
+
+        double bound_factor = 3;
 
         if (ui->state_pos_button->isChecked())
         {
             if (ui->state_pos_x->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_X))
-                    ->addData(elapsed_time, state_handler.msg().position[0]);
-                if (auto_y()) check_value_range(state_handler.msg().position[0]);
+                plot(Graph::STATE_POS_X, et, pos[0]);
+
+                if (auto_y()) check_value_range(pos[0]);
+
+                plot(Graph::STATE_POS_X_U, et, pos[0] + bound_factor * pos_sd[0]);
+                plot(Graph::STATE_POS_X_L, et, pos[0] - bound_factor * pos_sd[0]);
             }
             if (ui->state_pos_y->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_Y))
-                    ->addData(elapsed_time, state_handler.msg().position[1]);
-                if (auto_y()) check_value_range(state_handler.msg().position[1]);
+                plot(Graph::STATE_POS_Y, et, pos[1]);
+                if (auto_y()) check_value_range(pos[1]);
+
+                plot(Graph::STATE_POS_Y_U, et, pos[1] + bound_factor * pos_sd[1]);
+                plot(Graph::STATE_POS_Y_L, et, pos[1] - bound_factor * pos_sd[1]);
             }
             if (ui->state_pos_z->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_POS_Z))
-                    ->addData(elapsed_time, state_handler.msg().position[2]);
-                if (auto_y()) check_value_range(state_handler.msg().position[2]);
+                plot(Graph::STATE_POS_Z, et, pos[2]);
+                if (auto_y()) check_value_range(pos[2]);
+
+                plot(Graph::STATE_POS_Z_U, et, pos[2] + bound_factor * pos_sd[2]);
+                plot(Graph::STATE_POS_Z_L, et, pos[2] - bound_factor * pos_sd[2]);
             }
         }
 
@@ -298,21 +355,27 @@ void MainWindow::plot_state()
         {
             if (ui->state_vel_x->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_X))
-                    ->addData(elapsed_time, state_handler.msg().velocity[0]);
-                if (auto_y()) check_value_range(state_handler.msg().velocity[0]);
+                plot(Graph::STATE_VEL_X, et, vel[0]);
+                if (auto_y()) check_value_range(vel[0]);
+
+                plot(Graph::STATE_VEL_X_U, et, vel[0] + (bound_factor * vel_sd[0]));
+                plot(Graph::STATE_VEL_X_L, et, vel[0] - (bound_factor * vel_sd[0]));
             }
             if (ui->state_vel_y->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_Y))
-                    ->addData(elapsed_time, state_handler.msg().velocity[1]);
-                if (auto_y()) check_value_range(state_handler.msg().velocity[1]);
+                plot(Graph::STATE_VEL_Y, et, vel[1]);
+                if (auto_y()) check_value_range(vel[1]);
+
+                plot(Graph::STATE_VEL_Y_U, et, vel[1] + bound_factor * vel_sd[1]);
+                plot(Graph::STATE_VEL_Y_L, et, vel[1] - bound_factor * vel_sd[1]);
             }
             if (ui->state_vel_z->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::STATE_VEL_Z))
-                    ->addData(elapsed_time, state_handler.msg().velocity[2]);
-                if (auto_y()) check_value_range(state_handler.msg().velocity[2]);
+                plot(Graph::STATE_VEL_Z, et, vel[2]);
+                if (auto_y()) check_value_range(vel[2]);
+
+                plot(Graph::STATE_VEL_Z_U, et, vel[2] + bound_factor * vel_sd[2]);
+                plot(Graph::STATE_VEL_Z_L, et, vel[2] - bound_factor * vel_sd[2]);
             }
         }
 
@@ -324,23 +387,24 @@ void MainWindow::plot_global_update()
 {
     if (global_update_handler.ready())
     {
-        double elapsed_time = time_manager(global_update_handler.msg().utime);
+        const global_update_t &msg = global_update_handler.msg();
+        double et = time_manager(global_update_handler.msg().utime);
         if (ui->global_update_button->isChecked())
         {
             if (ui->global_update_x->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_X))
-                    ->addData(elapsed_time, global_update_handler.msg().position[0]);
+                plot(Graph::GLOBAL_UPDATE_X, et, msg.position[0]);
+                if (auto_y()) check_value_range(msg.position[0]);
             }
             if (ui->global_update_y->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_Y))
-                    ->addData(elapsed_time, global_update_handler.msg().position[1]);
+                plot(Graph::GLOBAL_UPDATE_Y, et, msg.position[1]);
+                if (auto_y()) check_value_range(msg.position[1]);
             }
             if (ui->global_update_z->isChecked())
             {
-                ui->customPlot->graph(static_cast<int>(Graph::GLOBAL_UPDATE_Z))
-                    ->addData(elapsed_time, global_update_handler.msg().position[2]);
+                plot(Graph::GLOBAL_UPDATE_Z, et, msg.position[2]);
+                if (auto_y()) check_value_range(msg.position[2]);
             }
         }
 
@@ -348,6 +412,77 @@ void MainWindow::plot_global_update()
     }
 }
 
+void MainWindow::plot_pid()
+{
+    if (pid_error_handler.ready())
+    {
+        const pid_error_t &msg = pid_error_handler.msg();
+        double et = time_manager(pid_error_handler.msg().utime);
+        if (ui->pid_pos_button->isChecked())
+        {
+            if (ui->pid_pos_x->isChecked())
+            {
+                plot(Graph::PID_POS_X, et, msg.pos_error[0]);
+                if (auto_y()) check_value_range(msg.pos_error[0]);
+            }
+            if (ui->pid_pos_y->isChecked())
+            {
+                plot(Graph::PID_POS_Y, et, msg.pos_error[1]);
+                if (auto_y()) check_value_range(msg.pos_error[1]);
+            }
+            if (ui->pid_pos_z->isChecked())
+            {
+                plot(Graph::PID_POS_Z, et, msg.pos_error[2]);
+                if (auto_y()) check_value_range(msg.pos_error[2]);
+            }
+        }
+
+        if (ui->pid_vel_button->isChecked())
+        {
+            if (ui->pid_vel_x->isChecked())
+            {
+                plot(Graph::PID_VEL_X, et, msg.vel_error[0]);
+                if (auto_y()) check_value_range(msg.vel_error[0]);
+            }
+            if (ui->pid_vel_y->isChecked())
+            {
+                plot(Graph::PID_VEL_Y, et, msg.vel_error[1]);
+                if (auto_y()) check_value_range(msg.vel_error[1]);
+            }
+            if (ui->pid_vel_z->isChecked())
+            {
+                plot(Graph::PID_VEL_Z, et, msg.vel_error[2]);
+                if (auto_y()) check_value_range(msg.vel_error[2]);
+            }
+        }
+
+        if (ui->com_button->isChecked())
+        {
+            if (ui->com_thrust->isChecked())
+            {
+                plot(Graph::COM_THRUST, et, msg.thrust);
+                if (auto_y()) check_value_range(msg.thrust);
+            }
+            if (ui->com_roll->isChecked())
+            {
+                plot(Graph::COM_ROLL, et, msg.roll);
+                if (auto_y()) check_value_range(msg.roll);
+            }
+            if (ui->com_pitch->isChecked())
+            {
+                plot(Graph::COM_PITCH, et, msg.pitch);
+                if (auto_y()) check_value_range(msg.pitch);
+            }
+        }
+
+        pid_error_handler.pop();
+    }
+}
+
+void MainWindow::plot(const Graph &graph, double key, double value)
+{
+    ui->customPlot->graph(static_cast<int>(graph))->addData(key, value);
+}
 /*
  *
  *      SLOTS
@@ -390,6 +525,9 @@ void MainWindow::on_unselect_all_button_clicked()
     uncheck(ui->state_pos_button);
     uncheck(ui->state_vel_button);
     uncheck(ui->global_update_button);
+    uncheck(ui->com_button);
+    uncheck(ui->pid_pos_button);
+    uncheck(ui->pid_vel_button);
 }
 
 void MainWindow::on_select_all_button_clicked()
@@ -402,6 +540,9 @@ void MainWindow::on_select_all_button_clicked()
     check(ui->state_pos_button);
     check(ui->state_vel_button);
     check(ui->global_update_button);
+    check(ui->com_button);
+    check(ui->pid_pos_button);
+    check(ui->pid_vel_button);
 }
 void MainWindow::on_reset_plots_button_clicked()
 {
@@ -505,6 +646,7 @@ void MainWindow::on_log_button_clicked()
         if (sx->key != sy->key || sy->key != sz->key || sx->key != sz->key)
         {
             std::cout << "STATE POSITION VALUES NOT SYNCHRONIZED\n";
+            break;
         }
         state_pos_log << sx->key << ',' << sx->value << ',' << sy->value << ',' << sz->value
                       << '\n';
@@ -525,6 +667,7 @@ void MainWindow::on_log_button_clicked()
         if (svx->key != svy->key || svy->key != svz->key || svx->key != svz->key)
         {
             std::cout << "STATE VELOCITY VALUES NOT SYNCHRONIZED\n";
+            break;
         }
         state_vel_log << svx->key << ',' << svx->value << ',' << svy->value << ',' << svz->value
                       << '\n';
@@ -544,11 +687,74 @@ void MainWindow::on_log_button_clicked()
         if (gx->key != gy->key || gy->key != gz->key || gx->key != gz->key)
         {
             std::cout << "GLOBAL POSITION VALUES NOT SYNCHRONIZED\n";
+            break;
         }
         global_pos_log << gx->key << ',' << gx->value << ',' << gy->value << ',' << gz->value
                        << '\n';
     }
     global_pos_log.close();
+
+    std::ofstream pos_error_log(logs_path + std::string("pid_pos_error.log"));
+    pos_error_log << "sec,x,y,z\n";
+    auto &pos_error_x = *(ui->customPlot->graph(static_cast<int>(Graph::PID_POS_X))->data());
+    auto &pos_error_y = *(ui->customPlot->graph(static_cast<int>(Graph::PID_POS_Y))->data());
+    auto &pos_error_z = *(ui->customPlot->graph(static_cast<int>(Graph::PID_POS_Z))->data());
+    const QCPGraphData *px = pos_error_x.begin();
+    const QCPGraphData *py = pos_error_y.begin();
+    const QCPGraphData *pz = pos_error_z.begin();
+    for (; px != pos_error_x.end() && py != pos_error_y.end() && pz != pos_error_z.end();
+         ++px, ++py, ++pz)
+    {
+        if (px->key != py->key || py->key != pz->key || px->key != pz->key)
+        {
+            std::cout << "POS ERROR VALUES NOT SYNCHRONIZED\n";
+            break;
+        }
+        pos_error_log << px->key << ',' << px->value << ',' << py->value << ',' << pz->value
+                      << '\n';
+    }
+    pos_error_log.close();
+
+    std::ofstream vel_error_log(logs_path + std::string("pid_vel_error.log"));
+    vel_error_log << "sec,x,y,z\n";
+    auto &vel_error_x = *(ui->customPlot->graph(static_cast<int>(Graph::PID_VEL_X))->data());
+    auto &vel_error_y = *(ui->customPlot->graph(static_cast<int>(Graph::PID_VEL_Y))->data());
+    auto &vel_error_z = *(ui->customPlot->graph(static_cast<int>(Graph::PID_VEL_Z))->data());
+    const QCPGraphData *evx = vel_error_x.begin();
+    const QCPGraphData *evy = vel_error_y.begin();
+    const QCPGraphData *evz = vel_error_z.begin();
+    for (; evx != vel_error_x.end() && evy != vel_error_y.end() && evz != vel_error_z.end();
+         ++evx, ++evy, ++evz)
+    {
+        if (evx->key != evy->key || evy->key != evz->key || evx->key != evz->key)
+        {
+            std::cout << "VEL ERROR VALUES NOT SYNCHRONIZED\n";
+            break;
+        }
+        vel_error_log << evx->key << ',' << evx->value << ',' << evy->value << ',' << evz->value
+                      << '\n';
+    }
+    vel_error_log.close();
+
+    std::ofstream com_val_log(logs_path + std::string("commanded_values.log"));
+    com_val_log << "sec,thrust,roll,pitch\n";
+    auto &com_thrust = *(ui->customPlot->graph(static_cast<int>(Graph::COM_THRUST))->data());
+    auto &com_roll = *(ui->customPlot->graph(static_cast<int>(Graph::COM_ROLL))->data());
+    auto &com_pitch = *(ui->customPlot->graph(static_cast<int>(Graph::COM_PITCH))->data());
+    const QCPGraphData *ct = com_thrust.begin();
+    const QCPGraphData *cr = com_roll.begin();
+    const QCPGraphData *cp = com_pitch.begin();
+    for (; ct != com_thrust.end() && cr != com_roll.end() && cp != com_pitch.end();
+         ++ct, ++cr, ++cp)
+    {
+        if (ct->key != cr->key || ct->key != cp->key || cr->key != cp->key)
+        {
+            std::cout << "COMMANDED VALUES NOT SYNCHRONIZED\n";
+            break;
+        }
+        com_val_log << ct->key << ',' << ct->value << ',' << cr->value << ',' << cp->value << '\n';
+    }
+    com_val_log.close();
 }
 
 /*

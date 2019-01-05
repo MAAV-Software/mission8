@@ -13,6 +13,7 @@
 #include <common/messages/global_update_t.hpp>
 #include <common/messages/imu_t.hpp>
 #include <common/messages/lidar_t.hpp>
+#include <common/messages/pid_error_t.hpp>
 #include <common/messages/plane_fit_t.hpp>
 #include <common/messages/state_t.hpp>
 #include <common/utils/ZCMHandler.hpp>
@@ -43,10 +44,31 @@ enum class Graph
     STATE_VEL_Z,
     GLOBAL_UPDATE_X,
     GLOBAL_UPDATE_Y,
-    GLOBAL_UPDATE_Z
+    GLOBAL_UPDATE_Z,
+    PID_POS_X,
+    PID_POS_Y,
+    PID_POS_Z,
+    PID_VEL_X,
+    PID_VEL_Y,
+    PID_VEL_Z,
+    COM_THRUST,
+    COM_ROLL,
+    COM_PITCH,
+    STATE_POS_X_U,
+    STATE_POS_X_L,
+    STATE_POS_Y_U,
+    STATE_POS_Y_L,
+    STATE_POS_Z_U,
+    STATE_POS_Z_L,
+    STATE_VEL_X_U,
+    STATE_VEL_X_L,
+    STATE_VEL_Y_U,
+    STATE_VEL_Y_L,
+    STATE_VEL_Z_U,
+    STATE_VEL_Z_L
 };
 
-const int NUM_GRAPHS = 20;
+const int NUM_GRAPHS = 41;
 
 class MainWindow : public QMainWindow
 {
@@ -71,6 +93,7 @@ private:
     void setup(QCustomPlot *customPlot);
     void add_graphs(QCustomPlot *customPlot);
     void color_graph(QWidget *, const Graph &, const std::vector<int> rgb);
+    void color_graph_bounds(QWidget *, const Graph &, const std::vector<int>);
     void set_sliders();
     void update_y_axis();
     void update_x_axis();
@@ -80,6 +103,8 @@ private:
     void plot_plane_fit();
     void plot_state();
     void plot_global_update();
+    void plot_pid();
+    void plot(const Graph &graph, double key, double value);
 
     double time_manager(uint64_t);
     double time();
@@ -99,6 +124,7 @@ private:
     ZCMHandler<global_update_t> global_update_handler;
     ZCMHandler<plane_fit_t> plane_fit_handler;
     ZCMHandler<state_t> state_handler;
+    ZCMHandler<pid_error_t> pid_error_handler;
 
     uint64_t start_utime;
     uint64_t max_utime;

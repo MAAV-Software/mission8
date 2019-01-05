@@ -3,11 +3,15 @@
 #include <array>
 #include <atomic>
 #include <list>
+#include <string>
 #include <utility>
+
+#include <zcm/zcm-cpp.hpp>
 
 #include <common/mavlink/offboard_control.hpp>
 #include <common/messages/ctrl_params_t.hpp>
 #include <common/messages/path_t.hpp>
+#include <common/messages/pid_error_t.hpp>
 #include <gnc/ControlState.hpp>
 #include <gnc/State.hpp>
 #include <gnc/control/pid.hpp>
@@ -40,9 +44,10 @@ public:
         std::pair<double, double> thrust_limits{1, 0};
         double takeoff_alt;
         double setpoint_tol;  //< convergence tolerance for achieving setpoints
+        std::string zcm_url;
     };
 
-    Controller();
+    Controller(const std::string&);
     ~Controller();
     void set_path(const path_t& _path);
     void set_current_target(const Waypoint& new_target);
@@ -94,6 +99,9 @@ private:
         std::chrono::high_resolution_clock::now();
     std::chrono::high_resolution_clock::time_point controller_run_loop_2 =
         std::chrono::high_resolution_clock::now();
+
+    zcm::ZCM zcm;
+    pid_error_t pid_error_msg;
 };
 
 }  // namespace gnc

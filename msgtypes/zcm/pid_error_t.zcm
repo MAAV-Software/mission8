@@ -1,0 +1,9 @@
+struct pid_error_t
+{
+    double pos_error[3];
+    double vel_error[3];
+    double roll;
+    double pitch;
+    double thrust;
+    int64_t utime;
+}
