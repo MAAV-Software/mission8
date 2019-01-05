@@ -1,5 +1,9 @@
 #include "vision/depth-utils/PlaneFitter.hpp"
 
+// TODO Move to a config file
+// Used to filter out poor data when out of the camera's range
+constexpr float NECESSARY_INLIER_PROPORTION = 0.8f;
+
 using maav::vision::PlaneFitter;
 
 PlaneFitter::PlaneFitter(const float inlier_threshold)
@@ -31,7 +35,7 @@ Eigen::MatrixXf PlaneFitter::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
         segs.segment(*inliers, *coefficients);
         // Check to see if a model was found
         // If no model found, return failure
-        if (inliers->indices.empty())
+        if (inliers->indices.size() < (NECESSARY_INLIER_PROPORTION * cloud->size()))
         {
             return Eigen::MatrixXf(0, 0);
         }

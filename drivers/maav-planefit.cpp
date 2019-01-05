@@ -112,7 +112,7 @@ void runHeartbeat(shared_ptr<ZCM> zcm)
 void runFitPlane(shared_ptr<JobDispatcher> dispatcher, shared_ptr<ZCM> zcm, shared_ptr<ZCM> zcm_udp)
 {
     // Initialize plane fitter
-    maav::vision::PlaneFitter planeFitter(0.1f);
+    maav::vision::PlaneFitter planeFitter(0.02f);
     // Run plane fitting whenever possible (using JobDispatcher) to prevent
     // jobs from pilling up that it takes too long too handle
     while (!KILL)
