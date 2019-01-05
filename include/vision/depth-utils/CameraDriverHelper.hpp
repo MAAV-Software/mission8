@@ -42,9 +42,9 @@ private:
     std::string rgbd_channel_;
     std::string pointcloud_channel_;
 
-    static void publish(CameraDriverHelper* cd_ptr);
-    static void rgbdPublish(CameraDriverHelper* cd_ptr);
-    static void pointcloudPublish(CameraDriverHelper* cd_ptr);
+    void publish();
+    void rgbdPublish();
+    void pointcloudPublish();
 };
 }  // namespace maav::vision
 

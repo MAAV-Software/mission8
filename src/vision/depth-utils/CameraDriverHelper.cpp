@@ -19,6 +19,7 @@ using std::string;
 using std::thread;
 using std::vector;
 using std::chrono::milliseconds;
+using namespace std::literals::chrono_literals;
 
 using pcl::PointCloud;
 using pcl::PointXYZ;
@@ -44,7 +45,7 @@ void CameraDriverHelper::beginRecording()
 {
     running_ = true;
 
-    publish_thread_ = thread(publish, this);
+    publish_thread_ = thread(&CameraDriverHelper::publish, this);
 }
 
 void CameraDriverHelper::endRecording()
@@ -55,41 +56,42 @@ void CameraDriverHelper::endRecording()
         publish_thread_.join();
     }
 }
-void CameraDriverHelper::publish(CameraDriverHelper* cd_ptr)
+void CameraDriverHelper::publish()
 {
-    while (cd_ptr->isRunning())
+    while (running_)
     {
-        cd_ptr->camera_.loadNext();
-        if (cd_ptr->publish_rgbd_) rgbdPublish(cd_ptr);
-        if (cd_ptr->publish_pc_) pointcloudPublish(cd_ptr);
+        camera_.loadNext();
+        if (publish_rgbd_) rgbdPublish();
+        if (publish_pc_) pointcloudPublish();
+        std::this_thread::sleep_for(10ms); // Maybe make this time configurable?
     }
 }
 
-void CameraDriverHelper::rgbdPublish(CameraDriverHelper* cd_ptr)
+void CameraDriverHelper::rgbdPublish()
 {
     rgbd_image_t rgbd;
 
-    rgbd.rgb_image.width = cd_ptr->camera_.getStreamWidth();
-    rgbd.rgb_image.height = cd_ptr->camera_.getStreamHeight();
+    rgbd.rgb_image.width = camera_.getStreamWidth();
+    rgbd.rgb_image.height = camera_.getStreamHeight();
     rgbd.rgb_image.size = rgbd.rgb_image.width * rgbd.rgb_image.height * 3;
-    const int8_t* raw_color = reinterpret_cast<const int8_t*>(cd_ptr->camera_.getRawColor());
+    const int8_t* raw_color = reinterpret_cast<const int8_t*>(camera_.getRawColor());
     rgbd.rgb_image.raw_image.assign(raw_color, raw_color + rgbd.rgb_image.size);
 
-    rgbd.depth_image.width = cd_ptr->camera_.getStreamWidth();
-    rgbd.depth_image.height = cd_ptr->camera_.getStreamHeight();
+    rgbd.depth_image.width = camera_.getStreamWidth();
+    rgbd.depth_image.height = camera_.getStreamHeight();
     rgbd.depth_image.size = rgbd.depth_image.width * rgbd.depth_image.height;
-    const int16_t* raw_depth = reinterpret_cast<const int16_t*>(cd_ptr->camera_.getRawDepth());
+    const int16_t* raw_depth = reinterpret_cast<const int16_t*>(camera_.getRawDepth());
     rgbd.depth_image.raw_image.assign(raw_depth, raw_depth + rgbd.depth_image.size);
 
-    rgbd.utime = cd_ptr->camera_.getUTime();
+    rgbd.utime = camera_.getUTime();
 
-    cd_ptr->zcm_.publish(cd_ptr->rgbd_channel_, &rgbd);
+    zcm_.publish(rgbd_channel_, &rgbd);
 }
 
-void CameraDriverHelper::pointcloudPublish(CameraDriverHelper* cd_ptr)
+void CameraDriverHelper::pointcloudPublish()
 {
     PointCloud<PointXYZ>::Ptr cloud;
-    cloud = cd_ptr->camera_.getPointCloudBasic();
+    cloud = camera_.getPointCloudBasic();
 
     point_cloud_t pcd;
     pcd.size = static_cast<int>(cloud->size());
@@ -105,8 +107,8 @@ void CameraDriverHelper::pointcloudPublish(CameraDriverHelper* cd_ptr)
         pcd.point_cloud.push_back(np);
     }
 
-    pcd.utime = cd_ptr->camera_.getUTime();
+    pcd.utime = camera_.getUTime();
 
-    cd_ptr->zcm_.publish(cd_ptr->pointcloud_channel_, &pcd);
+    zcm_.publish(pointcloud_channel_, &pcd);
 }
 }  // namespace maav::vision
