@@ -12,7 +12,7 @@ state:
   velocity: [0, 0, 0] # [m/s]
 
   # Starting covariance
-  covariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001, 0.000001, 0.000001, 0.000001]
+  covariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001, 0.0001, 0.0001, 0.0001]
 
 
 prediction:
@@ -23,26 +23,31 @@ prediction:
     kappa: 2
 
   # Process noise covariance
-  Q_i: [0.00001, 0.00001, 0.00001, 0.0001, 0.0001, 0.0001]
+  Q_i: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001]
 
 updates:
+  imu_height: 0.17
 
   lidar:
     enabled: true
+    enable_outliers: true
     # Unscented transform params
     UT:
       alpha: 0.1
       beta: 2.0
       kappa: 0.0
     # Sensor noise covariance
-    R: [0.00001]
+    R: [0.005]
     # Pose relative to IMU
     extrinsics:
       rot: [1, 0, 0, 0]
-      pos: [0, 0, 0]
+      pos: [-0.04, 0.07, 0.07]
+    # Calibrated
+    lidar_bias: 0.075
 
   planefit:
     enabled: false
+    enable_outliers: true
     # Unscented transform params
     UT:
       alpha: 0.1
@@ -53,21 +58,22 @@ updates:
     # Pose relative to IMU
     extrinsics:
       rot: [1, 0, 0, 0]
-      pos: [0, 0, 0]
+      pos: [0.04, -0.07, 0.06]
 
   global_update:
     enabled: true
+    enable_outliers: false
     # Unscented transform params
     UT:
       alpha: 0.1
       beta: 2.0
       kappa: 0.0
     # Sensor noise covariance
-    R: [0.00001, 0.00001, 0.00001, 0.0005, 0.0005, 0.01]
+    R: [0.00001, 0.00001, 0.00001, 0.0001, 0.0001, 0.0005]
     # Pose relative to IMU
     extrinsics:
       rot: [1, 0, 0, 0]
-      pos: [0, 0, 0]
+      pos: [0.12, 0, 0]
 
 sim_imu: false
 sim_lidar: false

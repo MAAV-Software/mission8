@@ -13,15 +13,15 @@ color:
   pf-roll: [255, 255, 25]
   pf-z: [210, 245, 60]
   pf-z-dot: [60, 180, 75]
-  state-pos-x: [70, 240, 240]
-  state-pos-y: [0, 130, 200]
-  state-pos-z: [145, 30, 180]
+  state-pos-x: [255, 0, 0]
+  state-pos-y: [0, 255, 0]
+  state-pos-z: [0, 0, 255]
   state-vel-x: [240, 50, 230]
   state-vel-y: [128, 128, 128]
   state-vel-z: [250, 190, 190]
-  global-update-x: [255, 215, 180]
-  global-update-y: [255, 250, 200]
-  global-update-z: [160, 245, 185]
+  global-update-x: [0, 0, 0]
+  global-update-y: [0, 255, 255]
+  global-update-z: [255, 0, 255]
 
 
 # Larger line widths will decrease

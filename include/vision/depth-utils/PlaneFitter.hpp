@@ -43,7 +43,7 @@ public:
      * plane, computing peices of the quadcopter's pose
      */
     bool runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-        float &zdepth, float &roll, float &pitch);
+        float &zdepth, float &roll, float &pitch, uint64_t utime);
     /** \brief Obtain all the plane information needed by driver
      * \return boolean that indicates whether plane fitting was successful
      * \param cloud a point cloud ptr to the input point cloud
@@ -64,7 +64,7 @@ public:
      * in to hold the plane coefficients computed by the class
      */
     bool getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot, float &zdepth,
-        float &roll, float &pitch, Eigen::MatrixXf &coefs);
+        float &roll, float &pitch, uint64_t utime, Eigen::MatrixXf &coefs);
     /** Get the last computed height
      * \return the last computed quadcopter height
      */
@@ -72,6 +72,7 @@ public:
 private:
     const float inlier_thresh_;
     float last_height_;
+    uint64_t last_time_;
     Eigen::MatrixXf junk_matrix_;
 };  // PlaneFitter
 }

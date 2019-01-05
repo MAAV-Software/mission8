@@ -3,7 +3,7 @@
 using maav::vision::PlaneFitter;
 
 PlaneFitter::PlaneFitter(const float inlier_threshold)
-    : inlier_thresh_{inlier_threshold}, last_height_{0}
+    : inlier_thresh_{inlier_threshold}, last_height_{0}, last_time_(0)
 {
 }
 
@@ -31,7 +31,7 @@ Eigen::MatrixXf PlaneFitter::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
         segs.segment(*inliers, *coefficients);
         // Check to see if a model was found
         // If no model found, return failure
-        if (inliers->indices.size() == 0)
+        if (inliers->indices.empty())
         {
             return Eigen::MatrixXf(0, 0);
         }
@@ -53,13 +53,13 @@ Eigen::MatrixXf PlaneFitter::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 }
 
 bool PlaneFitter::runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-    float &zdepth, float &roll, float &pitch)
+    float &zdepth, float &roll, float &pitch, uint64_t utime)
 {
-    return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, junk_matrix_);
+    return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, utime, junk_matrix_);
 }
 
 bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-    float &zdepth, float &roll, float &pitch, Eigen::MatrixXf &coefs)
+    float &zdepth, float &roll, float &pitch, uint64_t utime, Eigen::MatrixXf &coefs)
 {
     coefs = fitPlane(cloud);
     if (coefs.size() == 0)
@@ -72,7 +72,10 @@ bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, 
     }
     zdepth = abs(coefs(3) / coefs(2));
     float height = abs(coefs(2) * zdepth);
-    zdot = height - last_height_;
+    uint64_t dt = utime - last_time_;
+    constexpr float USEC_TO_SEC = 1000000.0;
+    zdot = (height - last_height_) / static_cast<float>(dt) * USEC_TO_SEC;
+    last_time_ = utime;
     last_height_ = height;
     // assuming quad plane normal is [0,0,1]
     float xq = 0, yq = 0, zq = 1;

@@ -46,6 +46,9 @@ public:
 
 private:
     using BaseUpdate<measurements::LidarMeasurement>::correct;
+
+    double bias_;
+    double imu_height_;
 };
 }  // namespace kalman
 }  // namespace gnc

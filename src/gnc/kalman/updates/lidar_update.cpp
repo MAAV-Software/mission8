@@ -8,7 +8,13 @@ namespace gnc
 {
 namespace kalman
 {
-LidarUpdate::LidarUpdate(YAML::Node config) : BaseUpdate(config["lidar"]) {}
+LidarUpdate::LidarUpdate(YAML::Node config)
+    : BaseUpdate(config["lidar"]),
+      bias_(config["lidar"]["lidar_bias"].as<double>()),
+      imu_height_(config["imu_height"].as<double>())
+{
+}
+
 LidarMeasurement LidarUpdate::predicted(const State& state)
 {
     /*
@@ -19,7 +25,10 @@ LidarMeasurement LidarUpdate::predicted(const State& state)
     LidarMeasurement predicted_measurement;
     const Eigen::Vector3d vertical_vec = Eigen::Vector3d::UnitZ();
     double cos_theta = (state.attitude() * vertical_vec).dot(vertical_vec);
-    predicted_measurement.distance()(0) = -state.position().z() / cos_theta;
+    predicted_measurement.distance()(0) = -state.position().z() / cos_theta + bias_ + imu_height_ -
+                                          BaseUpdate::extrinsics_.position().z();
+    // std::cout << "Pred lid: " << predicted_measurement.distance() << std::endl;
+
     return predicted_measurement;
 }
 

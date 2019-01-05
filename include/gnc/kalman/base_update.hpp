@@ -35,6 +35,7 @@ private:
 public:
     BaseUpdate(YAML::Node config)
         : enabled_(config["enabled"].as<bool>()),
+          enable_outliers_(config["enable_outliers"].as<bool>()),
           unscented_transform_(config["UT"]),
           extrinsics_(config["extrinsics"])
     {
@@ -63,7 +64,6 @@ protected:
         const typename TargetSpace::CovarianceMatrix& covariance)
     {
         double mahl_dist = std::sqrt((residual.transpose() * covariance.inverse() * residual)(0));
-        if (mahl_dist > 0.5) std::cout << "Mahl Dist: " << mahl_dist << std::endl;
         return mahl_dist > 5;
     }
 
@@ -79,9 +79,10 @@ protected:
         const TargetSpace predicted_meas = unscented_transform_(state);
         const TargetSpace measured_mes = measured(snapshot.measurement);
         ErrorStateVector residual = measured_mes - predicted_meas;
+        const CovarianceMatrix S = predicted_meas.covariance() + R_;
 
         // Reject outliers
-        if (rejectOutlier(residual, predicted_meas.covariance()))
+        if (rejectOutlier(residual, S) && enable_outliers_)
         {
             std::cout << "WARNING: Outlier rejected." << std::endl;
             return;
@@ -93,7 +94,6 @@ protected:
         const typename UT::TransformedPoints& transformed_points =
             unscented_transform_.last_transformed_points();
 
-        const CovarianceMatrix S = predicted_meas.covariance() + R_;
         CrossCovarianceMatrix Sigma_x_z = CrossCovarianceMatrix::Zero();
         for (size_t i = 0; i < UnscentedTransform<TargetSpace>::N; i++)
         {
@@ -108,8 +108,11 @@ protected:
 
 private:
     bool enabled_;
+    bool enable_outliers_;
     UT unscented_transform_;
     CovarianceMatrix R_;
+
+protected:
     Extrinsics extrinsics_;
 };
 }  // namespace kalman
