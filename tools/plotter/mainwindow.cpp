@@ -306,7 +306,6 @@ void MainWindow::plot_plane_fit()
     }
 }
 
-#include <iomanip>
 void MainWindow::plot_state()
 {
     if (state_handler.ready())
@@ -330,24 +329,33 @@ void MainWindow::plot_state()
 
                 if (auto_y()) check_value_range(pos[0]);
 
-                plot(Graph::STATE_POS_X_U, et, pos[0] + bound_factor * pos_sd[0]);
-                plot(Graph::STATE_POS_X_L, et, pos[0] - bound_factor * pos_sd[0]);
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_X_U, et, pos[0] + bound_factor * pos_sd[0]);
+                    plot(Graph::STATE_POS_X_L, et, pos[0] - bound_factor * pos_sd[0]);
+                }
             }
             if (ui->state_pos_y->isChecked())
             {
                 plot(Graph::STATE_POS_Y, et, pos[1]);
                 if (auto_y()) check_value_range(pos[1]);
 
-                plot(Graph::STATE_POS_Y_U, et, pos[1] + bound_factor * pos_sd[1]);
-                plot(Graph::STATE_POS_Y_L, et, pos[1] - bound_factor * pos_sd[1]);
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_Y_U, et, pos[1] + bound_factor * pos_sd[1]);
+                    plot(Graph::STATE_POS_Y_L, et, pos[1] - bound_factor * pos_sd[1]);
+                }
             }
             if (ui->state_pos_z->isChecked())
             {
                 plot(Graph::STATE_POS_Z, et, pos[2]);
                 if (auto_y()) check_value_range(pos[2]);
 
-                plot(Graph::STATE_POS_Z_U, et, pos[2] + bound_factor * pos_sd[2]);
-                plot(Graph::STATE_POS_Z_L, et, pos[2] - bound_factor * pos_sd[2]);
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_Z_U, et, pos[2] + bound_factor * pos_sd[2]);
+                    plot(Graph::STATE_POS_Z_L, et, pos[2] - bound_factor * pos_sd[2]);
+                }
             }
         }
 
@@ -358,24 +366,33 @@ void MainWindow::plot_state()
                 plot(Graph::STATE_VEL_X, et, vel[0]);
                 if (auto_y()) check_value_range(vel[0]);
 
-                plot(Graph::STATE_VEL_X_U, et, vel[0] + (bound_factor * vel_sd[0]));
-                plot(Graph::STATE_VEL_X_L, et, vel[0] - (bound_factor * vel_sd[0]));
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_X_U, et, vel[0] + (bound_factor * vel_sd[0]));
+                    plot(Graph::STATE_VEL_X_L, et, vel[0] - (bound_factor * vel_sd[0]));
+                }
             }
             if (ui->state_vel_y->isChecked())
             {
                 plot(Graph::STATE_VEL_Y, et, vel[1]);
                 if (auto_y()) check_value_range(vel[1]);
 
-                plot(Graph::STATE_VEL_Y_U, et, vel[1] + bound_factor * vel_sd[1]);
-                plot(Graph::STATE_VEL_Y_L, et, vel[1] - bound_factor * vel_sd[1]);
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_Y_U, et, vel[1] + bound_factor * vel_sd[1]);
+                    plot(Graph::STATE_VEL_Y_L, et, vel[1] - bound_factor * vel_sd[1]);
+                }
             }
             if (ui->state_vel_z->isChecked())
             {
                 plot(Graph::STATE_VEL_Z, et, vel[2]);
                 if (auto_y()) check_value_range(vel[2]);
 
-                plot(Graph::STATE_VEL_Z_U, et, vel[2] + bound_factor * vel_sd[2]);
-                plot(Graph::STATE_VEL_Z_L, et, vel[2] - bound_factor * vel_sd[2]);
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_Z_U, et, vel[2] + bound_factor * vel_sd[2]);
+                    plot(Graph::STATE_VEL_Z_L, et, vel[2] - bound_factor * vel_sd[2]);
+                }
             }
         }
 

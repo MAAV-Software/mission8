@@ -1,0 +1,93 @@
+void MainWindow::plot_state()
+{
+    if (state_handler.ready())
+    {
+        const state_t &msg = state_handler.msg();
+        double et = time_manager(state_handler.msg().utime);
+        const std::vector<double> pos = {msg.position[0], msg.position[1], msg.position[2]};
+        const std::vector<double> vel = {msg.velocity[0], msg.velocity[1], msg.velocity[2]};
+        const std::vector<double> pos_sd = {
+            sqrt(msg.covariance[3][3]), sqrt(msg.covariance[4][4]), sqrt(msg.covariance[5][5])};
+        const std::vector<double> vel_sd = {
+            sqrt(msg.covariance[6][6]), sqrt(msg.covariance[7][7]), sqrt(msg.covariance[8][8])};
+
+        double bound_factor = 3;
+
+        if (ui->state_pos_button->isChecked())
+        {
+            if (ui->state_pos_x->isChecked())
+            {
+                plot(Graph::STATE_POS_X, et, pos[0]);
+
+                if (auto_y()) check_value_range(pos[0]);
+
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_X_U, et, pos[0] + bound_factor * pos_sd[0]);
+                    plot(Graph::STATE_POS_X_L, et, pos[0] - bound_factor * pos_sd[0]);
+                }
+            }
+            if (ui->state_pos_y->isChecked())
+            {
+                plot(Graph::STATE_POS_Y, et, pos[1]);
+                if (auto_y()) check_value_range(pos[1]);
+
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_Y_U, et, pos[1] + bound_factor * pos_sd[1]);
+                    plot(Graph::STATE_POS_Y_L, et, pos[1] - bound_factor * pos_sd[1]);
+                }
+            }
+            if (ui->state_pos_z->isChecked())
+            {
+                plot(Graph::STATE_POS_Z, et, pos[2]);
+                if (auto_y()) check_value_range(pos[2]);
+
+                if (ui->pos_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_POS_Z_U, et, pos[2] + bound_factor * pos_sd[2]);
+                    plot(Graph::STATE_POS_Z_L, et, pos[2] - bound_factor * pos_sd[2]);
+                }
+            }
+        }
+
+        if (ui->state_vel_button->isChecked())
+        {
+            if (ui->state_vel_x->isChecked())
+            {
+                plot(Graph::STATE_VEL_X, et, vel[0]);
+                if (auto_y()) check_value_range(vel[0]);
+
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_X_U, et, vel[0] + (bound_factor * vel_sd[0]));
+                    plot(Graph::STATE_VEL_X_L, et, vel[0] - (bound_factor * vel_sd[0]));
+                }
+            }
+            if (ui->state_vel_y->isChecked())
+            {
+                plot(Graph::STATE_VEL_Y, et, vel[1]);
+                if (auto_y()) check_value_range(vel[1]);
+
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_Y_U, et, vel[1] + bound_factor * vel_sd[1]);
+                    plot(Graph::STATE_VEL_Y_L, et, vel[1] - bound_factor * vel_sd[1]);
+                }
+            }
+            if (ui->state_vel_z->isChecked())
+            {
+                plot(Graph::STATE_VEL_Z, et, vel[2]);
+                if (auto_y()) check_value_range(vel[2]);
+
+                if (ui->vel_error_bounds->isChecked())
+                {
+                    plot(Graph::STATE_VEL_Z_U, et, vel[2] + bound_factor * vel_sd[2]);
+                    plot(Graph::STATE_VEL_Z_L, et, vel[2] - bound_factor * vel_sd[2]);
+                }
+            }
+        }
+
+        state_handler.pop();
+    }
+}
