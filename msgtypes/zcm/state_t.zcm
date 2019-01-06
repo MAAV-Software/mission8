@@ -6,7 +6,7 @@ struct state_t
 	int64_t utime;
 
 	// TODO: Increase this to estimate more variables
-	const int32_t DoF = 9;
+	const int32_t DoF = 15;
 
 	double covariance[DoF][DoF];
 

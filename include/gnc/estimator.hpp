@@ -30,6 +30,8 @@ public:
      */
     const State& add_measurement_set(const measurements::MeasurementSet& meas);
 
+    void setBiases(const Eigen::Vector3d& gyro_bias, const Eigen::Vector3d& accel_bias);
+
 private:
     State empty_state_;
     kalman::History history_;

@@ -45,8 +45,8 @@ State State::mean(const std::array<State, N>& sigma_points, const std::array<dou
         // TODO: Determine if other values are necessary to average.
         // TODO: Use other estimated parameters
         // Propagate bias
-        mean_state.accelBias() = sigma_points[i].accelBias() * weights[i];
-        mean_state.gyroBias() = sigma_points[i].gyroBias() * weights[i];
+        mean_state.gyroBias() += sigma_points[i].gyroBias() * weights[i];
+        mean_state.accelBias() += sigma_points[i].accelBias() * weights[i];
     }
     return mean_state;
 }
@@ -60,18 +60,22 @@ State::CovarianceMatrix State::cov(const State& mean, const std::array<State, N>
         const State& state = sigma_points[i];
         ErrorStateVector& e_state = points[i];
         Eigen::Vector3d q_err = (mean.attitude().inverse() * state.attitude()).log();
-        e_state.block<3, 1>(0, 0) = q_err;
-        e_state.block<3, 1>(3, 0) = state.position();
-        e_state.block<3, 1>(6, 0) = state.velocity();
+        e_state.segment<3>(0) = q_err;
+        e_state.segment<3>(3) = state.position();
+        e_state.segment<3>(6) = state.velocity();
+        e_state.segment<3>(9) = state.gyroBias();
+        e_state.segment<3>(12) = state.accelBias();
 
         // TODO: add more states to estimate
     }
 
     ErrorStateVector mean_e_state;
     Eigen::Vector3d q_err = Eigen::Vector3d::Zero();
-    mean_e_state.block<3, 1>(0, 0) = q_err;
-    mean_e_state.block<3, 1>(3, 0) = mean.position();
-    mean_e_state.block<3, 1>(6, 0) = mean.velocity();
+    mean_e_state.segment<3>(0) = q_err;
+    mean_e_state.segment<3>(3) = mean.position();
+    mean_e_state.segment<3>(6) = mean.velocity();
+    mean_e_state.segment<3>(9) = mean.gyroBias();
+    mean_e_state.segment<3>(12) = mean.accelBias();
 
     CovarianceMatrix new_covariance = CovarianceMatrix::Zero();
     for (size_t i = 0; i < sigma_points.size(); i++)
@@ -94,12 +98,16 @@ State State::compute_gaussian(const std::array<State, N>& points,
 State& State::operator+=(const State::ErrorStateVector& e_state)
 {
     const Sophus::SO3d attitude_err = Sophus::SO3d::exp(e_state.head(3));
-    const Eigen::Vector3d position_err = e_state.segment(3, 3);
-    const Eigen::Vector3d velocity_err = e_state.segment(6, 3);
+    const Eigen::Vector3d position_err = e_state.segment<3>(3);
+    const Eigen::Vector3d velocity_err = e_state.segment<3>(6);
+    const Eigen::Vector3d gyro_bias_err = e_state.segment<3>(9);
+    const Eigen::Vector3d accel_bias_err = e_state.segment<3>(12);
 
     attitude() *= attitude_err;
     position() += position_err;
     velocity() += velocity_err;
+    gyroBias() += gyro_bias_err;
+    accelBias() += accel_bias_err;
 
     return *this;
 }
@@ -110,6 +118,8 @@ State::ErrorStateVector State::operator-(const State& other) const
     difference.segment<3>(0) = (attitude() * other.attitude().inverse()).log();
     difference.segment<3>(3) = position() - other.position();
     difference.segment<3>(6) = velocity() - other.velocity();
+    difference.segment<3>(9) = gyroBias() - other.gyroBias();
+    difference.segment<3>(12) = accelBias() - other.accelBias();
 
     return difference;
 }
@@ -147,8 +157,14 @@ std::ostream& operator<<(std::ostream& os, const State& state)
               << state.position().z() << '\n';
     std::cout << "State - Velocity: " << state.velocity().x() << ' ' << state.velocity().y() << ' '
               << state.velocity().z() << '\n';
+    std::cout << "State - Angular Velocity: " << state.angularVelocity().x() << ' '
+              << state.angularVelocity().y() << ' ' << state.angularVelocity().z() << '\n';
     std::cout << "State - Acceleration: " << state.acceleration().x() << ' '
               << state.acceleration().y() << ' ' << state.acceleration().z() << '\n';
+    std::cout << "State - gyroBias: " << state.gyroBias().x() << ' ' << state.gyroBias().y() << ' '
+              << state.gyroBias().z() << '\n';
+    std::cout << "State - accelBias: " << state.accelBias().x() << ' ' << state.accelBias().y()
+              << ' ' << state.accelBias().z() << '\n';
     std::cout << "State - Variance: " << state.covariance().diagonal().transpose() << std::endl;
     return os;
 }

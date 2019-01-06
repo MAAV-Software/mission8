@@ -67,5 +67,9 @@ const State& Estimator::add_measurement_set(const MeasurementSet& meas)
     return prev->state;
 }
 
+void Estimator::setBiases(const Eigen::Vector3d& gyro_bias, const Eigen::Vector3d& accel_bias)
+{
+    history_.setInitialBiases(gyro_bias, accel_bias);
+}
 }  // namespace gnc
 }  // namespace maav

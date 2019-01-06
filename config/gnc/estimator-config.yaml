@@ -1,4 +1,4 @@
-# Configuration file for the kalman filter
+  # Configuration file for the kalman filter
 # All covariance matrices are diagonal
 
 history:
@@ -12,7 +12,7 @@ state:
   velocity: [0, 0, 0] # [m/s]
 
   # Starting covariance
-  covariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001, 0.0001, 0.0001, 0.0001]
+  covariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
 
 
 prediction:
@@ -23,13 +23,17 @@ prediction:
     kappa: 2
 
   # Process noise covariance
-  Q_i: [0.00001, 0.00001, 0.00001, 0.001, 0.001, 0.001]
+  Q_i: [0.00005, 0.00005, 0.00005, 0.00002, 0.00002, 0.00002, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+
+imu_extrinsics:
+  rot: [1, 0, 0, 0]
+  pos: [0, 0.0, -0.16]
 
 updates:
   imu_height: 0.17
 
   lidar:
-    enabled: true
+    enabled: false
     enable_outliers: true
     # Unscented transform params
     UT:
@@ -37,7 +41,7 @@ updates:
       beta: 2.0
       kappa: 0.0
     # Sensor noise covariance
-    R: [0.005]
+    R: [0.01]
     # Pose relative to IMU
     extrinsics:
       rot: [1, 0, 0, 0]
@@ -69,7 +73,7 @@ updates:
       beta: 2.0
       kappa: 0.0
     # Sensor noise covariance
-    R: [0.00001, 0.00001, 0.00001, 0.0001, 0.0001, 0.0005]
+    R: [0.00001, 0.00001, 0.00001, 0.0003, 0.0003, 0.0003]
     # Pose relative to IMU
     extrinsics:
       rot: [1, 0, 0, 0]

@@ -14,7 +14,7 @@ UkfPrediction::UkfPrediction(YAML::Node config) : transformation(config["UT"])
     std::function<State(const State&)> functor = std::bind(&UkfPrediction::predict, this, _1);
     transformation.set_transformation(functor);
 
-    constexpr size_t IMU_DoF = 6;
+    constexpr size_t IMU_DoF = 12;
     using ImpulseVector = Eigen::Matrix<double, IMU_DoF, 1>;
     ImpulseVector Q_i_vec = config["Q_i"].as<ImpulseVector>();
     Eigen::DiagonalMatrix<double, IMU_DoF> Q_i{Q_i_vec};
@@ -24,6 +24,8 @@ UkfPrediction::UkfPrediction(YAML::Node config) : transformation(config["UT"])
 
     F_i.block<3, 3>(0, 0) = Eigen::Matrix3d::Identity();
     F_i.block<3, 3>(6, 3) = Eigen::Matrix3d::Identity();
+    F_i.block<3, 3>(9, 6) = Eigen::Matrix3d::Identity();
+    F_i.block<3, 3>(12, 9) = Eigen::Matrix3d::Identity();
 
     Q = F_i * Q_i * F_i.transpose();
 }

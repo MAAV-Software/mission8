@@ -18,6 +18,7 @@
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/constants.hpp>
+#include <gnc/constants.hpp>
 #include <gnc/estimator.hpp>
 #include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/Measurement.hpp>
@@ -157,6 +158,37 @@ int main(int argc, char** argv)
     // Main Loop
     KILL = false;
     zcm.start();
+
+    cout << "Calibrating IMU..." << endl;
+
+    Eigen::Vector3d avg_acceleration;
+    Eigen::Vector3d avg_angular_rate;
+    int num_samples = 50;
+    for (int count = 0; count < num_samples && !KILL;)
+    {
+        if (imu_handler.ready())
+        {
+            const imu_t msg = imu_handler.msg();
+            imu_handler.pop();
+            auto msg_ptr = convertImu(msg);
+            avg_acceleration += msg_ptr->acceleration;
+            avg_angular_rate += msg_ptr->angular_rates;
+            count++;
+        }
+        this_thread::sleep_for(2ms);
+    }
+    avg_acceleration /= static_cast<double>(num_samples);
+    avg_angular_rate /= static_cast<double>(num_samples);
+
+    Eigen::Vector3d true_accel = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
+    Eigen::Vector3d accel_bias = avg_acceleration - true_accel;
+    Eigen::Vector3d true_ang_rate = Eigen::Vector3d::Zero();
+    Eigen::Vector3d gyro_bias = avg_angular_rate - true_ang_rate;
+
+    cout << "Calibrated. Starting biases:\n";
+    cout << "Gyro: " << gyro_bias.transpose() << std::endl;
+    cout << "Accel: " << accel_bias.transpose() << std::endl;
+    estimator.setBiases(gyro_bias, accel_bias);
 
     cout << "Starting estimator loop" << endl;
 

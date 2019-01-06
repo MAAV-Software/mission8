@@ -31,7 +31,7 @@ Viewer::Viewer(YAML::Node config, std::shared_ptr<FrameDrawer> frame_drawer,
       stopped_(true),
       frame_drawer_(frame_drawer),
       map_drawer_(map_drawer),
-      priv_node{"ipc"}
+      priv_node{config["zcm_url"].as<std::string>()}
 {
     zcm_node.subscribe(maav::VISUALIZER_CHANNEL, &Viewer::updateLocalizer, this);
     zcm_node.subscribe(maav::STATE_CHANNEL, &Viewer::updateEstimator, this);

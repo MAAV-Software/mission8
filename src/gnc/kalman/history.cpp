@@ -259,6 +259,12 @@ History::Iterator History::set_last_modified(
 }
 
 size_t History::size() { return _history.size(); }
+void History::setInitialBiases(const Eigen::Vector3d &gyro_bias, const Eigen::Vector3d &accel_bias)
+{
+    _initial_state.gyroBias() = gyro_bias;
+    _initial_state.accelBias() = accel_bias;
+}
+
 }  // namespace kalman
 }  // namespace gnc
 }  // namespace maav

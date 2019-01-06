@@ -47,7 +47,8 @@ BOOST_AUTO_TEST_CASE(RunTest)
 
     LidarUpdate update(
         YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
-                   "kappa: 0.0\n    R: [0.01]\n"));
+                   "kappa: 0.0\n    R: [0.01]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      "
+                   "pos: [0, 0, 0]"));
     update(snapshot);
 }
 
@@ -78,7 +79,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
 
     LidarUpdate update(
         YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
-                   "kappa: 0.0\n    R: [0.01]\n"));
+                   "kappa: 0.0\n    R: [0.01]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      "
+                   "pos: [0, 0, 0]"));
 
     double pred = update.predicted(state).distance()(0);
     double correct_pred = 1;
@@ -113,7 +115,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
 
     LidarUpdate update(
         YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
-                   "kappa: 0.0\n    R: [0.01]\n"));
+                   "kappa: 0.0\n    R: [0.01]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      "
+                   "pos: [0, 0, 0]"));
 
     double pred = update.predicted(state).distance()(0);
     double correct_pred = 3.5052379137;
@@ -147,7 +150,8 @@ BOOST_AUTO_TEST_CASE(SensorMeasuredTest)
 
     LidarUpdate update(
         YAML::Load("lidar:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n      "
-                   "kappa: 0.0\n    R: [0.01]\n"));
+                   "kappa: 0.0\n    R: [0.01]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      "
+                   "pos: [0, 0, 0]"));
 
     double pred = update.measured(measurement).distance()(0);
     double correct_pred = 1;

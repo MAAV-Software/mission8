@@ -54,6 +54,8 @@ public:
 
     size_t size();
 
+    void setInitialBiases(const Eigen::Vector3d& gyro_bias, const Eigen::Vector3d& accel_bias);
+
 private:
     void resize(Iterator last_modified);
 

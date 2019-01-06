@@ -51,7 +51,8 @@ BOOST_AUTO_TEST_CASE(RunTest)
     PlaneFitUpdate update(
         YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
-                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
+                   "0, 0, 0]\n      pos: [0, 0, 0]"));
     update(snapshot);
 }
 
@@ -82,7 +83,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     PlaneFitUpdate update(
         YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
-                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
+                   "0, 0, 0]\n      pos: [0, 0, 0]"));
 
     Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();
     Eigen::Matrix<double, 4, 1> correct_pred;
@@ -121,7 +123,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     PlaneFitUpdate update(
         YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
-                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n"));
+                   "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
+                   "0, 0, 0]\n      pos: [0, 0, 0]"));
 
     Eigen::Matrix<double, 4, 1> pred = update.predicted(state).readings();
     Eigen::Matrix<double, 4, 1> correct_pred;
