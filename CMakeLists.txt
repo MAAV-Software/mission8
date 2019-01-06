@@ -66,7 +66,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 add_subdirectory(src)
 add_subdirectory(thirdparty)
 add_subdirectory(drivers)
-add_subdirectory(tools)
+if(BUILD_PLOTTER AND BUILD_VISUALIZER)
+    add_subdirectory(tools)
+endif()
+
 # Setup testing options
 if(BUILD_TESTS)
     enable_testing()

@@ -85,7 +85,12 @@ Mat LegacyCameraInterface::getCombined() const
     return img.clone();
 }
 
-void LegacyCameraInterface::loadNext()
+void LegacyCameraInterface::disableAutoExposure()
+{
+    throw std::runtime_error("LegacyCameraInterface::disableAutoExposure isn't implemented");
+}
+
+bool LegacyCameraInterface::loadNext()
 {
     device_ptr_->wait_for_frames();
     depth_image_ = static_cast<const uint16_t*>(device_ptr_->get_frame_data(stream::depth));
@@ -95,6 +100,8 @@ void LegacyCameraInterface::loadNext()
     depth_intrinsics_ = device_ptr_->get_stream_intrinsics(stream::depth);
     depth_to_color_ = device_ptr_->get_extrinsics(stream::depth, stream::color);
     color_intrin_ = device_ptr_->get_stream_intrinsics(stream::color);
+    // TODO: Don't just return false or delete this file
+    return false;
 }
 
 LegacyCameraInterface& LegacyCameraInterface::operator++()

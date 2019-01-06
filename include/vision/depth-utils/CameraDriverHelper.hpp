@@ -21,8 +21,7 @@ public:
     CameraDriverHelper() = delete;
 
     CameraDriverHelper(YAML::Node config, const std::string& zcm_format,
-        const std::string& rgbd_channel_in, const std::string& pointcloud_channel_in,
-        bool rgbd = true, bool pointcloud = true);
+        const std::string& rgbd_channel_in, const std::string& pointcloud_channel_in);
 
     ~CameraDriverHelper() { endRecording(); }
     void beginRecording();
@@ -33,8 +32,10 @@ public:
     static const std::string FORMAT_IPC;
 
 private:
+    bool enabled_;
     bool publish_rgbd_;
     bool publish_pc_;
+    bool autoexposure_;
     zcm::ZCM zcm_;
     maav::vision::D400CameraInterface camera_;
     bool running_;

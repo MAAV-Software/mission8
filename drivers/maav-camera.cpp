@@ -82,11 +82,9 @@ int main(int argc, char** argv)
     vector<unique_ptr<CameraDriverHelper>> helpers;
     helpers.reserve(2);
     helpers.emplace_back(new CameraDriverHelper(config["downward"], CameraDriverHelper::FORMAT_IPC,
-        maav::RGBD_DOWNWARD_CHANNEL, maav::DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL, false, true));
+        maav::RGBD_DOWNWARD_CHANNEL, maav::DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL));
     helpers.emplace_back(new CameraDriverHelper(config["forward"], CameraDriverHelper::FORMAT_IPC,
-        maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL, true, false));
-
-    std::cout << "Cameras enabled and reading." << std::endl;
+        maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL));
 
     helpers[0]->beginRecording();
     helpers[1]->beginRecording();

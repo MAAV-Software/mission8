@@ -7,13 +7,21 @@
 # Orange: 819112070694
 
 forward:
+  enabled: true
   width: 640
   height: 480
   fps: 15                # 15, 30, or 60
   serial: "819112072448" # 12 digit number on bottom of realsense camera
+  publish_rgbd: true
+  publish_pointcloud: false
+  enable_autoexposure: false
 
 downward:
+  enabled: false
   width: 640
   height: 480
   fps: 30                # 15, 30, or 60
   serial: "819112070694" # 12 digit number on bottom of realsense camera
+  publish_rgbd: false
+  publish_pointcloud: true
+  enable_autoexposure: false

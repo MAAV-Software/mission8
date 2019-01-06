@@ -21,6 +21,7 @@
 #include <thread>
 
 #include <pangolin/pangolin.h>
+#include <yaml-cpp/yaml.h>
 
 #include "gnc/slam/Converter.h"
 #include "gnc/slam/System.h"
@@ -32,7 +33,7 @@ namespace gnc
 namespace slam
 {
 System::System(const string& strVocFile, const string& strSettingsFile, const eSensor sensor,
-    const std::string& zcm_url, bool send_images)
+    const std::string& zcm_url)
     : mSensor(sensor),
       mbReset(false),
       mbActivateLocalizationMode(false),
@@ -84,7 +85,10 @@ System::System(const string& strVocFile, const string& strSettingsFile, const eS
     // Create the Map
     mpMap = new Map();
 
-    link_ = std::shared_ptr<VisualizerLink>(new VisualizerLink(zcm_url, mpMap, send_images));
+    YAML::Node config = YAML::LoadFile(strSettingsFile);
+    link_ = std::shared_ptr<VisualizerLink>(
+        new VisualizerLink(zcm_url, mpMap, config["send_images"].as<bool>(),
+            config["send_points"].as<bool>(), config["send_keyframes"].as<bool>()));
 
     // Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this

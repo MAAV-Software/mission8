@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pkill maav-camera
+pkill maav-imu
+pkill tanfan
+pkill maav-localizer
+pkill maav-estimator
+pkill maav-controller

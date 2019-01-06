@@ -75,6 +75,8 @@ Viewer.ViewpointF: 500
 # Visualizer Parameters
 #--------------------------------------------------------------------------------------------
 
-zcm_url: "ipc"
-# zcm_url: "udpm://239.255.76.67:7667?ttl=1"
-send_images: true
+# zcm_url: "ipc"
+zcm_url: "udpm://239.255.76.67:7667?ttl=1"
+send_images: false
+send_points: false
+send_keyframes: false

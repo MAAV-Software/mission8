@@ -9,6 +9,7 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+// #include <yaml-cpp/node/detail/bool_type.h>
 
 #include <iostream>
 #include <vector>
@@ -29,9 +30,11 @@ namespace maav::vision
 const string CameraDriverHelper::FORMAT_IPC = "ipc";
 
 CameraDriverHelper::CameraDriverHelper(YAML::Node config, const string& zcm_format,
-    const string& rgbd_channel_in, const string& pointcloud_channel_in, bool rgbd, bool pointcloud)
-    : publish_rgbd_(rgbd),
-      publish_pc_(pointcloud),
+    const string& rgbd_channel_in, const string& pointcloud_channel_in)
+    : enabled_(config["enabled"].as<bool>()),
+      publish_rgbd_(config["publish_rgbd"].as<bool>()),
+      publish_pc_(config["publish_pointcloud"].as<bool>()),
+      autoexposure_(config["enable_autoexposure"].as<bool>()),
       zcm_{zcm_format},
       camera_(config),
       running_(false),
@@ -58,12 +61,16 @@ void CameraDriverHelper::endRecording()
 }
 void CameraDriverHelper::publish()
 {
+    if (!enabled_) return;
+    if (!autoexposure_) camera_.disableAutoExposure();
     while (running_)
     {
-        camera_.loadNext();
-        if (publish_rgbd_) rgbdPublish();
-        if (publish_pc_) pointcloudPublish();
-        std::this_thread::sleep_for(10ms); // Maybe make this time configurable?
+        if (camera_.loadNext())
+        {
+            if (publish_rgbd_) rgbdPublish();
+            if (publish_pc_) pointcloudPublish();
+        }
+        std::this_thread::sleep_for(5ms);  // Maybe make this time configurable?
     }
 }
 

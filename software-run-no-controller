@@ -1,0 +1,8 @@
+#!/bin/bash
+
+daemonize -e ~/imuerr -o ~/imuout ~/software/bin/maav-imu -c ~/software/config/imu-config.yaml
+daemonize -e ~/tanerr -o ~/tanout ~/software/bin/tanfan
+daemonize -e ~/camerr -o ~/camout ~/software/bin/maav-camera -c ~/software/config/camera-config.yaml
+daemonize -e ~/locerr -o ~/locout ~/software/bin/maav-localizer -c ~/software/config/gnc/slam-config-forward.yaml -b ~/software/config/gnc/ORBvoc.txt
+sleep 7s
+daemonize -e ~/esterr -o ~/estout ~/software/bin/maav-estimator -c ~/software/config/gnc/estimator-config.yaml

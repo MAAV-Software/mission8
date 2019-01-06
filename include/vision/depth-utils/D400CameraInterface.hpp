@@ -55,11 +55,13 @@ public:
 
     virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getMappedPointCloud() const override;
 
+    virtual void disableAutoExposure() override;
+
     /**
      * increments the camera to the next available frame
      * all the get methods now pull data from the most recent frame
      */
-    virtual void loadNext() override;
+    virtual bool loadNext() override;
 
     /**
      * increments to the next frame using loadNext
@@ -76,6 +78,7 @@ public:
     uint64_t getUTime() const;
 
 private:
+    bool enabled_;
     std::string serial_;
     int width_;
     int height_;
@@ -96,6 +99,9 @@ private:
     rs2_intrinsics color_intrinsics_;
     std::unique_ptr<rs2::align> align_object_;
     float scale_;
+
+    rs2::sensor sensor_color_;
+    rs2::sensor sensor_depth_;
 };
 }  // namespace maav::vision
 

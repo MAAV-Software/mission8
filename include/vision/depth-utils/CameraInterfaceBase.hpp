@@ -26,10 +26,12 @@ public:
      */
     virtual cv::Mat getDepth() const = 0;
 
+    virtual void disableAutoExposure() = 0;
+
     /**
      * Loads the next frame into memory.
      */
-    virtual void loadNext() = 0;
+    virtual bool loadNext() = 0;
 
     /**
      * Loads the next frame into memory (calls loadNext)

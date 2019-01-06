@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+cd software
+
+if [ ! -d build ]
+then
+	mkdir build
+fi
+
+cd build
+
+cmake \
+	-DBUILD_TESTS=OFF \
+	-DBUILD_GCS_CLIENT=ON \
+	-DBUILD_GNC=ON \
+	-DBUILD_MISSION_PLANNING=ON \
+	-DBUILD_OBSTACLES=OFF \
+	-DBUILD_TANFAN=ON \
+	-DBUILD_VISION=ON \
+	-DBUILD_VISUALIZER=OFF \
+	-DBUILD_PLOTTER=OFF \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_INSTALL_PREFIX=/usr \
+	..
+
+make -j3
+#sudo make install
+#sudo cp lib/systemd/system/maav-nav.service /lib/systemd/system/
+#sudo systemctl daemon-reload
+#sudo systemctl restart maav-nav
+#sudo systemctl enable maav-nav

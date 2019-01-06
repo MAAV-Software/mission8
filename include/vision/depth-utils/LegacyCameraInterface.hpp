@@ -85,11 +85,13 @@ public:
      */
     cv::Mat getCombined() const;
 
+    virtual void disableAutoExposure() override;
+
     /**
      * increments to the next frame using loadNext
      * Returns the LegacyCameraInterface instance following the increment
      */
-    virtual void loadNext() override;
+    virtual bool loadNext() override;
 
     /**
      * increments to the next frame using loadNext

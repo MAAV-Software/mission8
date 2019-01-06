@@ -18,7 +18,6 @@ struct SlamInitializer
     std::string config_file;
     slam::System::eSensor sensor;
     std::string zcm_url;
-    bool send_images;
 };
 
 class Localizer

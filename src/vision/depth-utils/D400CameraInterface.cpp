@@ -11,11 +11,13 @@ using std::string;
 using namespace maav::vision;
 
 D400CameraInterface::D400CameraInterface(YAML::Node config)
-    : serial_(config["serial"].as<std::string>()),
+    : enabled_(config["enabled"].as<bool>()),
+      serial_(config["serial"].as<std::string>()),
       width_(config["width"].as<int>()),
       height_(config["height"].as<int>()),
       fps_(config["fps"].as<int>())
 {
+    if (!enabled_) return;
     cfg_.enable_stream(RS2_STREAM_COLOR, width_, height_, RS2_FORMAT_BGR8, fps_);
     cfg_.enable_stream(RS2_STREAM_DEPTH, width_, height_, RS2_FORMAT_Z16, fps_);
     cfg_.enable_device(serial_);
@@ -28,12 +30,16 @@ D400CameraInterface::D400CameraInterface(YAML::Node config)
     auto color_stream = selection.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
     color_intrinsics_ = color_stream.get_intrinsics();
 
-    // get the scale
+    // Get sensors
+    sensor_color_ = selection.get_device().query_sensors()[0];
+    sensor_depth_ = selection.get_device().query_sensors()[1];
+
+    // Get the scale
     auto sensor = selection.get_device().first<rs2::depth_sensor>();
     scale_ = sensor.get_depth_scale();
     std::cout << "Camera scale: " << scale_ << std::endl;
 
-    // get the extrinsics (very hacky)
+    // Get the extrinsics (very hacky)
     // rs2_error* memory = (rs2_error*)malloc(5000);
     rs2_error* memory = nullptr;
     rs2_stream_profile* depth = reinterpret_cast<rs2_stream_profile*>(&depth_stream);
@@ -43,37 +49,6 @@ D400CameraInterface::D400CameraInterface(YAML::Node config)
     // Set up the align object
     // rs2_stream align_to = find_stream_to_align(selection.get_streams());
     align_object_.reset(new rs2::align(RS2_STREAM_COLOR));
-
-    std::cout << "Disabling auto exposure..." << std::endl;
-
-    // Disable auto exposure
-    // For some reason, letting auto exposure set the exposure before disabling results in a
-    // brighter and less blurry image. However, you have to disable, enable, and disable again for
-    // this to happen.
-    rs2::sensor sensor_color(selection.get_device().query_sensors()[0]);
-    rs2::sensor sensor_depth(selection.get_device().query_sensors()[1]);
-
-    // Auto expose for two seconds
-    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
-
-    // Disable
-    sensor_color.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-    sensor_depth.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-
-    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
-
-    // Enable
-    sensor_color.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
-    sensor_depth.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
-
-    // Auto expose for two seconds
-    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
-
-    // Disable
-    sensor_color.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-    sensor_depth.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
-
-    std::cout << "Auto exposure disabled." << std::endl;
 }
 
 Mat D400CameraInterface::getRGB() const
@@ -86,25 +61,59 @@ Mat D400CameraInterface::getDepth() const
     return Mat(cv::Size(width_, height_), CV_16SC1, (void*)depth_image_, Mat::AUTO_STEP).clone();
 }
 
-void D400CameraInterface::loadNext()
+void D400CameraInterface::disableAutoExposure()
 {
-    frames_ = pipe_.wait_for_frames();
-    auto processed = align_object_->process(frames_);
+    // Disable auto exposure
+    // For some reason, letting auto exposure set the exposure before disabling results in a
+    // brighter and less blurry image. However, you have to disable, enable, and disable again for
+    // this to happen.
 
-    // Try to get the frames from processed
-    rgb_frame_ = processed.first_or_default(RS2_STREAM_COLOR);
-    depth_frame_ = processed.get_depth_frame();
-    if (rgb_frame_)
+    // Auto expose for two seconds
+    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
+
+    // Disable
+    sensor_color_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_depth_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+
+    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
+
+    // Enable
+    sensor_color_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+    sensor_depth_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+
+    // Auto expose for two seconds
+    for (int i = 0; i < 2 * fps_; i++) pipe_.wait_for_frames();
+
+    // Disable
+    sensor_color_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+    sensor_depth_.set_option(rs2_option::RS2_OPTION_ENABLE_AUTO_EXPOSURE, 0);
+
+    std::cout << "Auto exposure disabled." << std::endl;
+}
+
+bool D400CameraInterface::loadNext()
+{
+    if (pipe_.poll_for_frames(&frames_))
     {
-        color_image_ = static_cast<const uint16_t*>(rgb_frame_.get_data());
+        auto processed = align_object_->process(frames_);
+
+        // Try to get the frames from processed
+        rgb_frame_ = processed.first_or_default(RS2_STREAM_COLOR);
+        depth_frame_ = processed.get_depth_frame();
+        if (rgb_frame_)
+        {
+            color_image_ = static_cast<const uint16_t*>(rgb_frame_.get_data());
+        }
+        if (depth_frame_)
+        {
+            depth_image_ = static_cast<const uint16_t*>(depth_frame_.get_data());
+        }
+        utime_ = std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::system_clock::now().time_since_epoch())
+                     .count();
+        return true;
     }
-    if (depth_frame_)
-    {
-        depth_image_ = static_cast<const uint16_t*>(depth_frame_.get_data());
-    }
-    utime_ = std::chrono::duration_cast<std::chrono::microseconds>(
-                 std::chrono::system_clock::now().time_since_epoch())
-                 .count();
+    return false;
 }
 
 D400CameraInterface& D400CameraInterface::operator++()

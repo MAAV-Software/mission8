@@ -73,7 +73,6 @@ void MapDrawer::SetCurrentCameraPose(const cv::Mat& Tcw, bool use_estimator)
     {
         mCameraPose = Tcw.clone();
     }
-    std::cout << mCameraPose << std::endl;
 }
 
 void MapDrawer::DrawMapPoints(const visualizer_log_t& msg)

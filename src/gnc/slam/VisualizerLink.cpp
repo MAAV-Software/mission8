@@ -7,10 +7,16 @@ namespace gnc
 {
 namespace slam
 {
-VisualizerLink::VisualizerLink(const std::string& zcm_url, Map* map_data, bool send_images)
-    : zcm{zcm_url}, map_(map_data), send_images_(send_images)
+VisualizerLink::VisualizerLink(const std::string& zcm_url, Map* map_data, bool send_images,
+    bool send_points, bool send_keyframes)
+    : zcm{zcm_url},
+      map_(map_data),
+      send_images_(send_images),
+      send_points_(send_points),
+      send_keyframes_(send_keyframes)
 {
 }
+
 void VisualizerLink::updateTracking(Tracking* tracker)
 {
     unique_lock<mutex> lock(tracking_mutex_);
@@ -20,6 +26,40 @@ void VisualizerLink::updateTracking(Tracking* tracker)
     {
         convertRgbImage(tracker->rgb_im);
         convertDepthImage(tracker->depth_im);
+
+        auto keypoints = tracker->mCurrentFrame.mvKeys;
+        last_frame.num_keypoints = keypoints.size();
+        size_t N = keypoints.size();
+
+        last_frame.keypoints.resize(N);
+
+        last_frame.only_tracking = tracker->mbOnlyTracking;
+
+        // if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED)
+        // {
+        //     mvIniKeys = pTracker->mInitialFrame.mvKeys;
+        //     mvIniMatches = pTracker->mvIniMatches;
+        // }
+        if (tracker->mLastProcessedState == Tracking::OK)
+        {
+            for (size_t i = 0; i < N; i++)
+            {
+                last_frame.keypoints[i].x = keypoints[i].pt.x;
+                last_frame.keypoints[i].y = keypoints[i].pt.y;
+
+                MapPoint* map_pt = tracker->mCurrentFrame.mvpMapPoints[i];
+                if (map_pt)
+                {
+                    if (!tracker->mCurrentFrame.mvbOutlier[i])
+                    {
+                        if (map_pt->Observations() > 0)
+                            last_frame.keypoints[i].info = 0 | KP_MAP_BIT;
+                        else
+                            last_frame.keypoints[i].info = 0 | KP_VO_BIT;
+                    }
+                }
+            }
+        }
     }
     else
     {
@@ -29,82 +69,54 @@ void VisualizerLink::updateTracking(Tracking* tracker)
         last_frame.img.depth_image.size = 0;
     }
 
-    auto keypoints = tracker->mCurrentFrame.mvKeys;
-    last_frame.num_keypoints = keypoints.size();
-    size_t N = keypoints.size();
-
-    last_frame.keypoints.resize(N);
-
-    last_frame.only_tracking = tracker->mbOnlyTracking;
-
-    // if (pTracker->mLastProcessedState == Tracking::NOT_INITIALIZED)
-    // {
-    //     mvIniKeys = pTracker->mInitialFrame.mvKeys;
-    //     mvIniMatches = pTracker->mvIniMatches;
-    // }
-    if (tracker->mLastProcessedState == Tracking::OK)
-    {
-        for (size_t i = 0; i < N; i++)
-        {
-            last_frame.keypoints[i].x = keypoints[i].pt.x;
-            last_frame.keypoints[i].y = keypoints[i].pt.y;
-
-            MapPoint* map_pt = tracker->mCurrentFrame.mvpMapPoints[i];
-            if (map_pt)
-            {
-                if (!tracker->mCurrentFrame.mvbOutlier[i])
-                {
-                    if (map_pt->Observations() > 0)
-                        last_frame.keypoints[i].info = 0 | KP_MAP_BIT;
-                    else
-                        last_frame.keypoints[i].info = 0 | KP_VO_BIT;
-                }
-            }
-        }
-    }
-
     last_frame.state = static_cast<int>(tracker->mLastProcessedState);
     last_frame.utime = tracker->last_frame_usec;
 
     // Send points
-    const vector<MapPoint*>& vpMPs = map_->GetAllMapPoints();
-    const vector<MapPoint*>& vpRefMPs = map_->GetReferenceMapPoints();
-    set<MapPoint*> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
-
-    last_frame.num_points = vpMPs.size();
-    last_frame.points.resize(last_frame.num_points);
-    for (size_t i = 0, iend = vpMPs.size(); i < iend; i++)
+    if (send_points_)
     {
-        if (vpMPs[i]->isBad()) continue;
-        cv::Mat pos = vpMPs[i]->GetWorldPos();
-        last_frame.points[i].pos[0] = pos.at<float>(0);
-        last_frame.points[i].pos[1] = pos.at<float>(1);
-        last_frame.points[i].pos[2] = pos.at<float>(2);
+        const vector<MapPoint*>& vpMPs = map_->GetAllMapPoints();
+        const vector<MapPoint*>& vpRefMPs = map_->GetReferenceMapPoints();
+        set<MapPoint*> spRefMPs(vpRefMPs.begin(), vpRefMPs.end());
 
-        if (spRefMPs.count(vpMPs[i]))
+        last_frame.num_points = vpMPs.size();
+        last_frame.points.resize(last_frame.num_points);
+        for (size_t i = 0, iend = vpMPs.size(); i < iend; i++)
         {
-            last_frame.points[i].info = 0 | PT_REF_BIT;
-        }
-        else
-        {
-            last_frame.points[i].info = 0 | PT_MAP_BIT;
+            if (vpMPs[i]->isBad()) continue;
+            cv::Mat pos = vpMPs[i]->GetWorldPos();
+            last_frame.points[i].pos[0] = pos.at<float>(0);
+            last_frame.points[i].pos[1] = pos.at<float>(1);
+            last_frame.points[i].pos[2] = pos.at<float>(2);
+
+            if (spRefMPs.count(vpMPs[i]))
+            {
+                last_frame.points[i].info = 0 | PT_REF_BIT;
+            }
+            else
+            {
+                last_frame.points[i].info = 0 | PT_MAP_BIT;
+            }
         }
     }
 
     // Send keyframes
-    const vector<KeyFrame*> vpKFs = map_->GetAllKeyFrames();
-    last_frame.num_keyframes = vpKFs.size();
-    last_frame.keyframes.resize(last_frame.num_keyframes);
-
-    for (size_t i = 0; i < vpKFs.size(); i++)
+    if (send_keyframes_)
     {
-        KeyFrame* pKF = vpKFs[i];
-        cv::Mat Twc = pKF->GetPoseInverse().t();
-        for (size_t row = 0; row < 4; row++)
+        const vector<KeyFrame*> vpKFs = map_->GetAllKeyFrames();
+        last_frame.num_keyframes = vpKFs.size();
+        last_frame.keyframes.resize(last_frame.num_keyframes);
+
+        for (size_t i = 0; i < vpKFs.size(); i++)
         {
-            for (size_t col = 0; col < 3; col++)
+            KeyFrame* pKF = vpKFs[i];
+            cv::Mat Twc = pKF->GetPoseInverse().t();
+            for (size_t row = 0; row < 4; row++)
             {
-                last_frame.keyframes[i].pose[row][col] = Twc.at<float>(row, col);
+                for (size_t col = 0; col < 3; col++)
+                {
+                    last_frame.keyframes[i].pose[row][col] = Twc.at<float>(row, col);
+                }
             }
         }
     }

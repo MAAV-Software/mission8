@@ -96,7 +96,6 @@ int main(int argc, char** argv)
     slam_init.config_file = gopt.getString("config");
     slam_init.sensor = System::eSensor::RGBD;
     slam_init.zcm_url = config["zcm_url"].as<std::string>();
-    slam_init.send_images = config["send_images"].as<bool>();
 
     Localizer localizer(slam_init);
     cv::Mat pose;

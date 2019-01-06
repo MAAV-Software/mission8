@@ -68,6 +68,8 @@ int main(int argc, char** argv)
 
     auto viewer_thread = std::thread(&Viewer::Run, viewer);
 
+    std::this_thread::sleep_for(1s);
+
     zcm.start();
 
     while (!KILL)
