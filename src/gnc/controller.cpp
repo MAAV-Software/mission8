@@ -255,7 +255,7 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     Eigen::Quaternionf q_yaw(Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()));
 
     new_setpoint.q = q_roll * q_pitch * q_yaw;
-    new_setpoint.thrust = -target_acceleration.z();
+    new_setpoint.thrust = -target_acceleration.z() + veh_params.ff_thrust;
 
     if (position_error.norm() < veh_params.setpoint_tol)
     {

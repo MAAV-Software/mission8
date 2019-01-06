@@ -76,6 +76,7 @@ Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file)
     params.takeoff_alt = config_file["takeoff-alt"].as<double>();
 
     params.zcm_url = config_file["zcm-url"].as<std::string>();
+    params.ff_thrust = config_file["ff-thrust"].as<double>();
 
     return params;
 }

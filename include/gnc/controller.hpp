@@ -45,6 +45,7 @@ public:
         double takeoff_alt;
         double setpoint_tol;  //< convergence tolerance for achieving setpoints
         std::string zcm_url;
+        double ff_thrust;
     };
 
     Controller(const std::string&);
