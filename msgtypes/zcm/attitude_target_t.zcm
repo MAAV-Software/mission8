@@ -1,0 +1,9 @@
+struct attitude_target_t {
+    int64_t time_boot_ms;
+    float q[4];
+    float roll_rate;
+    float yaw_rate;
+    float pitch_rate;
+    float thrust;
+    int8_t type_mask;
+}

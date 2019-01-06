@@ -1,7 +1,10 @@
 #pragma once
 
 #include <atomic>
+#include <string>
 #include <thread>
+
+#include <zcm/zcm-cpp.hpp>
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include <Eigen/Eigen>
@@ -18,6 +21,7 @@ struct Messages
     mavlink_system_time_t system_time;
     mavlink_ping_t ping;
     mavlink_altitude_t altitude;
+    mavlink_attitude_target_t attitude_target;
 };
 
 struct EmsState
@@ -40,7 +44,7 @@ struct InnerLoopSetpoint
 class OffboardControl
 {
 public:
-    OffboardControl(const CommunicationType, const std::string& port_path = "");
+    OffboardControl(const std::string&, const CommunicationType, const std::string& port_path = "");
     ~OffboardControl();
     void init(std::atomic<bool>& kill);
 
@@ -77,6 +81,8 @@ private:
     double z_velocity_last;
     double dt;
     EmsState ems_state;
+
+    zcm::ZCM zcm;
 
     // These are defined so that they are not magic numbers in the code
     const uint8_t system_id = 1;     // system we are connecting should always be 1 (only system)

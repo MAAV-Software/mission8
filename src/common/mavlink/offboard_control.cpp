@@ -1,5 +1,3 @@
-#include <common/mavlink/offboard_control.hpp>
-
 #include <unistd.h>
 #include <atomic>
 #include <cassert>
@@ -7,6 +5,10 @@
 #include <csignal>
 #include <iostream>
 #include <mutex>
+
+#include <common/mavlink/offboard_control.hpp>
+#include <common/messages/MsgChannels.hpp>
+#include <common/messages/attitude_target_t.hpp>
 
 using namespace std::chrono;
 using std::this_thread::sleep_for;
@@ -20,9 +22,12 @@ namespace mavlink
 std::atomic<bool> END{false};
 
 // Creates thread and passing read_messages loop into thread
-OffboardControl::OffboardControl(const CommunicationType com_type, const std::string& port_path)
-    : com_port(com_type, port_path), alt_filter(0.2), vel_filter(0.2)
+OffboardControl::OffboardControl(
+    const std::string& zcm_url, const CommunicationType com_type, const std::string& port_path)
+    : com_port(com_type, port_path), alt_filter(0.2), vel_filter(0.2), zcm(zcm_url)
 {
+    attitude_target_t at;
+    zcm.publish(maav::ATTITUDE_TARGET_CHANNEL, &at);
 }
 
 void OffboardControl::init(std::atomic<bool>& kill)
@@ -76,6 +81,7 @@ void OffboardControl::read_thread()
 bool OffboardControl::read_message()
 {
     mavlink_message_t message;
+    attitude_target_t at;
     bool heartbeat_received = false;
 
     // Try to read 100 messages
@@ -112,6 +118,20 @@ bool OffboardControl::read_message()
                     ems_state.z_velocity = vel_filter.getState();
                     // cout << std::fixed <<  alt_filter.getState() << '\t' << ems_state.z_velocity
                     // << '\n';
+                    break;
+                case MAVLINK_MSG_ID_ATTITUDE_TARGET:
+                    mavlink_msg_attitude_target_decode(
+                        &message, &(current_messages_in.attitude_target));
+                    at.time_boot_ms = current_messages_in.attitude_target.time_boot_ms;
+                    at.q[0] = current_messages_in.attitude_target.q[0];
+                    at.q[1] = current_messages_in.attitude_target.q[1];
+                    at.q[2] = current_messages_in.attitude_target.q[2];
+                    at.q[3] = current_messages_in.attitude_target.q[3];
+                    at.roll_rate = current_messages_in.attitude_target.body_roll_rate;
+                    at.pitch_rate = current_messages_in.attitude_target.body_pitch_rate;
+                    at.yaw_rate = current_messages_in.attitude_target.body_yaw_rate;
+                    at.thrust = current_messages_in.attitude_target.thrust;
+                    zcm.publish(maav::ATTITUDE_TARGET_CHANNEL, &at);
                     break;
                 default:
                     break;

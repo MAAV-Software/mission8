@@ -155,7 +155,8 @@ int main(int argc, char** argv)
         cout << "Connecting to px4 through USB fd: " << control_config["uart-path"].as<string>()
              << '\n';
     }
-    OffboardControl offboard_control(com_type, control_config["uart-path"].as<string>());
+    OffboardControl offboard_control(
+        control_config["zcm-url"].as<string>(), com_type, control_config["uart-path"].as<string>());
     try
     {
         offboard_control.init(KILL);  // pass kill variable into init so loops can exit on signal
@@ -371,14 +372,22 @@ int main(int argc, char** argv)
 
             case ControlState::ARMING:
                 cout << "Pixhawk arming...\n";
-                while (!KILL && !offboard_control.is_armed()) offboard_control.arm();
+                while (!KILL && !offboard_control.is_armed())
+                {
+                    offboard_control.arm();
+                    offboard_control.set_attitude_target(InnerLoopSetpoint::zero());
+                }
                 cout << "Pixhawk armed\n";
                 controller.set_control_state(ControlState::TAKEOFF);
                 break;
 
             case ControlState::DISARMING:
                 cout << "Pixhawk disarming...\n";
-                while (!KILL && offboard_control.is_armed()) offboard_control.disarm();
+                while (!KILL && offboard_control.is_armed())
+                {
+                    offboard_control.disarm();
+                    offboard_control.set_attitude_target(InnerLoopSetpoint::zero());
+                }
                 cout << "Pixhawk disarmed\n";
                 controller.set_control_state(ControlState::STANDBY);
                 break;
@@ -387,7 +396,11 @@ int main(int argc, char** argv)
                 inner_loop_setpoint = InnerLoopSetpoint::zero();
                 offboard_control.set_attitude_target(inner_loop_setpoint);
                 sleep_for(1s);
-                while (offboard_control.is_armed() && !KILL) offboard_control.disarm();
+                while (offboard_control.is_armed() && !KILL)
+                {
+                    offboard_control.disarm();
+                    offboard_control.set_attitude_target(InnerLoopSetpoint::zero());
+                }
                 KILL = true;
                 continue;
 
