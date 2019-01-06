@@ -137,7 +137,17 @@ add_executable(maav-killswitch maav-killswitch.cpp)
 
 target_link_libraries(maav-killswitch
         ${ZCM_LIBRARIES}
-        maav-msg        
+        maav-msg
+        maav-utils
+)
+
+add_executable(read-thrust read-thrust.cpp)
+
+target_link_libraries(read-thrust
+        ${ZCM_LIBRARIES}
+        ${YAMLCPP_LIBRARY}
+        maav-msg
+        maav-utils
 )
 
 if(EXISTS ${LIBREALSENSE_LIBRARIES})

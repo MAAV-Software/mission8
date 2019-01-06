@@ -36,6 +36,8 @@ int main(int argc, char** argv)
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
     gopt.addString('p', "test-path", "../config/gnc/test-path.yaml", "Read path to test path file");
+    gopt.addString(
+        'c', "config", "../config/gnc/control-config.yaml", "Control config for command zcm url");
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
         std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
@@ -45,8 +47,19 @@ int main(int argc, char** argv)
 
     // Read path to path file;
     YAML::Node path_file;
+    YAML::Node config;
+    try
+    {
+        config = YAML::LoadFile(gopt.getString("config"));
+    }
+    catch (...)
+    {
+        cout << "Could not find config file\nPlease provide command line option \"-c "
+                "<path-to-config>\"\n";
+        return 2;
+    }
 
-    zcm::ZCM zcm{"ipc"};
+    zcm::ZCM zcm{config["command-zcm-url"].as<std::string>()};
     sleep_for(1s);
 
     control_commands_t commands;

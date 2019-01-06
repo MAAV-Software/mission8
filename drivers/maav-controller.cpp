@@ -110,7 +110,9 @@ int main(int argc, char** argv)
      *      Start zcm and subscribe to proper channels
      */
     zcm::ZCM zcm{"ipc"};
+    zcm::ZCM zcm_com{control_config["command-zcm-url"].as<string>()};
     zcm.start();
+    zcm_com.start();
     ZCMHandler<path_t> path_handler;
     ZCMHandler<state_t> state_handler;
     ZCMHandler<ctrl_params_t> gains_handler;
@@ -130,11 +132,14 @@ int main(int argc, char** argv)
     }
     zcm.subscribe(PATH_CHANNEL, &ZCMHandler<path_t>::recv, &path_handler);
     zcm.subscribe(CTRL_PARAMS_CHANNEL, &ZCMHandler<ctrl_params_t>::recv, &gains_handler);
-    zcm.subscribe(
-        maav::CONTROL_COMMANDS_CHANNEL, &ZCMHandler<control_commands_t>::recv, &command_handler);
     zcm.subscribe(maav::LOCALIZATION_STATUS_CHANNEL, &ZCMHandler<localization_status_t>::recv,
         &localizer_status_handler);
     zcm.subscribe(maav::KILLSWITCH_CHANNEL, &ZCMHandler<killswitch_t>::recv, &killswitch_handler);
+
+    // subscribe to command channel with seperate zcm instance (option for sending messages over
+    // udp)
+    zcm_com.subscribe(
+        maav::CONTROL_COMMANDS_CHANNEL, &ZCMHandler<control_commands_t>::recv, &command_handler);
 
     /*
      *      Initialize controller class and offboard control
@@ -417,6 +422,7 @@ int main(int argc, char** argv)
     }
 
     zcm.stop();
+    zcm_com.stop();
 }
 
 /*

@@ -25,7 +25,7 @@ limits:
   angle: # limits are in degrees
     roll: [10, -10]
     pitch: [10, -10]
-
+  
 # vehicle params that won't be tuned
 tol: 0.1 # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
@@ -36,4 +36,6 @@ ff-thrust: 0.563787
 
 # ZCM publish url
 zcm-url: "ipc"
+# command-zcm-url: "ipc"
 # zcm-url: "udpm://239.255.76.67:7667?ttl=1"
+command-zcm-url: "udpm://239.255.76.67:7667?ttl=1"
