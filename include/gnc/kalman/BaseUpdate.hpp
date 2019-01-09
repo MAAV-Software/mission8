@@ -5,8 +5,8 @@
 
 #include <common/utils/yaml_matrix.hpp>
 #include <gnc/kalman/Extrinsics.hpp>
-#include <gnc/kalman/history.hpp>
-#include <gnc/kalman/unscented_transform.hpp>
+#include <gnc/kalman/History.hpp>
+#include <gnc/kalman/UnscentedTransform.hpp>
 #include <gnc/measurements/Measurement.hpp>
 
 using std::placeholders::_1;

@@ -3,7 +3,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <gnc/kalman/base_update.hpp>
+#include <gnc/kalman/BaseUpdate.hpp>
 #include <gnc/measurements/PlaneFitMeasurement.hpp>
 
 namespace maav

@@ -8,7 +8,7 @@
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
-#include <gnc/planner.hpp>
+#include <gnc/Planner.hpp>
 
 using maav::MAP_CHANNEL;
 using maav::STATE_CHANNEL;

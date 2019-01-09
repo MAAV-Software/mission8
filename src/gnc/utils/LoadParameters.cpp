@@ -1,7 +1,7 @@
 #include <string>
 #include <utility>
 
-#include <gnc/constants.hpp>
+#include <gnc/Constants.hpp>
 #include <gnc/utils/LoadParameters.hpp>
 
 using YAML::Node;

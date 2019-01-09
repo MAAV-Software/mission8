@@ -14,7 +14,7 @@
 #include <common/messages/pid_error_t.hpp>
 #include <gnc/ControlState.hpp>
 #include <gnc/State.hpp>
-#include <gnc/control/pid.hpp>
+#include <gnc/control/Pid.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 
 namespace maav

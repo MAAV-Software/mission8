@@ -4,8 +4,8 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <gnc/kalman/history.hpp>
-#include <gnc/kalman/unscented_transform.hpp>
+#include <gnc/kalman/History.hpp>
+#include <gnc/kalman/UnscentedTransform.hpp>
 
 namespace maav
 {

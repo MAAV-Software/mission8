@@ -1,7 +1,7 @@
 #include <cmath>
 
+#include <gnc/Estimator.hpp>
 #include <gnc/State.hpp>
-#include <gnc/estimator.hpp>
 
 using maav::gnc::measurements::MeasurementSet;
 

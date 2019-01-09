@@ -1,4 +1,4 @@
-#include <gnc/kalman/updates/planefit_update.hpp>
+#include <gnc/kalman/updates/PlanefitUpdate.hpp>
 
 namespace maav
 {

@@ -1,7 +1,7 @@
 
 #include <cmath>
 
-#include "test_helpers.hpp"
+#include "TestHelpers.hpp"
 
 double diff(const Sophus::SO3d& r1, const Sophus::SO3d& r2)
 {

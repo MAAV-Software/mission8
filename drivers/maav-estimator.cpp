@@ -17,9 +17,9 @@
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
-#include <gnc/constants.hpp>
-#include <gnc/constants.hpp>
-#include <gnc/estimator.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/Estimator.hpp>
 #include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/Measurement.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
@@ -161,8 +161,8 @@ int main(int argc, char** argv)
 
     cout << "Calibrating IMU..." << endl;
 
-    Eigen::Vector3d avg_acceleration;
-    Eigen::Vector3d avg_angular_rate;
+    Eigen::Vector3d avg_acceleration = Eigen::Vector3d::Zero();
+    Eigen::Vector3d avg_angular_rate = Eigen::Vector3d::Zero();
     int num_samples = 50;
     for (int count = 0; count < num_samples && !KILL;)
     {

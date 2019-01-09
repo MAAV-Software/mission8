@@ -2,7 +2,7 @@
 
 #include <yaml-cpp/yaml.h>
 #include <common/messages/ctrl_params_t.hpp>
-#include <gnc/controller.hpp>
+#include <gnc/Controller.hpp>
 
 namespace maav
 {

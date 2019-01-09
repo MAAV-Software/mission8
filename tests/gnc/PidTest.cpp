@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#include "gnc/control/pid.hpp"
+#include "gnc/control/Pid.hpp"
 
 using std::cout;
 using std::endl;

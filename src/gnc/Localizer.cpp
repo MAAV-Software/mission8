@@ -1,5 +1,5 @@
+#include <gnc/Localizer.hpp>
 #include <gnc/State.hpp>
-#include <gnc/localizer.hpp>
 
 using cv::Mat;
 

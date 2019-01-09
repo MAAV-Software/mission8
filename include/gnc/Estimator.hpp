@@ -3,11 +3,11 @@
 #include <yaml-cpp/yaml.h>
 
 #include <gnc/State.hpp>
-#include <gnc/kalman/history.hpp>
-#include <gnc/kalman/prediction.hpp>
+#include <gnc/kalman/History.hpp>
+#include <gnc/kalman/Prediction.hpp>
 #include <gnc/kalman/updates/GlobalUpdate.hpp>
-#include <gnc/kalman/updates/lidar_update.hpp>
-#include <gnc/kalman/updates/planefit_update.hpp>
+#include <gnc/kalman/updates/LidarUpdate.hpp>
+#include <gnc/kalman/updates/PlanefitUpdate.hpp>
 #include <gnc/measurements/Measurement.hpp>
 
 namespace maav

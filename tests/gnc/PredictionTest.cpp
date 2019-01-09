@@ -11,10 +11,10 @@
 #include <boost/test/unit_test.hpp>
 #include <sophus/so3.hpp>
 
-#include <gnc/constants.hpp>
-#include <gnc/constants.hpp>
-#include <gnc/kalman/prediction.hpp>
-#include "test_helpers.hpp"
+#include <gnc/Constants.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/kalman/Prediction.hpp>
+#include "TestHelpers.hpp"
 
 using namespace boost::unit_test;
 using namespace Eigen;
@@ -38,7 +38,8 @@ BOOST_AUTO_TEST_CASE(RunTest)
 {
     YAML::Node config = YAML::Load(
         "# Unscented transform params\nUT:\n  alpha: 0.1\n  beta: 2.0\n  kappa: 0.0\n# Process "
-        "noise covariance\nQ_i: [0.1, 0.1, 0.1, 1.0, 1.0, 1.0]\n");
+        "noise covariance\nQ_i: [0.00005, 0.00005, 0.00005, 0.00002, 0.00002, 0.00002, 0.00001, "
+        "0.00001, 0.00001, 0.00001, 0.00001, 0.00001]\n");
 
     UkfPrediction pred(config);
 }
@@ -47,7 +48,8 @@ BOOST_AUTO_TEST_CASE(PredictionStep)
 {
     YAML::Node config = YAML::Load(
         "# Unscented transform params\nUT:\n  alpha: 0.1\n  beta: 2.0\n  kappa: 0.0\n# Process "
-        "noise covariance\nQ_i: [0.1, 0.1, 0.1, 1.0, 1.0, 1.0]\n");
+        "noise covariance\nQ_i: [0.00005, 0.00005, 0.00005, 0.00002, 0.00002, 0.00002, 0.00001, "
+        "0.00001, 0.00001, 0.00001, 0.00001, 0.00001]\n");
 
     measurements::ImuMeasurement imu1;
     imu1.time_usec = 0;

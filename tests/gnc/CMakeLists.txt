@@ -20,7 +20,7 @@ include_directories(
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(testhelper SHARED test_helpers.cpp)
+add_library(testhelper SHARED TestHelpers.cpp)
 
 target_link_libraries(testhelper
         maav-state
@@ -28,13 +28,13 @@ target_link_libraries(testhelper
         ${ZCM_LIBRARIES})
 
 set(TEST_SRCS
-        state_test.cpp
-        history_test.cpp
-        unscented_transform_test.cpp
-        pid_test.cpp
-        lidar_test.cpp
-        prediction_test.cpp
-        planefit_test.cpp
+        StateTest.cpp
+        HistoryTest.cpp
+        UnscentedTransformTest.cpp
+        PidTest.cpp
+        LidarTest.cpp
+        PredictionTest.cpp
+        PlaneFitTest.cpp
         ZcmConversionTest.cpp
         GlobalUpdateTest.cpp)
 

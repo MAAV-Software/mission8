@@ -6,7 +6,7 @@
 #include <Eigen/Eigen>
 #include <boost/test/unit_test.hpp>
 
-#include "gnc/kalman/history.hpp"
+#include "gnc/kalman/History.hpp"
 #include "gnc/measurements/GlobalUpdateMeasurement.hpp"
 #include "gnc/measurements/ImuMeasurement.hpp"
 #include "gnc/measurements/LidarMeasurement.hpp"
@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE(HistoryInitializeTest)
 {
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
     MeasurementSet set;
     ImuMeasurement imu;
@@ -53,9 +53,9 @@ BOOST_AUTO_TEST_CASE(HistorySimpleTest)
     // Create first measurement set
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
     MeasurementSet set1;
     ImuMeasurement imu1;
@@ -89,9 +89,9 @@ BOOST_AUTO_TEST_CASE(HistoryOverflowTest)
 {
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
 
     // Add 10 measurements
@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(HistoryTolerance)
 {
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
 
     // Add 4 measurements
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE(HistoryInerpolateTest)
 {
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
 
     // Add 4 measurements
@@ -231,9 +231,9 @@ BOOST_AUTO_TEST_CASE(HistoryOlderTest)
 {
     YAML::Node config = YAML::Load("size: 3\ntolerance: 1000");
     YAML::Node initial_state_config = YAML::Load(
-        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\n"
-        "velocity: [0, 0, 0] # [m/s]\n# Starting covariance\ncovariance: [0.5, 0.5, 0.5, 0.5, "
-        "0.5, 0.5, 0.5, 0.5, 0.5]");
+        "# Starting state\nattitude: [1, 0, 0, 0]\nposition: [0, 0, 0] # [m]\nvelocity: [0, 0, 0] "
+        "# [m/s]\n# Starting covariance\ncovariance: [0.00001, 0.00001, 0.00001, 0.001, 0.001, "
+        "0.001, 0.0001, 0.0001, 0.0001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]");
     History history(config, initial_state_config);
 
     auto set1 = create_meas(0, 0);

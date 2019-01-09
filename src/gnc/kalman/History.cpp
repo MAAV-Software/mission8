@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <common/utils/yaml_matrix.hpp>
-#include <gnc/kalman/history.hpp>
+#include <gnc/kalman/History.hpp>
 
 using maav::gnc::measurements::ImuMeasurement;
 using maav::gnc::measurements::Measurement;
@@ -78,7 +78,6 @@ pair<History::Iterator, History::Iterator> History::add_measurement(
         _initial_state.setTime(start_time);
 
         _history.emplace_back(_initial_state, start_measurement);
-        std::cout << "Starting pos: " << _history.back().state.position().transpose() << std::endl;
         return {_history.end(), _history.end()};
     }
 

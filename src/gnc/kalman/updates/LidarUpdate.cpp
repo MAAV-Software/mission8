@@ -1,4 +1,4 @@
-#include <gnc/kalman/updates/lidar_update.hpp>
+#include <gnc/kalman/updates/LidarUpdate.hpp>
 
 using maav::gnc::measurements::LidarMeasurement;
 

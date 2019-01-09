@@ -63,8 +63,8 @@ target_link_libraries(maav-measurements
 
 
 add_library(maav-control SHARED
-    control/pid.cpp
-    controller.cpp
+    control/Pid.cpp
+    Controller.cpp
 )
 
 target_include_directories(maav-control PUBLIC 
@@ -79,13 +79,12 @@ target_link_libraries(maav-control
 )
 
 add_library(maav-kalman SHARED
-    estimator.cpp
-    kalman/history.cpp
-    kalman/unscented_transform.cpp
-    kalman/prediction.cpp
+    Estimator.cpp
+    kalman/History.cpp
+    kalman/Prediction.cpp
     kalman/Extrinsics.cpp
-    kalman/updates/lidar_update.cpp
-    kalman/updates/planefit_update.cpp
+    kalman/updates/LidarUpdate.cpp
+    kalman/updates/PlanefitUpdate.cpp
     kalman/updates/GlobalUpdate.cpp
 )
 
@@ -120,7 +119,7 @@ add_library(maav-slam SHARED
     slam/System.cc
     slam/Tracking.cc
     slam/VisualizerLink.cpp
-    localizer.cpp
+    Localizer.cpp
 )
 
 target_include_directories(maav-slam PUBLIC
@@ -142,7 +141,7 @@ target_link_libraries(maav-slam
 )
 
 add_library(maav-guidance SHARED
-    planner.cpp
+    Planner.cpp
 )
 
 target_include_directories(maav-guidance PUBLIC

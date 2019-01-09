@@ -10,9 +10,9 @@
 #include <boost/test/unit_test.hpp>
 #include <sophus/so3.hpp>
 
-#include <gnc/constants.hpp>
+#include <gnc/Constants.hpp>
 #include <gnc/kalman/updates/GlobalUpdate.hpp>
-#include "test_helpers.hpp"
+#include "TestHelpers.hpp"
 
 using namespace boost::unit_test;
 using namespace Eigen;
@@ -31,7 +31,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     state.acceleration() = Vector3d::Zero();
 
     GlobalUpdate update(YAML::Load(
-        "  global_update:\n    enabled: true\n    # Unscented transform params\n    "
+        "  global_update:\n    enabled: true\n    enable_outliers: false\n    # Unscented "
+        "transform params\n    "
         "UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise covariance\n "
         "   R: [0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, 0.0000001]\n    extrinsics:\n  "
         "    rot: [1, 0, 0, 0]\n      pos: [0, 0, 0]"));
@@ -52,7 +53,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     state.acceleration() = Vector3d::Zero();
 
     GlobalUpdate update(
-        YAML::Load("  global_update:\n    enabled: true\n    # Unscented transform params\n    "
+        YAML::Load("  global_update:\n    enabled: true\n    enable_outliers: false\n    # "
+                   "Unscented transform params\n    "
                    "UT:\n      alpha: 0.1\n      beta: 2.0\n      kappa: 0.0\n    # Sensor noise "
                    "covariance\n    R: [0.000001, 0.000001, 0.000001, 0.0000001, 0.0000001, "
                    "0.0000001]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      pos: [0, 0, 0]"));

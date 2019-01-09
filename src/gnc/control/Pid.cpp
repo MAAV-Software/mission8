@@ -1,4 +1,4 @@
-#include <gnc/control/pid.hpp>
+#include <gnc/control/Pid.hpp>
 
 namespace maav
 {

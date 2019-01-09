@@ -17,7 +17,7 @@
 #include <common/utils/ZCMHandler.hpp>
 
 #include <gnc/slam/System.h>
-#include <gnc/localizer.hpp>
+#include <gnc/Localizer.hpp>
 
 using maav::MAP_CHANNEL;
 using maav::RGBD_FORWARD_CHANNEL;

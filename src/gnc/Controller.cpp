@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <common/messages/MsgChannels.hpp>
-#include <gnc/constants.hpp>
-#include <gnc/controller.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/Controller.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
 using maav::mavlink::InnerLoopSetpoint;

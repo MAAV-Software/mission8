@@ -20,9 +20,9 @@
 #include <common/messages/state_t.hpp>
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
+#include <gnc/Controller.hpp>
 #include <gnc/State.hpp>
 #include <gnc/State.hpp>
-#include <gnc/controller.hpp>
 #include <gnc/utils/LoadParameters.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 

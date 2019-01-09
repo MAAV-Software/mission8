@@ -10,8 +10,8 @@
 #include <boost/test/unit_test.hpp>
 #include <sophus/so3.hpp>
 
-#include <gnc/constants.hpp>
-#include <gnc/kalman/updates/planefit_update.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/kalman/updates/PlanefitUpdate.hpp>
 
 using namespace boost::unit_test;
 using namespace Eigen;
@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_CASE(RunTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+        YAML::Load("planefit:\n    enabled: true\n    enable_outliers: false\n    UT:\n      "
+                   "alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
                    "0, 0, 0]\n      pos: [0, 0, 0]"));
@@ -81,7 +82,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+        YAML::Load("planefit:\n    enabled: true\n    enable_outliers: false\n    UT:\n      "
+                   "alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
                    "0, 0, 0]\n      pos: [0, 0, 0]"));
@@ -121,7 +123,8 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
     History::Snapshot snapshot(state, measurement);
 
     PlaneFitUpdate update(
-        YAML::Load("planefit:\n    enabled: true\n    UT:\n      alpha: 0.1\n      beta: 2.0\n     "
+        YAML::Load("planefit:\n    enabled: true\n    enable_outliers: false\n    UT:\n      "
+                   "alpha: 0.1\n      beta: 2.0\n     "
                    " kappa: 0.0\n    "
                    "R: [0.000001, 0.000001, 0.000001, 0.000001]\n    extrinsics:\n      rot: [1, "
                    "0, 0, 0]\n      pos: [0, 0, 0]"));

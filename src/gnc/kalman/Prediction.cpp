@@ -1,6 +1,6 @@
 #include <common/utils/yaml_matrix.hpp>
-#include <gnc/constants.hpp>
-#include <gnc/kalman/prediction.hpp>
+#include <gnc/Constants.hpp>
+#include <gnc/kalman/Prediction.hpp>
 
 namespace maav
 {
