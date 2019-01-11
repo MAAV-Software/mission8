@@ -1,5 +1,5 @@
-zcm-url: "udpm://239.255.76.67:7667?ttl=1"
-# zcm-url: "ipc"
+#zcm-url: "udpm://239.255.76.67:7667?ttl=1"
+zcm-url: "ipc"
 
 color:
   lidar: [128, 0, 0]
@@ -19,6 +19,9 @@ color:
   state-vel-x: [240, 50, 230]
   state-vel-y: [128, 128, 128]
   state-vel-z: [250, 190, 190]
+  imu-mag-x: [240, 50, 230]
+  imu-mag-y: [128, 128, 128]
+  imu-mag-z: [250, 190, 190]
   global-update-x: [0, 0, 0]
   global-update-y: [0, 255, 255]
   global-update-z: [255, 0, 255]

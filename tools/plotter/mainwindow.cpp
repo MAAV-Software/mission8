@@ -117,6 +117,9 @@ void MainWindow::add_graphs(QCustomPlot *customPlot)
     color_graph(ui->state_vel_x, Graph::STATE_VEL_X, color["state-vel-x"].as<std::vector<int>>());
     color_graph(ui->state_vel_y, Graph::STATE_VEL_Y, color["state-vel-y"].as<std::vector<int>>());
     color_graph(ui->state_vel_z, Graph::STATE_VEL_Z, color["state-vel-z"].as<std::vector<int>>());
+    color_graph(ui->imu_mag_x, Graph::IMU_MAG_X, color["imu-mag-x"].as<std::vector<int>>());
+    color_graph(ui->imu_mag_y, Graph::IMU_MAG_Y, color["imu-mag-y"].as<std::vector<int>>());
+    color_graph(ui->imu_mag_z, Graph::IMU_MAG_Z, color["imu-mag-z"].as<std::vector<int>>());
     color_graph_bounds(
         ui->state_pos_x, Graph::STATE_POS_X_U, color["state-pos-x"].as<std::vector<int>>());
     color_graph_bounds(
@@ -225,6 +228,7 @@ void MainWindow::plot_imu()
     {
         const imu_t &msg = imu_handler.msg();
         double et = time_manager(imu_handler.msg().utime);
+        const std::vector<double> mag = {msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]};
         if (ui->imu_button->isChecked())
         {
             if (ui->imu_acc_x->isChecked())
@@ -260,6 +264,25 @@ void MainWindow::plot_imu()
             {
                 plot(Graph::IMU_ROLL, et, msg.angular_rates[0]);
                 if (auto_y()) check_value_range(msg.angular_rates[0]);
+            }
+        }
+
+        if (ui->imu_mag_button->isChecked())
+        {
+            if (ui->imu_mag_x->isChecked())
+            {
+                plot(Graph::IMU_MAG_X, et, mag[0]);
+                if (auto_y()) check_value_range(mag[0]);
+            }
+            if (ui->imu_mag_y->isChecked())
+            {
+                plot(Graph::IMU_MAG_Y, et, mag[1]);
+                if (auto_y()) check_value_range(mag[1]);
+            }
+            if (ui->imu_mag_z->isChecked())
+            {
+                plot(Graph::IMU_MAG_Z, et, mag[2]);
+                if (auto_y()) check_value_range(mag[2]);
             }
         }
 
@@ -541,6 +564,7 @@ void MainWindow::on_unselect_all_button_clicked()
     uncheck(ui->pf_z_button);
     uncheck(ui->state_pos_button);
     uncheck(ui->state_vel_button);
+    uncheck(ui->imu_mag_button);
     uncheck(ui->global_update_button);
     uncheck(ui->com_button);
     uncheck(ui->pid_pos_button);
@@ -556,6 +580,7 @@ void MainWindow::on_select_all_button_clicked()
     check(ui->pf_z_button);
     check(ui->state_pos_button);
     check(ui->state_vel_button);
+    check(ui->imu_mag_button);
     check(ui->global_update_button);
     check(ui->com_button);
     check(ui->pid_pos_button);
@@ -690,6 +715,27 @@ void MainWindow::on_log_button_clicked()
                       << '\n';
     }
     state_vel_log.close();
+
+    std::ofstream imu_mag_log(logs_path + std::string("imu_mag.log"));
+    imu_mag_log << "sec,x,y,z\n";
+    auto &state_mx = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_MAG_X))->data());
+    auto &state_my = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_MAG_Y))->data());
+    auto &state_mz = *(ui->customPlot->graph(static_cast<int>(Graph::IMU_MAG_Z))->data());
+    const QCPGraphData *smx = state_mx.begin();
+    const QCPGraphData *smy = state_my.begin();
+    const QCPGraphData *smz = state_mz.begin();
+    for (; smx != state_mx.end() && smy != state_mx.end() && smz != state_mx.end();
+         ++smx, ++smy, ++smz)
+    {
+        if (smx->key != smy->key || smy->key != smz->key || smx->key != smz->key)
+        {
+            std::cout << "STATE MAGNET VALUES NOT SYNCHRONIZED\n";
+            break;
+        }
+        imu_mag_log << smx->key << ',' << smx->value << ',' << smy->value << ',' << smz->value
+                      << '\n';
+    }
+    imu_mag_log.close();
 
     std::ofstream global_pos_log(logs_path + std::string("global_pos.log"));
     global_pos_log << "sec,x,y,z\n";

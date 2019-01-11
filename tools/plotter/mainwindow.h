@@ -42,6 +42,9 @@ enum class Graph
     STATE_VEL_X,
     STATE_VEL_Y,
     STATE_VEL_Z,
+    IMU_MAG_X,
+    IMU_MAG_Y,
+    IMU_MAG_Z,
     GLOBAL_UPDATE_X,
     GLOBAL_UPDATE_Y,
     GLOBAL_UPDATE_Z,
@@ -68,7 +71,7 @@ enum class Graph
     STATE_VEL_Z_L
 };
 
-const int NUM_GRAPHS = 41;
+const int NUM_GRAPHS = 44;
 
 class MainWindow : public QMainWindow
 {

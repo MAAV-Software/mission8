@@ -143,7 +143,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>490</y>
+         <y>530</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -159,7 +159,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>460</y>
+         <y>500</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -482,6 +482,94 @@
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QCheckBox" name="imu_mag_button">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>440</y>
+         <width>161</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>IMU Mag</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="imu_mag_y">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>460</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>y</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="imu_mag_x">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>460</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>x</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="imu_mag_z">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>460</y>
+         <width>41</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>z</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>  
       <widget class="QCheckBox" name="state_vel_button">
        <property name="geometry">
         <rect>
@@ -662,7 +750,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>490</y>
+         <y>530</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -678,7 +766,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>460</y>
+         <y>500</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -697,7 +785,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>520</y>
+         <y>560</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -710,7 +798,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>520</y>
+         <y>560</y>
          <width>89</width>
          <height>25</height>
         </rect>
@@ -1027,7 +1115,7 @@
         <bool>true</bool>
        </property>
       </widget>
-     </widget>
+     </widget>    
     </item>
     <item>
      <widget class="QWidget" name="plot_area" native="true">
