@@ -1,8 +1,11 @@
 #include <chrono>
 #include <csignal>
 #include <cstdint>
+#include <cstdio>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 
@@ -22,6 +25,8 @@ sig_atomic_t RUNNING = 1;
 
 void sigHandler(int) { RUNNING = 0; }
 std::unique_ptr<maav::ImuDevice> getDevice(const std::string& device_name);
+void calibrateMagnetometer(
+    std::unique_ptr<maav::ImuDevice>& device, const std::string& imu_calib_file);
 
 int main(int argc, char** argv)
 {
@@ -35,6 +40,8 @@ int main(int argc, char** argv)
     gopt.addBool('h', "help", false, "This message");
     gopt.addString('c', "config", "../config/imu-config.yaml", "Path to config.");
     gopt.addBool('v', "verbose", false, "Print readings.");
+    gopt.addBool('m', "magcal", false, "Run magnetometer calibration");
+    gopt.addString('i', "imucalibfile", "../config/imu-calib.yaml", "Path to imu calibration file");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -71,6 +78,11 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (gopt.getBool("magcal"))
+    {
+        calibrateMagnetometer(device, gopt.getString("imucalibfile"));
+    }
+
     cout << "IMU Connected. Begin reading data and publishing messages.\n";
 
     imu_t msg;
@@ -82,11 +94,25 @@ int main(int argc, char** argv)
         cout << std::showpos << std::setprecision(3);
     }
 
+    YAML::Node mag_config = YAML::LoadFile(gopt.getString("imucalibfile"));
+
+    double offset_x = mag_config["offset_x"].as<double>();
+    double offset_y = mag_config["offset_y"].as<double>();
+    double offset_z = mag_config["offset_z"].as<double>();
+    double scale_x = mag_config["scale_x"].as<double>();
+    double scale_y = mag_config["scale_y"].as<double>();
+    double scale_z = mag_config["scale_z"].as<double>();
+
     while (RUNNING)
     {
         auto start_time = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 
         device->read(msg);
+
+        // Scale magnetometer readings from calibration constants
+        msg.magnetometer[0] = (msg.magnetometer[0] - offset_x) * scale_x;
+        msg.magnetometer[1] = (msg.magnetometer[1] - offset_y) * scale_y;
+        msg.magnetometer[2] = (msg.magnetometer[2] - offset_z) * scale_z;
 
         zcm.publish(maav::IMU_CHANNEL, &msg);
         zcm_udp.publish(maav::IMU_CHANNEL, &msg);
@@ -98,6 +124,8 @@ int main(int argc, char** argv)
                  << ", z: " << msg.acceleration[2] << '\n';
             cout << "AngularRates: x: " << msg.angular_rates[0] << ", y: " << msg.angular_rates[1]
                  << ", z: " << msg.angular_rates[2] << endl;
+            cout << "Magnetometer: x: " << msg.magnetometer[0] << ", y: " << msg.magnetometer[1]
+                 << ", z: " << msg.magnetometer[2] << endl;
         }
 
         this_thread::sleep_for(
@@ -126,4 +154,82 @@ std::unique_ptr<maav::ImuDevice> getDevice(const std::string& device_name)
     {
         throw runtime_error("Unknown IMU device");
     }
+}
+
+void calibrateMagnetometer(
+    std::unique_ptr<maav::ImuDevice>& device, const std::string& imu_calib_file)
+{
+    cout << "Starting magnetometer calibration.\n";
+
+    imu_t msg;
+    vector<vector<double>> magvals;
+
+    std::clock_t start;
+    double duration;
+
+    start = std::clock();
+
+    cout << "Move the IMU in many different directions for 1 minute.\n";
+
+    while (RUNNING)
+    {
+        device->read(msg);
+        magvals.push_back(
+            vector<double>{msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]});
+        duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+        if (duration >= 60) break;
+        std::this_thread::sleep_for(1ms);
+    }
+
+    if (!RUNNING) return;
+
+    // Calibration calculations: https://appelsiini.net/2018/calibrate-magnetometer/
+
+    // Find max, min
+    double x_max, y_max, z_max;
+    x_max = y_max = z_max = std::numeric_limits<double>::min();
+    double x_min, y_min, z_min;
+    x_min = y_min = z_min = std::numeric_limits<double>::max();
+    for (auto& v : magvals)
+    {
+        if (v[0] > x_max) x_max = v[0];
+        if (v[1] > y_max) y_max = v[1];
+        if (v[2] > z_max) z_max = v[2];
+        if (v[0] < x_min) x_min = v[0];
+        if (v[1] < y_min) y_min = v[1];
+        if (v[2] < z_min) z_min = v[2];
+    }
+
+    double offset_x = (x_max + x_min) / 2.0;
+    double offset_y = (y_max + y_min) / 2.0;
+    double offset_z = (z_max + z_min) / 2.0;
+
+    double avg_delta_x = (x_max - x_min) / 2.0;
+    double avg_delta_y = (y_max - y_min) / 2.0;
+    double avg_delta_z = (z_max - z_min) / 2.0;
+
+    double avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3.0;
+
+    double scale_x = avg_delta / avg_delta_x;
+    double scale_y = avg_delta / avg_delta_y;
+    double scale_z = avg_delta / avg_delta_z;
+
+    // Save constants:
+    // offset x,y,z
+    // scale x,y,z
+    YAML::Node node, _baseNode = YAML::LoadFile(imu_calib_file);
+    _baseNode["offset_x"] = offset_x;
+    _baseNode["offset_y"] = offset_y;
+    _baseNode["offset_z"] = offset_z;
+    _baseNode["scale_x"] = scale_x;
+    _baseNode["scale_y"] = scale_y;
+    _baseNode["scale_z"] = scale_z;
+
+    remove(imu_calib_file.c_str());
+
+    ofstream fout(imu_calib_file);
+    fout << _baseNode;
+    fout.close();
+
+    cout << "Magnetometer calibration completed.\n";
 }
