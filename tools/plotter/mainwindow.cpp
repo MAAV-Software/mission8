@@ -60,8 +60,15 @@ MainWindow::MainWindow(const YAML::Node &config_in, QWidget *parent)
     zcm.subscribe(
         maav::GLOBAL_UPDATE_CHANNEL, &ZCMHandler<global_update_t>::recv, &global_update_handler);
     zcm.subscribe(maav::PLANE_FIT_CHANNEL, &ZCMHandler<plane_fit_t>::recv, &plane_fit_handler);
-    zcm.subscribe(maav::STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
     zcm.subscribe(maav::PID_ERROR_CHANNEL, &ZCMHandler<pid_error_t>::recv, &pid_error_handler);
+    if (config["sim-state"].as<bool>())
+    {
+        zcm.subscribe(maav::SIM_STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+    }
+    else
+    {
+        zcm.subscribe(maav::STATE_CHANNEL, &ZCMHandler<state_t>::recv, &state_handler);
+    }
     zcm.start();
 }
 
@@ -228,7 +235,8 @@ void MainWindow::plot_imu()
     {
         const imu_t &msg = imu_handler.msg();
         double et = time_manager(imu_handler.msg().utime);
-        const std::vector<double> mag = {msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]};
+        const std::vector<double> mag = {
+            msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]};
         if (ui->imu_button->isChecked())
         {
             if (ui->imu_acc_x->isChecked())
@@ -543,6 +551,7 @@ void MainWindow::on_auto_y_button_toggled()
     value_range = 2;
     max_value = 2;
     min_value = -2;
+    if (auto_y()) update_y_axis();
 }
 
 static void uncheck(QAbstractButton *button)
@@ -733,7 +742,7 @@ void MainWindow::on_log_button_clicked()
             break;
         }
         imu_mag_log << smx->key << ',' << smx->value << ',' << smy->value << ',' << smz->value
-                      << '\n';
+                    << '\n';
     }
     imu_mag_log.close();
 

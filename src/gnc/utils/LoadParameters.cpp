@@ -5,9 +5,9 @@
 #include <gnc/utils/LoadParameters.hpp>
 
 using YAML::Node;
-using std::make_pair;
 using maav::gnc::Controller;
 using maav::gnc::constants::DEG_TO_RAD;
+using std::make_pair;
 namespace maav
 {
 namespace gnc
@@ -77,6 +77,9 @@ Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file)
 
     params.zcm_url = config_file["zcm-url"].as<std::string>();
     params.ff_thrust = config_file["ff-thrust"].as<double>();
+
+    params.thrust_limits = make_pair(config_file["limits"]["thrust"][0].as<double>(),
+        config_file["limits"]["thrust"][1].as<double>());
 
     return params;
 }

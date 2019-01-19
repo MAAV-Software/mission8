@@ -217,23 +217,12 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 
     const Eigen::Vector3d& position = current_state.position();
     const Eigen::Vector3d& velocity = current_state.velocity();
-    const Eigen::Vector3d& acceleration = current_state.acceleration();
 
     Eigen::Vector3d position_error = target_position - position;
-    Eigen::Vector3d target_velocity = {x_position_pid.run(position_error.x(), -velocity.x()),
+    Eigen::Vector3d target_acceleration = {x_position_pid.run(position_error.x(), -velocity.x()),
         y_position_pid.run(position_error.y(), -velocity.y()),
         z_position_pid.run(position_error.z(), -velocity.z())};
     // TODO: add rate limits
-
-    target_velocity.x() = bounded(target_velocity.x(), veh_params.rate_limits[0]);
-    target_velocity.y() = bounded(target_velocity.y(), veh_params.rate_limits[1]);
-    target_velocity.z() = bounded(target_velocity.z(), veh_params.rate_limits[2]);
-
-    Eigen::Vector3d velocity_error = target_velocity - velocity;
-    Eigen::Vector3d target_acceleration = {
-        x_velocity_pid.run(velocity_error.x(), -acceleration.x()),
-        y_velocity_pid.run(velocity_error.y(), -acceleration.y()),
-        z_velocity_pid.run(velocity_error.z(), -acceleration.z())};
 
     float roll = static_cast<float>(target_acceleration.y());
     float pitch = -static_cast<float>(target_acceleration.x());
@@ -249,13 +238,14 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     }
     roll = bounded(roll, veh_params.angle_limits[0]);
     pitch = bounded(pitch, veh_params.angle_limits[1]);
+    new_setpoint.thrust =
+        bounded(-target_acceleration.z() + veh_params.ff_thrust, veh_params.thrust_limits);
 
     Eigen::Quaternionf q_roll(Eigen::AngleAxisf(roll, Eigen::Vector3f::UnitX()));
     Eigen::Quaternionf q_pitch(Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY()));
     Eigen::Quaternionf q_yaw(Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()));
 
     new_setpoint.q = q_roll * q_pitch * q_yaw;
-    new_setpoint.thrust = -target_acceleration.z() + veh_params.ff_thrust;
 
     if (position_error.norm() < veh_params.setpoint_tol)
     {
@@ -265,12 +255,12 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     pid_error_msg.pos_error[0] = position_error.x();
     pid_error_msg.pos_error[1] = position_error.y();
     pid_error_msg.pos_error[2] = position_error.z();
-    pid_error_msg.vel_error[0] = velocity_error.x();
-    pid_error_msg.vel_error[1] = velocity_error.y();
-    pid_error_msg.vel_error[2] = velocity_error.z();
+    pid_error_msg.vel_error[0] = 0;
+    pid_error_msg.vel_error[1] = 0;
+    pid_error_msg.vel_error[2] = 0;
     pid_error_msg.roll = roll;
     pid_error_msg.pitch = pitch;
-    pid_error_msg.thrust = -target_acceleration.z();
+    pid_error_msg.thrust = new_setpoint.thrust;
     pid_error_msg.utime = current_state.timeUSec();
     zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
 
@@ -319,7 +309,7 @@ bool Controller::at_takeoff_alt()
  */
 bool Controller::landing_detected()
 {
-    return fabs(current_state.velocity()(2)) < 0.01 && fabs(current_state.position()(2)) < 0.1;
+    return fabs(current_state.velocity()(2)) < 0.01 && fabs(current_state.position()(2)) < 0.25;
 }
 
 }  // namespace gnc

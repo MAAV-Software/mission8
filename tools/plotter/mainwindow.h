@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include <yaml-cpp/node/detail/bool_type.h>
 #include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
 
