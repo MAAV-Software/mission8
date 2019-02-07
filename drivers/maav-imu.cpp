@@ -252,13 +252,11 @@ void calibrateMagnetometer(
     double scale_y = sqrt(std::abs(1 / ev(1, 0)));
     double scale_z = sqrt(std::abs(1 / ev(2, 0)));
 
+    Vector3d scale(scale_x, scale_y, scale_z);
+
     YAML::Node node, _baseNode = YAML::LoadFile(imu_calib_file);
-    _baseNode["offset_x"] = offset(0);
-    _baseNode["offset_y"] = offset(1);
-    _baseNode["offset_z"] = offset(2);
-    _baseNode["scale_x"] = scale_x;
-    _baseNode["scale_y"] = scale_y;
-    _baseNode["scale_z"] = scale_z;
+    _baseNode["offset"] = offset;
+    _baseNode["scale"] = scale;
     _baseNode["rotM"] = rotM;
 
     remove(imu_calib_file.c_str());
