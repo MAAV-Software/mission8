@@ -188,7 +188,8 @@ void calibrateMagnetometer(
         idx++;
     }
 
-    // flag 2 algorithm
+    // Algorithm from https://github.com/martindeegan/drone/blob/master/copter/matlab/ellipsoid_fit.m
+
     MatrixXd D(magvals.size(), 9);
 
     for (size_t i = 0; i < magvals.size(); i++)
