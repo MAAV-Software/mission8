@@ -88,6 +88,8 @@ int main(int argc, char** argv)
     if (gopt.getBool("magcal"))
     {
         calibrateMagnetometer(device, gopt.getString("imucalibfile"));
+        std::cout << "Exiting...\n";
+        return 0;
     }
 
     cout << "IMU Connected. Begin reading data and publishing messages.\n";
