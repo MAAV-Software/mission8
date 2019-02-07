@@ -18,38 +18,39 @@
 #include <common/utils/GetOpt.hpp>
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/Constants.hpp>
-#include <gnc/Constants.hpp>
 #include <gnc/Estimator.hpp>
 #include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/Measurement.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
-using maav::HEIGHT_LIDAR_CHANNEL;
 using maav::GLOBAL_UPDATE_CHANNEL;
-using maav::SIM_GLOBAL_UPDATE_CHANNEL;
+using maav::HEIGHT_LIDAR_CHANNEL;
 using maav::IMU_CHANNEL;
 using maav::PLANE_FIT_CHANNEL;
+using maav::SIM_GLOBAL_UPDATE_CHANNEL;
 using maav::SIM_PLANE_FIT_CHANNEL;
 using maav::STATE_CHANNEL;
-using maav::gnc::ConvertState;
-using maav::gnc::convertLidar;
 using maav::gnc::convertGlobalUpdate;
 using maav::gnc::convertImu;
+using maav::gnc::convertLidar;
 using maav::gnc::convertPlaneFit;
+using maav::gnc::ConvertState;
 using maav::gnc::Estimator;
 using maav::gnc::State;
+using maav::gnc::measurements::GlobalUpdateMeasurement;
 using maav::gnc::measurements::ImuMeasurement;
 using maav::gnc::measurements::LidarMeasurement;
 using maav::gnc::measurements::MeasurementSet;
 using maav::gnc::measurements::PlaneFitMeasurement;
-using maav::gnc::measurements::GlobalUpdateMeasurement;
 
 using namespace std;
 
 sig_atomic_t KILL = 0;
 
 void sighandler(int sig) { KILL = sig; }
-int main(int argc, char** argv)
+void applyMagnetometerCalibration(imu_t &msg, const Eigen::Vector3d &offset,
+    const Eigen::Vector3d &scale, const Eigen::Matrix3d &rotM);
+int main(int argc, char **argv)
 {
     signal(SIGINT, sighandler);
     signal(SIGABRT, sighandler);
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
     gopt.addBool('h', "help", false, "This message");
     gopt.addBool('v', "verbose", false, "Print the state at each iteration");
     gopt.addString('c', "config", "", "Path to config.");
+    gopt.addString('i', "imucalibfile", "../config/imu-calib.yaml", "Path to imu calibration file");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -190,6 +192,11 @@ int main(int argc, char** argv)
     cout << "Accel: " << accel_bias.transpose() << std::endl;
     estimator.setBiases(gyro_bias, accel_bias);
 
+    YAML::Node mag_calib = YAML::LoadFile(gopt.getString("imucalibfile"));
+    Eigen::Vector3d offset(mag_calib["offset"].as<Eigen::Vector3d>());
+    Eigen::Vector3d scale(mag_calib["scale"].as<Eigen::Vector3d>());
+    Eigen::Matrix3d rotM(mag_calib["rotM"].as<Eigen::Matrix3d>());
+
     cout << "Starting estimator loop" << endl;
 
     while (!KILL)
@@ -202,8 +209,10 @@ int main(int argc, char** argv)
 
         MeasurementSet set;
 
-        const imu_t msg = imu_handler.msg();
+        imu_t msg = imu_handler.msg();
         imu_handler.pop();
+
+        applyMagnetometerCalibration(msg, offset, scale, rotM);
 
         set.imu = convertImu(msg);
 
@@ -231,7 +240,7 @@ int main(int argc, char** argv)
             set.global_update = convertGlobalUpdate(msg);
         }
 
-        const State& state = estimator.add_measurement_set(set);
+        const State &state = estimator.add_measurement_set(set);
 
         state_t zcm_state = ConvertState(state);
 
@@ -253,4 +262,21 @@ int main(int argc, char** argv)
     zcm.stop();
 
     return 0;
+}
+
+void applyMagnetometerCalibration(imu_t &msg, const Eigen::Vector3d &offset,
+    const Eigen::Vector3d &scale, const Eigen::Matrix3d &rotM)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        msg.magnetometer[i] -= offset(i);
+    }
+
+    Eigen::RowVector3d prod =
+        Eigen::RowVector3d(msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]) * rotM;
+
+    for (int i = 0; i < 3; i++)
+    {
+        msg.magnetometer[i] = prod(i) / scale(i);
+    }
 }
