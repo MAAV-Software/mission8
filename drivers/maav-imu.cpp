@@ -159,7 +159,7 @@ void calibrateMagnetometer(
     imu_t msg;
     vector<vector<double>> magvals;
 
-    auto start = duration_cast<microseconds>(system_clock::now().time_since_epoch());
+    auto start = duration_cast<seconds>(system_clock::now().time_since_epoch());
 
     cout << "Rotate the drone to trace an imaginary sphere\n";
 
@@ -168,7 +168,7 @@ void calibrateMagnetometer(
         device->read(msg);
         magvals.push_back(
             vector<double>{msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]});
-        if ((duration_cast<microseconds>(system_clock::now().time_since_epoch()) - start) >= 6e7us)
+        if ((duration_cast<seconds>(system_clock::now().time_since_epoch()) - start) >= 60s)
             break;
         std::this_thread::sleep_for(1ms);
     }
