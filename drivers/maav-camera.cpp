@@ -18,7 +18,7 @@
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/rgb_image_t.hpp>
 #include <common/utils/GetOpt.hpp>
-#include <vision/depth-utils/CameraDriverHelper.hpp>
+#include <vision/core/CameraDriverHelper.hpp>
 
 using std::atomic;
 using std::condition_variable;
@@ -74,10 +74,6 @@ int main(int argc, char** argv)
     // Assign using the convention mentioned above
     rs2::context ctx;
     auto list = ctx.query_devices();
-    vector<string> serials(2);
-    serials[0] = list[0].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-    serials[1] = list[1].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-    std::sort(serials.begin(), serials.end());
 
     vector<unique_ptr<CameraDriverHelper>> helpers;
     helpers.reserve(2);

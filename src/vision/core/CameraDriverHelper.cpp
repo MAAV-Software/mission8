@@ -1,11 +1,11 @@
-#include "vision/depth-utils/CameraDriverHelper.hpp"
+#include "vision/core/CameraDriverHelper.hpp"
 
 #include "common/messages/depth_image_t.hpp"
 #include "common/messages/point_cloud_t.hpp"
 #include "common/messages/point_t.hpp"
 #include "common/messages/rgb_image_t.hpp"
 
-#include "vision/depth-utils/utilities.hpp"
+#include "vision/core/utilities.hpp"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

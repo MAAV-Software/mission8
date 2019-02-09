@@ -5,7 +5,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(LibRealSense REQUIRED)
 find_package(LibRealSense2 REQUIRED)
-find_package(ZCM REQUIRED)
+find_package(Boost REQUIRED system)
 
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
@@ -18,72 +18,101 @@ include_directories(
     ${LIBREALSENSE2_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${GLFW3_INCLUDE_DIR}
-    ${ZCM_INCLUDE+DIRS}
+    ${SW_INCLUDE_DIR}
+    ${AUX_SW_INCLUDE_DIR}
 )
 
 include_directories(SYSTEM
     ${PCL_INCLUDE_DIRS}
+    ${SOFTWARE_INCLUDE_DIRS}
 )
 
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(RealsenseSettings SHARED RealsenseSettings.cpp)
+add_executable(data-log-check data-log-check.cpp DataLogReader.cpp)
 
-# add_library(RGBDPlayback SHARED RGBDPlayback.cpp)
+add_executable(snapshot getSnapshot.cpp)
 
-add_library(CameraInterface SHARED
-    CameraInterfaceBase.cpp
-    LegacyCameraInterface.cpp
-    D400CameraInterface.cpp
+add_executable(planeFitterPCLTest planeFitterPclTest.cpp)
+
+add_executable(planeFitterIRLTest planeFitterTestIRL.cpp)
+
+target_link_libraries(planeFitterIRLTest
+    CameraInterface
+    PlaneFitter
+    maav-utils
+    maav-msg
+    ${YAMLCPP_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
-add_library(CameraDriverHelper SHARED CameraDriverHelper.cpp)
+target_link_libraries(planeFitterPCLTest
+    CameraInterface
+    PlaneFitter
+    maav-utils
+    maav-msg
+    ${YAMLCPP_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
+)
 
-add_library(VisionUtils SHARED utilities.cpp)
-
-# add_executable(data-log data-log.cpp)
-
-add_library(PlaneFitter SHARED PlaneFitter.cpp)
-
-target_link_libraries(CameraInterface
+target_link_libraries(data-log-check
     ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
     ${LIBREALSENSE2_LIBRARIES}
-    RealsenseSettings
 )
 
-target_link_libraries(CameraInterface realsense2)
-
-target_link_libraries(CameraDriverHelper
-    CameraInterface
-    VisionUtils
+target_link_libraries(snapshot
+    ${OpenCV_LIBS}
+    ${PCL_LIBRARIES}
+    ${EPOXY_LIBRARIES}
+    ${GLFW3_LIBRARIES}
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
 )
 
-# target_link_libraries(data-log
-#     ${OpenCV_LIBS}
-#     ${PCL_LIBRARIES}
-#     ${LIBREALSENSE_LIBRARIES}
-#     ${LIBREALSENSE2_LIBRARIES}
-#     realsense2
-#     CameraInterface
-# )
+# RGBD Testing
+add_executable(pcl_test pcl_test.cpp)
+add_executable(view_cloud view_cloud.cpp)
+add_executable(view_rgb rgbView.cpp)
+add_executable(view_infrared depthView.cpp)
+add_executable(combined_view combinedView.cpp)
 
-target_link_libraries(PlaneFitter
+target_link_libraries(pcl_test
+    ${OpenCV_LIBS}
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
     ${LIBREALSENSE2_LIBRARIES}
 )
 
-# target_link_libraries(RGBDPlayback
-#     ${OpenCV_LIBS}
-#     ${PCL_LIBRARIES}
-#     ${LIBREALSENSE_LIBRARIES}
-#     ${LIBREALSENSE2_LIBRARIES}
-# )
+target_link_libraries(view_cloud
+    ${EPOXY_LIBRARIES}
+    ${GLFW3_LIBRARIES}
+    ${PCL_LIBRARIES}
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
+)
 
-target_link_libraries(VisionUtils
+target_link_libraries(view_rgb
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
+    ${OpenCV_LIBS}
+)
+
+target_link_libraries(view_infrared
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
+    ${OpenCV_LIBS}
+)
+
+target_link_libraries(combined_view
+    ${LIBREALSENSE_LIBRARIES}
+    ${LIBREALSENSE2_LIBRARIES}
     ${OpenCV_LIBS}
 )
 

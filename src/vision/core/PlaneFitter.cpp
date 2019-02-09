@@ -1,4 +1,4 @@
-#include "vision/depth-utils/PlaneFitter.hpp"
+#include "vision/core/PlaneFitter.hpp"
 
 // TODO Move to a config file
 // Used to filter out poor data when out of the camera's range

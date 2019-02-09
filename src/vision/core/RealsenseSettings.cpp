@@ -1,4 +1,4 @@
-#include "vision/depth-utils/RealsenseSettings.hpp"
+#include "vision/core/RealsenseSettings.hpp"
 
 const int STREAM_WIDTH = 640;
 const int STREAM_HEIGHT = 480;

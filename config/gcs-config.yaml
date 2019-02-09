@@ -1,0 +1,24 @@
+---
+# Config file for GCS
+# Tuning parameters to be loaded on launch
+Tuning:
+  pos:
+    x: [0.00, 0.00, 0.00]
+    y: [0.00, 0.00, 0.00]
+    z: [0.00, 0.00, 0.00]
+    yaw: [0.00, 0.00, 0.00]
+  rate:
+    x: [0.00, 0.00, 0.00]
+    y: [0.00, 0.00, 0.00]
+    z: [0.00, 0.00, 0.00]
+# GUI Spacing
+Spacing:
+  small: 2
+  med: 5
+  large: 10
+# Status timeouts
+Timeout:
+  quiet: 3
+  down: 10
+# ZCM url
+url: "udpm://239.255.76.67:7667?ttl=1"

@@ -13,6 +13,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # Add option to build modules
 option(BUILD_GNC "Build the GNC module" ON)
+option(BUILD_GCS "Build the GCS module" OFF)
 option(BUILD_VISION "Build the vision module" ON)
 option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
 option(BUILD_GCS_CLIENT "Build the ground control station client" ON)

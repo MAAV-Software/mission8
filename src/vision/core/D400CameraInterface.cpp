@@ -2,8 +2,8 @@
 #include <chrono>
 #include <iostream>
 
-#include "vision/depth-utils/D400CameraInterface.hpp"
-#include "vision/depth-utils/RealsenseSettings.hpp"
+#include "vision/core/D400CameraInterface.hpp"
+#include "vision/core/RealsenseSettings.hpp"
 
 using cv::Mat;
 using std::string;

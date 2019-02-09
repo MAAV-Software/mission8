@@ -1,5 +1,5 @@
-#include "vision/depth-utils/LegacyCameraInterface.hpp"
-#include "vision/depth-utils/RealsenseSettings.hpp"
+#include "vision/core/LegacyCameraInterface.hpp"
+#include "vision/core/RealsenseSettings.hpp"
 
 #include <stdexcept>
 #include <string>

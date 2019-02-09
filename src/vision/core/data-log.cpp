@@ -18,9 +18,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "vision/depth-utils/CameraInterfaceBase.hpp"
-#include "vision/depth-utils/D400CameraInterface.hpp"
-#include "vision/depth-utils/LegacyCameraInterface.hpp"
+#include "vision/core/CameraInterfaceBase.hpp"
+#include "vision/core/D400CameraInterface.hpp"
+#include "vision/core/LegacyCameraInterface.hpp"
 
 using std::atomic;
 using std::condition_variable;

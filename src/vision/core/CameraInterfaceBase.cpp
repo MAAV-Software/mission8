@@ -1,4 +1,4 @@
-#include "vision/depth-utils/CameraInterfaceBase.hpp"
+#include "vision/core/CameraInterfaceBase.hpp"
 
 using maav::vision::CameraInterfaceBase;
 

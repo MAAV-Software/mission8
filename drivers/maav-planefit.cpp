@@ -16,7 +16,7 @@
 #include "common/messages/nav_runstate_t.hpp"
 #include "common/messages/plane_fit_t.hpp"
 #include "common/messages/point_cloud_t.hpp"
-#include "vision/depth-utils/PlaneFitter.hpp"
+#include "vision/core/PlaneFitter.hpp"
 
 using std::atomic;
 using std::make_tuple;

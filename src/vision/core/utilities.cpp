@@ -1,4 +1,4 @@
-#include "vision/depth-utils/utilities.hpp"
+#include "vision/core/utilities.hpp"
 
 #include <vector>
 

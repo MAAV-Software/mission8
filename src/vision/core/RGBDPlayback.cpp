@@ -1,4 +1,4 @@
-#include "vision/depth-utils/RGBDPlayback.hpp"
+#include "vision/core/RGBDPlayback.hpp"
 
 using namespace maav::vision;
 
@@ -6,7 +6,7 @@ using std::string;
 using std::to_string;
 using std::runtime_error;
 
-const std::string DEFAULT_PATH = "build/src/vision/depth-utils/";
+const std::string DEFAULT_PATH = "build/src/vision/core/";
 
 RGBDPlayback::RGBDPlayback(int num, const string& path) : file_path_(path)
 {

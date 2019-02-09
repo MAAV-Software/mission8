@@ -11,7 +11,7 @@
 #include <zcm/zcm-cpp.hpp>
 
 #include <common/messages/rgbd_image_t.hpp>
-#include <vision/depth-utils/D400CameraInterface.hpp>
+#include <vision/core/D400CameraInterface.hpp>
 
 namespace maav::vision
 {
