@@ -1,3 +1,4 @@
+#include <Eigen/Dense>
 #include <chrono>
 #include <csignal>
 #include <cstdint>
@@ -10,6 +11,7 @@
 #include <stdexcept>
 
 #include <yaml-cpp/yaml.h>
+#include <common/utils/yaml_matrix.hpp>
 #include <zcm/zcm-cpp.hpp>
 
 #include <common/utils/GetOpt.hpp>
@@ -20,6 +22,11 @@ using namespace zcm;
 using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
+using Eigen::Matrix4d;
+using Eigen::MatrixXd;
+using Eigen::SelfAdjointEigenSolver;
+using Eigen::Vector3d;
+using Eigen::VectorXd;
 
 sig_atomic_t RUNNING = 1;
 
@@ -81,6 +88,8 @@ int main(int argc, char** argv)
     if (gopt.getBool("magcal"))
     {
         calibrateMagnetometer(device, gopt.getString("imucalibfile"));
+        std::cout << "Exiting...\n";
+        return 0;
     }
 
     cout << "IMU Connected. Begin reading data and publishing messages.\n";
@@ -94,25 +103,11 @@ int main(int argc, char** argv)
         cout << std::showpos << std::setprecision(3);
     }
 
-    YAML::Node mag_config = YAML::LoadFile(gopt.getString("imucalibfile"));
-
-    double offset_x = mag_config["offset_x"].as<double>();
-    double offset_y = mag_config["offset_y"].as<double>();
-    double offset_z = mag_config["offset_z"].as<double>();
-    double scale_x = mag_config["scale_x"].as<double>();
-    double scale_y = mag_config["scale_y"].as<double>();
-    double scale_z = mag_config["scale_z"].as<double>();
-
     while (RUNNING)
     {
         auto start_time = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 
         device->read(msg);
-
-        // Scale magnetometer readings from calibration constants
-        msg.magnetometer[0] = (msg.magnetometer[0] - offset_x) * scale_x;
-        msg.magnetometer[1] = (msg.magnetometer[1] - offset_y) * scale_y;
-        msg.magnetometer[2] = (msg.magnetometer[2] - offset_z) * scale_z;
 
         zcm.publish(maav::IMU_CHANNEL, &msg);
         zcm_udp.publish(maav::IMU_CHANNEL, &msg);
@@ -164,66 +159,105 @@ void calibrateMagnetometer(
     imu_t msg;
     vector<vector<double>> magvals;
 
-    std::clock_t start;
-    double duration;
+    auto start = duration_cast<seconds>(system_clock::now().time_since_epoch());
 
-    start = std::clock();
-
-    cout << "Move the IMU in many different directions for 1 minute.\n";
+    cout << "Rotate the drone to trace an imaginary sphere\n";
 
     while (RUNNING)
     {
         device->read(msg);
         magvals.push_back(
             vector<double>{msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]});
-        duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-        if (duration >= 60) break;
+        if ((duration_cast<seconds>(system_clock::now().time_since_epoch()) - start) >= 60s)
+            break;
         std::this_thread::sleep_for(1ms);
     }
 
     if (!RUNNING) return;
 
-    // Calibration calculations: https://appelsiini.net/2018/calibrate-magnetometer/
+    VectorXd x(magvals.size());
+    VectorXd y(magvals.size());
+    VectorXd z(magvals.size());
 
-    // Find max, min
-    double x_max, y_max, z_max;
-    x_max = y_max = z_max = std::numeric_limits<double>::min();
-    double x_min, y_min, z_min;
-    x_min = y_min = z_min = std::numeric_limits<double>::max();
+    int idx = 0;
     for (auto& v : magvals)
     {
-        if (v[0] > x_max) x_max = v[0];
-        if (v[1] > y_max) y_max = v[1];
-        if (v[2] > z_max) z_max = v[2];
-        if (v[0] < x_min) x_min = v[0];
-        if (v[1] < y_min) y_min = v[1];
-        if (v[2] < z_min) z_min = v[2];
+        x(idx) = v[0];
+        y(idx) = v[1];
+        z(idx) = v[2];
+        idx++;
     }
 
-    double offset_x = (x_max + x_min) / 2.0;
-    double offset_y = (y_max + y_min) / 2.0;
-    double offset_z = (z_max + z_min) / 2.0;
+    // Algorithm from https://github.com/martindeegan/drone/blob/master/copter/matlab/ellipsoid_fit.m
 
-    double avg_delta_x = (x_max - x_min) / 2.0;
-    double avg_delta_y = (y_max - y_min) / 2.0;
-    double avg_delta_z = (z_max - z_min) / 2.0;
+    MatrixXd D(magvals.size(), 9);
 
-    double avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3.0;
+    for (size_t i = 0; i < magvals.size(); i++)
+    {
+        D(i, 0) = (x(i) * x(i));
+        D(i, 1) = (y(i) * y(i));
+        D(i, 2) = (z(i) * z(i));
+        D(i, 3) = 2 * x(i) * y(i);
+        D(i, 4) = 2 * z(i) * x(i);
+        D(i, 5) = 2 * y(i) * z(i);
+        D(i, 6) = 2 * x(i);
+        D(i, 7) = 2 * y(i);
+        D(i, 8) = 2 * z(i);
+    }
 
-    double scale_x = avg_delta / avg_delta_x;
-    double scale_y = avg_delta / avg_delta_y;
-    double scale_z = avg_delta / avg_delta_z;
+    MatrixXd v;
 
-    // Save constants:
-    // offset x,y,z
-    // scale x,y,z
+    v = (D.transpose() * D)
+            .colPivHouseholderQr()
+            .solve(D.transpose() * Eigen::MatrixXd::Ones(D.rows(), 1));
+
+    Matrix4d A;
+    A(0, 0) = v(0);
+    A(0, 1) = v(3);
+    A(0, 2) = v(4);
+    A(0, 3) = v(6);
+    A(1, 0) = v(3);
+    A(1, 1) = v(1);
+    A(1, 2) = v(5);
+    A(1, 3) = v(7);
+    A(2, 0) = v(4);
+    A(2, 1) = v(5);
+    A(2, 2) = v(2);
+    A(2, 3) = v(8);
+    A(3, 0) = v(6);
+    A(3, 1) = v(7);
+    A(3, 2) = v(8);
+    A(3, 3) = -1;
+
+    Vector3d v_col;
+    v_col << v(6), v(7), v(8);
+
+    Vector3d offset = -A.block(0, 0, 3, 3).colPivHouseholderQr().solve(v_col);
+
+    MatrixXd Tmtx = MatrixXd::Identity(4, 4);
+
+    Tmtx(3, 0) = offset(0);
+    Tmtx(3, 1) = offset(1);
+    Tmtx(3, 2) = offset(2);
+
+    Matrix4d AT = Tmtx * A * Tmtx.transpose();
+
+    SelfAdjointEigenSolver<MatrixXd> es((AT.block(0, 0, 3, 3) / -AT(3, 3)));
+
+    MatrixXd ev = es.eigenvalues().real();
+
+    MatrixXd rotM = es.eigenvectors().real();
+
+    double scale_x = sqrt(std::abs(1 / ev(0, 0)));
+    double scale_y = sqrt(std::abs(1 / ev(1, 0)));
+    double scale_z = sqrt(std::abs(1 / ev(2, 0)));
+
+    Vector3d scale(scale_x, scale_y, scale_z);
+
     YAML::Node node, _baseNode = YAML::LoadFile(imu_calib_file);
-    _baseNode["offset_x"] = offset_x;
-    _baseNode["offset_y"] = offset_y;
-    _baseNode["offset_z"] = offset_z;
-    _baseNode["scale_x"] = scale_x;
-    _baseNode["scale_y"] = scale_y;
-    _baseNode["scale_z"] = scale_z;
+    _baseNode["offset"] = offset;
+    _baseNode["scale"] = scale;
+    _baseNode["rotM"] = rotM;
 
     remove(imu_calib_file.c_str());
 
