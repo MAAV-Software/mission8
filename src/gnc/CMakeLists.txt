@@ -44,6 +44,7 @@ include_directories(maav-gnc-utils
 add_library(maav-gnc-utils SHARED
     utils/ZcmConversion.cpp
     utils/LoadParameters.cpp
+    utils/MagnetometerEllipsoidFit.cpp
 )
 
 target_link_libraries(maav-gnc-utils
