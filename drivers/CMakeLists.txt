@@ -125,6 +125,7 @@ target_link_libraries(maav-imu
         ${ZCM_LIBRARIES} 
         maav-msg
         maav-utils
+        maav-gnc-utils
         ${YAMLCPP_LIBRARY}
         maav-imu-device
 )
