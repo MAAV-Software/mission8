@@ -24,12 +24,12 @@ using namespace zcm;
 using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
-using maav::gnc::runMagnetometerCalibration;
 using Eigen::Matrix4d;
 using Eigen::MatrixXd;
 using Eigen::SelfAdjointEigenSolver;
 using Eigen::Vector3d;
 using Eigen::VectorXd;
+using maav::gnc::runMagnetometerCalibration;
 
 sig_atomic_t RUNNING = 1;
 
@@ -153,7 +153,6 @@ std::unique_ptr<maav::ImuDevice> getDevice(const std::string& device_name)
         throw runtime_error("Unknown IMU device");
     }
 }
-
 
 void calibrateMagnetometer(
     std::unique_ptr<maav::ImuDevice>& device, const std::string& imu_calib_file)
