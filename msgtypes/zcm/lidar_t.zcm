@@ -5,5 +5,5 @@ struct lidar_t
 {
 	int64_t utime;
 
-    double distance;
+    vector1_t distance;
 }

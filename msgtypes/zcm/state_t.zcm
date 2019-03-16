@@ -8,22 +8,30 @@ struct state_t
 	// TODO: Increase this to estimate more variables
 	const int32_t DoF = 15;
 
-	double covariance[DoF][DoF];
+	matrix_t covariance;
 
 	// State variables
-	double attitude[4];
-	double position[3];
-	double velocity[3];
+	quaternion_t attitude;
+	// LEGEND: [pos_x, pos_y, pos_z]
+	vector3_t position;
+	// LEGEND: [vel_x, vel_y, vel_z]
+	vector3_t velocity;
 
 	// Control inputs
-	double angular_velocity[3];
-	double acceleration[3];
+	// LEGEND: [ω_x, ω_y, ω_z]
+	vector3_t angular_velocity;
+	// LEGEND: [acc_x, acc_y, acc_z]
+	vector3_t acceleration;
 
 	// Biases
-	double gyro_biases[3];
-	double accel_biases[3];
+	// LEGEND: [gbias_x, gbias_y, gbias_z]
+	vector3_t gyro_biases;
+	// LEGEND: [abias_x, abias_y, abias_z]
+	vector3_t accel_biases;
 
 	// World properties
-	double gravity[3];
-	double magnetic_field[3];
+	// LEGEND: [grav_x, grav_y, grav_z]
+	vector3_t gravity;
+	// LEGEND: [mag_x, mag_y, mag_z]
+	vector3_t magnetic_field;
 }

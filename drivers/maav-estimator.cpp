@@ -269,14 +269,15 @@ void applyMagnetometerCalibration(imu_t &msg, const Eigen::Vector3d &offset,
 {
     for (int i = 0; i < 3; i++)
     {
-        msg.magnetometer[i] -= offset(i);
+        msg.magnetometer.data[i] -= offset(i);
     }
 
-    Eigen::RowVector3d prod =
-        Eigen::RowVector3d(msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]) * rotM;
+    Eigen::RowVector3d prod = Eigen::RowVector3d(msg.magnetometer.data[0], msg.magnetometer.data[1],
+                                  msg.magnetometer.data[2]) *
+                              rotM;
 
     for (int i = 0; i < 3; i++)
     {
-        msg.magnetometer[i] = prod(i) / scale(i);
+        msg.magnetometer.data[i] = prod(i) / scale(i);
     }
 }

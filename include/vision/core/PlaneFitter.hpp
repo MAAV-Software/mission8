@@ -9,6 +9,8 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
+#include <common/messages/vector1_t.hpp>
+
 namespace maav::vision
 {
 class PlaneFitter
@@ -42,8 +44,8 @@ public:
      * cloud to a plane, and assuming that that plane is the ground
      * plane, computing peices of the quadcopter's pose
      */
-    bool runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-        float &zdepth, float &roll, float &pitch, uint64_t utime);
+    bool runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, vector1_t &zdot,
+        vector1_t &zdepth, vector1_t &roll, vector1_t &pitch, uint64_t utime);
     /** \brief Obtain all the plane information needed by driver
      * \return boolean that indicates whether plane fitting was successful
      * \param cloud a point cloud ptr to the input point cloud
@@ -63,17 +65,19 @@ public:
      * as quadcopter pitch, coefs is the matrix that can be passed
      * in to hold the plane coefficients computed by the class
      */
-    bool getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot, float &zdepth,
-        float &roll, float &pitch, uint64_t utime, Eigen::MatrixXf &coefs);
+    bool getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, vector1_t &zdot,
+        vector1_t &zdepth, vector1_t &roll, vector1_t &pitch, uint64_t utime,
+        Eigen::MatrixXf &coefs);
     /** Get the last computed height
      * \return the last computed quadcopter height
      */
     float getLastHeight() const { return last_height_; }
+
 private:
     const float inlier_thresh_;
     float last_height_;
     uint64_t last_time_;
     Eigen::MatrixXf junk_matrix_;
 };  // PlaneFitter
-}
+}  // namespace maav::vision
 #endif

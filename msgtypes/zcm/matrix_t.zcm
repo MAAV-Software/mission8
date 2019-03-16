@@ -1,0 +1,7 @@
+struct matrix_t
+{
+    int32_t rows;
+    int32_t cols;
+
+    double data[rows][cols];
+}

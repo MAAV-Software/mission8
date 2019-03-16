@@ -1,23 +1,22 @@
 #include <iostream>
 #include <vector>
 
-#include <common/utils/GetOpt.hpp>
 #include <pcl/ModelCoefficients.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <common/utils/GetOpt.hpp>
 #include <librealsense2/rs.hpp>
 
 #include "vision/core/D400CameraInterface.hpp"
 #include "vision/core/PlaneFitter.hpp"
 
+using maav::vision::D400CameraInterface;
+using pcl::PointCloud;
+using pcl::PointXYZ;
 using std::cout;
 using std::endl;
 using std::vector;
-using pcl::PointCloud;
-using pcl::PointXYZ;
-using maav::vision::D400CameraInterface;
 
 int main(int argc, char** argv)
 {
@@ -38,10 +37,10 @@ int main(int argc, char** argv)
 
     maav::vision::PlaneFitter planeFitter(0.05f);
     PointCloud<PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>());
-    float zdot = 0;
-    float zdepth = 0;
-    float roll = 0;
-    float pitch = 0;
+    vector1_t zdot;
+    vector1_t zdepth;
+    vector1_t roll;
+    vector1_t pitch;
     unsigned long long utime = 0;
     while (true)
     {
@@ -49,8 +48,8 @@ int main(int argc, char** argv)
         cloudPtr = cam.getPointCloudBasic();
         if (planeFitter.runPlaneFitting(cloudPtr, zdot, zdepth, roll, pitch, utime))
         {
-            cout << planeFitter.getLastHeight() << '\t' <<
-                zdot << '\t' << zdepth << '\t' << roll << '\t' << pitch << endl;
+            cout << planeFitter.getLastHeight() << '\t' << zdot.data[0] << '\t' << zdepth.data[0]
+                 << '\t' << roll.data[0] << '\t' << pitch.data[0] << endl;
         }
         else
         {

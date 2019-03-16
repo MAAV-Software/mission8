@@ -269,15 +269,15 @@ void MicrostrainImu::parseData(unsigned char *data, imu_t &imu)
     // char FirstByte = data[0];
     constexpr double STANDARD_GRAVITY = 9.80665;
 
-    imu.acceleration[0] = bytesToFloat(data, 1) * STANDARD_GRAVITY;
-    imu.acceleration[1] = bytesToFloat(data, 5) * STANDARD_GRAVITY;
-    imu.acceleration[2] = bytesToFloat(data, 9) * STANDARD_GRAVITY;
-    imu.angular_rates[0] = bytesToFloat(data, 13);
-    imu.angular_rates[1] = bytesToFloat(data, 17);
-    imu.angular_rates[2] = bytesToFloat(data, 21);
-    imu.magnetometer[0] = bytesToFloat(data, 25);
-    imu.magnetometer[1] = bytesToFloat(data, 29);
-    imu.magnetometer[2] = bytesToFloat(data, 33);
+    imu.acceleration.data[0] = bytesToFloat(data, 1) * STANDARD_GRAVITY;
+    imu.acceleration.data[1] = bytesToFloat(data, 5) * STANDARD_GRAVITY;
+    imu.acceleration.data[2] = bytesToFloat(data, 9) * STANDARD_GRAVITY;
+    imu.angular_rates.data[0] = bytesToFloat(data, 13);
+    imu.angular_rates.data[1] = bytesToFloat(data, 17);
+    imu.angular_rates.data[2] = bytesToFloat(data, 21);
+    imu.magnetometer.data[0] = bytesToFloat(data, 25);
+    imu.magnetometer.data[1] = bytesToFloat(data, 29);
+    imu.magnetometer.data[2] = bytesToFloat(data, 33);
 }
 
 float MicrostrainImu::bytesToFloat(unsigned char *raw, unsigned int i)

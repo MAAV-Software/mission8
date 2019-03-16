@@ -12,12 +12,12 @@ namespace zcm
 // #include "common/messages/emergency_t.hpp"
 #include "common/messages/imu_t.hpp"
 #include "common/messages/lidar_t.hpp"
-}
+}  // namespace zcm
 
 #include "common/messages/MsgChannels.hpp"
 
-using zcm::ZCM;
 using std::strncmp;
+using zcm::ZCM;
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -66,9 +66,9 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
         lidar_t_decode(buf, 0, buf_len, &(mh->lidar));
         zcm::lidar_t zcmLidar;
 
-        zcmLidar.distance = mh->lidar.dist;
+        zcmLidar.distance.data[0] = mh->lidar.dist;
 
-        std::cout << "Lidar distance: " << zcmLidar.distance << std::endl;
+        std::cout << "Lidar distance: " << zcmLidar.distance.data[0] << std::endl;
 
         zcmLidar.utime =
             duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
@@ -81,15 +81,15 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
         imu_t_decode(buf, 0, buf_len, &(mh->imu));
         zcm::imu_t zcmImu;
 
-        zcmImu.acceleration[0] = mh->imu.AccX;
-        zcmImu.acceleration[1] = mh->imu.AccY;
-        zcmImu.acceleration[2] = mh->imu.AccZ;
-        zcmImu.angular_rates[0] = mh->imu.AngRateX;
-        zcmImu.angular_rates[1] = mh->imu.AngRateY;
-        zcmImu.angular_rates[2] = mh->imu.AngRateZ;
-        zcmImu.magnetometer[0] = mh->imu.MagX;
-        zcmImu.magnetometer[1] = mh->imu.MagY;
-        zcmImu.magnetometer[2] = mh->imu.MagZ;
+        zcmImu.acceleration.data[0] = mh->imu.AccX;
+        zcmImu.acceleration.data[1] = mh->imu.AccY;
+        zcmImu.acceleration.data[2] = mh->imu.AccZ;
+        zcmImu.angular_rates.data[0] = mh->imu.AngRateX;
+        zcmImu.angular_rates.data[1] = mh->imu.AngRateY;
+        zcmImu.angular_rates.data[2] = mh->imu.AngRateZ;
+        zcmImu.magnetometer.data[0] = mh->imu.MagX;
+        zcmImu.magnetometer.data[1] = mh->imu.MagY;
+        zcmImu.magnetometer.data[2] = mh->imu.MagZ;
 
         zcmImu.utime = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 

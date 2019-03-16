@@ -5,7 +5,7 @@ struct imu_t
 {
 	int64_t utime;
 
-	double angular_rates[3];
-    double acceleration[3];
-    double magnetometer[3];
+	vector3_t angular_rates;
+    vector3_t acceleration;
+    vector3_t magnetometer;
 }

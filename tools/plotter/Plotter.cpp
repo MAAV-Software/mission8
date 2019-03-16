@@ -1,11 +1,15 @@
 #include <iostream>
+#include <memory>
+#include <thread>
 
 #include <yaml-cpp/yaml.h>
-
-#include <mainwindow.h>
 #include <QApplication>
 
 #include <common/utils/GetOpt.hpp>
+#include "DataDict.hpp"
+#include "LinePlotWindow.h"
+#include "ListWindow.h"
+#include "ZcmLoop.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -30,9 +34,21 @@ int main(int argc, char *argv[])
             << "Please provide correct path to configuration file with \"-c <path-to-config>\"\n";
         return 1;
     }
+
+    // Create QApplication before all other objects
     QApplication app(argc, argv);
-    MainWindow main_window(config);
-    main_window.show();
+
+    // DataDict stores all data for plotting organized in a dictionary
+    std::shared_ptr<DataDict> dict(new DataDict());
+
+    // ZcmLoop runs in another thread and feeds zcm messages into the dictionary
+    ZcmLoop loop(dict);
+
+    ListWindow list_window(dict, config);
+    list_window.show();
+
+    std::thread zcm_loop = std::thread(&ZcmLoop::run, &loop);
+    std::thread dict_loop = std::thread(&DataDict::run, dict);
 
     return app.exec();
 }

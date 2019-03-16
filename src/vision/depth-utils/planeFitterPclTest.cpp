@@ -11,18 +11,18 @@
 
 #include "vision/core/PlaneFitter.hpp"
 
-using std::vector;
-using std::cout;
-using std::cerr;
 using Eigen::MatrixXf;
-using std::ofstream;
 using pcl::PointCloud;
 using pcl::PointXYZ;
+using std::cerr;
+using std::cout;
+using std::ofstream;
+using std::vector;
 
 constexpr float distanceTolerance = 0.3f;
 
-double calculateError(const Eigen::Vector4f &sampledCoefficients,
-                      vector<Eigen::Vector3f> &pointsVectors)
+double calculateError(
+    const Eigen::Vector4f &sampledCoefficients, vector<Eigen::Vector3f> &pointsVectors)
 {
     // Orthogonal projection least squares method
     // Calculate a basis of the plane represented by sampledCoefficients
@@ -31,8 +31,7 @@ double calculateError(const Eigen::Vector4f &sampledCoefficients,
     for (unsigned i = 0; i < 3; ++i)
     {
         bPoints[i](2) = (sampledCoefficients(0) * bPoints[i](0) +
-                         sampledCoefficients(1) * bPoints[i](1) -
-                         sampledCoefficients(3)) /
+                            sampledCoefficients(1) * bPoints[i](1) - sampledCoefficients(3)) /
                         (-1 * sampledCoefficients(2));
     }
     // Basis vectors
@@ -67,8 +66,7 @@ double calculateError(const Eigen::Vector4f &sampledCoefficients,
     return squaredError;
 }
 
-PointCloud<PointXYZ> generatePoints(const float x, const float y,
-    const float z, const float d,
+PointCloud<PointXYZ> generatePoints(const float x, const float y, const float z, const float d,
     const float noise, const unsigned numPoints)
 {
     std::normal_distribution<float> sample;
@@ -123,12 +121,10 @@ bool checkCoefficients(coefficients_t ground, coefficients_t test)
         float testY = sample(gen) * 10;
         PointXYZ groundPoint(testX, testY, 0.f);
         PointXYZ testPoint(testX, testY, 0.f);
-        groundPoint.z = (-1 * groundPoint.x * ground.x - ground.y *
-            groundPoint.y - ground.d) / ground.z;
-        testPoint.z = (-1 * testPoint.x * test.x - test.y * testPoint.y -
-            test.d) / test.z;
-        if (sqrt((testPoint.z - groundPoint.z) * (testPoint.z -
-            groundPoint.z)) > distanceTolerance)
+        groundPoint.z =
+            (-1 * groundPoint.x * ground.x - ground.y * groundPoint.y - ground.d) / ground.z;
+        testPoint.z = (-1 * testPoint.x * test.x - test.y * testPoint.y - test.d) / test.z;
+        if (sqrt((testPoint.z - groundPoint.z) * (testPoint.z - groundPoint.z)) > distanceTolerance)
         {
             cout << "Failing z: " << testPoint.z << " " << groundPoint.z << '\n';
             return false;
@@ -151,8 +147,7 @@ void randomTest(std::ofstream &foutPCL, std::ofstream &foutErrorPCL)
     const float d = sampleWithNegatives(gen);
     const float z = -1 * x - y - d;
     maav::vision::PlaneFitter planeFitterPCL(inlierDistance);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr
-        cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
     *cloud = generatePoints(x, y, z, d, noise, numPoints);
     vector<Eigen::Vector3f> pointsVectors(cloud->size());
     for (unsigned i = 0; i < cloud->size(); ++i)
@@ -162,16 +157,16 @@ void randomTest(std::ofstream &foutPCL, std::ofstream &foutErrorPCL)
         pointsVectors[i](2) = (*cloud)[i].z;
     }
     long long time1 = std::chrono::duration_cast<std::chrono::microseconds>(
-                std::chrono::system_clock::now().time_since_epoch())
-                .count();
+        std::chrono::system_clock::now().time_since_epoch())
+                          .count();
     auto coefs = planeFitterPCL.fitPlane(cloud);
     long long time2 = std::chrono::duration_cast<std::chrono::microseconds>(
-                std::chrono::system_clock::now().time_since_epoch())
-                .count();
-    float zdot;
-    float zdepth;
-    float roll;
-    float pitch;
+        std::chrono::system_clock::now().time_since_epoch())
+                          .count();
+    vector1_t zdot;
+    vector1_t zdepth;
+    vector1_t roll;
+    vector1_t pitch;
     unsigned long long utime = 0;
     planeFitterPCL.runPlaneFitting(cloud, zdot, zdepth, roll, pitch, utime);
     if (coefs.size() == 0)
@@ -181,7 +176,8 @@ void randomTest(std::ofstream &foutPCL, std::ofstream &foutErrorPCL)
     else
     {
         foutErrorPCL << calculateError(coefs, pointsVectors) /
-            static_cast<double>(pointsVectors.size()) << std::endl;
+                            static_cast<double>(pointsVectors.size())
+                     << std::endl;
     }
     foutPCL << (time2 - time1) << std::endl;
 }

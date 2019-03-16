@@ -1,64 +1,124 @@
 #include <gnc/utils/ZcmConversion.hpp>
 
+#include <vector>
+
+using maav::gnc::measurements::GlobalUpdateMeasurement;
 using maav::gnc::measurements::ImuMeasurement;
 using maav::gnc::measurements::LidarMeasurement;
 using maav::gnc::measurements::PlaneFitMeasurement;
-using maav::gnc::measurements::GlobalUpdateMeasurement;
 
 namespace maav
 {
 namespace gnc
 {
+vector1_t convertVector1d(double vec)
+{
+    vector1_t new_vec;
+    new_vec.data[0] = vec;
+    return new_vec;
+}
+
+double convertVector1d(const vector1_t& zcm_vec) { return zcm_vec.data[0]; }
+
+vector2_t convertVector2d(const Eigen::Vector2d& vec)
+{
+    vector2_t new_vec;
+    new_vec.data[0] = vec.x();
+    new_vec.data[1] = vec.y();
+    return new_vec;
+}
+Eigen::Vector2d convertVector2d(const vector2_t& zcm_vec)
+{
+    Eigen::Vector2d vec;
+    vec.x() = zcm_vec.data[0];
+    vec.y() = zcm_vec.data[1];
+    return vec;
+}
+
+vector3_t convertVector3d(const Eigen::Vector3d& vec)
+{
+    vector3_t zcm_vec;
+    zcm_vec.data[0] = vec.x();
+    zcm_vec.data[1] = vec.y();
+    zcm_vec.data[2] = vec.z();
+    return zcm_vec;
+}
+
+Eigen::Vector3d convertVector3d(const vector3_t& zcm_vec)
+{
+    Eigen::Vector3d vec;
+    vec.x() = zcm_vec.data[0];
+    vec.y() = zcm_vec.data[1];
+    vec.z() = zcm_vec.data[2];
+    return vec;
+}
+
+vector4_t convertVector4d(const Eigen::Vector4d& vec)
+{
+    vector4_t zcm_vec;
+    zcm_vec.data[0] = vec.w();
+    zcm_vec.data[1] = vec.x();
+    zcm_vec.data[2] = vec.y();
+    zcm_vec.data[3] = vec.z();
+    return zcm_vec;
+}
+
+Eigen::Vector4d convertVector4d(const vector4_t& zcm_vec)
+{
+    Eigen::Vector4d vec;
+    vec.w() = zcm_vec.data[0];
+    vec.x() = zcm_vec.data[1];
+    vec.y() = zcm_vec.data[2];
+    vec.z() = zcm_vec.data[3];
+    return vec;
+}
+
+quaternion_t convertQuaternion(const Sophus::SO3d& att)
+{
+    quaternion_t zcm_quat;
+    const Eigen::Quaterniond& quat = att.unit_quaternion();
+    zcm_quat.data[0] = quat.w();
+    zcm_quat.data[1] = quat.x();
+    zcm_quat.data[2] = quat.y();
+    zcm_quat.data[3] = quat.z();
+    return zcm_quat;
+}
+
+Sophus::SO3d convertQuaternion(const quaternion_t& zcm_att)
+{
+    Eigen::Quaterniond quat;
+    quat.w() = zcm_att.data[0];
+    quat.x() = zcm_att.data[1];
+    quat.y() = zcm_att.data[2];
+    quat.z() = zcm_att.data[3];
+    return Sophus::SO3d(quat);
+}
+
 state_t ConvertState(const State& state)
 {
     state_t zcm_state;
     zcm_state.utime = state.timeUSec();
 
-    const Eigen::Quaterniond& q = state.attitude().unit_quaternion();
-    zcm_state.attitude[0] = q.w();
-    zcm_state.attitude[1] = q.x();
-    zcm_state.attitude[2] = q.y();
-    zcm_state.attitude[3] = q.z();
-
-    zcm_state.position[0] = state.position().x();
-    zcm_state.position[1] = state.position().y();
-    zcm_state.position[2] = state.position().z();
-
-    zcm_state.velocity[0] = state.velocity().x();
-    zcm_state.velocity[1] = state.velocity().y();
-    zcm_state.velocity[2] = state.velocity().z();
-
-    zcm_state.angular_velocity[0] = state.angularVelocity().x();
-    zcm_state.angular_velocity[1] = state.angularVelocity().y();
-    zcm_state.angular_velocity[2] = state.angularVelocity().z();
-
-    zcm_state.acceleration[0] = state.acceleration().x();
-    zcm_state.acceleration[1] = state.acceleration().y();
-    zcm_state.acceleration[2] = state.acceleration().z();
-
-    zcm_state.magnetic_field[0] = state.magneticFieldVector().x();
-    zcm_state.magnetic_field[1] = state.magneticFieldVector().y();
-    zcm_state.magnetic_field[2] = state.magneticFieldVector().z();
-
-    zcm_state.gravity[0] = state.gravity().x();
-    zcm_state.gravity[1] = state.gravity().y();
-    zcm_state.gravity[2] = state.gravity().z();
-
-    zcm_state.gyro_biases[0] = state.gyroBias().x();
-    zcm_state.gyro_biases[1] = state.gyroBias().y();
-    zcm_state.gyro_biases[2] = state.gyroBias().z();
-
-    zcm_state.accel_biases[0] = state.accelBias().x();
-    zcm_state.accel_biases[1] = state.accelBias().y();
-    zcm_state.accel_biases[2] = state.accelBias().z();
-
-    for (size_t i = 0; i < State::DoF; i++)
-    {
-        for (size_t j = 0; j < State::DoF; j++)
-        {
-            zcm_state.covariance[i][j] = state.covariance()(i, j);
-        }
-    }
+    zcm_state.attitude = convertQuaternion(state.attitude());
+    zcm_state.position = convertVector3d(state.position());
+    zcm_state.velocity = convertVector3d(state.velocity());
+    zcm_state.angular_velocity = convertVector3d(state.angularVelocity());
+    zcm_state.acceleration = convertVector3d(state.acceleration());
+    zcm_state.magnetic_field = convertVector3d(state.magneticFieldVector());
+    zcm_state.gravity = convertVector3d(state.gravity());
+    zcm_state.gyro_biases = convertVector3d(state.gyroBias());
+    zcm_state.accel_biases = convertVector3d(state.accelBias());
+    convertMatrix(state.covariance(), zcm_state.covariance);
+    // for (size_t i = 0; i < State::DoF; i++)
+    // {
+    //     for (size_t j = 0; j < State::DoF; j++)
+    //     {
+    //         zcm_state.covariance.rows = State::DoF;
+    //         zcm_state.covariance.cols = State::DoF;
+    //         zcm_state.covariance = convertMatrix(state.covariance());
+    //         // zcm_state.covariance.data[i][j] = state.covariance()(i, j);
+    //     }
+    // }
 
     return zcm_state;
 }
@@ -67,31 +127,24 @@ State ConvertState(const state_t& zcm_state)
 {
     State state(zcm_state.utime);
 
-    state.attitude().setQuaternion({zcm_state.attitude[0], zcm_state.attitude[1],
-        zcm_state.attitude[2], zcm_state.attitude[3]});
-    state.velocity() = {zcm_state.velocity[0], zcm_state.velocity[1], zcm_state.velocity[2]};
-    state.position() = {zcm_state.position[0], zcm_state.position[1], zcm_state.position[2]};
+    state.attitude() = convertQuaternion(zcm_state.attitude);
+    state.position() = convertVector3d(zcm_state.position);
+    state.velocity() = convertVector3d(zcm_state.velocity);
+    state.gyroBias() = convertVector3d(zcm_state.gyro_biases);
+    state.accelBias() = convertVector3d(zcm_state.accel_biases);
+    state.angularVelocity() = convertVector3d(zcm_state.angular_velocity);
+    state.acceleration() = convertVector3d(zcm_state.acceleration);
+    state.magneticFieldVector() = convertVector3d(zcm_state.magnetic_field);
+    state.gravity() = convertVector3d(zcm_state.gravity);
+    convertMatrix(state.covariance(), zcm_state.covariance);
 
-    state.gyroBias() = {
-        zcm_state.gyro_biases[0], zcm_state.gyro_biases[1], zcm_state.gyro_biases[2]};
-    state.accelBias() = {
-        zcm_state.accel_biases[0], zcm_state.accel_biases[1], zcm_state.accel_biases[2]};
-
-    state.angularVelocity() = {zcm_state.angular_velocity[0], zcm_state.angular_velocity[1],
-        zcm_state.angular_velocity[2]};
-    state.acceleration() = {
-        zcm_state.acceleration[0], zcm_state.acceleration[1], zcm_state.acceleration[2]};
-    state.magneticFieldVector() = {
-        zcm_state.magnetic_field[0], zcm_state.magnetic_field[1], zcm_state.magnetic_field[2]};
-    state.gravity() = {zcm_state.gravity[0], zcm_state.gravity[1], zcm_state.gravity[2]};
-
-    for (size_t i = 0; i < State::DoF; i++)
-    {
-        for (size_t j = 0; j < State::DoF; j++)
-        {
-            state.covariance()(i, j) = zcm_state.covariance[i][j];
-        }
-    }
+    // for (size_t i = 0; i < State::DoF; i++)
+    // {
+    //     for (size_t j = 0; j < State::DoF; j++)
+    //     {
+    //         state.covariance()(i, j) = zcm_state.covariance.data[i][j];
+    //     }
+    // }
 
     return state;
 }
@@ -112,7 +165,7 @@ std::shared_ptr<LidarMeasurement> convertLidar(const lidar_t& zcm_lidar)
 {
     std::shared_ptr<LidarMeasurement> lidar(new LidarMeasurement());
 
-    lidar->distance()(0) = zcm_lidar.distance;
+    lidar->distance()(0) = convertVector1d(zcm_lidar.distance);
     lidar->setTime(zcm_lidar.utime);
 
     return lidar;
@@ -132,10 +185,9 @@ std::shared_ptr<ImuMeasurement> convertImu(const imu_t& zcm_imu)
 
     imu->time_usec = zcm_imu.utime;
 
-    imu->acceleration = {zcm_imu.acceleration[0], zcm_imu.acceleration[1], zcm_imu.acceleration[2]};
-    imu->angular_rates = {
-        zcm_imu.angular_rates[0], zcm_imu.angular_rates[1], zcm_imu.angular_rates[2]};
-    imu->magnetometer = {zcm_imu.magnetometer[0], zcm_imu.magnetometer[1], zcm_imu.magnetometer[2]};
+    imu->acceleration = convertVector3d(zcm_imu.acceleration);
+    imu->angular_rates = convertVector3d(zcm_imu.angular_rates);
+    imu->magnetometer = convertVector3d(zcm_imu.magnetometer);
 
     return imu;
 }
@@ -146,11 +198,11 @@ std::shared_ptr<PlaneFitMeasurement> convertPlaneFit(const plane_fit_t& zcm_plan
 
     plane_fit->time_usec = zcm_plane_fit.utime;
 
-    plane_fit->height = zcm_plane_fit.z;
-    plane_fit->vertical_speed = zcm_plane_fit.z_dot;
+    plane_fit->height = convertVector1d(zcm_plane_fit.z);
+    plane_fit->vertical_speed = convertVector1d(zcm_plane_fit.z_dot);
 
-    plane_fit->roll = zcm_plane_fit.roll;
-    plane_fit->pitch = zcm_plane_fit.pitch;
+    plane_fit->roll = convertVector1d(zcm_plane_fit.roll);
+    plane_fit->pitch = convertVector1d(zcm_plane_fit.pitch);
 
     return plane_fit;
 }
@@ -161,12 +213,10 @@ std::shared_ptr<GlobalUpdateMeasurement> convertGlobalUpdate(const global_update
 
     global_update->setTime(zcm_global.utime);
 
-    global_update->position() = {
-        zcm_global.position[0], zcm_global.position[1], zcm_global.position[2]};
-    global_update->attitude().setQuaternion(Eigen::Quaterniond(zcm_global.attitude[0],
-        zcm_global.attitude[1], zcm_global.attitude[2], zcm_global.attitude[3]));
+    global_update->position() = convertVector3d(zcm_global.position);
+    global_update->attitude() = convertQuaternion(zcm_global.attitude);
 
     return global_update;
 }
-}
-}
+}  // namespace gnc
+}  // namespace maav

@@ -10,7 +10,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 # Find the QtWidgets library
-find_package(Qt5 COMPONENTS Widgets PrintSupport REQUIRED)
+set(Qt5_DIR "${PROJECT_SOURCE_DIR}/thirdparty/Qt5/5.12.1/gcc_64/lib/cmake/Qt5")
+find_package(Qt5 5.12.1 REQUIRED COMPONENTS Widgets Core PrintSupport)
 find_package(OpenGL REQUIRED)
 
 #enable OpenGl
@@ -19,19 +20,32 @@ add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
 set(EXECUTABLE maav-plotter)
 
 set(PLOTTER_SRC
-    qcustomplot.cpp
-    mainwindow.ui
-    mainwindow.cpp
-    plotter.cpp
+    qcustomplot.cpp 
+    LinePlotWindow.ui
+    LinePlotWindow.cpp
+    ListWindow.ui
+    ListWindow.cpp
+    ListWindow_generated.cpp
+    Plotter.cpp
+    AbstractData.cpp
+    DataDict.cpp
+    DataDict_generated.cpp
+    ZcmConversion.cpp
+    ZcmLoop.cpp
+    ZcmLoop_generated.cpp
 )
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # Tell CMake to create the plotter executable
 add_executable(${EXECUTABLE} ${PLOTTER_SRC})
 
 target_include_directories(${EXECUTABLE} PUBLIC
+    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/
+    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtCore
+    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtGui
+    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtWidgets
     plotter
-    Qt5::Widgets
-    Qt5::PrintSupport
     ${ZCM_INCLUDE_DIRS}
     ${SW_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
@@ -39,6 +53,7 @@ target_include_directories(${EXECUTABLE} PUBLIC
 
 # Use the Widgets module from Qt 5
 target_link_libraries(${EXECUTABLE}
+    Qt5::Core
     Qt5::Widgets
     Qt5::PrintSupport
     maav-utils

@@ -56,14 +56,14 @@ Eigen::MatrixXf PlaneFitter::fitPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     return Eigen::MatrixXf(0, 0);  // No coefficients, return failure
 }
 
-bool PlaneFitter::runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-    float &zdepth, float &roll, float &pitch, uint64_t utime)
+bool PlaneFitter::runPlaneFitting(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, vector1_t &zdot,
+    vector1_t &zdepth, vector1_t &roll, vector1_t &pitch, uint64_t utime)
 {
     return getPlaneInfo(cloud, zdot, zdepth, roll, pitch, utime, junk_matrix_);
 }
 
-bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, float &zdot,
-    float &zdepth, float &roll, float &pitch, uint64_t utime, Eigen::MatrixXf &coefs)
+bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, vector1_t &zdot,
+    vector1_t &zdepth, vector1_t &roll, vector1_t &pitch, uint64_t utime, Eigen::MatrixXf &coefs)
 {
     coefs = fitPlane(cloud);
     if (coefs.size() == 0)
@@ -74,11 +74,11 @@ bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, 
     {
         return false;
     }
-    zdepth = abs(coefs(3) / coefs(2));
-    float height = abs(coefs(2) * zdepth);
+    zdepth.data[0] = abs(coefs(3) / coefs(2));
+    float height = abs(coefs(2) * zdepth.data[0]);
     uint64_t dt = utime - last_time_;
     constexpr float USEC_TO_SEC = 1000000.0;
-    zdot = (height - last_height_) / static_cast<float>(dt) * USEC_TO_SEC;
+    zdot.data[0] = (height - last_height_) / static_cast<float>(dt) * USEC_TO_SEC;
     last_time_ = utime;
     last_height_ = height;
     // assuming quad plane normal is [0,0,1]
@@ -86,9 +86,9 @@ bool PlaneFitter::getPlaneInfo(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, 
     float xg = coefs(0);
     float yg = coefs(1);
     float zg = coefs(2);
-    roll = acos(((xg * xq) + (zg * zq)) / sqrt((xg * xg) + (zg * zg)));
-    pitch = acos(((yg * yq) + (zg * zq)) / sqrt((yg * yg) + (zg * zg)));
-    if (yg < 0) pitch *= -1;
-    if (xg < 0) roll *= -1;
+    roll.data[0] = acos(((xg * xq) + (zg * zq)) / sqrt((xg * xg) + (zg * zg)));
+    pitch.data[0] = acos(((yg * yq) + (zg * zq)) / sqrt((yg * yg) + (zg * zg)));
+    if (yg < 0) pitch.data[0] *= -1;
+    if (xg < 0) roll.data[0] *= -1;
     return true;
 }

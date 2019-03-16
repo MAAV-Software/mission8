@@ -19,9 +19,9 @@
 #include <gnc/slam/System.h>
 #include <gnc/Localizer.hpp>
 
+using maav::GLOBAL_UPDATE_CHANNEL;
 using maav::MAP_CHANNEL;
 using maav::RGBD_FORWARD_CHANNEL;
-using maav::GLOBAL_UPDATE_CHANNEL;
 using maav::gnc::Localizer;
 using maav::gnc::SlamInitializer;
 using maav::gnc::slam::System;
@@ -181,25 +181,26 @@ int main(int argc, char** argv)
                 }
 
                 const Eigen::Quaterniond qatt(attitude);
-                msg.attitude[0] = qatt.w();
-                msg.attitude[1] = -qatt.z();
-                msg.attitude[2] = -qatt.x();
-                msg.attitude[3] = -qatt.y();
+                msg.attitude.data[0] = qatt.w();
+                msg.attitude.data[1] = -qatt.z();
+                msg.attitude.data[2] = -qatt.x();
+                msg.attitude.data[3] = -qatt.y();
 
-                msg.position[0] = -position.z();
-                msg.position[1] = -position.x();
-                msg.position[2] = -position.y();
+                msg.position.data[0] = -position.z();
+                msg.position.data[1] = -position.x();
+                msg.position.data[2] = -position.y();
 
                 msg.utime = img.utime;
 
                 if (verbose)
                 {
-                    std::cout << "Attitude Corr: " << msg.attitude[0] << ' ' << msg.attitude[1]
-                              << ' ' << msg.attitude[2] << ' ' << msg.attitude[3] << ' ' << '\n';
+                    std::cout << "Attitude Corr: " << msg.attitude.data[0] << ' '
+                              << msg.attitude.data[1] << ' ' << msg.attitude.data[2] << ' '
+                              << msg.attitude.data[3] << ' ' << '\n';
                     std::cout << "Attitude UCor: " << qatt.w() << ' ' << qatt.x() << ' ' << qatt.y()
                               << ' ' << qatt.z() << ' ' << '\n';
-                    std::cout << "Position: " << msg.position[0] << ' ' << msg.position[1] << ' '
-                              << msg.position[2] << ' ' << std::endl;
+                    std::cout << "Position: " << msg.position.data[0] << ' ' << msg.position.data[1]
+                              << ' ' << msg.position.data[2] << ' ' << std::endl;
                 }
 
                 zcm.publish(GLOBAL_UPDATE_CHANNEL, &msg);
@@ -218,8 +219,8 @@ int main(int argc, char** argv)
  */
 cv::Mat convertRgb(const rgb_image_t& rgb_image)
 {
-    return cv::Mat(cv::Size(640, 480), CV_8UC3, (uint8_t*)rgb_image.raw_image.data(),
-               cv::Mat::AUTO_STEP)
+    return cv::Mat(
+        cv::Size(640, 480), CV_8UC3, (uint8_t*)rgb_image.raw_image.data(), cv::Mat::AUTO_STEP)
         .clone();
 }
 
@@ -228,7 +229,7 @@ cv::Mat convertRgb(const rgb_image_t& rgb_image)
  */
 cv::Mat convertDepth(const depth_image_t& depth_image)
 {
-    return cv::Mat(cv::Size(640, 480), CV_16UC1, (uint16_t*)depth_image.raw_image.data(),
-               cv::Mat::AUTO_STEP)
+    return cv::Mat(
+        cv::Size(640, 480), CV_16UC1, (uint16_t*)depth_image.raw_image.data(), cv::Mat::AUTO_STEP)
         .clone();
 }

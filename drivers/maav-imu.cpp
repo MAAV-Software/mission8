@@ -118,12 +118,12 @@ int main(int argc, char** argv)
         if (verbose)
         {
             cout << "Time: " << msg.utime << '\n';
-            cout << "Acceleration: x: " << msg.acceleration[0] << ", y: " << msg.acceleration[1]
-                 << ", z: " << msg.acceleration[2] << '\n';
-            cout << "AngularRates: x: " << msg.angular_rates[0] << ", y: " << msg.angular_rates[1]
-                 << ", z: " << msg.angular_rates[2] << endl;
-            cout << "Magnetometer: x: " << msg.magnetometer[0] << ", y: " << msg.magnetometer[1]
-                 << ", z: " << msg.magnetometer[2] << endl;
+            cout << "Acceleration: x: " << msg.acceleration.data[0] << ", y: " << msg.acceleration.data[1]
+                 << ", z: " << msg.acceleration.data[2] << '\n';
+            cout << "AngularRates: x: " << msg.angular_rates.data[0] << ", y: " << msg.angular_rates.data[1]
+                 << ", z: " << msg.angular_rates.data[2] << endl;
+            cout << "Magnetometer: x: " << msg.magnetometer.data[0] << ", y: " << msg.magnetometer.data[1]
+                 << ", z: " << msg.magnetometer.data[2] << endl;
         }
 
         this_thread::sleep_for(
@@ -170,7 +170,7 @@ void calibrateMagnetometer(
     {
         device->read(msg);
         magvals.push_back(
-            vector<double>{msg.magnetometer[0], msg.magnetometer[1], msg.magnetometer[2]});
+            vector<double>{msg.magnetometer.data[0], msg.magnetometer.data[1], msg.magnetometer.data[2]});
         if ((duration_cast<seconds>(system_clock::now().time_since_epoch()) - start) >= 60s) break;
         std::this_thread::sleep_for(1ms);
     }

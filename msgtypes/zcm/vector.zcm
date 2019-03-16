@@ -1,0 +1,23 @@
+struct vector1_t
+{
+	const int32_t dim = 1;
+	double data[dim];
+}
+
+struct vector2_t
+{
+	const int32_t dim = 2;
+	double data[dim];
+}
+
+struct vector3_t
+{
+	const int32_t dim = 3;
+	double data[dim];
+}
+
+struct vector4_t
+{
+	const int32_t dim = 4;
+	double data[dim];
+}

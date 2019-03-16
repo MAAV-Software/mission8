@@ -5,8 +5,8 @@ struct plane_fit_t
 {
     int64_t utime;
 
-    float z;
-    float z_dot;
-    float roll;
-    float pitch;
+    vector1_t z;
+    vector1_t z_dot;
+    vector1_t roll;
+    vector1_t pitch;
 }
