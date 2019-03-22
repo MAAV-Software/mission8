@@ -42,7 +42,7 @@ sudo apt install cmake \
                  python3 \
                  python3-pip \
                  libvtk6-dev \
-                 sl -y # system libraries
+                 -y # system libraries
 
 # Install custom deps
 ${SOFTWARE_DIR}/scripts/install/install-cmake.sh
@@ -55,3 +55,4 @@ ${SOFTWARE_DIR}/scripts/install/install-opencv3.sh
 ${SOFTWARE_DIR}/scripts/install/install-lcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-librealsense-legacy.sh
 ${SOFTWARE_DIR}/scripts/install/install-apriltag.sh
+${SOFTWARE_DIR}/scripts/install/install-qt5.sh

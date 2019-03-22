@@ -31,7 +31,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
          -DBUILD_PANGOLIN_VIDEO=OFF \
          -DBUILD_PANGOLIN_LIBDC1394=OFF \
          -DBUILD_PANGOLIN_DEPTHSENSE=OFF
-make -j4
+num_procs_avail=$(($(grep -c ^processor /proc/cpuinfo)-1))
+make -j$((num_procs_avail > 1 ? num_procs_avail : 1))
 sudo make install
 
 cd $GNC_DIR

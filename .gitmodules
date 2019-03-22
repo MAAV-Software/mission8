@@ -7,3 +7,6 @@
 [submodule "thirdparty/mavlink"]
 	path = thirdparty/mavlink
 	url = https://github.com/mavlink/mavlink.git
+[submodule "thirdparty/Firmware"]
+	path = thirdparty/Firmware
+	url = https://github.com/PX4/Firmware.git

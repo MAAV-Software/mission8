@@ -23,6 +23,7 @@ option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 option(BUILD_PLOTTER "Build plotting tool" ON)
 option(BUILD_VISUALIZER "Build localization visualization tool" ON)
+option(BUILD_SIM "Build sim sensors and plugins (Note: this will not build Px4 Firmware or Gazebo" ON)
 
 # Set all compiled libraries to be placed in software/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -31,7 +32,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # Find all globally required libraries
-find_package(YAML REQUIRED)
+find_package(YAMLCPP REQUIRED)
 find_package(ZCM REQUIRED)
 find_package(libusb-1.0 REQUIRED)
 
@@ -67,6 +68,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 add_subdirectory(src)
 add_subdirectory(thirdparty)
 add_subdirectory(drivers)
+add_subdirectory(sim)
 if(BUILD_PLOTTER AND BUILD_VISUALIZER)
     add_subdirectory(tools)
 endif()

@@ -102,44 +102,45 @@ target_link_libraries(maav-kalman
     ${YAMLCPP_LIBRARY}
 )
 
-add_library(maav-slam SHARED
-    slam/Converter.cc
-    slam/Frame.cc
-    slam/Initializer.cc
-    slam/KeyFrame.cc
-    slam/KeyFrameDatabase.cc
-    slam/LocalMapping.cc
-    slam/LoopClosing.cc
-    slam/Map.cc
-    slam/MapPoint.cc
-    slam/Optimizer.cc
-    slam/ORBextractor.cc
-    slam/ORBmatcher.cc
-    slam/PnPsolver.cc
-    slam/Sim3Solver.cc
-    slam/System.cc
-    slam/Tracking.cc
-    slam/VisualizerLink.cpp
-    Localizer.cpp
-)
+# Removed for now. T265 will replace
+# add_library(maav-slam SHARED
+#     slam/Converter.cc
+#     slam/Frame.cc
+#     slam/Initializer.cc
+#     slam/KeyFrame.cc
+#     slam/KeyFrameDatabase.cc
+#     slam/LocalMapping.cc
+#     slam/LoopClosing.cc
+#     slam/Map.cc
+#     slam/MapPoint.cc
+#     slam/Optimizer.cc
+#     slam/ORBextractor.cc
+#     slam/ORBmatcher.cc
+#     slam/PnPsolver.cc
+#     slam/Sim3Solver.cc
+#     slam/System.cc
+#     slam/Tracking.cc
+#     slam/VisualizerLink.cpp
+#     Localizer.cpp
+# )
 
-target_include_directories(maav-slam PUBLIC
-    ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-    ${Pangolin_INCLUDE_DIRS}
-    ${DBOW2_INCLUDE_DIR}
-    ${G2O_INCLUDE_DIR}
-	${OpenCV_INCLUDE_DIR}
-    ${SOPHUS_INCLUDE_DIR}
-)
+# target_include_directories(maav-slam PUBLIC
+#     ${SW_INCLUDE_DIR}
+#     ${EIGEN3_INCLUDE_DIR}
+#     ${Pangolin_INCLUDE_DIRS}
+#     ${DBOW2_INCLUDE_DIR}
+#     ${G2O_INCLUDE_DIR}
+# 	${OpenCV_INCLUDE_DIR}
+#     ${SOPHUS_INCLUDE_DIR}
+# )
 
-target_link_libraries(maav-slam
-    ${OpenCV_LIBS}
-    ${EIGEN3_LIBS}
-    ${Pangolin_LIBRARIES}
-    DBoW2
-    g2o
-)
+# target_link_libraries(maav-slam
+#     ${OpenCV_LIBS}
+#     ${EIGEN3_LIBS}
+#     ${Pangolin_LIBRARIES}
+#     DBoW2
+#     g2o
+# )
 
 add_library(maav-guidance SHARED
     Planner.cpp

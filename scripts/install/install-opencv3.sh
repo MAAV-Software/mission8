@@ -2,7 +2,7 @@
 #
 # Install OpenCV 3.3.1 on your machine
 
-sudo apt install libcurl4-openssl-dev
+sudo apt install libcurl4-openssl-dev gcc-5
 
 # Get location of software
 SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
@@ -37,11 +37,10 @@ cmake -D BUILD_PNG=ON \
       -D BUILD_DOCS=OFF \
       -D BUILD_PERF_TESTS=OFF \
       -D BUILD_TESTS=OFF \
+      -D CUDA_HOST_COMPILER:FILEPATH=/usr/bin/gcc-5 \
       ..
 
 num_procs_avail=$(($(grep -c ^processor /proc/cpuinfo)-1))
 make -j$((num_procs_avail > 1 ? num_procs_avail : 1))
-
-sudo apt remove libopencv* -y
 
 sudo make install

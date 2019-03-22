@@ -62,17 +62,17 @@ target_link_libraries(maav-estimator
         maav-msg
 )
 
-add_executable(maav-localizer maav-localizer.cpp)
+# add_executable(maav-localizer maav-localizer.cpp)
 
-target_link_libraries(maav-localizer
-        maav-slam
-        maav-state
-        maav-gnc-utils
-        maav-measurements                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-        ${ZCM_LIBRARIES}
-        maav-utils
-        maav-msg
-)
+# target_link_libraries(maav-localizer
+#         maav-slam
+#         maav-state
+#         maav-gnc-utils
+#         maav-measurements                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+#         ${ZCM_LIBRARIES}
+#         maav-utils
+#         maav-msg
+# )
 
 add_executable(maav-control-input maav-control-input.cpp)
 

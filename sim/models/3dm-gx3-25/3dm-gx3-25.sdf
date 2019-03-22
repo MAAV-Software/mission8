@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<sdf version='1.6'>
+  <model name='3dm_gx3_25'>
+    <pose frame="">0 0 0.015 0 0 0</pose>
+    <link name="link">
+      <inertial>
+        <mass>0.018</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <iyy>0.000001</iyy>
+          <izz>0.000001</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+      </inertial>
+      <self_collide>0</self_collide>
+      <enable_wind>0</enable_wind>
+      <kinematic>0</kinematic>
+      <gravity>1</gravity>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://3dm-gx3-25/meshes/3dm-gx3-25.dae</uri>
+          </mesh>
+        </geometry>
+        <pose>0 0 0 0 0 -1.57</pose>
+      </visual>
+    </link>
+    <plugin name="maav_imu_plugin" filename="libMaavImuPlugin.so">
+      <alignment_error>0.05</alignment_error>
+      <gyro>
+        <noise_density>2.74155677808038e-05</noise_density>
+        <bias_stability>5.87610763477447e-16</bias_stability>
+        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
+        <nonlinearity>0.1</nonlinearity>
+        <scale_factor_stability>0.05</scale_factor_stability>
+      </gyro>
+      <accel>
+        <noise_density>2.74155677808038e-05</noise_density>
+        <bias_stability>5.87610763477447e-16</bias_stability>
+        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
+        <nonlinearity>0.1</nonlinearity>
+        <scale_factor_stability>0.05</scale_factor_stability>
+      </accel>
+      <mag>
+        <noise_density>2.74155677808038e-05</noise_density>
+        <bias_stability>5.87610763477447e-16</bias_stability>
+        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
+        <nonlinearity>0.1</nonlinearity>
+        <scale_factor_stability>0.05</scale_factor_stability>
+      </mag>
+    </plugin>
+  </model>
+</sdf>
