@@ -22,7 +22,7 @@ option(BUILD_IMU "Build the IMU driver" ON)
 option(BUILD_TESTS "Build test cases" ON)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 option(BUILD_PLOTTER "Build plotting tool" ON)
-option(BUILD_VISUALIZER "Build localization visualization tool" ON)
+option(BUILD_VISUALIZER "Build localization visualization tool" OFF)
 option(BUILD_SIM "Build sim sensors and plugins (Note: this will not build Px4 Firmware or Gazebo" ON)
 
 # Set all compiled libraries to be placed in software/lib
