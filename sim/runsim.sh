@@ -23,7 +23,7 @@ pkill -x px4 || true
 pkill -x gzserver || true
 pkill -x gzclient || true
 
-gzserver -s ${SIM_DIR}/lib/libSensorRegisterPlugin.so --verbose ${WORLD_DIR}/test.world &
+gzserver -s ${SIM_DIR}/lib/libSensorRegisterPlugin.so --verbose ${WORLD_DIR}/maav-test.world &
 SIM_PID=`echo $!`
 
 if [[ -n "$HEADLESS" ]]; then

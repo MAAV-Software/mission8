@@ -65,6 +65,7 @@ public:
     mavlink::InnerLoopSetpoint ems_land();
     bool at_takeoff_alt();
     bool landing_detected();
+    void set_yaw_north();
 
 private:
     mavlink::InnerLoopSetpoint move_to_current_target();
@@ -75,6 +76,7 @@ private:
     double ems_dt;
     double total_distance_to_target;
     float origin_yaw;
+    float yaw_north;
 
     path_t path;
     int16_t path_counter;

@@ -56,7 +56,6 @@ Controller::Controller(const std::string& zcm_url)
     zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
     set_control_state(ControlState::STANDBY);
     current_state.zero(0);
-
     std::cout << std::fixed << std::setprecision(3) << std::showpos;
 }
 
@@ -72,7 +71,10 @@ void Controller::set_path(const path_t& _path)
     path_counter = 0;
 }
 
+void Controller::set_yaw_north() { yaw_north = get_heading(current_state); }
+
 void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
+
 /*
  *      Control parameters set from message and vehicle
  *      parameters set from struct.  Vehicle parametes should
@@ -230,12 +232,13 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     if (position_error.norm() < 1 ||
         (total_distance_to_target != 0 && position_error.norm() / total_distance_to_target < 0.85))
     {
-        yaw = static_cast<float>(current_target.yaw * constants::DEG_TO_RAD);
+        yaw = static_cast<float>(current_target.yaw * constants::DEG_TO_RAD + yaw_north);
     }
     else
     {
         yaw = origin_yaw;
     }
+
     roll = bounded(roll, veh_params.angle_limits[0]);
     pitch = bounded(pitch, veh_params.angle_limits[1]);
     new_setpoint.thrust =

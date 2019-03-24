@@ -22,35 +22,34 @@
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/Controller.hpp>
 #include <gnc/State.hpp>
-#include <gnc/State.hpp>
 #include <gnc/utils/LoadParameters.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
-using maav::STATE_CHANNEL;
-using maav::SIM_STATE_CHANNEL;
-using maav::PATH_CHANNEL;
 using maav::CTRL_PARAMS_CHANNEL;
+using maav::PATH_CHANNEL;
+using maav::SIM_STATE_CHANNEL;
+using maav::STATE_CHANNEL;
 using maav::gnc::Controller;
-using maav::gnc::XboxController;
 using maav::gnc::ConvertState;
 using maav::gnc::ConvertWaypoint;
-using maav::mavlink::OffboardControl;
+using maav::gnc::XboxController;
 using maav::mavlink::InnerLoopSetpoint;
+using maav::mavlink::OffboardControl;
 using std::this_thread::sleep_for;
 using namespace std::chrono;
-using std::cout;
+using YAML::Node;
+using maav::gnc::ControlState;
+using maav::gnc::State;
+using maav::gnc::Waypoint;
+using maav::gnc::utils::LoadParametersFromYAML;
 using maav::mavlink::CommunicationType;
 using std::cin;
-using std::thread;
-using maav::gnc::ControlState;
-using YAML::Node;
+using std::cout;
 using std::make_pair;
 using std::string;
-using maav::gnc::Waypoint;
-using std::to_string;
 using std::this_thread::sleep_for;
-using maav::gnc::State;
-using maav::gnc::utils::LoadParametersFromYAML;
+using std::thread;
+using std::to_string;
 
 XboxController read_controller_input();
 State ems_state(const OffboardControl& offboard_control);
@@ -179,12 +178,13 @@ int main(int argc, char** argv)
     cout << "Establishing initial state...\n";
     int counter = 0;
     auto timeout = system_clock::now() + 10s;
-    while (!KILL && counter < 2 && system_clock::now() < timeout)
+    while (!KILL && counter < 10 && system_clock::now() < timeout)
     {
         offboard_control.set_attitude_target(InnerLoopSetpoint::zero());
         if (state_handler.ready())
         {
             const auto msg = state_handler.msg();
+            controller.add_state(ConvertState(msg));
             state_handler.pop();
             ++counter;
         }
@@ -196,6 +196,8 @@ int main(int argc, char** argv)
         cout << "Unable to establish state of vehicle\n";
         return 3;
     }
+
+    controller.set_yaw_north();
 
     /*
      *      Set control to xbox controller

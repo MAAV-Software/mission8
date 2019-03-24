@@ -33,7 +33,7 @@ uart-path: "/dev/ttyACM1"
 sim: true        #true - control sim over udp, false - control pixhawk through usb
 sim-state: true  #true - state comes from sim, false - state comes from kalman filter
 takeoff-alt: 0.5 #meters
-ff-thrust: 0.66
+ff-thrust: 0
 
 # ZCM publish url
 zcm-url: "ipc"
