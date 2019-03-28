@@ -21,20 +21,25 @@ public:
     CameraDriverHelper() = delete;
 
     CameraDriverHelper(YAML::Node config, const std::string& zcm_format,
-        const std::string& rgbd_channel_in, const std::string& pointcloud_channel_in);
+        const std::string& rgbd_channel_in,
+        const std::string& pointcloud_channel_in,
+        const std::string& pos_channel_in);
 
     ~CameraDriverHelper() { endRecording(); }
+
     void beginRecording();
 
     void endRecording();
 
     bool isRunning() { return running_; }
+
     static const std::string FORMAT_IPC;
 
 private:
     bool enabled_;
     bool publish_rgbd_;
     bool publish_pc_;
+    bool publish_pose_; // TODO usage in impl
     bool autoexposure_;
     zcm::ZCM zcm_;
     maav::vision::D400CameraInterface camera_;
@@ -42,10 +47,13 @@ private:
     std::thread publish_thread_;
     std::string rgbd_channel_;
     std::string pointcloud_channel_;
+    std::string pose_channel_;// TODO using in impl
+    // TODO ZCM message type for pos data
 
     void publish();
     void rgbdPublish();
     void pointcloudPublish();
+    void posPublish();
 };
 }  // namespace maav::vision
 

@@ -108,6 +108,8 @@ public:
 
     virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getMappedPointCloud() const override;
 
+    virtual CameraPoseData getPoseData();
+
 private:
     int camera_id_;
 

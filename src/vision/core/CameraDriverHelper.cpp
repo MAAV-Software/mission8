@@ -4,6 +4,7 @@
 #include "common/messages/point_cloud_t.hpp"
 #include "common/messages/point_t.hpp"
 #include "common/messages/rgb_image_t.hpp"
+#include "common/messages/camera_pose_t.hpp"
 
 #include "vision/core/utilities.hpp"
 
@@ -30,16 +31,19 @@ namespace maav::vision
 const string CameraDriverHelper::FORMAT_IPC = "ipc";
 
 CameraDriverHelper::CameraDriverHelper(YAML::Node config, const string& zcm_format,
-    const string& rgbd_channel_in, const string& pointcloud_channel_in)
+    const string& rgbd_channel_in, const string& pointcloud_channel_in,
+    const string& pose_channel_in)
     : enabled_(config["enabled"].as<bool>()),
       publish_rgbd_(config["publish_rgbd"].as<bool>()),
       publish_pc_(config["publish_pointcloud"].as<bool>()),
+      publish_pose_(config["publish_pose"].as<bool>()),
       autoexposure_(config["enable_autoexposure"].as<bool>()),
       zcm_{zcm_format},
       camera_(config),
       running_(false),
       rgbd_channel_(rgbd_channel_in),
-      pointcloud_channel_(pointcloud_channel_in)
+      pointcloud_channel_(pointcloud_channel_in),
+      pose_channel_(pose_channel_in)
 {
     if (!zcm_.good()) std::cout << "ZCM bad" << std::endl;
 }
@@ -59,6 +63,7 @@ void CameraDriverHelper::endRecording()
         publish_thread_.join();
     }
 }
+
 void CameraDriverHelper::publish()
 {
     if (!enabled_) return;
@@ -69,6 +74,7 @@ void CameraDriverHelper::publish()
         {
             if (publish_rgbd_) rgbdPublish();
             if (publish_pc_) pointcloudPublish();
+            if (publish_pose_) posPublish();
         }
         std::this_thread::sleep_for(5ms);  // Maybe make this time configurable?
     }
@@ -118,4 +124,45 @@ void CameraDriverHelper::pointcloudPublish()
 
     zcm_.publish(pointcloud_channel_, &pcd);
 }
+
+void CameraDriverHelper::posPublish()
+{
+    CameraPoseData data = camera_.getPoseData();
+
+    camera_pose_t message;
+
+    // Set everything in the message to what is in the retrieved data
+    message.x_translation_ = data.x_translation_;
+    message.y_translation_ = data.y_translation_;
+    message.z_translation_ = data.z_translation_;
+
+    message.x_velocity_ = data.x_velocity_;
+    message.y_velocity_ = data.y_velocity_;
+    message.z_velocity_ = data.z_velocity_;
+
+    message.x_acceleration_ = data.x_acceleration_;
+    message.y_acceleration_ = data.y_acceleration_;
+    message.z_acceleration_ = data.z_acceleration_;
+
+    message.Qi_rotation_ = data.Qi_rotation_;
+    message.Qj_rotation_ = data.Qj_rotation_;
+    message.Qk_rotation_ = data.Qk_rotation_;
+    message.Qr_rotation_ = data.Qr_rotation_;
+
+    message.x_angular_velocity_ = data.x_angular_velocity_;
+    message.y_angular_velocity_ = data.y_angular_velocity_;
+    message.z_angular_velocity_ = data.z_angular_velocity_;
+
+    message.x_angular_acceleration_ = data.x_angular_acceleration_;
+    message.y_angular_acceleration_ = data.y_angular_acceleration_;
+    message.z_angular_acceleration_ = data.z_angular_acceleration_;
+
+    message.tracker_confidence_ = data.tracker_confidence_;
+    message.mapper_confidence_ = data.mapper_confidence_;
+
+    message.utime = camera_.getUTime();
+
+    zcm_.publish(pose_channel_, &message);
+}
+
 }  // namespace maav::vision

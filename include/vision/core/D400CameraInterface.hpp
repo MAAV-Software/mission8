@@ -69,6 +69,8 @@ public:
      */
     virtual D400CameraInterface& operator++() override;
 
+    virtual maav::vision::CameraPoseData getPoseData();
+
     const void* getRawDepth() const;
     const void* getRawColor() const;
 
@@ -79,6 +81,7 @@ public:
 
 private:
     bool enabled_;
+    bool publish_pos_;
     std::string serial_;
     int width_;
     int height_;
@@ -94,6 +97,7 @@ private:
     rs2::frameset frames_;
     rs2::frame rgb_frame_;
     rs2::frame depth_frame_;
+    rs2::frame pose_frame_;
     rs2_intrinsics depth_intrinsics_;
     rs2_extrinsics depth_to_color_;
     rs2_intrinsics color_intrinsics_;

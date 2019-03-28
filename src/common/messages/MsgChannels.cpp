@@ -10,7 +10,7 @@ const char* const RGBD_DOWNWARD_CHANNEL = "DOWNWARD_RGBD";
 const char* const FORWARD_CAMERA_POINT_CLOUD_CHANNEL = "FORWARD_POINT_CLOUD";
 const char* const DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL = "DOWNWARD_POINT_CLOUD";
 
-// GNC messages     
+// GNC messages
 const char* const STATE_CHANNEL = "STATE";
 const char* const IMU_CHANNEL = "IMU";
 const char* const HEIGHT_LIDAR_CHANNEL = "HLIDAR";
@@ -29,12 +29,12 @@ const char* const PATH_CHANNEL = "PATH";
 const char* const SLAM_RESET_CHANNEL = "SLAM_RESET";
 const char* const SLAM_LOCALIZATION_MODE_CHANNEL = "SLAM_LOC_MODE";
 
-// Planefitter messages     
+// Planefitter messages
 const char* const PLANE_FITTER_HEARTBEAT_CHANNEL = "PLANE_FITTER_HEARTBEAT";
 
 const char* const VISUALIZER_CHANNEL = "VISUALIZER";
 
-// Miscellaneous channels     
+// Miscellaneous channels
 const char* const EMS_CHANNEL = "EMS";
 const char* const PATH_PROGRESS_CHANNEL = "PATH_PROGRESS";
 const char* const NAV_RUNSTATE_CMD_CHANNEL = "RUNSTATE_CMD";
@@ -45,6 +45,7 @@ const char* const KILLSWITCH_CHANNEL = "KILLSWITCH";
 const char* const LOCALIZATION_STATUS_CHANNEL = "LOCALIZATION_STATUS";
 const char* const PID_ERROR_CHANNEL = "PID_ERROR";
 const char* const ATTITUDE_TARGET_CHANNEL = "ATTITUDE_TARGET";
+const char* const CAMERA_POS_CHANNEL = "CAMERA_POS_CHANNEL";
 
 // clang-format on
 }  // namespace maav

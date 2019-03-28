@@ -138,6 +138,11 @@ PointCloud<PointXYZ>::Ptr LegacyCameraInterface::getPointCloudBasic() const
     return cloud;
 }
 
+maav::vision::CameraPoseData LegacyCameraInterface::getPoseData() {
+    throw runtime_error("getPoseData can not exist for legacy cameras.");
+    return CameraPoseData();
+}
+
 // not implemented
 PointCloud<PointXYZ>::Ptr LegacyCameraInterface::getMappedPointCloud() const
 {

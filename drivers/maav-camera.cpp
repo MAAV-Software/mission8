@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
-    gopt.addString('c', "config", "../config/imu-config.yaml", "Path to config.");
+    gopt.addString('c', "config", "../config/camera-config.yaml", "Path to config.");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -69,21 +69,32 @@ int main(int argc, char** argv)
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
 
-    // Set up camera driver helpers
-    // Get and sort the serial numbers
-    // Assign using the convention mentioned above
-    rs2::context ctx;
-    auto list = ctx.query_devices();
-
     vector<unique_ptr<CameraDriverHelper>> helpers;
-    helpers.reserve(2);
-    helpers.emplace_back(new CameraDriverHelper(config["downward"], CameraDriverHelper::FORMAT_IPC,
-        maav::RGBD_DOWNWARD_CHANNEL, maav::DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL));
-    helpers.emplace_back(new CameraDriverHelper(config["forward"], CameraDriverHelper::FORMAT_IPC,
-        maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL));
+    helpers.reserve(3);
+    // All cameras get the same camera pos channel
+    // Since it is not intended for there to be more than one tracking camera
+    // in use at one time. And also this way, each of the CameraDriverHelpers
+    // can be configured to be the tracking camera in so desired.
+    if (config["downward"]["enabled"].as<bool>())
+        helpers.emplace_back(new CameraDriverHelper(config["downward"],
+            CameraDriverHelper::FORMAT_IPC,
+            maav::RGBD_DOWNWARD_CHANNEL, maav::DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL,
+            maav::CAMERA_POS_CHANNEL));
+    if (config["forward"]["enabled"].as<bool>())
+        helpers.emplace_back(new CameraDriverHelper(config["forward"],
+            CameraDriverHelper::FORMAT_IPC,
+            maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
+            maav::CAMERA_POS_CHANNEL));
+    if (config["other-forward"]["enabled"].as<bool>())
+        helpers.emplace_back(new CameraDriverHelper(config["other-forward"],
+            CameraDriverHelper::FORMAT_IPC,
+            maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
+            maav::CAMERA_POS_CHANNEL));
 
-    helpers[0]->beginRecording();
-    helpers[1]->beginRecording();
+    for (unsigned i = 0; i < helpers.size(); ++i)
+    {
+        helpers[i]->beginRecording();
+    }
 
     // Wait until the kill signal is received
     unique_lock<mutex> lck(mtx);

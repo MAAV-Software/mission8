@@ -6,6 +6,7 @@ find_package(OpenCV REQUIRED)
 find_package(LibRealSense REQUIRED)
 find_package(LibRealSense2 REQUIRED)
 find_package(ZCM REQUIRED)
+find_package(libusb-1.0 REQUIRED)
 
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
@@ -51,7 +52,9 @@ target_link_libraries(CameraInterface
     ${PCL_LIBRARIES}
     ${LIBREALSENSE_LIBRARIES}
     ${LIBREALSENSE2_LIBRARIES}
+    ${LIBUSB_1_LIBRARIES}
     RealsenseSettings
+    m
 )
 
 target_link_libraries(CameraInterface realsense2)

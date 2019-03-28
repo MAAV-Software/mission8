@@ -10,6 +10,8 @@ ZCM_TYPES_DIR="${SOFTWARE_DIR}/msgtypes/zcm"
 echo ${SOFTWARE_DIR}
 
 # Delete Generated messages
-rm -r ${SOFTWARE_DIR}/generated/common
+if [ -d "${SOFTWARE_DIR}/generated/common" ]; then
+    rm -r ${SOFTWARE_DIR}/generated/common
+fi
 
 zcm-gen --cpp --cpp-hpath ${GENERATED_DIR} ${ZCM_TYPES_DIR}/*.zcm

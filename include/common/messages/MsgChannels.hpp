@@ -11,7 +11,7 @@ extern const char* const RGBD_DOWNWARD_CHANNEL;             ///< Downward camera
 extern const char* const FORWARD_CAMERA_POINT_CLOUD_CHANNEL;  ///< Forward camera point cloud channel
 extern const char* const DOWNWARD_CAMERA_POINT_CLOUD_CHANNEL; ///< Downward camera rgbd channel
 
-// GNC messages     
+// GNC messages
 extern const char* const STATE_CHANNEL;                     ///< Kalman filter state estimate
 extern const char* const IMU_CHANNEL;                       ///< IMU sensor readings
 extern const char* const HEIGHT_LIDAR_CHANNEL;              ///< Height lidar distance measurements
@@ -30,12 +30,12 @@ extern const char* const PATH_CHANNEL;                      ///< Path output fro
 extern const char* const SLAM_RESET_CHANNEL;
 extern const char* const SLAM_LOCALIZATION_MODE_CHANNEL;
 
-// Planefitter messages     
+// Planefitter messages
 extern const char* const PLANE_FITTER_HEARTBEAT_CHANNEL;    ///< Heart beat for the plane fitter
 
 extern const char* const VISUALIZER_CHANNEL;
 
-// Miscellaneous channels     
+// Miscellaneous channels
 extern const char* const EMS_CHANNEL;                       ///< Tiva's emergency message from tanfan to system
 extern const char* const PATH_PROGRESS_CHANNEL;             ///< The outer loop controller's progress through its path
 extern const char* const NAV_RUNSTATE_CMD_CHANNEL;          ///< GCS mission state command to mission planner
@@ -46,6 +46,7 @@ extern const char* const KILLSWITCH_CHANNEL;                ///< killswitch chan
 extern const char* const LOCALIZATION_STATUS_CHANNEL;       ///< status of localization
 extern const char* const PID_ERROR_CHANNEL;
 extern const char* const ATTITUDE_TARGET_CHANNEL;           ///< current commanded attitude of pixhawk
+extern const char* const CAMERA_POS_CHANNEL;           ///< current pos of tracking camera
 // clang-format on
 }  // namespace maav
 

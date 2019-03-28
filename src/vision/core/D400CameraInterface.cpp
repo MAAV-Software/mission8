@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <chrono>
 #include <iostream>
+#include <iostream>
 
 #include "vision/core/D400CameraInterface.hpp"
 #include "vision/core/RealsenseSettings.hpp"
 
 using cv::Mat;
+using std::cout;
+using std::endl;
 using std::string;
 
 using namespace maav::vision;
@@ -18,37 +21,78 @@ D400CameraInterface::D400CameraInterface(YAML::Node config)
       fps_(config["fps"].as<int>())
 {
     if (!enabled_) return;
-    cfg_.enable_stream(RS2_STREAM_COLOR, width_, height_, RS2_FORMAT_BGR8, fps_);
-    cfg_.enable_stream(RS2_STREAM_DEPTH, width_, height_, RS2_FORMAT_Z16, fps_);
-    cfg_.enable_device(serial_);
+    /* TODO
+     * There exists a bug in librealsense tha currently prevents the t265 from
+     * being instantiated using the serial number. The same issue occurs if
+     * rs2::context::query_devices is called. It will say there is no device
+     * connected however, when neither call is used, it works. The relevant
+     * issue on the realsense github is
+     * https://github.com/IntelRealSense/librealsense/issues/3434
+     * Once the bug is fixed, the code must be modified such that the t265
+     * is enabled by the call to enable_device below that only occurs
+     * for cameras that are not publishing position data (ie not t265).
+     * The code below can be used to test if the bug has been fixed by
+     * leaving the unload_module commented out, and then seeing if the
+     * and rs::error no device connected is thrown.
+     */
+    /*
+    rs2::context ctx;
+    ctx.unload_tracking_module();
+    auto devices = ctx.query_devices();
+    ctx.unload_tracking_module();
+    const size_t num_devices = devices.size();
+    cout << num_devices << endl;
+    for (size_t i = 0; i < num_devices; ++i) {
+        cout << devices[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER) << endl;
+        cout << devices[i].get_info(RS2_CAMERA_INFO_NAME) << endl;
+    }
+    */
+    publish_pos_ = config["publish_pose"].as<bool>();
+    if (publish_pos_)
+    {
+        // ctx.unload_tracking_module();
+        cfg_.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+        // ctx.unload_tracking_module();
+    }
+    else
+    {
+        cfg_.enable_stream(RS2_STREAM_COLOR, width_, height_, RS2_FORMAT_BGR8, fps_);
+        cfg_.enable_stream(RS2_STREAM_DEPTH, width_, height_, RS2_FORMAT_Z16, fps_);
+        cfg_.enable_device(serial_);
+    }
     rs2::pipeline_profile selection = pipe_.start(cfg_);
 
-    // get intrinsics
-    auto depth_stream = selection.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
-    depth_intrinsics_ = depth_stream.get_intrinsics();
+    if (!publish_pos_)
+    {
+        // get intrinsics
+        auto depth_stream =
+            selection.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
+        depth_intrinsics_ = depth_stream.get_intrinsics();
 
-    auto color_stream = selection.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
-    color_intrinsics_ = color_stream.get_intrinsics();
+        auto color_stream =
+            selection.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+        color_intrinsics_ = color_stream.get_intrinsics();
 
-    // Get sensors
-    sensor_color_ = selection.get_device().query_sensors()[0];
-    sensor_depth_ = selection.get_device().query_sensors()[1];
+        // Get sensors
+        sensor_color_ = selection.get_device().query_sensors()[0];
+        sensor_depth_ = selection.get_device().query_sensors()[1];
 
-    // Get the scale
-    auto sensor = selection.get_device().first<rs2::depth_sensor>();
-    scale_ = sensor.get_depth_scale();
-    std::cout << "Camera scale: " << scale_ << std::endl;
+        // Get the scale
+        auto sensor = selection.get_device().first<rs2::depth_sensor>();
+        scale_ = sensor.get_depth_scale();
+        std::cout << "Camera scale: " << scale_ << std::endl;
 
-    // Get the extrinsics (very hacky)
-    // rs2_error* memory = (rs2_error*)malloc(5000);
-    rs2_error* memory = nullptr;
-    rs2_stream_profile* depth = reinterpret_cast<rs2_stream_profile*>(&depth_stream);
-    rs2_stream_profile* color = reinterpret_cast<rs2_stream_profile*>(&color_stream);
-    rs2_get_extrinsics(depth, color, &depth_to_color_, &memory);
+        // Get the extrinsics (very hacky)
+        // rs2_error* memory = (rs2_error*)malloc(5000);
+        rs2_error* memory = nullptr;
+        rs2_stream_profile* depth = reinterpret_cast<rs2_stream_profile*>(&depth_stream);
+        rs2_stream_profile* color = reinterpret_cast<rs2_stream_profile*>(&color_stream);
+        rs2_get_extrinsics(depth, color, &depth_to_color_, &memory);
 
-    // Set up the align object
-    // rs2_stream align_to = find_stream_to_align(selection.get_streams());
-    align_object_.reset(new rs2::align(RS2_STREAM_COLOR));
+        // Set up the align object
+        // rs2_stream align_to = find_stream_to_align(selection.get_streams());
+        align_object_.reset(new rs2::align(RS2_STREAM_COLOR));
+    }
 }
 
 Mat D400CameraInterface::getRGB() const
@@ -95,18 +139,29 @@ bool D400CameraInterface::loadNext()
 {
     if (pipe_.poll_for_frames(&frames_))
     {
-        auto processed = align_object_->process(frames_);
+        // If publishing pos is tracking camera, therefore, ignore depth
+        // and color information and only publish pos info
+        if (!publish_pos_)
+        {
+            auto processed = align_object_->process(frames_);
 
-        // Try to get the frames from processed
-        rgb_frame_ = processed.first_or_default(RS2_STREAM_COLOR);
-        depth_frame_ = processed.get_depth_frame();
-        if (rgb_frame_)
-        {
-            color_image_ = static_cast<const uint16_t*>(rgb_frame_.get_data());
+            // Try to get the frames from processed
+            rgb_frame_ = processed.first_or_default(RS2_STREAM_COLOR);
+            depth_frame_ = processed.get_depth_frame();
+            if (rgb_frame_)
+            {
+                color_image_ =
+                    static_cast<const uint16_t*>(rgb_frame_.get_data());
+            }
+            if (depth_frame_)
+            {
+                depth_image_ =
+                    static_cast<const uint16_t*>(depth_frame_.get_data());
+            }
         }
-        if (depth_frame_)
+        else
         {
-            depth_image_ = static_cast<const uint16_t*>(depth_frame_.get_data());
+            pose_frame_ = frames_.first_or_default(RS2_STREAM_POSE);
         }
         utime_ = std::chrono::duration_cast<std::chrono::microseconds>(
                      std::chrono::system_clock::now().time_since_epoch())
@@ -173,6 +228,42 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr D400CameraInterface::getMappedPointCloud() c
         }
     }
     return cloud;
+}
+
+maav::vision::CameraPoseData D400CameraInterface::getPoseData()
+{
+    CameraPoseData out_pose_data = CameraPoseData();
+    auto pose_data = pose_frame_.as<rs2::pose_frame>().get_pose_data();
+    // Sets every field of CameraPoseData and returns it
+    out_pose_data.x_translation_ = pose_data.translation.x;
+    out_pose_data.y_translation_ = pose_data.translation.y;
+    out_pose_data.z_translation_ = pose_data.translation.z;
+
+    out_pose_data.x_velocity_ = pose_data.velocity.x;
+    out_pose_data.y_velocity_ = pose_data.velocity.y;
+    out_pose_data.z_velocity_ = pose_data.velocity.z;
+
+    out_pose_data.x_acceleration_ = pose_data.acceleration.x;
+    out_pose_data.y_acceleration_ = pose_data.acceleration.y;
+    out_pose_data.z_acceleration_ = pose_data.acceleration.z;
+
+    out_pose_data.Qi_rotation_ = pose_data.rotation.x;
+    out_pose_data.Qj_rotation_ = pose_data.rotation.y;
+    out_pose_data.Qk_rotation_ = pose_data.rotation.z;
+    out_pose_data.Qr_rotation_ = pose_data.rotation.w;
+
+    out_pose_data.x_angular_velocity_ = pose_data.angular_velocity.x;
+    out_pose_data.y_angular_velocity_ = pose_data.angular_velocity.y;
+    out_pose_data.z_angular_velocity_ = pose_data.angular_velocity.z;
+
+    out_pose_data.x_angular_acceleration_ = pose_data.angular_acceleration.x;
+    out_pose_data.y_angular_acceleration_ = pose_data.angular_acceleration.y;
+    out_pose_data.z_angular_acceleration_ = pose_data.angular_acceleration.z;
+
+    out_pose_data.tracker_confidence_ = pose_data.tracker_confidence;
+    out_pose_data.mapper_confidence_ = pose_data.mapper_confidence;
+
+    return out_pose_data;
 }
 
 const void* D400CameraInterface::getRawDepth() const { return depth_image_; }
