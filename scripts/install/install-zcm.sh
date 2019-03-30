@@ -22,7 +22,7 @@ unzip master.zip
 cd zcm-master
 
 # Install ZCM
-./scripts/install-deps.sh
+# ./scripts/install-deps.sh
 ./waf configure --use-java --use-python --use-zmq --use-elf --use-third-party \
     --use-dev --use-clang --use-cxxtest --use-inproc --use-ipc --use-udpm --use-serial
 ./waf build

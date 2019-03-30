@@ -40,8 +40,8 @@ KeyFrameTrajectory.txt
 debug_*.pnm
 debug_*.ps
 
-sim/etc
-sim/posix-configs
-sim/ROMFS
-sim/rootfs
-sim/test_data
+etc
+posix-configs
+ROMFS
+rootfs
+test_data
