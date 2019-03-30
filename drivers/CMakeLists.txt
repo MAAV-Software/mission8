@@ -1,8 +1,6 @@
-find_package(LibRealSense)
 find_package(LibRealSense2)
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(LibRealSense REQUIRED)
 find_package(LibRealSense2 REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -68,7 +66,7 @@ target_link_libraries(maav-estimator
 #         maav-slam
 #         maav-state
 #         maav-gnc-utils
-#         maav-measurements                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+#         maav-measurements
 #         ${ZCM_LIBRARIES}
 #         maav-utils
 #         maav-msg
@@ -97,7 +95,6 @@ target_link_libraries(maav-planefit
         maav-msg
         ${PCL_LIBRARIES}
         ${OpenCV_LIBS}
-        ${LIBREALSENSE_LIBRARIES}
         ${LIBREALSENSE2_LIBRARIES}
         PlaneFitter
 )
@@ -122,7 +119,7 @@ if(BUILD_IMU)
 add_executable(maav-imu maav-imu.cpp)
 
 target_link_libraries(maav-imu
-        ${ZCM_LIBRARIES} 
+        ${ZCM_LIBRARIES}
         maav-msg
         maav-utils
         maav-gnc-utils
@@ -151,7 +148,7 @@ target_link_libraries(read-thrust
         maav-utils
 )
 
-if(EXISTS ${LIBREALSENSE_LIBRARIES})
+if(BUILD_VISION)
 
     add_executable(maav-camera maav-camera.cpp)
 
@@ -161,7 +158,6 @@ if(EXISTS ${LIBREALSENSE_LIBRARIES})
         maav-msg
         ${PCL_LIBRARIES}
         ${OpenCV_LIBS}
-        ${LIBREALSENSE_LIBRARIES}
         ${LIBREALSENSE2_LIBRARIES}
         ${YAMLCPP_LIBRARY}
         CameraDriverHelper

@@ -49,7 +49,6 @@ ${SOFTWARE_DIR}/scripts/install/install-cmake.sh
 ${SOFTWARE_DIR}/scripts/install/install-g++7.sh
 ${SOFTWARE_DIR}/scripts/install/install-zcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-librealsense.sh
-${SOFTWARE_DIR}/scripts/install/install-librealsense-legacy.sh
 ${SOFTWARE_DIR}/scripts/install/install-pangolin.sh
 ${SOFTWARE_DIR}/scripts/install/install-pcl.sh
 ${SOFTWARE_DIR}/scripts/install/install-opencv3.sh
