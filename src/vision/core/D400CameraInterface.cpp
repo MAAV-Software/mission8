@@ -21,45 +21,17 @@ D400CameraInterface::D400CameraInterface(YAML::Node config)
       fps_(config["fps"].as<int>())
 {
     if (!enabled_) return;
-    /* TODO
-     * There exists a bug in librealsense tha currently prevents the t265 from
-     * being instantiated using the serial number. The same issue occurs if
-     * rs2::context::query_devices is called. It will say there is no device
-     * connected however, when neither call is used, it works. The relevant
-     * issue on the realsense github is
-     * https://github.com/IntelRealSense/librealsense/issues/3434
-     * Once the bug is fixed, the code must be modified such that the t265
-     * is enabled by the call to enable_device below that only occurs
-     * for cameras that are not publishing position data (ie not t265).
-     * The code below can be used to test if the bug has been fixed by
-     * leaving the unload_module commented out, and then seeing if the
-     * and rs::error no device connected is thrown.
-     */
-    /*
-    rs2::context ctx;
-    ctx.unload_tracking_module();
-    auto devices = ctx.query_devices();
-    ctx.unload_tracking_module();
-    const size_t num_devices = devices.size();
-    cout << num_devices << endl;
-    for (size_t i = 0; i < num_devices; ++i) {
-        cout << devices[i].get_info(RS2_CAMERA_INFO_SERIAL_NUMBER) << endl;
-        cout << devices[i].get_info(RS2_CAMERA_INFO_NAME) << endl;
-    }
-    */
     publish_pos_ = config["publish_pose"].as<bool>();
     if (publish_pos_)
     {
-        // ctx.unload_tracking_module();
         cfg_.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
-        // ctx.unload_tracking_module();
     }
     else
     {
         cfg_.enable_stream(RS2_STREAM_COLOR, width_, height_, RS2_FORMAT_BGR8, fps_);
         cfg_.enable_stream(RS2_STREAM_DEPTH, width_, height_, RS2_FORMAT_Z16, fps_);
-        cfg_.enable_device(serial_);
     }
+    cfg_.enable_device(serial_);
     rs2::pipeline_profile selection = pipe_.start(cfg_);
 
     if (!publish_pos_)

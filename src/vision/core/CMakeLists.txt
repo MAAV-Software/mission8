@@ -68,4 +68,3 @@ target_link_libraries(PlaneFitter
 target_link_libraries(VisionUtils
     ${OpenCV_LIBS}
 )
-

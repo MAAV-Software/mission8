@@ -32,7 +32,7 @@ downward:
   publish_pose: false # tracking camera only
 
 other-forward: # To accomodate the t265 in use with the other cameras
-  enabled: false
+  enabled: true
   width: 640
   height: 480
   fps: 30                # 15, 30, or 60

@@ -8,7 +8,7 @@ sudo apt install libusb-1.0-0-dev pkg-config -y
 sudo apt-get install libglfw3-dev -y
 
 cd /tmp/
-git clone -b 'v2.19.0' https://github.com/IntelRealSense/librealsense.git
+git clone -b 'v2.19.2' https://github.com/IntelRealSense/librealsense.git
 cd librealsense/
 
 # For people who have built-in cameras on their device

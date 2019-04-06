@@ -75,6 +75,13 @@ int main(int argc, char** argv)
     // Since it is not intended for there to be more than one tracking camera
     // in use at one time. And also this way, each of the CameraDriverHelpers
     // can be configured to be the tracking camera in so desired.
+    // IMPORTANT: T265 MUST BE INITIALIZED FIRST TO AVOID RUNTIME ERRORS
+    // DO NOT SWITCH THE ORDERING ARBITRARILY
+    if (config["other-forward"]["enabled"].as<bool>())
+        helpers.emplace_back(new CameraDriverHelper(config["other-forward"],
+            CameraDriverHelper::FORMAT_IPC,
+            maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
+            maav::CAMERA_POS_CHANNEL));
     if (config["downward"]["enabled"].as<bool>())
         helpers.emplace_back(new CameraDriverHelper(config["downward"],
             CameraDriverHelper::FORMAT_IPC,
@@ -82,11 +89,6 @@ int main(int argc, char** argv)
             maav::CAMERA_POS_CHANNEL));
     if (config["forward"]["enabled"].as<bool>())
         helpers.emplace_back(new CameraDriverHelper(config["forward"],
-            CameraDriverHelper::FORMAT_IPC,
-            maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
-            maav::CAMERA_POS_CHANNEL));
-    if (config["other-forward"]["enabled"].as<bool>())
-        helpers.emplace_back(new CameraDriverHelper(config["other-forward"],
             CameraDriverHelper::FORMAT_IPC,
             maav::RGBD_FORWARD_CHANNEL, maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
             maav::CAMERA_POS_CHANNEL));
