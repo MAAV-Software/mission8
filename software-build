@@ -21,13 +21,10 @@ cmake \
 	-DBUILD_VISION=ON \
 	-DBUILD_VISUALIZER=OFF \
 	-DBUILD_PLOTTER=OFF \
+	-DBUILD_SIM=OFF \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=/usr \
 	..
 
 make -j3
-#sudo make install
-#sudo cp lib/systemd/system/maav-nav.service /lib/systemd/system/
-#sudo systemctl daemon-reload
-#sudo systemctl restart maav-nav
-#sudo systemctl enable maav-nav
+

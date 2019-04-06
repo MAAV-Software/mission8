@@ -1,0 +1,3 @@
+thirdparty/Firmware
+thirdparty/Qt5
+thirdparty/opencv/lib/libopencv_cuda*
