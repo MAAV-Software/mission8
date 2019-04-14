@@ -5,12 +5,16 @@ import os
 
 # Add any zcm types that you want plotted in here
 zcm_types_channels = [
-    ('state_t', 'SIM_STATE'),
     ('state_t', 'STATE'),
     ('imu_t', 'IMU'),
+    ('imu_t', 'SIM_IMU'),
     ('lidar_t', 'HEIGHT_LIDAR'),
     ('plane_fit_t', 'PLANE_FIT'),
-    ('global_update_t', 'GLOBAL_UPDATE')
+    ('global_update_t', 'GLOBAL_UPDATE'),
+    ('groundtruth_inertial_t', 'GT_INERTIAL'),
+    ('groundtruth_imu_t', 'GT_IMU'),
+    ('groundtruth_world_t', 'GT_WORLD'),
+    ('groundtruth_slamdrift_t', 'GT_SLAMDRIFT')
 ]
 
 # CHANGE THIS TO CHANGE THE FREQUENCY OF UPDATES
@@ -137,13 +141,11 @@ def generate_ZcmLoop(dict):
         "<chrono>",
         "<thread>",
         "<common/messages/MsgChannels.hpp>",
-        "<common/messages/state_t.hpp>",
-        "<common/messages/imu_t.hpp>",
-        "<common/messages/lidar_t.hpp>",
-        "<common/messages/plane_fit_t.hpp>",
-        "<common/messages/global_update_t.hpp>",
         "<common/utils/ZCMHandler.hpp>"
     ]
+
+    for (zcm_type, channel) in zcm_types_channels:
+        includes.append("<common/messages/" + zcm_type + ".hpp>")
 
     usings = ["namespace std::chrono"]
     gen_header(includes, usings, zcmloop_cpp)

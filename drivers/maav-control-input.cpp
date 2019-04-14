@@ -18,13 +18,13 @@
 #include <gnc/measurements/Waypoint.hpp>
 
 using YAML::Node;
-using std::string;
-using std::to_string;
 using maav::gnc::Waypoint;
-using std::cout;
 using std::cin;
-using std::this_thread::sleep_for;
+using std::cout;
+using std::string;
 using std::stringstream;
+using std::this_thread::sleep_for;
+using std::to_string;
 using std::vector;
 using namespace std::chrono;
 
@@ -171,11 +171,11 @@ int main(int argc, char** argv)
 }
 
 /*
-*	    Test path for testing tests
-*      Reads from yaml file (path can be provided)
-*      Make sure that the waypoints in yaml are named
-*      sequentially with integer values starting at 0
-*/
+ *	    Test path for testing tests
+ *      Reads from yaml file (path can be provided)
+ *      Make sure that the waypoints in yaml are named
+ *      sequentially with integer values starting at 0
+ */
 // path_t create_test_path(const Node& path_file)
 // {
 //     path_t path;

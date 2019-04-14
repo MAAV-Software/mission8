@@ -109,16 +109,6 @@ state_t ConvertState(const State& state)
     zcm_state.gyro_biases = convertVector3d(state.gyroBias());
     zcm_state.accel_biases = convertVector3d(state.accelBias());
     convertMatrix(state.covariance(), zcm_state.covariance);
-    // for (size_t i = 0; i < State::DoF; i++)
-    // {
-    //     for (size_t j = 0; j < State::DoF; j++)
-    //     {
-    //         zcm_state.covariance.rows = State::DoF;
-    //         zcm_state.covariance.cols = State::DoF;
-    //         zcm_state.covariance = convertMatrix(state.covariance());
-    //         // zcm_state.covariance.data[i][j] = state.covariance()(i, j);
-    //     }
-    // }
 
     return zcm_state;
 }
@@ -138,13 +128,18 @@ State ConvertState(const state_t& zcm_state)
     state.gravity() = convertVector3d(zcm_state.gravity);
     convertMatrix(state.covariance(), zcm_state.covariance);
 
-    // for (size_t i = 0; i < State::DoF; i++)
-    // {
-    //     for (size_t j = 0; j < State::DoF; j++)
-    //     {
-    //         state.covariance()(i, j) = zcm_state.covariance.data[i][j];
-    //     }
-    // }
+    return state;
+}
+
+State ConvertGroundTruthState(const groundtruth_inertial_t& zcm_state)
+{
+    State state(zcm_state.utime);
+
+    state.attitude() = convertQuaternion(zcm_state.attitude);
+    state.position() = convertVector3d(zcm_state.position);
+    state.velocity() = convertVector3d(zcm_state.velocity);
+    state.angularVelocity() = convertVector3d(zcm_state.angular_velocity);
+    state.acceleration() = convertVector3d(zcm_state.acceleration);
 
     return state;
 }

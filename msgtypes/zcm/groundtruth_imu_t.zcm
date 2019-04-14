@@ -1,0 +1,12 @@
+/**
+ * ZCM type for imu bias ground truth from sim
+ */
+struct groundtruth_imu_t
+{
+	int64_t utime;
+
+	// LEGEND: [gt_gyro_bias_x, gt_gyro_bias_y, gt_gyro_bias_z]
+	vector3_t gyro_bias;
+	// LEGEND: [gt_accel_bias_x, gt_accel_bias_y, gt_accel_bias_z]
+	vector3_t accel_bias;
+}

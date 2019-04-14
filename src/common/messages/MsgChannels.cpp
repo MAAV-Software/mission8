@@ -16,12 +16,20 @@ const char* const IMU_CHANNEL = "IMU";
 const char* const HEIGHT_LIDAR_CHANNEL = "HLIDAR";
 const char* const PLANE_FIT_CHANNEL = "PLANE_FIT";
 const char* const GLOBAL_UPDATE_CHANNEL = "GLOBAL_UPDATE";
+const char* const VISUAL_ODOMETRY_CHANNEL = "VISUAL_ODOMETRY";
 
-const char* const SIM_STATE_CHANNEL = "SIM_STATE";
 const char* const SIM_IMU_CHANNEL = "SIM_IMU";
 const char* const SIM_HEIGHT_LIDAR_CHANNEL = "SIM_HLIDAR";
 const char* const SIM_PLANE_FIT_CHANNEL = "SIM_PLANE_FIT";
 const char* const SIM_GLOBAL_UPDATE_CHANNEL = "SIM_GLOBAL_UPDATE";
+const char* const SIM_VISUAL_ODOMETRY_CHANNEL = "SIM_VISUAL_ODOMETRY";
+
+// Sim ground truth channels
+const char* const GT_INERTIAL_CHANNEL = "GT_INERTIAL";
+const char* const GT_IMU_CHANNEL = "GT_IMU";
+const char* const GT_WORLD_CHANNEL = "GT_WORLD";
+const char* const GT_SLAMDRIFT_CHANNEL = "GT_SLAMDRIFT";
+const char* const GT_LIDARDRIFT_CHANNEL = "GT_LIDARDRIFT";
 
 const char* const CTRL_PARAMS_CHANNEL = "CTRL_PARAMS";
 const char* const MAP_CHANNEL = "MAP";

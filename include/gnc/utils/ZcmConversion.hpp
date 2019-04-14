@@ -5,6 +5,7 @@
 #include <Eigen/Eigen>
 
 #include <common/messages/global_update_t.hpp>
+#include <common/messages/groundtruth_inertial_t.hpp>
 #include <common/messages/imu_t.hpp>
 #include <common/messages/lidar_t.hpp>
 #include <common/messages/matrix_t.hpp>
@@ -28,6 +29,8 @@ namespace gnc
 {
 state_t ConvertState(const State& state);
 State ConvertState(const state_t& state);
+
+State ConvertGroundTruthState(const groundtruth_inertial_t& state);
 
 Waypoint ConvertWaypoint(const waypoint_t& zcm_waypoint);
 

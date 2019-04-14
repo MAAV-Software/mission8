@@ -1,0 +1,12 @@
+/**
+ * ZCM type for slam drift ground truth from sim
+ */
+struct groundtruth_slamdrift_t
+{
+	int64_t utime;
+
+	// State variables
+	quaternion_t attitude_drift;
+	// LEGEND: [gt_pos_drift_x, gt_pos_drift_y, gt_pos_drift_z]
+	vector3_t position_drift;
+}

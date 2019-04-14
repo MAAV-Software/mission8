@@ -2,7 +2,7 @@
 <sdf version='1.6'>
   <model name='3dm_gx3_25'>
     <pose frame="">0 0 0.015 0 0 0</pose>
-    <link name="link">
+    <link name="imu_link">
       <inertial>
         <mass>0.018</mass>
         <inertia>
@@ -25,29 +25,29 @@
         <pose>0 0 0 0 0 -1.57</pose>
       </visual>
     </link>
-    <plugin name="maav_imu_plugin" filename="libMaavImuPlugin.so">
-      <alignment_error>0.05</alignment_error>
-      <gyro>
-        <noise_density>2.74155677808038e-05</noise_density>
-        <bias_stability>5.87610763477447e-16</bias_stability>
-        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
-        <nonlinearity>0.1</nonlinearity>
-        <scale_factor_stability>0.05</scale_factor_stability>
-      </gyro>
-      <accel>
-        <noise_density>2.74155677808038e-05</noise_density>
-        <bias_stability>5.87610763477447e-16</bias_stability>
-        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
-        <nonlinearity>0.1</nonlinearity>
-        <scale_factor_stability>0.05</scale_factor_stability>
-      </accel>
-      <mag>
-        <noise_density>2.74155677808038e-05</noise_density>
-        <bias_stability>5.87610763477447e-16</bias_stability>
-        <initial_bias_error>1.90385887366693e-05</initial_bias_error>
-        <nonlinearity>0.1</nonlinearity>
-        <scale_factor_stability>0.05</scale_factor_stability>
-      </mag>
+
+    <plugin name='ImuPlugin' filename='libMaavImuPlugin.so'>
+      <robotNamespace></robotNamespace>
+      <linkName>imu_link</linkName>
+      <imuTopic>/imu</imuTopic>
+      <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
+      <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+      <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
+      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
+      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
+      <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
+      <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+
+      <!-- <gyroscopeNoiseDensity>2.74155677808038e-05</gyroscopeNoiseDensity> -->
+      <!-- <gyroscopeRandomWalk>5.87610763477447e-16</gyroscopeRandomWalk> -->
+      <!-- <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime> -->
+      <!-- <gyroscopeTurnOnBiasSigma>1.90385887366693e-05</gyroscopeTurnOnBiasSigma> -->
+      <!-- <accelerometerNoiseDensity>2.74155677808038e-05</accelerometerNoiseDensity> -->
+      <!-- <accelerometerRandomWalk>5.87610763477447e-16</accelerometerRandomWalk> -->
+      <!-- <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime> -->
+      <!-- <accelerometerTurnOnBiasSigma>1.90385887366693e-05</accelerometerTurnOnBiasSigma> -->
     </plugin>
+
   </model>
 </sdf>

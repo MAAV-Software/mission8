@@ -71,9 +71,10 @@ add_subdirectory(drivers)
 if(BUILD_SIM)
     add_subdirectory(sim)
 endif()
-if(BUILD_PLOTTER AND BUILD_VISUALIZER)
+if(BUILD_VISUALIZER OR BUILD_PLOTTER)
     add_subdirectory(tools)
 endif()
+
 
 # Setup testing options
 if(BUILD_TESTS)

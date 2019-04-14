@@ -9,6 +9,8 @@
 #ifndef __visual_odometry_t_hpp__
 #define __visual_odometry_t_hpp__
 
+#include "vector3_t.hpp"
+#include "quaternion_t.hpp"
 
 
 class visual_odometry_t
@@ -16,9 +18,9 @@ class visual_odometry_t
     public:
         int64_t    utime;
 
-        double     translation[3];
+        vector3_t  translation;
 
-        double     rotation[3][3];
+        quaternion_t rotation;
 
     public:
         /**
@@ -127,13 +129,11 @@ int visual_odometry_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen
     thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->translation[0], 3);
+    thislen = this->translation._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    for (int a0 = 0; a0 < 3; ++a0) {
-        thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->rotation[a0][0], 3);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
+    thislen = this->rotation._encodeNoHash(buf, offset + pos, maxlen - pos);
+    if(thislen < 0) return thislen; else pos += thislen;
 
     return pos;
 }
@@ -146,13 +146,11 @@ int visual_odometry_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t 
     thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->translation[0], 3);
+    thislen = this->translation._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    for (int a0 = 0; a0 < 3; ++a0) {
-        thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->rotation[a0][0], 3);
-        if(thislen < 0) return thislen; else pos += thislen;
-    }
+    thislen = this->rotation._decodeNoHash(buf, offset + pos, maxlen - pos);
+    if(thislen < 0) return thislen; else pos += thislen;
 
     return pos;
 }
@@ -161,14 +159,23 @@ uint32_t visual_odometry_t::_getEncodedSizeNoHash() const
 {
     uint32_t enc_size = 0;
     enc_size += __int64_t_encoded_array_size(NULL, 1);
-    enc_size += __double_encoded_array_size(NULL, 3);
-    enc_size += 3 * __double_encoded_array_size(NULL, 3);
+    enc_size += this->translation._getEncodedSizeNoHash();
+    enc_size += this->rotation._getEncodedSizeNoHash();
     return enc_size;
 }
 
-uint64_t visual_odometry_t::_computeHash(const __zcm_hash_ptr*)
+uint64_t visual_odometry_t::_computeHash(const __zcm_hash_ptr* p)
 {
-    uint64_t hash = (uint64_t)0xd827139b3eea7917LL;
+    const __zcm_hash_ptr* fp;
+    for(fp = p; fp != NULL; fp = fp->parent)
+        if(fp->v == visual_odometry_t::getHash)
+            return 0;
+    const __zcm_hash_ptr cp = { p, (void*)visual_odometry_t::getHash };
+
+    uint64_t hash = (uint64_t)0xb6b66557e818db79LL +
+         vector3_t::_computeHash(&cp) +
+         quaternion_t::_computeHash(&cp);
+
     return (hash<<1) + ((hash>>63)&1);
 }
 

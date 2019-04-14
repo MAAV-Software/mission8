@@ -5,11 +5,13 @@ include_directories(maav-mavlink
 )
 
 add_library(maav-mavlink SHARED
-    communication_port.cpp
-    offboard_control.cpp
+    CommunicationPort.cpp
+    OffboardControl.cpp
 )
 
 target_link_libraries(maav-mavlink
     maav-msg
+    maav-utils
+    maav-math
     ${ZCM_LIBRARIES}
 )

@@ -1,0 +1,12 @@
+/**
+ * ZCM type for world ground truth from sim
+ */
+struct groundtruth_world_t
+{
+	int64_t utime;
+
+	// LEGEND: [gt_grav_x, gt_grav_y, gt_grav_z]
+	vector3_t gravity;
+	// LEGEND: [gt_mag_x, gt_mag_y, gt_mag_z]
+	vector3_t magnetic_field;
+}

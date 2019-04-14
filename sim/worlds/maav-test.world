@@ -16,7 +16,7 @@
     <include>
       <uri>model://maav_matrice</uri>
       <!-- Initial position at origin facing north -->
-      <pose>0 0 1 0 0 1.57</pose>
+      <pose>0 0 0.2 0 0 1.57</pose>
     </include>
     <include>
       <uri>model://asphalt_plane</uri>
@@ -47,7 +47,6 @@
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <plugin name='ground_truth_plugin' filename='libground_truth_plugin.so'/>
     <gravity>0 0 -9.8066</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>

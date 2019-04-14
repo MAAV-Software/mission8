@@ -65,7 +65,8 @@ target_link_libraries(maav-measurements
 
 add_library(maav-control SHARED
     control/Pid.cpp
-    Controller.cpp
+    control/Controller.cpp
+    control/StateMachine.cpp
 )
 
 target_include_directories(maav-control PUBLIC 
@@ -77,6 +78,7 @@ target_link_libraries(maav-control
     maav-gnc-utils
     maav-measurements
     maav-msg
+    maav-mavlink
 )
 
 add_library(maav-kalman SHARED

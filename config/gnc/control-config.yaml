@@ -1,9 +1,9 @@
 # all PID gains are in the format [kp, ki, kd]
 pid-gains:
   pos-ctrl:
-    x: [1, 0, 0.5]
-    y: [1, 0, 0.5]
-    z: [0.4, 0, 0.3]
+    x: [0.2, 0, 0.05]
+    y: [0.2, 0, 0.05]
+    z: [1.5, 0.0002, 0.3]
     yaw: [1, 0, 0]
   rate-ctrl:
     x: [0, 0, 0]
@@ -23,17 +23,20 @@ limits:
     y: [5, -5]
     z: [1, -1]
   angle: # limits are in degrees
-    roll: [10, -10]
-    pitch: [10, -10]
+    roll:  [20, -20]
+    pitch: [20, -20]
   thrust: [1, 0]
   
 # vehicle params that won't be tuned
-tol: 0.1 # convergence tolerance (norm of [x, y, z, yaw])
+tol: 0.1                    # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
-sim: true        #true - control sim over udp, false - control pixhawk through usb
-sim-state: true  #true - state comes from sim, false - state comes from kalman filter
-takeoff-alt: 0.5 #meters
-ff-thrust: 0
+sim: true                   #true - control sim over udp, false - control pixhawk through usb
+sim-state: true             #true - state comes from sim, false - state comes from kalman filter
+takeoff-alt: 1              #meters
+ff-thrust: 0                
+arming-delay: 1             #seconds
+land-detect-dur: 0.5
+
 
 # ZCM publish url
 zcm-url: "ipc"

@@ -1,6 +1,7 @@
 SIM_DIR=$(cd "$(dirname ${BASH_SOURCE[0]})" && pwd)
+SOFTWARE_DIR=${SIM_DIR}/..
 MODEL_DIR=${SIM_DIR}/models:/.gazebo/models:/usr/share/gazebo-9/models/
-PLUGIN_DIR=${SIM_DIR}/lib:/usr/lib/x86_64-linux-gnu/gazebo-9/plugins/
+PLUGIN_DIR=${SOFTWARE_DIR}/lib:/usr/lib/x86_64-linux-gnu/gazebo-9/plugins/
 WORLD_DIR=${SIM_DIR}/worlds
 PX4_MODEL_DIR=${SIM_DIR}/../thirdparty/Firmware/Tools/sitl_gazebo/models
 PX4_PLUGIN_DIR=${SIM_DIR}/../thirdparty/Firmware/build/px4_sitl_default/build_gazebo
@@ -23,7 +24,7 @@ pkill -x px4 || true
 pkill -x gzserver || true
 pkill -x gzclient || true
 
-gzserver -s ${SIM_DIR}/lib/libSensorRegisterPlugin.so --verbose ${WORLD_DIR}/maav-test.world &
+gzserver --verbose ${WORLD_DIR}/maav-test.world &
 SIM_PID=`echo $!`
 
 if [[ -n "$HEADLESS" ]]; then
@@ -32,7 +33,7 @@ else
 	# gzserver needs to be running to avoid a race. Since the launch
 	# is putting it into the background we need to avoid it by backing off
 	sleep 3
-	nice -n 20 gzclient --verbose &
+	nice -n 20 gzclient &
 	GUI_PID=`echo $!`
 fi
 
@@ -40,10 +41,3 @@ fi
 ${SIM_DIR}/../thirdparty/Firmware/build/posix_sitl_default/px4 \
 ${SIM_DIR}/../thirdparty/Firmware \
 ${SIM_DIR}/../thirdparty/Firmware/posix-configs/SITL/init/ekf2/iris
-
-# # Run PX4 flight controller
-# ${SIM_DIR}/../thirdparty/Firmware/build/px4_sitl_default/bin/px4 \
-# ${SIM_DIR}/../thirdparty/Firmware/ROMFS/px4fmu_common -s ${SIM_DIR}/../thirdparty/Firmware/ROMFS/px4fmu_common/init.d-posix/rcS -t
-
-
-# # ${SIM_DIR}/../thirdparty/Firmware/test_data
