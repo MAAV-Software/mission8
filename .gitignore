@@ -34,6 +34,7 @@ compile_commands.json
 thirdparty/opencv
 thirdparty/apriltags
 thirdparty/Qt5
+thirdparty/octomap
 .syntastic_cpp_config
 CameraTrajectory.txt
 KeyFrameTrajectory.txt
