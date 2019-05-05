@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 SIM_DIR=$(cd "$(dirname ${BASH_SOURCE[0]})" && pwd)
 SOFTWARE_DIR=${SIM_DIR}/..
 MODEL_DIR=${SIM_DIR}/models:/.gazebo/models:/usr/share/gazebo-9/models/
