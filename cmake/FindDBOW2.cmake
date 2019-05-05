@@ -1,7 +1,0 @@
-find_path(DBOW2_INCLUDE_DIR DBoW2/FORB.h
-    PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty/DBoW2
-)
-
-set(DBOW2_INCLUDE_DIRS ${DBOW2_INCLUDE_DIR})
-
-mark_as_advanced(DBOW2_INCLUDE_DIR)

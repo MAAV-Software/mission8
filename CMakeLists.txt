@@ -48,7 +48,7 @@ set(SW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 # Set the build type
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Find headers
@@ -66,7 +66,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
 # Add source directory
 add_subdirectory(src)
-add_subdirectory(thirdparty)
 add_subdirectory(drivers)
 if(BUILD_SIM)
     add_subdirectory(sim)

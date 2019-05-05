@@ -48,21 +48,9 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
     widget.deselectAll();
     widget.selectComponent("qt.qt5.5121.gcc_64");
     widget.selectComponent("qt.qt5.5121.qtcharts");
+    widget.selectComponent("qt.qt5.5121.qtdatavis3d");
 
-    //widget.selectComponent("qt.qt5.5121.qtdatavisualization");
-    //widget.selectComponent("qt.55.qtquickcontrols");
-    // widget.deselectComponent("qt.tools.qtcreator");
-    // widget.deselectComponent("qt.55.qt3d");
-    // widget.deselectComponent("qt.55.qtcanvas3d");
-    // widget.deselectComponent("qt.55.qtlocation");
-    // widget.deselectComponent("qt.55.qtquick1");
-    // widget.deselectComponent("qt.55.qtscript");
-    // widget.deselectComponent("qt.55.qtwebengine");
-    // widget.deselectComponent("qt.extras");
-    // widget.deselectComponent("qt.tools.doc");
-    // widget.deselectComponent("qt.tools.examples");
-
-    gui.clickButton(buttons.NextButton);
+    gui.clickButton(buttons.NextButton, 3000);
 }
 
 Controller.prototype.LicenseAgreementPageCallback = function() {

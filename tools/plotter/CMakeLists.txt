@@ -11,7 +11,11 @@ set(CMAKE_AUTOUIC ON)
 
 # Find the QtWidgets library
 set(Qt5_DIR "${PROJECT_SOURCE_DIR}/thirdparty/Qt5/5.12.1/gcc_64/lib/cmake/Qt5")
-find_package(Qt5 5.12.1 REQUIRED COMPONENTS Widgets Core PrintSupport)
+find_package(Qt5 5.12.1 REQUIRED COMPONENTS Widgets Core DataVisualization OpenGL PrintSupport
+    PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty
+    NO_DEFAULT_PATH
+    NO_CMAKE_FIND_ROOT_PATH
+    QUIET)
 find_package(OpenGL REQUIRED)
 
 #enable OpenGl
@@ -41,10 +45,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 add_executable(${EXECUTABLE} ${PLOTTER_SRC})
 
 target_include_directories(${EXECUTABLE} PUBLIC
-    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/
-    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtCore
-    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtGui
-    ${PROJECT_SOURCE_DIR}/thirdparty/Qt/5.12.1/gcc_64/include/QtWidgets
     plotter
     ${ZCM_INCLUDE_DIRS}
     ${SW_INCLUDE_DIR}
@@ -55,6 +55,7 @@ target_include_directories(${EXECUTABLE} PUBLIC
 target_link_libraries(${EXECUTABLE}
     Qt5::Core
     Qt5::Widgets
+    Qt5::DataVisualization
     Qt5::PrintSupport
     maav-utils
     maav-msg

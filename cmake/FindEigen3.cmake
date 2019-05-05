@@ -79,6 +79,7 @@ else (EIGEN3_INCLUDE_DIR)
         ${SOFTWARE_SOURCE_DIR}/thirdparty
         ${SOFTWARE_SOURCE_DIR}/thirdparty/eigen3
         ${SOFTWARE_SOURCE_DIR}/thirdparty/eigen
+        NO_DEFAULT_PATH
         )
   endif(NOT EIGEN3_INCLUDE_DIR)
 
@@ -91,6 +92,7 @@ else (EIGEN3_INCLUDE_DIR)
         HINTS
         ENV EIGEN3_ROOT
         ENV EIGEN3_ROOT_DIR
+        NO_DEFAULT_PATH
       )
   endif(NOT EIGEN3_INCLUDE_DIR)
 

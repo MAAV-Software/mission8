@@ -7,6 +7,7 @@ if(NOT OpenCV_INCLUDE_DIR)
     find_path(OpenCV_INCLUDE_DIR opencv2/core.hpp
         PATH_SUFFIXES opencv opencv/include
         PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty
+        NO_DEFAULT_PATH
     )
     SET(OPENCV_VERSION_FILE "${SOFTWARE_SOURCE_DIR}/thirdparty/opencv/include/opencv2/core/version.hpp")
     file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
