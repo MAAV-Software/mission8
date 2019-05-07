@@ -6,9 +6,11 @@
 #include <iostream>
 #include <stdexcept>
 #include <thread>
+#include <string>
 
 #include <zcm/zcm-cpp.hpp>
 #include "common/utils/ZCMHandler.hpp"
+#include <common/utils/GetOpt.hpp>
 
 #include "tanfan/lcmlite.h"
 #include "tanfan/messaging/dji_t.h"
@@ -30,15 +32,19 @@ using std::cout;
 using std::endl;
 using std::thread;
 using std::ref;
+using std::string;
+using std::atomic_bool;
+using std::runtime_error;
 
-void tivaToNucLoop(ZCM &zcm, ZCM &zcm_udp, PhysicalController &physicalController);
+void tivaToNucLoop(ZCM &zcm, PhysicalController &physicalController);
 void recvLcmLoop(ZCM &zcm);
 void sendGarbage(ZCM &zcm);
 void transmitPlaceholder(const uint8_t *, uint32_t);
 
-std::atomic_bool is_running = true;
+atomic_bool is_running = true;
 
 void sigHandler(int) { is_running = false; }
+
 /*
  * @brief TANFAN's main loop
  *
@@ -46,9 +52,22 @@ void sigHandler(int) { is_running = false; }
  * Tiva and the Nuc. It forwards messages sent from the Tiva to the main
  * network on the Nuc. The messaging is done via ZCM and lcm-lite.
  */
-int main()
+int main(int argc, char** argv)
 {
-    maav::Log::init("maav.log", maav::Log::Level::info);
+    GetOpt gopt;
+    gopt.addBool('h', "help", false, "This message");
+    gopt.addBool('v', "verbose", false, "Prints out message content from Tiva.");
+	gopt.addString('p', "port", "/dev/ttyUSB0", "Serial port for Tiva connection.");
+
+    if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
+    {
+        cout << "Usage: " << argv[0] << " [options]" << endl;
+        gopt.printHelp();
+        return 0;
+    }
+    
+	maav::Log::init("maav.log", 
+		gopt.getBool("verbose") ? maav::Log::Level::debug : maav::Log::Level::info);
 
     // on any of the following signals, quit
     signal(SIGINT, sigHandler);
@@ -57,33 +76,16 @@ int main()
     signal(SIGTERM, sigHandler);
     signal(SIGQUIT, sigHandler);
 
-    // ZCM Message handling queues (thread safe)
-
     // Instantiate ZCM
     ZCM zcm{"ipc"};
-    ZCM zcm_udp{"udpm://239.255.76.67:7667?ttl=1"};
-
-    if (!zcm.good())
-    {
-        throw "Bad ZCM";
-    }
-    if (!zcm_udp.good())
-    {
-        throw "Bad ZCM UDP";
-    }
-
+    if (!zcm.good()) throw runtime_error("tanfan error: Bad ZCM");
+	
     zcm.start();
 
     PhysicalController physicalController;
+    physicalController.connect(string(gopt.getString("port")));
 
-    physicalController.connect("/dev/ttyUSB0");
-
-    tivaToNucLoop(ref(zcm), ref(zcm_udp), ref(physicalController));
-
-    // the above functions block, so this is just cleanup for when the program
-    // exits.
-    // sendToTivaThread.join();
-    // recvLcmThread.join();
+    tivaToNucLoop(ref(zcm), ref(physicalController));
 
     physicalController.disconnect();
 
@@ -103,14 +105,11 @@ int main()
  *
  * @param zcmHandler an ZCMHandler which is called on updates
  */
-void tivaToNucLoop(ZCM &zcm, ZCM &zcm_udp, PhysicalController &physicalController)
+void tivaToNucLoop(ZCM &zcm, PhysicalController &physicalController)
 {
     while (is_running)
     {
-        void (*placeholder)(const uint8_t *, uint32_t);
-        placeholder = &transmitPlaceholder;
-        DataLink dlink(placeholder, &zcm, &zcm_udp);
-
+        DataLink dlink(&transmitPlaceholder, &zcm);
         physicalController.process(dlink);
     }
 
@@ -119,7 +118,7 @@ void tivaToNucLoop(ZCM &zcm, ZCM &zcm_udp, PhysicalController &physicalControlle
 
 void transmitPlaceholder(const uint8_t *buffer, uint32_t size)
 {
-    throw std::runtime_error(
+    throw runtime_error(
         "This function should not have been called. This DataLink object exists solely to process "
         "data from the Tiva. PhysicalController should be used to receive and send data from the "
         "Tiva");

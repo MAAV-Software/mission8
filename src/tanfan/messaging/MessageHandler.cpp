@@ -9,21 +9,23 @@
 
 namespace zcm
 {
-// #include "common/messages/emergency_t.hpp"
+#include "common/messages/emergency_t.hpp"
 #include "common/messages/imu_t.hpp"
 #include "common/messages/lidar_t.hpp"
 }  // namespace zcm
 
 #include "common/messages/MsgChannels.hpp"
 
+using std::cout;
+using std::endl;
 using std::strncmp;
 using zcm::ZCM;
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-MessageHandler::MessageHandler(zcm::ZCM *zcm_in, zcm::ZCM *zcm_udp_in, double alpha1, double alpha2)
-    : zcm(zcm_in), zcm_udp(zcm_udp_in), ts(alpha1, alpha2)
+MessageHandler::MessageHandler(zcm::ZCM *zcm_in, double alpha1, double alpha2)
+    : zcm(zcm_in), ts(alpha1, alpha2)
 {
     lidar.dist = 0;
     lidar.vel = 0;
@@ -42,10 +44,8 @@ MessageHandler::MessageHandler(zcm::ZCM *zcm_in, zcm::ZCM *zcm_udp_in, double al
     imu.MagX = 0;
     imu.MagY = 0;
     imu.MagZ = 0;
-    for (int i = 0; i < 9; ++i)
-    {
-        imu.M[i] = 0;
-    }
+    for (size_t i = 0; i < 9; ++i) imu.M[i] = 0;
+	
     imu.time = 0;
     imu.Timer = 0;
     imu.GyroBiasX = 0;
@@ -67,14 +67,12 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
         zcm::lidar_t zcmLidar;
 
         zcmLidar.distance.data[0] = mh->lidar.dist;
-
-        std::cout << "Lidar distance: " << zcmLidar.distance.data[0] << std::endl;
-
+//		cout << "Lidar distance " << zcmLidar.distance.data[0] << endl;
+		
         zcmLidar.utime =
             duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-
+		
         mh->zcm->publish(maav::HEIGHT_LIDAR_CHANNEL, &zcmLidar);
-        mh->zcm_udp->publish(maav::HEIGHT_LIDAR_CHANNEL, &zcmLidar);
     }
     else if (strncmp(channel, "IMU", 3) == 0)
     {
@@ -94,18 +92,13 @@ void callback(lcmlite_t *lcm, const char *channel, const void *buf, int buf_len,
         zcmImu.utime = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
 
         mh->zcm->publish(maav::IMU_CHANNEL, &zcmImu);
-        mh->zcm_udp->publish(maav::IMU_CHANNEL, &zcmImu);
     }
     else if (strncmp(channel, "EMS", 3) == 0)
     {
-        // TODO ()
         emergency_t_decode(buf, 0, buf_len, &(mh->ems));
-        // zcm::emergency_t zcmEms;
-        // zcmEms.status = mh->ems.status;
-        // zcmEms.time =
-        // std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        // zcmEms.time = mh->ts.reclock(mh->ems.time, recvTimeStamp);
-
-        // mh->zcm->publish("EMS", &zcmEms);
+        zcm::emergency_t zcmEms;
+        zcmEms.status = mh->ems.status;
+		zcmEms.time = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+        mh->zcm->publish(maav::EMS_CHANNEL, &zcmEms);
     }
 }

@@ -100,6 +100,14 @@ target_link_libraries(tanfan
         maav-msg
 )
 
+#add_executable(spy-tanfan spy-tanfan.cpp)
+#
+#target_link_libraries(spy-tanfan
+#        ${ZCM_LIBRARIES}
+#        maav-utils
+#        maav-msg
+#)
+
 endif()
 
 if(BUILD_IMU)
