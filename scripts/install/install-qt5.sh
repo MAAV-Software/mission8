@@ -31,7 +31,7 @@ Controller.prototype.CredentialsPageCallback = function() {
 }
 
 Controller.prototype.IntroductionPageCallback = function() {
-    gui.clickButton(buttons.NextButton);
+    gui.clickButton(buttons.NextButton, 200);
 }
 
 Controller.prototype.TargetDirectoryPageCallback = function()
@@ -39,7 +39,7 @@ Controller.prototype.TargetDirectoryPageCallback = function()
         if (widget != null) {
        widget.TargetDirectoryLineEdit.setText("$QT5_DIR");
    }
-   gui.clickButton(buttons.NextButton);
+   gui.clickButton(buttons.NextButton, 200);
 }
 
 Controller.prototype.ComponentSelectionPageCallback = function() {

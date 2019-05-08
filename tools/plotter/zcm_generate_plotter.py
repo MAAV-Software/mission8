@@ -76,6 +76,7 @@ def parse_zcm(type, dir):
 
     lines = zcm_file_contents.splitlines()
     legend = []
+    cov_indices = []
     for line in lines:
         striped_line = line.strip()
         if 'LEGEND:' in striped_line:
@@ -83,6 +84,12 @@ def parse_zcm(type, dir):
             ending_index = striped_line.find(']')
             legend_str = striped_line[starting_index:ending_index]
             legend = legend_str.replace(' ', '').split(',')
+        if 'COVARIANCE:' in striped_line:
+            starting_index = striped_line.find('[') + 1
+            ending_index = striped_line.find(']')
+            cov_indices_str = striped_line[starting_index:ending_index]
+            cov_indices = cov_indices_str.replace(' ', '').split(',')
+            cov_indices = list(map(int, cov_indices))
         if not striped_line.startswith(('//', '/**', '*', '*/')) and striped_line:
             line_split = striped_line.split()
             if line_split[0] == 'struct':
@@ -94,9 +101,10 @@ def parse_zcm(type, dir):
                     legend = default_legends[local_type]
                     legend = [var_name + '_' + elem for elem in legend]
                 zcm_msg['vars'][var_name] = {
-                    'type': local_type, 'legend': legend}
+                    'type': local_type, 'legend': legend, 'cov_indices': cov_indices}
             # Clear legend
             legend = []
+            cov_indices = []
 
     return zcm_msg
 
@@ -104,7 +112,8 @@ def parse_zcm(type, dir):
 def generate_DataDict(dict):
     datadict_cpp = open(cur_dir + '/DataDict_generated.cpp', 'w')
 
-    includes = ["\"DataDict.hpp\"", "\"AbstractData.hpp\""]
+    includes = ["\"DataDict.hpp\"",
+                "\"AbstractData.hpp\"", "\"GaussianData.hpp\""]
     usings = []
     gen_header(includes, usings, datadict_cpp)
 
@@ -118,8 +127,12 @@ def generate_DataDict(dict):
             legend = vars[var]['legend']
             print('\tdict[\"' + CHANNEL + '_' + var + '\"]',
                   end='', file=datadict_cpp)
-            print(' = std::shared_ptr<AbstractData>(new AbstractData(',
-                  end='', file=datadict_cpp)
+            if not vars[var]['cov_indices']:
+                print(' = std::shared_ptr<AbstractData>(new AbstractData(',
+                      end='', file=datadict_cpp)
+            else:
+                print(' = std::shared_ptr<GaussianData>(new GaussianData(',
+                      end='', file=datadict_cpp)
             print(str(type_dimensions[type]) +
                   ', {', end='', file=datadict_cpp)
             for i in range(len(legend) - 1):
@@ -138,8 +151,11 @@ def generate_ZcmLoop(dict):
         "\"AbstractData.hpp\"",
         "\"DataDict.hpp\"",
         "\"ZcmConversion.hpp\"",
+        "\"GaussianData.hpp\"",
         "<chrono>",
         "<thread>",
+        "<memory>",
+        "<Eigen/Dense>",
         "<common/messages/MsgChannels.hpp>",
         "<common/utils/ZCMHandler.hpp>"
     ]
@@ -179,12 +195,50 @@ def generate_ZcmLoop(dict):
 
         # Check if zcm handler is ready
         print('\t\twhile(' + handler_name + '.ready()) {', file=zcmloop_cpp)
-        print('\t\t\tdouble time = elapsedTime(static_cast<double>(' + handler_name + '.msg().utime) / 1e6);', file=zcmloop_cpp)
+        print('\t\t\tdouble time = elapsedTime(static_cast<double>(' +
+              handler_name + '.msg().utime) / 1e6);', file=zcmloop_cpp)
+
+        foundCovMat = False
+        #  Find the covariance matrix if applicable
+        for var in dict[channel]['vars']:
+            if var == 'covariance':
+                foundCovMat = True
+                print(
+                    '\t\t\tEigen::MatrixXd covariance = convertMatrix(' +
+                    handler_name + '.msg().covariance);',
+                    file=zcmloop_cpp)
+
         # Add each variable to the dictionary
         for var in dict[channel]['vars']:
             type_name = dict[channel]['vars'][var]['type']
-            print('\t\t\tdict_->dict["' + channel + '_' + var + '"]->addData(std::move(' +
-                  conv_func[type_name] + '(time, '  + handler_name + '.msg().' + var + ')));', file=zcmloop_cpp)
+
+            # Disable until we have a proper way to handle these
+            if type_name == 'matrix_t' or type_name == 'quaternion_t':
+                continue
+
+            # Check if we need to convert to a gaussian type
+            cov_indices = dict[channel]['vars'][var]['cov_indices']
+            if cov_indices:
+                # Check that we have found a covariance matrix
+                if not foundCovMat:
+                    print('Covariance indices when there is no covariance matrix')
+                else:
+                    # Dynamic cast the shared pointer
+                    print('\t\t\tstd::shared_ptr<GaussianData> ' +
+                          channel + '_' + var +
+                          ' = std::dynamic_pointer_cast<GaussianData>(dict_->dict["' +
+                          channel + '_' + var + '"]);',
+                          file=zcmloop_cpp)
+                    block_size = str(cov_indices[0])
+                    block_start = str(cov_indices[1])
+                    print('\t\t\t' + channel + '_' + var + '->addData(std::move(' +
+                          conv_func[type_name] + '(time, ' + handler_name + '.msg().' + var +
+                          ')), covariance.block<' + block_size + ',' + block_size +
+                          '>(' + block_start + ',' + block_start + '));',
+                          file=zcmloop_cpp)
+            else:
+                print('\t\t\tdict_->dict["' + channel + '_' + var + '"]->addData(std::move(' +
+                      conv_func[type_name] + '(time, ' + handler_name + '.msg().' + var + ')));', file=zcmloop_cpp)
         print('\t\t\t' + handler_name + '.pop();', file=zcmloop_cpp)
         print('\t\t}', file=zcmloop_cpp)
     print('\t\tstd::this_thread::sleep_for(' +

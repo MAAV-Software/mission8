@@ -24,16 +24,17 @@ add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
 set(EXECUTABLE maav-plotter)
 
 set(PLOTTER_SRC
-    qcustomplot.cpp 
+    AbstractData.cpp
+    DataDict.cpp
+    DataDict_generated.cpp
+    GaussianData.cpp
     LinePlotWindow.ui
     LinePlotWindow.cpp
     ListWindow.ui
     ListWindow.cpp
     ListWindow_generated.cpp
     Plotter.cpp
-    AbstractData.cpp
-    DataDict.cpp
-    DataDict_generated.cpp
+    qcustomplot.cpp 
     ZcmConversion.cpp
     ZcmLoop.cpp
     ZcmLoop_generated.cpp
@@ -49,6 +50,7 @@ target_include_directories(${EXECUTABLE} PUBLIC
     ${ZCM_INCLUDE_DIRS}
     ${SW_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
 )
 
 # Use the Widgets module from Qt 5

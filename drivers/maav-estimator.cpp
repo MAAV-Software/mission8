@@ -5,8 +5,7 @@
 #include <thread>
 
 #include <yaml-cpp/yaml.h>
-#include <Eigen/Core>
-#include <Eigen/Eigen>
+#include <Eigen/Dense>
 #include <zcm/zcm-cpp.hpp>
 
 #include <common/messages/MsgChannels.hpp>
@@ -192,16 +191,30 @@ int main(int argc, char **argv)
     cout << "Accel: " << accel_bias.transpose() << std::endl;
     estimator.setBiases(gyro_bias, accel_bias);
 
-    YAML::Node mag_calib = YAML::LoadFile(gopt.getString("imucalibfile"));
-    Eigen::Vector3d offset(mag_calib["offset"].as<Eigen::Vector3d>());
-    Eigen::Vector3d scale(mag_calib["scale"].as<Eigen::Vector3d>());
-    Eigen::Matrix3d rotM(mag_calib["rotM"].as<Eigen::Matrix3d>());
+    Eigen::Vector3d offset;
+    Eigen::Vector3d scale;
+    Eigen::Matrix3d rotM;
+
+    try
+    {
+        YAML::Node mag_calib = YAML::LoadFile(gopt.getString("imucalibfile"));
+        offset = mag_calib["offset"].as<Eigen::Vector3d>();
+        scale = mag_calib["scale"].as<Eigen::Vector3d>();
+        rotM = mag_calib["rotM"].as<Eigen::Matrix3d>();
+    }
+    catch (std::exception e)
+    {
+        std::cout << "No mag calibration found. Using defaults" << std::endl;
+        offset = Eigen::Vector3d::Zero();
+        scale = Eigen::Vector3d{1, 1, 1};
+        rotM = Eigen::Matrix3d::Identity();
+    }
 
     cout << "Starting estimator loop" << endl;
 
     while (!KILL)
     {
-        std::this_thread::sleep_for(2ms);
+        std::this_thread::sleep_for(1ms);
 
         // Kalman Update Rate = IMU's Update rate,
         // so we ONLY update the Kalman Filter when the IMU Updates.

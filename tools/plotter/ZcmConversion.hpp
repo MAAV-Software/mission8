@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <Eigen/Dense>
+
 #include <common/messages/matrix_t.hpp>
 #include <common/messages/quaternion_t.hpp>
 #include <common/messages/vector1_t.hpp>
@@ -27,4 +29,4 @@ std::vector<double> convertVector(double time, const ZcmVector& vec)
 
 std::vector<double> convertQuaternion(double time, const quaternion_t& quat);
 
-std::vector<double> convertMatrix(double time, const matrix_t& mat);
+Eigen::MatrixXd convertMatrix(const matrix_t& mat);

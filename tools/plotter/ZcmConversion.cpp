@@ -5,7 +5,15 @@ std::vector<double> convertQuaternion(double time, const quaternion_t& quat)
     return convertVector(time, quat);
 }
 
-std::vector<double> convertMatrix(double time, const matrix_t& mat)
+Eigen::MatrixXd convertMatrix(const matrix_t& mat)
 {
-    return std::vector<double>({time, 1, 2, 3});
+    Eigen::MatrixXd convertedMat(mat.rows, mat.cols);
+    for (int i = 0; i < mat.rows; i++)
+    {
+        for (int j = 0; j < mat.cols; j++)
+        {
+            convertedMat(i, j) = mat.data[i][j];
+        }
+    }
+    return convertedMat;
 }
