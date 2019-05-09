@@ -47,3 +47,4 @@ ROMFS
 rootfs
 test_data
 scripts/exe
+exe
