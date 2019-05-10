@@ -35,7 +35,7 @@ public:
      *
      * @param time_usec Timestamp to initialize this state
      */
-    State(uint64_t time_usec);
+    explicit State(uint64_t time_usec);
 
     /**
      * Initializes position, velocity, angular rates, and biases to zero. Attitude is initialized to

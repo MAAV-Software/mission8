@@ -25,7 +25,7 @@ pkill -x px4 || true
 pkill -x gzserver || true
 pkill -x gzclient || true
 
-gzserver --verbose ${WORLD_DIR}/maav-test.world &
+gzserver --verbose ${WORLD_DIR}/fxb.world &
 SIM_PID=`echo $!`
 
 if [[ -n "$HEADLESS" ]]; then

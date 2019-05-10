@@ -21,7 +21,7 @@ namespace kalman
 class Extrinsics
 {
 public:
-    Extrinsics(YAML::Node config);
+    explicit Extrinsics(YAML::Node config);
 
     /**
      * @brief Relative attitude of the sensor to the IMU

@@ -36,6 +36,7 @@ const char* const MAP_CHANNEL = "MAP";
 const char* const PATH_CHANNEL = "PATH";
 const char* const SLAM_RESET_CHANNEL = "SLAM_RESET";
 const char* const SLAM_LOCALIZATION_MODE_CHANNEL = "SLAM_LOC_MODE";
+const char* const GOAL_WAYPOINT_CHANNEL = "GOAL_WAYPOINT_CHANNEL"; 
 
 // Planefitter messages
 const char* const PLANE_FITTER_HEARTBEAT_CHANNEL = "PLANE_FITTER_HEARTBEAT";
@@ -54,6 +55,9 @@ const char* const LOCALIZATION_STATUS_CHANNEL = "LOCALIZATION_STATUS";
 const char* const PID_ERROR_CHANNEL = "PID_ERROR";
 const char* const ATTITUDE_TARGET_CHANNEL = "ATTITUDE_TARGET";
 const char* const CAMERA_POS_CHANNEL = "CAMERA_POS_CHANNEL";
+const char* const OCCUPANCY_MAP_HEARTBEAT_CHANNEL = "OCCUPANCY_MAP_HEARTBEAT_CHANNEL";
+const char* const OCCUPANCY_MAP_CHANNEL = "OCCUPANCY_MAP_CHANNEL";
+const char* const STATE_FORWARD_HEARTBEAT_CHANNEL = "STATE_FORWARD_HEARTBEAT_CHANNEL"; 
 
 // clang-format on
 }  // namespace maav

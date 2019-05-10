@@ -1,3 +1,7 @@
+/**
+ * ZCM type for trajectory output from path planner
+ * first waypoint is source, final waypoint is goal
+ */
 struct path_t
 {
 	int64_t utime; // timestamp

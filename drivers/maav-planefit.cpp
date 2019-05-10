@@ -34,6 +34,7 @@ void sigHandler(int) { KILL = true; }
 class JobDispatcher
 {
 public:
+    JobDispatcher() = default;
     // Returns a tuple that holds the point cloud and the time it was recorded
     tuple<pcl::PointCloud<pcl::PointXYZ>::Ptr, long long> waitForTask()
     {
@@ -87,7 +88,7 @@ public:
     // The task dispatcher associated with this handler
     shared_ptr<JobDispatcher> dispatcher;
     // Pass in shared pointer to the job dispatcher
-    Handler(shared_ptr<JobDispatcher> dispatcherIn) : dispatcher{dispatcherIn} {}
+    explicit Handler(shared_ptr<JobDispatcher> dispatcherIn) : dispatcher{dispatcherIn} {}
     // Updates job dispatcher with new task data
     void handle(const zcm::ReceiveBuffer*, const std::string&, const point_cloud_t* message)
     {

@@ -32,9 +32,11 @@ compile_commands.json
 *.vscode
 *.idea
 thirdparty/opencv
+thirdparty/octomap
 thirdparty/apriltags
 thirdparty/Qt5
 thirdparty/octomap
+thirdparty/keras*
 .syntastic_cpp_config
 CameraTrajectory.txt
 KeyFrameTrajectory.txt

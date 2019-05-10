@@ -54,5 +54,6 @@ ${SOFTWARE_DIR}/scripts/install/install-pcl.sh
 ${SOFTWARE_DIR}/scripts/install/install-opencv3.sh
 ${SOFTWARE_DIR}/scripts/install/install-lcm.sh
 ${SOFTWARE_DIR}/scripts/install/install-apriltag.sh
+${SOFTWARE_DIR}/scripts/install/install-octomap.sh
 ${SOFTWARE_DIR}/scripts/install/install-qt5.sh
 ${SOFTWARE_DIR}/scripts/setup_sim.sh

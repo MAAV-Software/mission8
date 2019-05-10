@@ -7,7 +7,7 @@
 #include <random>
 #include <string>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include "vision/core/PlaneFitter.hpp"
 

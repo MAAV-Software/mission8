@@ -4,6 +4,7 @@ find_package(OpenCV REQUIRED)
 find_package(LibRealSense2 REQUIRED)
 find_package(ZCM REQUIRED)
 find_package(libusb-1.0 REQUIRED)
+find_package(Octomap REQUIRED)
 
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
@@ -17,6 +18,7 @@ include_directories(
 
 include_directories(SYSTEM
     ${PCL_INCLUDE_DIRS}
+    ${Octomap_INCLUDE_DIRS}
 )
 
 link_directories(${PCL_LIBRARY_DIRS})
@@ -62,4 +64,6 @@ target_link_libraries(PlaneFitter
 
 target_link_libraries(VisionUtils
     ${OpenCV_LIBS}
+    ${PCL_LIBRARIES}
+    ${Octomap_LIBRARIES}
 )

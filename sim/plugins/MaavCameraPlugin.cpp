@@ -10,6 +10,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <Eigen/Core>
 
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/point_cloud_t.hpp>
@@ -18,6 +19,8 @@
 
 using std::vector;
 using zcm::ZCM;
+using Eigen::Vector3d;
+using Eigen::Matrix3d;
 
 namespace gazebo
 {
@@ -96,6 +99,7 @@ public:
         SendMessage();
     }
 
+    // The point cloud is in the image frame: Z into page, x to the right and y down
     void OnNewRGBPointCloud(const float* _pcd, unsigned int _width, unsigned int _height,
         unsigned int _depth, const std::string& _format) override
     {
@@ -109,16 +113,19 @@ public:
             {
                 size_t index = (j * _width) + i;
                 point_t point;
-                float x = _pcd[4 * index];
-                float y = _pcd[4 * index + 1];
-                float z = _pcd[4 * index + 2];
-                point.x = y;
-                point.y = x;
-                point.z = -z;
+                point.x = _pcd[4 * index];
+                point.y = _pcd[4 * index + 1];
+                point.z = _pcd[4 * index + 2];
 
                 cloud.point_cloud.push_back(point);
             }
         }
+
+        auto time = sensor_->LastMeasurementTime();
+        uint64_t usec = time.sec * 1000000;
+        usec += time.nsec / 1000;
+
+        cloud.utime = usec;
 
         zcm.publish(pointcloud_channel_name_, &cloud);
     }
@@ -128,6 +135,12 @@ public:
         auto time = sensor_->LastMeasurementTime();
         uint64_t usec = time.sec * 1000000;
         usec += time.nsec / 1000;
+
+        // // Convert Gazebo time format to microseconds
+        // auto time =sensor_->world->SimTime();
+        // uint64_t usec = time.sec * 1000000;
+        // usec += time.nsec / 1000;
+
         msg.utime = usec;
 
         msg.rgb_image = rgb_image;

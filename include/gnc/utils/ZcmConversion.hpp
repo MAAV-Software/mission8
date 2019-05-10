@@ -17,12 +17,14 @@
 #include <common/messages/vector3_t.hpp>
 #include <common/messages/vector4_t.hpp>
 #include <common/messages/waypoint_t.hpp>
+#include <common/messages/path_t.hpp>
 #include <gnc/State.hpp>
 #include <gnc/measurements/GlobalUpdateMeasurement.hpp>
 #include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/LidarMeasurement.hpp>
 #include <gnc/measurements/PlaneFitMeasurement.hpp>
 #include <gnc/measurements/Waypoint.hpp>
+#include <gnc/planner/Path.hpp>
 namespace maav
 {
 namespace gnc
@@ -32,7 +34,11 @@ State ConvertState(const state_t& state);
 
 State ConvertGroundTruthState(const groundtruth_inertial_t& state);
 
+waypoint_t ConvertWaypoint(const Waypoint& waypoint);
 Waypoint ConvertWaypoint(const waypoint_t& zcm_waypoint);
+
+path_t ConvertPath(const Path& path);
+Path ConvertPath(const path_t& zcm_path);
 
 std::shared_ptr<measurements::LidarMeasurement> convertLidar(const lidar_t& zcm_lidar);
 // lidar_t convertLidar(const measurements::LidarMeasurement& lidar);

@@ -14,11 +14,31 @@ forward:
   width: 640
   height: 480
   fps: 15                # 15, 30, or 60
-  serial: "817512071338" # 12 digit number on bottom of realsense camera
+  serial: "749512060038" # 12 digit number on bottom of realsense camera
   publish_rgbd: true
-  publish_pointcloud: false
+  publish_pointcloud: true
   enable_autoexposure: false
   publish_pose: false # tracking camera only
+  rotation: # 3x3 rotation matrix left to right first, then top to bottom
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+  translation: # 3x1 translation vector
+    - 0
+    - 0
+    - 0
+  sim_rotation: [
+    0, 0, 1,
+    -1, 0, 0,
+    0, -1, 0
+  ]
+  sim_translation: [0, 0, 0]
 
 downward:
   enabled: false
@@ -30,6 +50,20 @@ downward:
   publish_pointcloud: true
   enable_autoexposure: false
   publish_pose: false # tracking camera only
+  rotation: # 3x3 rotation matrix left to right first, then top to bottom
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+  translation: # 3x1 translation vector
+    - 0
+    - 0
+    - 0
 
 other-forward: # To accomodate the t265 in use with the other cameras
   enabled: true
@@ -41,3 +75,17 @@ other-forward: # To accomodate the t265 in use with the other cameras
   publish_pointcloud: false
   enable_autoexposure: true
   publish_pose: true # tracking camera only
+  rotation: # 3x3 rotation matrix left to right first, then top to bottom
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+    - 0
+    - 0
+    - 0
+    - 1
+  translation: # 3x1 translation vector
+    - 0
+    - 0
+    - 0

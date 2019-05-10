@@ -1,7 +1,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "common/messages/depth_image_t.hpp"
-#include "common/messages/rgbd_image_t.hpp"
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <octomap/octomap.h>
+#include <octomap/OcTree.h>
+#include <common/messages/depth_image_t.hpp>
+#include <common/messages/rgbd_image_t.hpp>
+#include <common/messages/point_cloud_t.hpp>
+#include <common/messages/octomap_t.hpp>
+
+#include <memory>
 
 namespace maav::vision
 {
@@ -23,4 +31,10 @@ cv::Mat wrapInDepthMat(void* mem_ptr, int width, int height);
 void rgbdToZcmType(const cv::Mat& rgb, const cv::Mat& depth, rgbd_image_t& zcm_img);
 
 void zcmTypeToRgbd(const rgbd_image_t& zcm_img, cv::Mat& rgb, cv::Mat& depth);
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr zcmTypeToPCLPointCloud(const point_cloud_t& zcm_cloud);
+
+void octomapToZcmType(const std::shared_ptr<const octomap::OcTree>& octMap, octomap_t* msg);
+
+std::shared_ptr<octomap::OcTree> zcmTypeToOctomap(const octomap_t* msg);
 }

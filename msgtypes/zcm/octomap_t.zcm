@@ -1,0 +1,9 @@
+/*
+* ZCM type for serialized octomap
+*/
+struct octomap_t
+{
+    int32_t size;
+    int8_t data[size];
+    int64_t utime;
+}

@@ -3,40 +3,35 @@
  */
 struct state_t
 {
-	int64_t utime;
+    int64_t utime;
 
-	// TODO: Increase this to estimate more variables
-	const int32_t DoF = 15;
+    // TODO: Increase this to estimate more variables
+    const int32_t DoF = 15;
 
-	matrix_t covariance;
+    matrix_t covariance;
 
-	// State variables
-	// COVARIANCE: [3, 0]
-	quaternion_t attitude;
-	// LEGEND: [pos_x, pos_y, pos_z]
-	// COVARIANCE: [3, 3]
-	vector3_t position;
-	// LEGEND: [vel_x, vel_y, vel_z]
-	// COVARIANCE: [3, 6]
-	vector3_t velocity;
+    // State variables
+    quaternion_t attitude;
+    // LEGEND: [pos_x, pos_y, pos_z]
+    vector3_t position;
+    // LEGEND: [vel_x, vel_y, vel_z]
+    vector3_t velocity;
 
-	// Control inputs
-	// LEGEND: [ω_x, ω_y, ω_z]
-	vector3_t angular_velocity;
-	// LEGEND: [acc_x, acc_y, acc_z]
-	vector3_t acceleration;
+    // Control inputs
+    // LEGEND: [ω_x, ω_y, ω_z]
+    vector3_t angular_velocity;
+    // LEGEND: [acc_x, acc_y, acc_z]
+    vector3_t acceleration;
 
-	// Biases
-	// LEGEND: [gbias_x, gbias_y, gbias_z]
-	// COVARIANCE: [3, 9]
-	vector3_t gyro_biases;
-	// LEGEND: [abias_x, abias_y, abias_z]
-	// COVARIANCE: [3, 12]
-	vector3_t accel_biases;
+    // Biases
+    // LEGEND: [gbias_x, gbias_y, gbias_z]
+    vector3_t gyro_biases;
+    // LEGEND: [abias_x, abias_y, abias_z]
+    vector3_t accel_biases;
 
-	// World properties
-	// LEGEND: [grav_x, grav_y, grav_z]
-	vector3_t gravity;
-	// LEGEND: [mag_x, mag_y, mag_z]
-	vector3_t magnetic_field;
+    // World properties
+    // LEGEND: [grav_x, grav_y, grav_z]
+    vector3_t gravity;
+    // LEGEND: [mag_x, mag_y, mag_z]
+    vector3_t magnetic_field;
 }

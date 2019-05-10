@@ -53,6 +53,7 @@ foreach (testSrc ${TEST_SRCS})
             maav-gnc-utils
             maav-kalman
             maav-control
+            maav-path-planner
             ${YAML_CPP_LIBRARY}
             yaml-cpp
             testhelper

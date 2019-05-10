@@ -1,0 +1,14 @@
+map_res: 0.05
+prob_hit: 0.9
+prob_miss: 0.3
+thresh_min: 0.01
+thresh_max: 0.9
+max_range: 10.0
+point_cloud_min_x: -99999999999
+point_cloud_max_x: 99999999999
+point_cloud_min_y: -99999999999
+point_cloud_max_y: 99999999999
+point_cloud_min_z: -99999999999
+point_cloud_max_z: 99999999999
+compress: true
+simulator: true # If true use GT_INTERTIAL else use STATE for position

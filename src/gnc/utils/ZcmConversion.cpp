@@ -1,6 +1,7 @@
 #include <gnc/utils/ZcmConversion.hpp>
 
 #include <vector>
+#include <algorithm>
 
 using maav::gnc::measurements::GlobalUpdateMeasurement;
 using maav::gnc::measurements::ImuMeasurement;
@@ -144,6 +145,24 @@ State ConvertGroundTruthState(const groundtruth_inertial_t& zcm_state)
     return state;
 }
 
+// TODO: what is rate[3] supposed to be??
+waypoint_t ConvertWaypoint(const Waypoint& waypoint)
+{
+    waypoint_t zcm_waypoint;
+
+    zcm_waypoint.pose[0] = waypoint.position[0];
+    zcm_waypoint.pose[1] = waypoint.position[1];
+    zcm_waypoint.pose[2] = waypoint.position[2];
+    zcm_waypoint.pose[3] = waypoint.yaw;
+
+    zcm_waypoint.rate[0] = waypoint.velocity[0];
+    zcm_waypoint.rate[1] = waypoint.velocity[1];
+    zcm_waypoint.rate[2] = waypoint.velocity[2];
+    zcm_waypoint.rate[3] = waypoint.yaw_rate;
+
+    return zcm_waypoint;
+}
+
 Waypoint ConvertWaypoint(const waypoint_t& zcm_waypoint)
 {
     Waypoint waypoint;
@@ -154,6 +173,30 @@ Waypoint ConvertWaypoint(const waypoint_t& zcm_waypoint)
     waypoint.yaw = zcm_waypoint.pose[3];
 
     return waypoint;
+}
+
+
+path_t ConvertPath(const Path& path)
+{
+    path_t zcm_path;
+    zcm_path.utime = path.utime;
+    zcm_path.NUM_WAYPOINTS = path.waypoints.size();
+    std::transform(path.waypoints.cbegin(), path.waypoints.cend(), 
+        std::back_inserter(zcm_path.waypoints), [](const Waypoint& elt) {
+            return ConvertWaypoint(elt);
+    });
+    return zcm_path;
+}
+
+Path ConvertPath(const path_t& zcm_path)
+{
+    Path path;
+    path.utime = zcm_path.utime;
+    std::transform(zcm_path.waypoints.cbegin(), zcm_path.waypoints.cend(), 
+    std::back_inserter(path.waypoints), [](const waypoint_t& elt) {
+        return ConvertWaypoint(elt);
+    });
+    return path;
 }
 
 std::shared_ptr<LidarMeasurement> convertLidar(const lidar_t& zcm_lidar)
