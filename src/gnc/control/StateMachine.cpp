@@ -106,6 +106,11 @@ void StateMachine::run(const std::atomic<bool>& kill)
 
         autopilot_interface_->update_setpoint(inner_loop_setpoint);
 
+        while (!commands_.empty())
+        {
+            commands_.pop();
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
@@ -179,10 +184,6 @@ void StateMachine::readZcm()
     while (command_handler_.ready())
     {
         std::cout << "Command received\n";
-        while (!commands_.empty())
-        {
-            commands_.pop();
-        }
 
         if (command_handler_.msg().takeoff)
         {
