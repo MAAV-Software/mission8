@@ -23,6 +23,8 @@ namespace maav
 {
 namespace gnc
 {
+namespace control
+{
 /*
  *      Helper to saturate values
  */
@@ -259,7 +261,7 @@ InnerLoopSetpoint Controller::takeoff(const double takeoff_alt)
 
 InnerLoopSetpoint Controller::land()
 {
-    if (current_state.position().z() < -1.5)
+    if (current_state.position().z() < -0.6)
     {
         current_target.position.z() = -0.5;
     }
@@ -287,33 +289,6 @@ bool Controller::at_takeoff_alt()
     return fabs(takeoff_alt_setpoint - current_state.position()(2)) < convergence_tolerance;
 }
 
-/*
- *      Might want to change the tolerances, testing required
- */
-bool Controller::landing_detected()
-{
-    const static std::chrono::duration<double> land_detect_dur(
-        control_config_["land-detect-dur"].as<double>());
-    static std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<double>>
-        landing_detect_timout;
-    static bool landing_timer_start = false;
-
-    if (fabs(current_state.velocity()(2)) < 0.1 && fabs(current_state.position()(2)) < 0.2)
-    {
-        if (!landing_timer_start)
-        {
-            landing_timer_start = true;
-            landing_detect_timout = std::chrono::system_clock::now() + land_detect_dur;
-        }
-        else if (std::chrono::system_clock::now() > landing_detect_timout)
-        {
-            landing_timer_start = false;
-            return true;
-        }
-    }
-
-    return false;
-}
-
+}  // namespace control
 }  // namespace gnc
 }  // namespace maav

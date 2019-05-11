@@ -3,5 +3,7 @@ struct control_commands_t
     boolean takeoff;
     boolean land;
     boolean gains;
+    boolean disarm;
+    boolean arm;
     int64_t utime;
 }

@@ -30,7 +30,6 @@ limits:
 # vehicle params that won't be tuned
 tol: 0.1                    # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
-sim: true                   #true - control sim over udp, false - control pixhawk through usb
 sim-state: true             #true - state comes from sim, false - state comes from kalman filter
 takeoff-alt: 1              #meters
 ff-thrust: 0                
@@ -43,3 +42,10 @@ zcm-url: "ipc"
 command-zcm-url: "ipc"
 # zcm-url: "udpm://239.255.76.67:7667?ttl=1"
 # command-zcm-url: "udpm://239.255.76.67:7667?ttl=1"
+
+# Landing detector
+z_vel_max: 0.5
+xy_vel_max: 1.5
+rot_max: 20
+throttle_min: 0.12
+throttle_hover: 0.5

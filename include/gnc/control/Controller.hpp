@@ -9,7 +9,7 @@
 #include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
 
-#include <common/mavlink/OffboardControl.hpp>
+#include <common/mavlink/AutopilotInterface.hpp>
 #include <common/messages/ctrl_params_t.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/messages/pid_error_t.hpp>
@@ -20,6 +20,8 @@
 namespace maav
 {
 namespace gnc
+{
+namespace control
 {
 struct XboxController
 {
@@ -54,19 +56,18 @@ public:
     void set_current_target(const Waypoint& new_target);
     void add_state(const State& state);
     void add_ems_state(const State& state);
-    mavlink::InnerLoopSetpoint flight();
-    mavlink::InnerLoopSetpoint run_xbox(const XboxController& xbox_controller);
+    maav::mavlink::InnerLoopSetpoint flight();
+    maav::mavlink::InnerLoopSetpoint run_xbox(const XboxController& xbox_controller);
     void set_control_params(const Parameters&);
     void set_control_params(const ctrl_params_t& ctrl_params);
-    mavlink::InnerLoopSetpoint takeoff(const double takeoff_alt);
-    mavlink::InnerLoopSetpoint land();
-    mavlink::InnerLoopSetpoint ems_land();
+    maav::mavlink::InnerLoopSetpoint takeoff(const double takeoff_alt);
+    maav::mavlink::InnerLoopSetpoint land();
+    maav::mavlink::InnerLoopSetpoint ems_land();
     bool at_takeoff_alt();
-    bool landing_detected();
     void set_yaw_north();
 
 private:
-    mavlink::InnerLoopSetpoint move_to_current_target();
+    maav::mavlink::InnerLoopSetpoint move_to_current_target();
 
     const YAML::Node control_config_;
 
@@ -106,5 +107,6 @@ private:
     pid_error_t pid_error_msg;
 };
 
+}  // namespace control
 }  // namespace gnc
 }  // namespace maav

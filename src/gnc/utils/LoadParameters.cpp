@@ -4,10 +4,10 @@
 #include <gnc/Constants.hpp>
 #include <gnc/utils/LoadParameters.hpp>
 
-using YAML::Node;
-using maav::gnc::Controller;
 using maav::gnc::constants::DEG_TO_RAD;
+using maav::gnc::control::Controller;
 using std::make_pair;
+using YAML::Node;
 namespace maav
 {
 namespace gnc
@@ -83,6 +83,6 @@ Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file)
 
     return params;
 }
-}
-}
-}
+}  // namespace utils
+}  // namespace gnc
+}  // namespace maav

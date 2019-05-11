@@ -15,7 +15,7 @@ namespace utils
  *      Calling function should generate the config file
  *      node for proper error handling
  */
-maav::gnc::Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file);
-}
-}
-}
+maav::gnc::control::Controller::Parameters LoadParametersFromYAML(const YAML::Node& config_file);
+}  // namespace utils
+}  // namespace gnc
+}  // namespace maav

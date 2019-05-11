@@ -126,6 +126,20 @@ int main(int argc, char** argv)
             commands.gains = false;
         }
 
+        else if (current_command == "disarm")
+        {
+            commands.disarm = true;
+            zcm.publish(maav::CONTROL_COMMANDS_CHANNEL, &commands);
+            commands.disarm = false;
+        }
+
+        else if (current_command == "arm")
+        {
+            commands.arm = true;
+            zcm.publish(maav::CONTROL_COMMANDS_CHANNEL, &commands);
+            commands.arm = false;
+        }
+
         else if (current_command == "lost")
         {
             localizer_status.localized = false;

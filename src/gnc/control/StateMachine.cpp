@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 
@@ -6,23 +7,28 @@
 #include <gnc/utils/ZcmConversion.hpp>
 
 using maav::gnc::utils::LoadParametersFromYAML;
-using maav::mavlink::CommunicationType;
+using maav::mavlink::AutopilotInterface;
 using maav::mavlink::InnerLoopSetpoint;
+
+using namespace std::chrono_literals;
 
 namespace maav
 {
 namespace gnc
 {
-StateMachine::StateMachine(const std::string& control_config_file)
+namespace control
+{
+StateMachine::StateMachine(
+    const std::string& control_config_file, AutopilotInterface* const autopilot_interface)
     : control_config_file_(control_config_file),
       control_config_(YAML::LoadFile(control_config_file_)),
-      offboard_control_(
-          control_config_["sim"].as<bool>() ? CommunicationType::UDP : CommunicationType::UART,
-          control_config_["uart-path"].as<std::string>()),
+      autopilot_interface_(autopilot_interface),
       controller_(control_config_),
+      land_detector_(control_config_),
       current_control_state_(ControlState::STANDBY),
       zcm_(control_config_["zcm-url"].as<std::string>()),
       sim_state_(control_config_["sim-state"].as<bool>())
+
 {
     /*
      *  ZCM initialize
@@ -77,6 +83,9 @@ void StateMachine::run(const std::atomic<bool>& kill)
             case ControlState::ARMING:
                 inner_loop_setpoint = runArming();
                 break;
+            case ControlState::SOFT_ARM:
+                inner_loop_setpoint = runSoftArm();
+                break;
             case ControlState::DISARMING:
                 inner_loop_setpoint = runDisarming();
                 break;
@@ -88,7 +97,14 @@ void StateMachine::run(const std::atomic<bool>& kill)
                 break;
         }
 
-        offboard_control_.set_attitude_target(inner_loop_setpoint);
+        if (current_control_state_ != ControlState::STANDBY &&
+            current_control_state_ != ControlState::ARMING &&
+            current_control_state_ != ControlState::DISARMING)
+        {
+            inner_loop_setpoint.thrust = armedThrust(inner_loop_setpoint.thrust);
+        }
+
+        autopilot_interface_->update_setpoint(inner_loop_setpoint);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -96,36 +112,16 @@ void StateMachine::run(const std::atomic<bool>& kill)
 
 void StateMachine::initializeRun(const std::atomic<bool>& kill)
 {
-    std::cout << "Checking for heartbeat..." << std::endl;
-    while (!kill && !offboard_control_.readMessage())
-    {
-    }
-    std::cout << "Heartbeat received" << std::endl;
-
-    offboard_control_.holdZeroAttitude(std::chrono::seconds(1));
-
-    // Connect to offboard control
-    std::cout << "Establishing offboard control..." << std::endl;
-    while (!kill && !offboard_control_.activate_offboard_control())
-    {
-        offboard_control_.set_attitude_target(InnerLoopSetpoint::zero());
-    }
-
-    // Print success/failer of offboard connect
-    if (offboard_control_.offboardControlActive())
-    {
-        std::cout << "Offboard control established on pixhawk" << std::endl;
-    }
-
     /*
      *      Establish the initial state of the vehicle
      */
     std::cout << "Establishing initial state..." << std::endl;
     int counter = 0;
     auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(10);
+    auto zero_setpoint = InnerLoopSetpoint::zero();
     while (!kill && counter < 10 && std::chrono::system_clock::now() < timeout)
     {
-        offboard_control_.set_attitude_target(InnerLoopSetpoint::zero());
+        autopilot_interface_->update_setpoint(zero_setpoint);
         if (!sim_state_ && state_handler_.ready())
         {
             controller_.add_state(ConvertState(state_handler_.msg()));
@@ -147,6 +143,7 @@ void StateMachine::initializeRun(const std::atomic<bool>& kill)
     {
         std::cout << "Unable to establish state of vehicle" << std::endl;
     }
+    return;
 }
 
 void StateMachine::readZcm()
@@ -168,18 +165,25 @@ void StateMachine::readZcm()
     while (!sim_state_ && state_handler_.ready())
     {
         controller_.add_state(ConvertState(state_handler_.msg()));
+        land_detector_.setState(ConvertState(state_handler_.msg()));
         state_handler_.pop();
     }
 
     while (sim_state_ && sim_state_handler_.ready())
     {
         controller_.add_state(ConvertGroundTruthState(sim_state_handler_.msg()));
+        land_detector_.setState(ConvertGroundTruthState(sim_state_handler_.msg()));
         sim_state_handler_.pop();
     }
 
     while (command_handler_.ready())
     {
         std::cout << "Command received\n";
+        while (!commands_.empty())
+        {
+            commands_.pop();
+        }
+
         if (command_handler_.msg().takeoff)
         {
             commands_.push(ControlCommands::TAKEOFF);
@@ -187,6 +191,14 @@ void StateMachine::readZcm()
         if (command_handler_.msg().land)
         {
             commands_.push(ControlCommands::LAND);
+        }
+        if (command_handler_.msg().disarm)
+        {
+            commands_.push(ControlCommands::DISARM);
+        }
+        if (command_handler_.msg().arm)
+        {
+            commands_.push(ControlCommands::ARM);
         }
         if (command_handler_.msg().gains)
         {
@@ -210,47 +222,87 @@ void StateMachine::readZcm()
     }
 }
 
+bool StateMachine::checkCommand(const ControlCommands command)
+{
+    if (!commands_.empty() && commands_.front() == command)
+    {
+        commands_.pop();
+        return true;
+    }
+    return false;
+}
+
 InnerLoopSetpoint StateMachine::runStandby()
 {
-    if (commands_.front() == ControlCommands::TAKEOFF)
+    if (!autopilot_interface_->offboardMode())
     {
-        setControlState(ControlState::ARMING);
-        commands_.pop();
+        autopilot_interface_->enable_offboard_control();
+        std::this_thread::sleep_for(250ms);
+    }
+    else
+    {
+        if (checkCommand(ControlCommands::TAKEOFF))
+        {
+            setControlState(ControlState::ARMING);
+        }
+
+        if (checkCommand(ControlCommands::ARM))
+        {
+            setControlState(ControlState::ARMING);
+            soft_arm_ = true;
+        }
     }
     return InnerLoopSetpoint::zero();
 }
 
 InnerLoopSetpoint StateMachine::runTakeoff()
 {
-    if (commands_.front() == ControlCommands::LAND)
+    // variable to track printing takeoff message
+    static bool print_takeoff = true;
+
+    if (checkCommand(ControlCommands::LAND))
     {
         setControlState(ControlState::LAND);
-        commands_.pop();
     }
 
     if (controller_.at_takeoff_alt())
     {
         setControlState(ControlState::FLIGHT);
         std::cout << "switching to flight in takeoff" << std::endl;
+        print_takeoff = true;
     }
 
-    std::cout << "Taking off to alt: " << control_config_["takeoff-alt"].as<double>() << std::endl;
+    if (print_takeoff)
+    {
+        std::cout << "Taking off to alt: " << control_config_["takeoff-alt"].as<double>()
+                  << std::endl;
+        print_takeoff = false;
+    }
     return controller_.takeoff(control_config_["takeoff-alt"].as<double>());
 }
 
 InnerLoopSetpoint StateMachine::runLand()
 {
-    if (controller_.landing_detected())
+    if (checkCommand(ControlCommands::DISARM))
     {
         setControlState(ControlState::DISARMING);
     }
 
-    return controller_.land();
+    land_detector_.detectLanding();
+    if (land_detector_.getLandedState() == LandDetector::LandedState::Landed)
+    {
+        setControlState(ControlState::DISARMING);
+    }
+
+    auto setpoint = controller_.land();
+    land_detector_.setThrust(setpoint.thrust);
+
+    return setpoint;
 }
 
 InnerLoopSetpoint StateMachine::runFlight()
 {
-    if (commands_.front() == ControlCommands::LAND)
+    if (checkCommand(ControlCommands::LAND))
     {
         setControlState(ControlState::LAND);
     }
@@ -260,10 +312,6 @@ InnerLoopSetpoint StateMachine::runFlight()
 InnerLoopSetpoint StateMachine::runArming()
 {
     static bool print_message = true;
-    static std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<double>>
-        arming_timeout;
-    static auto arming_delay =
-        std::chrono::duration<double>(control_config_["arming-delay"].as<double>());
 
     // Print message on first arm attempt
     if (print_message)
@@ -272,28 +320,42 @@ InnerLoopSetpoint StateMachine::runArming()
         print_message = false;
     }
 
-    if (!offboard_control_.is_armed())
+    if (!autopilot_interface_->armed())
     {
-        // Try to arm, if success set arming delay timeout
-        if (offboard_control_.arm())
-        {
-            arming_timeout = std::chrono::system_clock::now() + arming_delay;
-        }
+        autopilot_interface_->arm();
+        std::this_thread::sleep_for(500ms);
     }
     else
     {
-        if (std::chrono::system_clock::now() > arming_timeout)
+        // ARMED!
+        // arm command pushed if soft are desired
+        if (soft_arm_)
         {
-            std::cout << "Pixhawk armed\n";
-            setControlState(ControlState::TAKEOFF);
-            print_message = true;  // print on next arm}
+            setControlState(ControlState::SOFT_ARM);
+            soft_arm_ = false;
         }
-
-        // During the arming delay, return 12% thrust
-        return InnerLoopSetpoint{{1, 0, 0, 0}, 0.12, 0, 0, 0};
+        else
+        {
+            setControlState(ControlState::TAKEOFF);
+        }
+        print_message = true;  // print message on next disarm
     }
 
     // If arming has not occured return zero thrust
+    return InnerLoopSetpoint::zero();
+}
+
+InnerLoopSetpoint StateMachine::runSoftArm()
+{
+    if (checkCommand(ControlCommands::TAKEOFF))
+    {
+        setControlState(ControlState::TAKEOFF);
+    }
+    if (checkCommand(ControlCommands::DISARM))
+    {
+        setControlState(ControlState::DISARMING);
+    }
+
     return InnerLoopSetpoint::zero();
 }
 
@@ -307,14 +369,14 @@ InnerLoopSetpoint StateMachine::runDisarming()
         print_message = false;
     }
 
-    if (offboard_control_.is_armed())
+    if (autopilot_interface_->armed())
     {
-        offboard_control_.disarm();
+        autopilot_interface_->disarm();
+        std::this_thread::sleep_for(500ms);
     }
     else
     {
         setControlState(ControlState::STANDBY);
-        std::cout << "Pixhawk disarmed\n";
         print_message = true;  // print message on next disarm
     }
 
@@ -335,6 +397,9 @@ void StateMachine::setControlState(const ControlState new_control_state)
         case ControlState::ARMING:
             std::cout << "ARMING";
             break;
+        case ControlState::SOFT_ARM:
+            std::cout << "SOFT ARMING";
+            break;
         case ControlState::DISARMING:
             std::cout << "DISARMING";
             break;
@@ -342,6 +407,7 @@ void StateMachine::setControlState(const ControlState new_control_state)
             std::cout << "TAKEOFF";
             break;
         case ControlState::LAND:
+            land_detector_.setAir();
             std::cout << "LAND";
             break;
         case ControlState::STANDBY:
@@ -361,5 +427,13 @@ void StateMachine::setControlState(const ControlState new_control_state)
     std::cout << std::endl;
     current_control_state_ = new_control_state;
 }
+
+float StateMachine::armedThrust(float thrust)
+{
+    constexpr float min_thrust = 0.12;
+    return std::max(thrust, min_thrust);
 }
-}
+
+}  // namespace control
+}  // namespace gnc
+}  // namespace maav

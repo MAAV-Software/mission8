@@ -40,6 +40,6 @@ void Pid::reset()
     _eint = 0;
     _eprev = 0;
 }
-}
-}
-}
+}  // namespace control
+}  // namespace gnc
+}  // namespace maav

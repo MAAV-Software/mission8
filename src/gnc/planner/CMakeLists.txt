@@ -6,8 +6,11 @@ add_library(maav-path-planner SHARED
 
 target_include_directories(maav-path-planner PUBLIC
     ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
-    ${Octomap_INCLUDE_DIRS}
+)
+
+target_include_directories(maav-path-planner SYSTEM PUBLIC
+${EIGEN3_INCLUDE_DIR}
+${Octomap_INCLUDE_DIRS}
 )
 
 target_link_libraries(maav-path-planner

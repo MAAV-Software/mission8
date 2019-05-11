@@ -70,6 +70,7 @@ add_library(maav-control SHARED
     control/Pid.cpp
     control/Controller.cpp
     control/StateMachine.cpp
+    control/LandDetector.cpp
 )
 
 target_include_directories(maav-control PUBLIC
@@ -155,6 +156,9 @@ target_include_directories(maav-guidance PUBLIC
     ${SW_INCLUDE_DIR}
     ${EIGEN3_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
+)
+
+target_include_directories(maav-guidance SYSTEM PUBLIC
     ${Octomap_INCLUDE_DIRS}
 )
 

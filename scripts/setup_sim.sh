@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Install script install gazebo and px4 firmware for simulation use.
 
 SOFTWARE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"

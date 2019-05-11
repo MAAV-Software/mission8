@@ -20,6 +20,10 @@ class control_commands_t
 
         int8_t     gains;
 
+        int8_t     disarm;
+
+        int8_t     arm;
+
         int64_t    utime;
 
     public:
@@ -135,6 +139,12 @@ int control_commands_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxle
     thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->gains, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
+    thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->disarm, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->arm, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
     thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
@@ -155,6 +165,12 @@ int control_commands_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t
     thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->gains, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
+    thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->disarm, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->arm, 1);
+    if(thislen < 0) return thislen; else pos += thislen;
+
     thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
     if(thislen < 0) return thislen; else pos += thislen;
 
@@ -167,13 +183,15 @@ uint32_t control_commands_t::_getEncodedSizeNoHash() const
     enc_size += __boolean_encoded_array_size(NULL, 1);
     enc_size += __boolean_encoded_array_size(NULL, 1);
     enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t control_commands_t::_computeHash(const __zcm_hash_ptr*)
 {
-    uint64_t hash = (uint64_t)0xf869effc7c60e24cLL;
+    uint64_t hash = (uint64_t)0xe631ae17694e5f1fLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

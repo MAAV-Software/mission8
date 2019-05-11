@@ -5,8 +5,8 @@ include_directories(maav-mavlink
 )
 
 add_library(maav-mavlink SHARED
-    CommunicationPort.cpp
-    OffboardControl.cpp
+    SerialPort.cpp
+    AutopilotInterface.cpp
 )
 
 target_link_libraries(maav-mavlink
