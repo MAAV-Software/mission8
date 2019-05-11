@@ -35,6 +35,7 @@ takeoff-alt: 1              #meters
 ff-thrust: 0                
 arming-delay: 1             #seconds
 land-detect-dur: 0.5
+landing-speed: 0.5
 
 
 # ZCM publish url
@@ -44,8 +45,8 @@ command-zcm-url: "ipc"
 # command-zcm-url: "udpm://239.255.76.67:7667?ttl=1"
 
 # Landing detector
-z_vel_max: 0.5
+z_vel_max: 0.2
 xy_vel_max: 1.5
 rot_max: 20
 throttle_min: 0.12
-throttle_hover: 0.5
+throttle_hover: 0.4

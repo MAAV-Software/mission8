@@ -13,6 +13,11 @@
 #include "waypoint_t.hpp"
 
 
+/**
+ * ZCM type for trajectory output from path planner
+ * first waypoint is source, final waypoint is goal
+ *
+ */
 class path_t
 {
     public:

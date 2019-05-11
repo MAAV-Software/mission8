@@ -17,15 +17,15 @@
 #include <common/utils/GetOpt.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 
+using YAML::Node;
 using maav::gnc::Waypoint;
 using std::cin;
 using std::cout;
 using std::string;
 using std::stringstream;
+using std::this_thread::sleep_for;
 using std::to_string;
 using std::vector;
-using std::this_thread::sleep_for;
-using YAML::Node;
 using namespace std::chrono;
 
 path_t create_test_path(const YAML::Node& path_file);

@@ -56,7 +56,8 @@ Controller::Controller(const YAML::Node& control_config)
     : control_config_(control_config),
       current_state(0),
       current_target({Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0.}),
-      zcm("ipc")
+      zcm("ipc"),
+      landing_speed_(control_config["landing-speed"].as<double>())
 {
     set_control_params(LoadParametersFromYAML(control_config));
     zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
@@ -261,14 +262,24 @@ InnerLoopSetpoint Controller::takeoff(const double takeoff_alt)
 
 InnerLoopSetpoint Controller::land()
 {
-    if (current_state.position().z() < -0.6)
+    using namespace std::chrono;
+
+    if (lt_dt_ == seconds(0))
     {
-        current_target.position.z() = -0.5;
+        lt_last_time_ = std::chrono::system_clock::now();
     }
-    else
+
+    lt_dt_ = duration_cast<duration<double>>(system_clock::now() - lt_last_time_);
+    lt_last_time_ = std::chrono::system_clock::now();
+
+    double dh = landing_speed_ * lt_dt_.count();
+    if (dh > 0.2)
     {
-        current_target.position.z() = -0.15;
+        dh = 0;  // stops bad first try
     }
+
+    current_target.position.z() = current_target.position.z() + dh;  // [+] <-- increasing z is down
+
     return move_to_current_target();
 }
 

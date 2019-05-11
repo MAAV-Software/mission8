@@ -105,6 +105,11 @@ private:
 
     zcm::ZCM zcm;
     pid_error_t pid_error_msg;
+
+    // Landing timer variables
+    std::chrono::duration<double> lt_dt_ = std::chrono::seconds(0);
+    std::chrono::time_point<std::chrono::system_clock> lt_last_time_;
+    const double landing_speed_ = 0.3;
 };
 
 }  // namespace control
