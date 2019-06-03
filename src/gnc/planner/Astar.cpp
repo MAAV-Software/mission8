@@ -81,28 +81,40 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 		point3d n_coord = tree->keyToCoord(n.key());
 		double x = n_coord.x(), y = n_coord.y(), z = n_coord.z();
 
-		for(int k = z - 1; k < z + 2; ++k)
+		// test 8 moves in 2d plane
+		for (int j = y - 1; j < y + 2; ++j) 
 		{
-			for (int j = y - 1; j < y + 2; ++j) 
+			for(int i = x - 1; i < x + 2; ++i) 
 			{
-				for(int i = x - 1; i < x + 2; ++i) 
-				{
-					// Is node the same as parent
-					if(i == x && j == y && k == z) {
-						continue;
-					}
-
-					// Check for collisions on node
-					OcTreeKey currKey;
-					point3d curr_coord(i, j, k);
-					if(tree->coordToKeyChecked(curr_coord, currKey) && 
-						!isCollision(curr_coord, tree.get()))
-					{
-						openNodes.push({currKey, (int) getId(currKey), n.id(), 
-							(curr_coord - start_coord).norm(), 
-							(curr_coord - goal_coord).norm() });
-					}
+				// Is node the same as parent
+				if(i == x && j == y) {
+					continue;
 				}
+
+				// Check for collisions on node
+				OcTreeKey currKey;
+				point3d curr_coord(i, j, z);
+				if(tree->coordToKeyChecked(curr_coord, currKey) && 
+					!isCollision(curr_coord, tree.get()))
+				{
+					openNodes.push({currKey, (int) getId(currKey), n.id(), 
+						(curr_coord - start_coord).norm(), 
+						(curr_coord - goal_coord).norm() });
+				}
+			}
+		}
+
+		// test move up or down
+		for (int k = z - 1; k < z + 2; k += 2)
+		{
+			OcTreeKey currKey;
+			point3d curr_coord(x, y, k);
+			if(tree->coordToKeyChecked(curr_coord, currKey) && 
+				!isCollision(curr_coord, tree.get()))
+			{
+				openNodes.push({currKey, (int) getId(currKey), n.id(), 
+					(curr_coord - start_coord).norm(), 
+					(curr_coord - goal_coord).norm() });
 			}
 		}
 	}
