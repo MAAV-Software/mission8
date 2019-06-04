@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include <cassert>
 #include <iostream>
+#include "common/math/math.hpp"
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Node.hpp"
 
@@ -30,6 +31,7 @@ bool isCollision(const point3d& query, const OcTree* tree)
 	// probability that cell is obstacle is less than 67%
 	//return map.cellOdds(x, y) > 2.0;
 	OcTreeNode* result = tree->search(query);
+	if(!result) { return false; } // TODO: This means it was unknown. Handle later
 	return result->getOccupancy() > 0.67;
 
 }
@@ -90,7 +92,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 				if(i == x && j == y) {
 					continue;
 				}
-
+ 
 				// Check for collisions on node
 				OcTreeKey currKey;
 				point3d curr_coord(i, j, z);
@@ -126,16 +128,28 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 		current_node = visitedNodes[current_node.parent()];
 	}
 	vector<Waypoint> waypoints;
-	std::for_each(node_path.rbegin(), node_path.rend(), [&waypoints, &tree, 
-		&map_origin](auto n) {
-		 // translates to globalFrame
-		auto pos = tree->keyToCoord(n.key());
-		pos += map_origin;
-		// TODO: Calculate the yaw. Don't be lazy
-		waypoints.emplace_back(Eigen::Vector3d(pos.x(), pos.y(), pos.z()), 
-			Eigen::Vector3d(0,0,0), 0);
-	});
-
+	for(size_t i = node_path.size() - 2; i > 0; --i)
+	{
+		auto n = node_path[i];
+		// translates to globalFrame
+		auto tmp_pos = tree->keyToCoord(n.key());
+		tmp_pos += map_origin;
+		Eigen::Vector3d pos = Eigen::Vector3d(tmp_pos.x(), tmp_pos.y(), 
+			tmp_pos.z());
+		if(i == node_path.size() - 2)
+		{
+			// handles first waypoint past the start
+			// TODO: Calculate Rates when controller has implemented it
+			waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), 
+				yaw_between(pos, start.position));
+		}
+		else 
+		{
+			// TODO: Calculate Rates when controller has implemented it
+			waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), 
+				yaw_between(pos, waypoints.back().position));
+		}
+	}
 
 	Path path;
 	path.waypoints = waypoints;

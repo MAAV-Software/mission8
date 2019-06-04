@@ -248,7 +248,7 @@ inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
  * @param end Ending position
  * @return Yaw angle needed to travel from start and end
  */
-inline double yaw_between(Eigen::Vector3d &start, Eigen::Vector3d &end)
+inline double yaw_between(const Eigen::Vector3d &start, const Eigen::Vector3d &end)
 {
     Eigen::Vector3d diff = end - start;
     if (diff(1) == 0)
