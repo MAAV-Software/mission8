@@ -26,14 +26,9 @@ ChannelListItem::ChannelListItem(QString text, QString key, QListWidget* view)
     QListWidgetItem::setText(text);
 }
 
-const QString& ChannelListItem::getKey() const
-{
-    return key_;
-}
+const QString& ChannelListItem::getKey() const { return key_; }
 
-ChannelListWidget::ChannelListWidget(QWidget* parent) : QListWidget(parent)
-{
-}
+ChannelListWidget::ChannelListWidget(QWidget* parent) : QListWidget(parent) {}
 
 void ChannelListWidget::mousePressEvent(QMouseEvent* event)
 {
@@ -70,6 +65,8 @@ ListWindow::ListWindow(std::shared_ptr<DataDict> dict, YAML::Node config, QWidge
     list_->setDragEnabled(true);
 
     addChannels_generated();
+
+    list_->sortItems();
 }
 
 ListWindow::~ListWindow()
