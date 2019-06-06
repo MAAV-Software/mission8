@@ -7,6 +7,8 @@
 
 #include <common/utils/GetOpt.hpp>
 #include "DataDict.hpp"
+#include "FlightInstruments.hpp"
+#include "FlightInstrumentsWindow.hpp"
 #include "LinePlotWindow.h"
 #include "ListWindow.h"
 #include "ZcmLoop.hpp"
@@ -42,10 +44,15 @@ int main(int argc, char *argv[])
     std::shared_ptr<DataDict> dict(new DataDict());
 
     // ZcmLoop runs in another thread and feeds zcm messages into the dictionary
-    ZcmLoop loop(dict);
+    ZcmLoop loop(dict, config);
 
     ListWindow list_window(dict, config);
     list_window.show();
+
+    std::cout << "Here" << std::endl;
+
+    FlightInstrumentsWindow flight_instruments(config);
+    flight_instruments.show();
 
     std::thread zcm_loop = std::thread(&ZcmLoop::run, &loop);
     std::thread dict_loop = std::thread(&DataDict::run, dict);

@@ -46,7 +46,7 @@ default_legends = {
     'vector2_t': ['x', 'y'],
     'vector3_t': ['x', 'y', 'z'],
     'vector4_t': ['w', 'x', 'y', 'z'],
-    'quaternion_t': ['w', 'x', 'y', 'z'],
+    'quaternion_t': ['roll', 'pitch', 'yaw'],
     'matrix_t': ['matrix']
 }
 
@@ -113,7 +113,9 @@ def generate_DataDict(dict):
     datadict_cpp = open(cur_dir + '/DataDict_generated.cpp', 'w')
 
     includes = ["\"DataDict.hpp\"",
-                "\"AbstractData.hpp\"", "\"GaussianData.hpp\""]
+                "\"AbstractData.hpp\"",
+                "\"GaussianData.hpp\"",
+                "\"QuaternionData.hpp\""]
     usings = []
     gen_header(includes, usings, datadict_cpp)
 
@@ -128,13 +130,27 @@ def generate_DataDict(dict):
             print('\tdict[\"' + CHANNEL + '_' + var + '\"]',
                   end='', file=datadict_cpp)
             if not vars[var]['cov_indices']:
-                print(' = std::shared_ptr<AbstractData>(new AbstractData(',
-                      end='', file=datadict_cpp)
+                # Not Gaussian
+                if type == 'quaternion_t':
+                    print(' = std::shared_ptr<QuaternionData>(new QuaternionData(',
+                          end='', file=datadict_cpp)
+                else:
+                    print(' = std::shared_ptr<AbstractData>(new AbstractData(',
+                          end='', file=datadict_cpp)
             else:
-                print(' = std::shared_ptr<GaussianData>(new GaussianData(',
-                      end='', file=datadict_cpp)
-            print(str(type_dimensions[type]) +
-                  ', {', end='', file=datadict_cpp)
+                # Gaussian
+                if type == 'quaternion_t':
+                    print(' = std::shared_ptr<QuaternionData>(new QuaternionData(',
+                          end='', file=datadict_cpp)
+                else:
+                    print(' = std::shared_ptr<GaussianData>(new GaussianData(',
+                          end='', file=datadict_cpp)
+            if type == 'quaternion_t':
+                print(
+                    '{', end='', file=datadict_cpp)
+            else:
+                print(str(type_dimensions[type]) +
+                      ', {', end='', file=datadict_cpp)
             for i in range(len(legend) - 1):
                 print('\"' + legend[i] + '\", ', end='', file=datadict_cpp)
             print('\"' + legend[len(legend) - 1] +
@@ -213,7 +229,7 @@ def generate_ZcmLoop(dict):
             type_name = dict[channel]['vars'][var]['type']
 
             # Disable until we have a proper way to handle these
-            if type_name == 'matrix_t' or type_name == 'quaternion_t':
+            if type_name == 'matrix_t':
                 continue
 
             # Check if we need to convert to a gaussian type

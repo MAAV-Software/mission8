@@ -1,6 +1,7 @@
 #include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -45,10 +46,7 @@ void LinePlotWindow::time_value_init()
     --start_utime;
 }
 
-LinePlotWindow::~LinePlotWindow()
-{
-    delete ui;
-}
+LinePlotWindow::~LinePlotWindow() { delete ui; }
 
 LinePlotWindow::LinePlotWindow(const YAML::Node &config_in, std::shared_ptr<DataDict> dict,
     ListWindow *const list_window, QListWidget *listWidget, QWidget *parent)
@@ -115,9 +113,7 @@ void LinePlotWindow::setup()
  *      REALTIME PLOTTING FUNCTIONS
  *
  */
-void LinePlotWindow::real_time_data_slot()
-{
-}
+void LinePlotWindow::real_time_data_slot() {}
 
 void LinePlotWindow::draw_slot()
 {
@@ -154,10 +150,7 @@ double LinePlotWindow::time_manager(uint64_t msg_time)
     return static_cast<double>(msg_time - start_utime) / 1e6;
 }
 
-double LinePlotWindow::time()
-{
-    return static_cast<double>(max_utime - start_utime) / 1e6;
-}
+double LinePlotWindow::time() { return static_cast<double>(max_utime - start_utime) / 1e6; }
 void LinePlotWindow::check_value_range(double value)
 {
     if (value < min_value)
@@ -201,10 +194,7 @@ void LinePlotWindow::keyPressEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
-void LinePlotWindow::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-}
+void LinePlotWindow::dragEnterEvent(QDragEnterEvent *event) { event->acceptProposedAction(); }
 
 void LinePlotWindow::dropEvent(QDropEvent *event)
 {
@@ -214,7 +204,10 @@ void LinePlotWindow::dropEvent(QDropEvent *event)
     std::string type = mimeData.substr(colon_index + 1);
     std::cout << "Key: " << key << std::endl;
     std::cout << "Type: " << type << std::endl;
-    if (type == "vector1_t" || type == "vector2_t" || type == "vector3_t" || type == "vector4_t")
+    std::set<std::string> valid_types = {
+        "vector1_t", "vector2_t", "vector3_t", "vector4_t", "quaternion_t"};
+
+    if (valid_types.count(type))
     {
         if (dict_->dict[key]->createLinePlots(custom_plot_))
         {

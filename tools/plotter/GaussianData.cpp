@@ -33,7 +33,23 @@ bool GaussianData::createLinePlots(QCustomPlot* plot)
 
             // Set looks
             QPen graphPen;
-            QColor color(rand() % 245 + 10, rand() % 245 + 10, rand() % 245 + 10);
+            int cutoff = 50;
+            QColor color(QColor(rand() % (255 - cutoff) + cutoff, rand() % (255 - cutoff) + cutoff,
+                rand() % (255 - cutoff) + cutoff));
+            static int discard = 0;
+            discard = (discard + 1) % 3;
+            switch (discard)
+            {
+                case 0:
+                    color.setBlue(0);
+                    break;
+                case 1:
+                    color.setRed(0);
+                    break;
+                case 2:
+                    color.setGreen(0);
+                    break;
+            }
             graphPen.setColor(color);
             graphPen.setWidthF(1);
             new_graph->setPen(graphPen);

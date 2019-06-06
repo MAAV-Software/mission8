@@ -10,12 +10,16 @@ struct state_t
 
     matrix_t covariance;
 
-    // State variables
-    quaternion_t attitude;
-    // LEGEND: [pos_x, pos_y, pos_z]
-    vector3_t position;
-    // LEGEND: [vel_x, vel_y, vel_z]
-    vector3_t velocity;
+	// State variables
+	// LEGEND: [ϕ, θ, ψ]
+	// COVARIANCE: [3, 0]
+	quaternion_t attitude;
+	// LEGEND: [pos_x, pos_y, pos_z]
+	// COVARIANCE: [3, 3]
+	vector3_t position;
+	// LEGEND: [vel_x, vel_y, vel_z]
+	// COVARIANCE: [3, 6]
+	vector3_t velocity;
 
     // Control inputs
     // LEGEND: [ω_x, ω_y, ω_z]
@@ -25,7 +29,9 @@ struct state_t
 
     // Biases
     // LEGEND: [gbias_x, gbias_y, gbias_z]
+	// COVARIANCE: [3, 9]
     vector3_t gyro_biases;
+	// COVARIANCE: [3, 12]
     // LEGEND: [abias_x, abias_y, abias_z]
     vector3_t accel_biases;
 

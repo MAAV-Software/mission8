@@ -6,12 +6,13 @@
 #include <atomic>
 #include <memory>
 
+#include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
 
 class ZcmLoop
 {
 public:
-    ZcmLoop(std::shared_ptr<DataDict> dict);
+    ZcmLoop(std::shared_ptr<DataDict> dict, YAML::Node config);
 
     /**
      * @brief Kills the run loop

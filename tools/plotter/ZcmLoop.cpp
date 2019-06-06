@@ -13,16 +13,14 @@
 
 using namespace std::chrono;
 
-ZcmLoop::ZcmLoop(std::shared_ptr<DataDict> dict) : RUNNING{true}, zcm{"ipc"}, dict_(dict)
+ZcmLoop::ZcmLoop(std::shared_ptr<DataDict> dict, YAML::Node config)
+    : RUNNING{true}, zcm{config["zcm-url"].as<std::string>()}, dict_(dict)
 {
     // Initialize the min and max times;
     resetTimes();
 }
 
-ZcmLoop::~ZcmLoop()
-{
-    RUNNING = false;
-}
+ZcmLoop::~ZcmLoop() { RUNNING = false; }
 
 double ZcmLoop::elapsedTime(const double time)
 {

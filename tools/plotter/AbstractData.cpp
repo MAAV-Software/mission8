@@ -29,7 +29,9 @@ bool AbstractData::createLinePlots(QCustomPlot* plot)
 
             // Set looks
             QPen graphPen;
-            graphPen.setColor(QColor(rand() % 245 + 10, rand() % 245 + 10, rand() % 245 + 10));
+            int cutoff = 50;
+            graphPen.setColor(QColor(rand() % (255 - cutoff) + cutoff,
+                rand() % (255 - cutoff) + cutoff, rand() % (255 - cutoff) + cutoff));
             graphPen.setWidthF(1);
             new_graph->setPen(graphPen);
 
@@ -66,13 +68,9 @@ void AbstractData::destroyLinePlots(QCustomPlot* plot)
     }
 }
 
-void AbstractData::createScatterPlots(QCustomPlot* plot)
-{
-}
+void AbstractData::createScatterPlots(QCustomPlot* plot) {}
 
-void AbstractData::createParametricPlots(QCustomPlot* plot)
-{
-}
+void AbstractData::createParametricPlots(QCustomPlot* plot) {}
 
 void AbstractData::addData(std::vector<double>&& data)
 {

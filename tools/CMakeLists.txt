@@ -1,5 +1,8 @@
-if (BUILD_PLOTTER AND BUILD_VISUALIZER)
+if (BUILD_PLOTTER)
     add_subdirectory(plotter)
+endif()
+
+if(BUILD_VISUALIZER)
     add_subdirectory(localization_viz)
 endif()
 

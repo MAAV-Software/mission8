@@ -38,6 +38,9 @@ set(PLOTTER_SRC
     ZcmConversion.cpp
     ZcmLoop.cpp
     ZcmLoop_generated.cpp
+    FlightInstruments.cpp
+    FlightInstrumentsWindow.cpp
+    QuaternionData.cpp
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
