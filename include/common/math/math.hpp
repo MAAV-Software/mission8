@@ -243,7 +243,8 @@ inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
 }
 
 /**
- * @brief Gives the yaw necessary to travel from start to end
+ * @brief Gives the resulting heading to travel from start to end
+ * @detail north is 0, East is 90, South is 180, West is 270
  * @param start Starting position
  * @param end Ending position
  * @return Yaw angle needed to travel from start and end
@@ -251,29 +252,11 @@ inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
 inline double yaw_between(const Eigen::Vector3d &start, const Eigen::Vector3d &end)
 {
     Eigen::Vector3d diff = end - start;
-    if (diff(1) == 0)
-    {
-        if (diff(0) < 0)
-            return maav::PI;
-        else
-            return 0.0;
-    }
-    else if (diff(0) == 0)
-    {
-        if (diff(1) < 0)
-            return -1 * maav::PI / 2;
-        else
-            return maav::PI / 2;
-    }
+    
+    double heading = atan2(diff(1), diff(0));
+    heading = -1 * heading + maav::PI / 2; // transform to yaw heading
 
-    double tmp = atan(diff(1) / diff(0));
-
-    if (diff(0) < 0 && diff(1) > 0)
-        return maav::PI + tmp;
-    else if (diff(0) < 0 && diff(1) < 0)
-        return (-1 * maav::PI) + tmp;
-
-    return tmp;
+    return (heading < 0) ? (heading + 2 * maav::PI) : heading;
 }
 
 /**
