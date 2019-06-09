@@ -141,13 +141,13 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 			// handles first waypoint past the start
 			// TODO: Calculate Rates when controller has implemented it
 			waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), 
-				yaw_between(pos, start.position));
+				rad_to_deg(yaw_between(pos, start.position)));
 		}
 		else 
 		{
 			// TODO: Calculate Rates when controller has implemented it
 			waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), 
-				yaw_between(pos, waypoints.back().position));
+				rad_to_deg(yaw_between(pos, waypoints.back().position)));
 		}
 	}
 
