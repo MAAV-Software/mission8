@@ -23,7 +23,6 @@
 #include <common/messages/heartbeat_t.hpp>
 #include <common/messages/octomap_t.hpp>
 #include <common/utils/GetOpt.hpp>
-#include <gnc/OccupancyMap.hpp>
 #include <vision/core/utilities.hpp>
 
 using std::atomic;
@@ -42,7 +41,6 @@ using std::chrono::milliseconds;
 using std::thread;
 using std::string;
 
-using maav::gnc::OccupancyMap;
 using maav::vision::octomapToZcmType;
 using namespace std::chrono;
 
@@ -75,21 +73,18 @@ void runHeartbeat(zcm::ZCM* zcm)
 // Sends saved map over zcm every 2 seconds
 void publishMap(zcm::ZCM* zcm, const string &filename)
 {
-    AbstractOcTree* tree = AbstractOcTree::read(filename);
-    OcTree* octree = dynamic_cast<OcTree*>(tree);
+    shared_ptr<const octomap::OcTree> octree((octomap::OcTree*)octomap::AbstractOcTree::read(filename));
     octomap_t message;
-    message.utime = last_update_;
     octomapToZcmType(octree, &message);
     while (!KILL)
     {
         milliseconds utime = duration_cast< milliseconds >(
             system_clock::now().time_since_epoch()
         );
-        message.utime = utime;
+        message.utime = utime.count();
         zcm->publish(maav::OCCUPANCY_MAP_CHANNEL, &message);
         std::this_thread::sleep_for(milliseconds(2000));
     }
-    delete octree;
 }
 
 int main(int argc, char** argv)
@@ -102,7 +97,7 @@ int main(int argc, char** argv)
 
     if(argc != 2)
     {
-        std::cerr << "USAGE: publish-load-map <filepath>"
+        std::cerr << "USAGE: publish-load-map <filepath>\n";
         return -1;
     }
 
@@ -119,13 +114,12 @@ int main(int argc, char** argv)
     string filename = argv[1];
 
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
-    YAML::Node forward_camera = camera_config["forward"];
     // Start zcm, it handler processes every new point cloud
     zcm::ZCM zcm {"ipc"};
     zcm.start();
     // start threads
     thread heartbeat(runHeartbeat, &zcm);
-    thread publishmap(publishMap, &zcm, filename)
+    thread publishmap(publishMap, &zcm, filename);
     // Wait until the kill signal is received
     unique_lock<mutex> lck(mtx);
     while (!KILL)
