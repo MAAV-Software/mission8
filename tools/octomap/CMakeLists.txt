@@ -25,7 +25,18 @@ add_definitions(${PCL_DEFINITIONS})
 
 add_executable(maav-save-octomap save-octomap.cpp)
 
+add_executable(publish-saved-octomap publish-saved-octomap.cpp)
+
 target_link_libraries(maav-save-octomap
+    maav-utils
+    maav-msg
+    VisionUtils
+    ${ZCM_LIBRARIES}
+    ${YAMLCPP_LIBRARY}
+    ${Octomap_LIBRARIES}
+)
+
+target_link_libraries(publish-saved-octomap
     maav-utils
     maav-msg
     VisionUtils
