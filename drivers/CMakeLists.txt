@@ -89,6 +89,15 @@ target_link_libraries(maav-control-input
         maav-msg
 )
 
+add_executable(maav-goal-input maav-goal-input.cpp)
+
+target_link_libraries(maav-goal-input
+        maav-measurements
+        ${ZCM_LIBRARIES}
+        maav-utils
+        maav-msg
+)
+
 endif()
 
 link_directories(${PCL_LIBRARY_DIRS})
