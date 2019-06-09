@@ -106,17 +106,15 @@ int main(int argc, char** argv)
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
-        std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
         gopt.printHelp();
         return 1;
     }
 
     string filename = argv[1];
 
-    YAML::Node config = YAML::LoadFile(gopt.getString("config"));
+
     // Start zcm, it handler processes every new point cloud
     zcm::ZCM zcm {"ipc"};
-    zcm.start();
     // start threads
     thread heartbeat(runHeartbeat, &zcm);
     thread publishmap(publishMap, &zcm, filename);
@@ -126,7 +124,6 @@ int main(int argc, char** argv)
     {
         cond_var.wait(lck);
     }
-    zcm.stop();
     heartbeat.join();
     publishmap.join();
 }
