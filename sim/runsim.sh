@@ -17,7 +17,7 @@ export PX4_HOME_ALT=269
 
 echo "Model Path: $GAZEBO_MODEL_PATH"
 echo "Plugin Path: $GAZEBO_PLUGIN_PATH"
-echo "Resource Path $GAZEBO_RESOURCE_PATH"	
+echo "Resource Path $GAZEBO_RESOURCE_PATH"
 
 # Kill any remaining processes
 pkill -x gazebo || true
@@ -25,7 +25,7 @@ pkill -x px4 || true
 pkill -x gzserver || true
 pkill -x gzclient || true
 
-gzserver --verbose ${WORLD_DIR}/maav-test.world &
+gzserver --verbose ${WORLD_DIR}/astar-building.world &
 SIM_PID=`echo $!`
 
 if [[ -n "$HEADLESS" ]]; then
