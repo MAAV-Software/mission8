@@ -6,11 +6,13 @@
 #include <Eigen/Dense>
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include "common/math/math.hpp"
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Node.hpp"
 
 using std::vector;
+using std::shared_ptr;
 using std::priority_queue;
 using std::unordered_map;
 using std::cerr;
@@ -36,6 +38,11 @@ bool isCollision(const point3d& query, const OcTree* tree)
 
 }
 
+bool operator>(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
+{
+    return *lhs > *rhs;
+}
+
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {
     // TODO: GET MAP ORIGIN FROM DZ
@@ -55,32 +62,34 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 
     // construct priority queue on nodes and add start node
     // top element has least cost
-    priority_queue<Node, vector<Node>, std::greater<Node> > openNodes;
-    openNodes.push({start_key, start_id, -1, 0,
-        (goal_coord - start_coord).norm()});
+    priority_queue<shared_ptr<Node>, vector<shared_ptr<Node> >,
+        std::greater<shared_ptr<Node> > > openNodes;
+    openNodes.emplace(new Node(start_key, start_id, -1, 0,
+        (goal_coord - start_coord).norm()));
 
     // keep track of visited nodes based on their id
-    unordered_map<int, Node> visitedNodes;
+    unordered_map<int, shared_ptr<Node> > visitedNodes;
     while (!openNodes.empty())
     {
         auto n = openNodes.top();
         openNodes.pop();
 
         // check if we've already visited the node
-        if (visitedNodes.find(n.id()) != visitedNodes.end())
+        if (visitedNodes.find(n->id()) != visitedNodes.end())
         {
             continue;
         }
 
-        visitedNodes[n.id()] = n;
+        visitedNodes[n->id()] = n;
 
         // check if node is the goal node
-        if (n.id() == goal_id)
+        if (n->id() == goal_id)
         {
+            std::cout << "Found Goal" << std::endl;
             break;
         }
 
-        point3d n_coord = tree->keyToCoord(n.key());
+        point3d n_coord = tree->keyToCoord(n->key());
         double x = n_coord.x(), y = n_coord.y(), z = n_coord.z();
 
         // test 8 moves in 2d plane
@@ -99,9 +108,17 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                 if(tree->coordToKeyChecked(curr_coord, currKey) &&
                     !isCollision(curr_coord, tree.get()))
                 {
-                    openNodes.push({currKey, (int) getId(currKey), n.id(),
+                    shared_ptr<Node> new_ptr = shared_ptr<Node>(new
+                        Node(currKey, (int) getId(currKey), n->id(),
                         (curr_coord - start_coord).norm(),
-                        (curr_coord - goal_coord).norm() });
+                        (curr_coord - goal_coord).norm()));
+                    if ((int) getId(currKey) == goal_id)
+                    {
+                        visitedNodes[goal_id] = new_ptr;
+                        break;
+                    }
+
+                    openNodes.push(new_ptr);
                 }
             }
         }
@@ -122,19 +139,25 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         }
         */
     }
+    std::cout << "Computed path." << std::endl;
 
-    vector<Node> node_path;
-    auto current_node = visitedNodes[goal_id];
-    while(current_node.parent() != -1){
-        node_path.emplace_back(current_node);
-        current_node = visitedNodes[current_node.parent()];
+    vector<shared_ptr<Node> > node_path;
+    shared_ptr<Node> current_node = visitedNodes[goal_id];
+    std::cout << "Got current_node from goal id" << std::endl;
+    while(current_node->parent() != -1){
+        node_path.push_back(current_node);
+        std::cout << "Current node pushed back" << std::endl;
+        std::cout << current_node->parent() << std::endl;
+        current_node = visitedNodes[current_node->parent()];
+        std::cout << "Got current_node from parent." << std::endl;
     }
+    std::cout << "Path is in list now." << std::endl;
     vector<Waypoint> waypoints;
     for(size_t i = node_path.size() - 2; i > 0; --i)
     {
-        auto n = node_path[i];
+        shared_ptr<Node> n = node_path[i];
         // translates to globalFrame
-        auto tmp_pos = tree->keyToCoord(n.key());
+        auto tmp_pos = tree->keyToCoord(n->key());
         tmp_pos += map_origin;
         Eigen::Vector3d pos = Eigen::Vector3d(tmp_pos.x(), tmp_pos.y(),
             tmp_pos.z());
@@ -152,6 +175,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                 rad_to_deg(yaw_between(pos, waypoints.back().position)));
         }
     }
+    std::cout << "Path object created." << std::endl;
 
     Path path;
     path.waypoints = waypoints;

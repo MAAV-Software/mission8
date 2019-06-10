@@ -21,6 +21,7 @@
 #include <common/utils/ZCMHandler.hpp>
 #include <condition_variable>
 #include <gnc/Planner.hpp>
+#include <gnc/planner/Path.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 #include <gnc/planner/Path.hpp>
 #include <gnc/State.hpp>
@@ -48,7 +49,7 @@ using maav::gnc::State;
 using maav::gnc::ConvertState;
 using maav::gnc::ConvertGroundTruthState;
 using maav::gnc::Waypoint;
-
+using maav::gnc::Path;
 using std::atomic;
 using std::condition_variable;
 using std::mutex;
@@ -279,7 +280,7 @@ void AStarManager::compute(AStarManager* self, bool* running)
         self->planner_.update_state(self->state_handler_->getState());
         self->planner_.update_target(self->goal_handler_->getGoal());
         Path p = self->planner_.get_path();
-        planner_.print_path();
+        self->planner_.print_path(p);
         path_t path = maav::gnc::ConvertPath(p);
         self->zcm_->publish(PATH_CHANNEL, &path);
         std::cout << "Published path" << std::endl;
