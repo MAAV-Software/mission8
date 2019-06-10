@@ -278,7 +278,9 @@ void AStarManager::compute(AStarManager* self, bool* running)
         self->planner_.update_map(self->map_handler_->getMap());
         self->planner_.update_state(self->state_handler_->getState());
         self->planner_.update_target(self->goal_handler_->getGoal());
-        path_t path = maav::gnc::ConvertPath(self->planner_.get_path());
+        Path p = self->planner_.get_path();
+        planner_.print_path();
+        path_t path = maav::gnc::ConvertPath(p);
         self->zcm_->publish(PATH_CHANNEL, &path);
         std::cout << "Published path" << std::endl;
         lck.lock();
