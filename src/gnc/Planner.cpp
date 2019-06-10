@@ -1,4 +1,5 @@
 #include "gnc/Planner.hpp"
+#include <iostream>
 
 namespace maav
 {
@@ -10,6 +11,16 @@ Planner::Planner(const std::string& config_path)
 Path Planner::get_path() {
 	if(!tree_) { return Path(); }
 	return astar(state_, target_, tree_); 
+}
+
+void Planner::print_path(Path& path)
+{
+	std::cout << "{ ";
+	for(auto& w: path.waypoints)
+	{
+		std::cout << w.position << ", ";
+	}
+	std::cout << " }" << std::endl;
 }
 
 void Planner::update_target(const Waypoint& target) { target_ = target; }

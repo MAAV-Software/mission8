@@ -19,6 +19,8 @@ public:
     // returns the path
     Path get_path();
 
+    void print_path(Path& path);
+
     void update_target(const Waypoint& target);
 
     void update_state(const State& state);
