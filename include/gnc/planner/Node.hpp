@@ -58,6 +58,8 @@ public:
 	 * @brief Returns node id (liner index into occupancy map)
 	 */
 	int id() const { return id_; }
+
+	void setId(int id) { id_ = id; }
 	
 	octomap::OcTreeKey key() const { return key_; }
 

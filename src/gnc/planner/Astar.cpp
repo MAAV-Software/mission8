@@ -69,6 +69,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 
     // keep track of visited nodes based on their id
     unordered_map<int, shared_ptr<Node> > visitedNodes;
+    // TODO: Add faults
+    bool foundGoal = false;
     while (!openNodes.empty())
     {
         auto n = openNodes.top();
@@ -85,7 +87,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // check if node is the goal node
         if (n->id() == goal_id)
         {
-            std::cout << "Found Goal" << std::endl;
+        	foundGoal = true;
+            std::cout << "Found goal" << std::endl;
             break;
         }
 
@@ -105,6 +108,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                 // Check for collisions on node
                 OcTreeKey currKey;
                 point3d curr_coord(i, j, z);
+
                 if(tree->coordToKeyChecked(curr_coord, currKey) &&
                     !isCollision(curr_coord, tree.get()))
                 {
@@ -112,9 +116,13 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                         Node(currKey, (int) getId(currKey), n->id(),
                         (curr_coord - start_coord).norm(),
                         (curr_coord - goal_coord).norm()));
-                    if ((int) getId(currKey) == goal_id)
+                    // check for the coordinate in the correct tolerance to be 
+                	// considered finding our goal
+                    if ((curr_coord - goal_coord).norm() < 0.1)
                     {
+                    	new_ptr.setId(goal_id);
                         visitedNodes[goal_id] = new_ptr;
+                        foundGoal = true;
                         break;
                     }
 
