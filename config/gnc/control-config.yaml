@@ -1,10 +1,10 @@
 # all PID gains are in the format [kp, ki, kd]
 pid-gains:
   pos-ctrl:
-    x: [0.2, 0, 0.05]
-    y: [0.2, 0, 0.05]
+    x: [0.2, 0.000, 0.05]
+    y: [0.2, 0.000, 0.05]
     z: [1.5, 0.0002, 0.3]
-    yaw: [1, 0, 0]
+    yaw: [0.05, 0, 0.05]
   rate-ctrl:
     x: [0, 0, 0]
     y: [0, 0, 0]
@@ -17,24 +17,25 @@ limits:
     x: [1, -1]
     y: [1, -1]
     z: [0.5, -0.5]
-    yaw: [1, -1]
+    yaw: [0.15, -0.15]
   accel: # limits are m/s^2
     x: [5, -5]
     y: [5, -5]
     z: [1, -1]
   angle: # limits are in degrees
-    roll:  [20, -20]
-    pitch: [20, -20]
+    roll:  [5, -5]
+    pitch: [5, -5]
   thrust: [1, 0]
   
 # vehicle params that won't be tuned
-tol: 0.1                    # convergence tolerance (norm of [x, y, z, yaw])
+tol: 0.25                    # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
 sim-state: true             #true - state comes from sim, false - state comes from kalman filter
-takeoff-alt: 1              #meters
+takeoff-alt: 2              #meters
 ff-thrust: 0                
 arming-delay: 1             #seconds
 land-detect-dur: 0.5
+takeoff-speed: 0.5
 landing-speed: 0.5
 
 

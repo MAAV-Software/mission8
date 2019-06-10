@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 
+#include <common/math/angle_functions.hpp>
 #include <common/messages/MsgChannels.hpp>
 #include <gnc/Constants.hpp>
 #include <gnc/control/Controller.hpp>
@@ -52,11 +53,14 @@ static double get_heading(const State& state)
     return atan2((q1 * q2) + (q0 * q3), 0.5 - (q2 * q2) - (q3 * q3));
 }
 
-Controller::Controller(const YAML::Node& control_config)
+Controller::Controller(const YAML::Node& control_config, float starting_yaw)
     : control_config_(control_config),
       current_state(0),
+      internal_yaw_(starting_yaw),
       current_target({Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0, 0, 0), 0.}),
+      takeoff_alt_setpoint(-control_config["takeoff-alt"].as<double>()),
       zcm("ipc"),
+      takeoff_speed_(control_config["takeoff-speed"].as<double>()),
       landing_speed_(control_config["landing-speed"].as<double>())
 {
     set_control_params(LoadParametersFromYAML(control_config));
@@ -91,29 +95,34 @@ void Controller::set_current_target(const Waypoint& new_target) { current_target
 void Controller::set_control_params(const Controller::Parameters& params)
 {
     veh_params = params;
-    x_position_pid.setGains(params.pos_gains[0][0], params.pos_gains[0][1], params.pos_gains[0][2]);
-    y_position_pid.setGains(params.pos_gains[1][0], params.pos_gains[1][1], params.pos_gains[1][2]);
-    z_position_pid.setGains(params.pos_gains[2][0], params.pos_gains[2][1], params.pos_gains[2][2]);
-    x_velocity_pid.setGains(
-        params.rate_gains[0][0], params.rate_gains[0][1], params.rate_gains[0][2]);
-    y_velocity_pid.setGains(
-        params.rate_gains[1][0], params.rate_gains[1][1], params.rate_gains[1][2]);
-    z_velocity_pid.setGains(
-        params.rate_gains[2][0], params.rate_gains[2][1], params.rate_gains[2][2]);
-    emz_z_velocity_pid.setGains(
-        params.rate_gains[3][0], params.rate_gains[3][1], params.rate_gains[3][2]);
+    x_position_pid.setGains(params.pos_gains[Parameters::X][Parameters::P],
+        params.pos_gains[Parameters::X][Parameters::I],
+        params.pos_gains[Parameters::X][Parameters::D]);
+    y_position_pid.setGains(params.pos_gains[Parameters::Y][Parameters::P],
+        params.pos_gains[Parameters::Y][Parameters::I],
+        params.pos_gains[Parameters::Y][Parameters::D]);
+    z_position_pid.setGains(params.pos_gains[Parameters::Z][Parameters::P],
+        params.pos_gains[Parameters::Z][Parameters::I],
+        params.pos_gains[Parameters::Z][Parameters::D]);
+
+    x_velocity_pid.setGains(params.rate_gains[Parameters::DX][Parameters::P],
+        params.rate_gains[Parameters::DX][Parameters::I],
+        params.rate_gains[Parameters::DX][Parameters::D]);
+    y_velocity_pid.setGains(params.rate_gains[Parameters::DY][Parameters::P],
+        params.rate_gains[Parameters::DY][Parameters::I],
+        params.rate_gains[Parameters::DY][Parameters::D]);
+    z_velocity_pid.setGains(params.rate_gains[Parameters::DZ][Parameters::P],
+        params.rate_gains[Parameters::DZ][Parameters::I],
+        params.rate_gains[Parameters::DZ][Parameters::D]);
+
+    yaw_velocity_pid.setGains(params.pos_gains[Parameters::DYAW][Parameters::P],
+        params.pos_gains[Parameters::DYAW][Parameters::I],
+        params.pos_gains[Parameters::DYAW][Parameters::D]);
 }
 
 void Controller::set_control_params(const ctrl_params_t& ctrl_params)
 {
-    x_position_pid.setGains(ctrl_params.value[0].p, ctrl_params.value[0].i, ctrl_params.value[0].d);
-    y_position_pid.setGains(ctrl_params.value[1].p, ctrl_params.value[1].i, ctrl_params.value[1].d);
-    z_position_pid.setGains(ctrl_params.value[2].p, ctrl_params.value[2].i, ctrl_params.value[2].d);
-    x_velocity_pid.setGains(ctrl_params.rate[0].p, ctrl_params.rate[0].i, ctrl_params.rate[0].d);
-    y_velocity_pid.setGains(ctrl_params.rate[1].p, ctrl_params.rate[1].i, ctrl_params.rate[1].d);
-    z_velocity_pid.setGains(ctrl_params.rate[2].p, ctrl_params.rate[2].i, ctrl_params.rate[2].d);
-    emz_z_velocity_pid.setGains(
-        ctrl_params.rate[3].p, ctrl_params.rate[3].i, ctrl_params.rate[3].d);
+    set_control_params(convertControlParams(ctrl_params));
 }
 
 /*
@@ -211,15 +220,19 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 
     float roll = static_cast<float>(target_acceleration.y());
     float pitch = -static_cast<float>(target_acceleration.x());
-    float yaw;
+
+    double yaw_error = eecs467::angle_diff(current_target.yaw, current_state.attitude().angleZ());
+
+    // Only rotate yaw if close enough to target OR we have completed enough of the trajectory
     if (position_error.norm() < 1 ||
         (total_distance_to_target != 0 && position_error.norm() / total_distance_to_target < 0.85))
     {
-        yaw = static_cast<float>(current_target.yaw * constants::DEG_TO_RAD + yaw_north);
-    }
-    else
-    {
-        yaw = origin_yaw;
+        double yaw_velocity = current_state.angularVelocity().z();
+        double yaw_rate = yaw_velocity_pid.run(yaw_error, yaw_velocity);
+        yaw_rate = bounded(yaw_rate, veh_params.rate_limits[3]);
+
+        constexpr double dt = 1.0 / 100.0;
+        internal_yaw_ = eecs467::wrap_to_pi(internal_yaw_ + yaw_rate * dt);
     }
 
     roll = bounded(roll, veh_params.angle_limits[0]);
@@ -229,7 +242,7 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 
     Eigen::Quaternionf q_roll(Eigen::AngleAxisf(roll, Eigen::Vector3f::UnitX()));
     Eigen::Quaternionf q_pitch(Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY()));
-    Eigen::Quaternionf q_yaw(Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()));
+    Eigen::Quaternionf q_yaw(Eigen::AngleAxisf(internal_yaw_, Eigen::Vector3f::UnitZ()));
 
     new_setpoint.q = q_roll * q_pitch * q_yaw;
 
@@ -238,15 +251,12 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
         converged_on_waypoint = true;
     }
 
-    pid_error_msg.pos_error[0] = position_error.x();
-    pid_error_msg.pos_error[1] = position_error.y();
-    pid_error_msg.pos_error[2] = position_error.z();
-    pid_error_msg.vel_error[0] = 0;
-    pid_error_msg.vel_error[1] = 0;
-    pid_error_msg.vel_error[2] = 0;
-    pid_error_msg.roll = roll;
-    pid_error_msg.pitch = pitch;
-    pid_error_msg.thrust = new_setpoint.thrust;
+    pid_error_msg.pos_error = convertVector3d(position_error);
+    pid_error_msg.vel_error = convertVector3d({0, 0, 0});
+    pid_error_msg.yaw_error = convertVector1d(yaw_error);
+    pid_error_msg.roll = convertVector1d(roll);
+    pid_error_msg.pitch = convertVector1d(pitch);
+    pid_error_msg.thrust = convertVector1d(new_setpoint.thrust);
     pid_error_msg.utime = current_state.timeUSec();
     zcm.publish(maav::PID_ERROR_CHANNEL, &pid_error_msg);
 
@@ -255,8 +265,28 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 
 InnerLoopSetpoint Controller::takeoff(const double takeoff_alt)
 {
+    using namespace std::chrono;
+
     takeoff_alt_setpoint = -takeoff_alt;  // saved for reference by other methods
-    current_target.position.z() = takeoff_alt_setpoint;
+
+    if (lt_dt_ == seconds(0))
+    {
+        lt_last_time_ = std::chrono::system_clock::now();
+    }
+
+    lt_dt_ = duration_cast<duration<double>>(system_clock::now() - lt_last_time_);
+    lt_last_time_ = std::chrono::system_clock::now();
+
+    double dh = takeoff_speed_ * lt_dt_.count();
+    if (dh > 0.2)
+    {
+        dh = 0.2;  // stops bad first try
+    }
+
+    // If we reach the takeoff altitude, don't keep increasing
+    current_target.position.z() =
+        std::max(current_target.position.z() - dh, takeoff_alt_setpoint);  // <-- decreasing z is up
+
     return move_to_current_target();
 }
 
@@ -278,7 +308,7 @@ InnerLoopSetpoint Controller::land()
         dh = 0;  // stops bad first try
     }
 
-    current_target.position.z() = current_target.position.z() + dh;  // [+] <-- increasing z is down
+    current_target.position.z() = current_target.position.z() + dh;  // <-- increasing z is down
 
     return move_to_current_target();
 }
@@ -297,7 +327,7 @@ InnerLoopSetpoint Controller::ems_land()
 
 bool Controller::at_takeoff_alt()
 {
-    return fabs(takeoff_alt_setpoint - current_state.position()(2)) < convergence_tolerance;
+    return fabs(takeoff_alt_setpoint - current_state.position().z()) < convergence_tolerance;
 }
 
 }  // namespace control

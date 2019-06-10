@@ -1,9 +1,10 @@
 struct pid_error_t
 {
-    double pos_error[3];
-    double vel_error[3];
-    double roll;
-    double pitch;
-    double thrust;
+    vector3_t pos_error;
+    vector3_t vel_error;
+    vector1_t yaw_error;
+    vector1_t roll;
+    vector1_t pitch;
+    vector1_t thrust;
     int64_t utime;
 }

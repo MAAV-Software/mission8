@@ -24,7 +24,7 @@
         </geometry>
         <pose>0 0 0 0 0 1.57</pose>
       </visual>
-      <collision name='collision'>
+      <!-- <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
         <pose frame=''>0 0 0 0 -0 1.57</pose>
@@ -78,7 +78,7 @@
             </bullet>
           </contact>
         </surface>
-      </collision>
+      </collision> -->
       <sensor name="color" type="camera">
         <pose frame="">0 0.03 0.00 0 0 0</pose>
         <camera name="__default__">

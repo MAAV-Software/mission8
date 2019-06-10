@@ -38,8 +38,22 @@ class Controller
 public:
     struct Parameters
     {
+        // Parameter indicies
+        constexpr static size_t P = 0;
+        constexpr static size_t I = 1;
+        constexpr static size_t D = 2;
+
+        constexpr static size_t X = 0;
+        constexpr static size_t Y = 1;
+        constexpr static size_t Z = 2;
+
+        constexpr static size_t DX = 0;
+        constexpr static size_t DY = 1;
+        constexpr static size_t DZ = 2;
+        constexpr static size_t DYAW = 3;
+
         std::array<std::array<double, 3>, 4> pos_gains;         // x, y, z, yaw
-        std::array<std::array<double, 3>, 4> rate_gains;        // x, y, z, ems_z
+        std::array<std::array<double, 3>, 4> rate_gains;        // x, y, z, yaw
         std::array<std::pair<double, double>, 4> rate_limits;   // x, y, z, yaw
         std::array<std::pair<double, double>, 3> accel_limits;  // x, y, z
         std::array<std::pair<double, double>, 2> angle_limits;  // roll, pitch
@@ -50,21 +64,25 @@ public:
         double ff_thrust;
     };
 
-    Controller(const YAML::Node& control_config);
+    Controller(const YAML::Node& control_config, float starting_yaw);
     ~Controller();
+
     void set_path(const path_t& _path);
     void set_current_target(const Waypoint& new_target);
     void add_state(const State& state);
     void add_ems_state(const State& state);
-    maav::mavlink::InnerLoopSetpoint flight();
-    maav::mavlink::InnerLoopSetpoint run_xbox(const XboxController& xbox_controller);
-    void set_control_params(const Parameters&);
-    void set_control_params(const ctrl_params_t& ctrl_params);
+
     maav::mavlink::InnerLoopSetpoint takeoff(const double takeoff_alt);
     maav::mavlink::InnerLoopSetpoint land();
+    maav::mavlink::InnerLoopSetpoint flight();
     maav::mavlink::InnerLoopSetpoint ems_land();
+    maav::mavlink::InnerLoopSetpoint run_xbox(const XboxController& xbox_controller);
+
     bool at_takeoff_alt();
     void set_yaw_north();
+
+    void set_control_params(const Parameters& params);
+    void set_control_params(const ctrl_params_t& ctrl_params);
 
 private:
     maav::mavlink::InnerLoopSetpoint move_to_current_target();
@@ -77,6 +95,7 @@ private:
     double total_distance_to_target;
     float origin_yaw;
     float yaw_north;
+    float internal_yaw_;
 
     path_t path;
     int16_t path_counter;
@@ -90,6 +109,7 @@ private:
     control::Pid y_velocity_pid;
     control::Pid z_position_pid;
     control::Pid z_velocity_pid;
+    control::Pid yaw_velocity_pid;
     control::Pid emz_z_velocity_pid;
     Parameters veh_params;
 
@@ -106,9 +126,10 @@ private:
     zcm::ZCM zcm;
     pid_error_t pid_error_msg;
 
-    // Landing timer variables
+    // Takeoff and landing timer variables
     std::chrono::duration<double> lt_dt_ = std::chrono::seconds(0);
     std::chrono::time_point<std::chrono::system_clock> lt_last_time_;
+    const double takeoff_speed_ = 0.3;
     const double landing_speed_ = 0.3;
 };
 

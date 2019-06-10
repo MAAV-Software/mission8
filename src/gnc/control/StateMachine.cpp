@@ -23,7 +23,7 @@ StateMachine::StateMachine(
     : control_config_file_(control_config_file),
       control_config_(YAML::LoadFile(control_config_file_)),
       autopilot_interface_(autopilot_interface),
-      controller_(control_config_),
+      controller_(control_config_, autopilot_interface->initial_position.yaw),
       land_detector_(control_config_),
       current_control_state_(ControlState::STANDBY),
       zcm_(control_config_["zcm-url"].as<std::string>()),

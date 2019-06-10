@@ -14,7 +14,8 @@ zcm_types_channels = [
     ('groundtruth_inertial_t', 'GT_INERTIAL'),
     ('groundtruth_imu_t', 'GT_IMU'),
     ('groundtruth_world_t', 'GT_WORLD'),
-    ('groundtruth_slamdrift_t', 'GT_SLAMDRIFT')
+    ('groundtruth_slamdrift_t', 'GT_SLAMDRIFT'),
+    ('pid_error_t', 'PID_ERROR')
 ]
 
 # CHANGE THIS TO CHANGE THE FREQUENCY OF UPDATES

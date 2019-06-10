@@ -1,7 +1,7 @@
 #include <gnc/utils/ZcmConversion.hpp>
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 using maav::gnc::measurements::GlobalUpdateMeasurement;
 using maav::gnc::measurements::ImuMeasurement;
@@ -175,16 +175,14 @@ Waypoint ConvertWaypoint(const waypoint_t& zcm_waypoint)
     return waypoint;
 }
 
-
 path_t ConvertPath(const Path& path)
 {
     path_t zcm_path;
     zcm_path.utime = path.utime;
     zcm_path.NUM_WAYPOINTS = path.waypoints.size();
-    std::transform(path.waypoints.cbegin(), path.waypoints.cend(), 
-        std::back_inserter(zcm_path.waypoints), [](const Waypoint& elt) {
-            return ConvertWaypoint(elt);
-    });
+    std::transform(path.waypoints.cbegin(), path.waypoints.cend(),
+        std::back_inserter(zcm_path.waypoints),
+        [](const Waypoint& elt) { return ConvertWaypoint(elt); });
     return zcm_path;
 }
 
@@ -192,10 +190,9 @@ Path ConvertPath(const path_t& zcm_path)
 {
     Path path;
     path.utime = zcm_path.utime;
-    std::transform(zcm_path.waypoints.cbegin(), zcm_path.waypoints.cend(), 
-    std::back_inserter(path.waypoints), [](const waypoint_t& elt) {
-        return ConvertWaypoint(elt);
-    });
+    std::transform(zcm_path.waypoints.cbegin(), zcm_path.waypoints.cend(),
+        std::back_inserter(path.waypoints),
+        [](const waypoint_t& elt) { return ConvertWaypoint(elt); });
     return path;
 }
 
@@ -256,5 +253,47 @@ std::shared_ptr<GlobalUpdateMeasurement> convertGlobalUpdate(const global_update
 
     return global_update;
 }
+
+control::Controller::Parameters convertControlParams(const ctrl_params_t& ctrl_params)
+{
+    using Params = control::Controller::Parameters;
+    Params converted_params;
+
+    // Copy position gains
+    converted_params.pos_gains[Params::X][Params::P] = ctrl_params.value[Params::X].p;
+    converted_params.pos_gains[Params::X][Params::I] = ctrl_params.value[Params::X].i;
+    converted_params.pos_gains[Params::X][Params::D] = ctrl_params.value[Params::X].d;
+
+    converted_params.pos_gains[Params::Y][Params::P] = ctrl_params.value[Params::Y].p;
+    converted_params.pos_gains[Params::Y][Params::I] = ctrl_params.value[Params::Y].i;
+    converted_params.pos_gains[Params::Y][Params::D] = ctrl_params.value[Params::Y].d;
+
+    converted_params.pos_gains[Params::Z][Params::P] = ctrl_params.value[Params::Z].p;
+    converted_params.pos_gains[Params::Z][Params::I] = ctrl_params.value[Params::Z].i;
+    converted_params.pos_gains[Params::Z][Params::D] = ctrl_params.value[Params::Z].d;
+
+    // Copy rate gains
+    converted_params.rate_gains[Params::DX][Params::P] = ctrl_params.rate[Params::DX].p;
+    converted_params.rate_gains[Params::DX][Params::I] = ctrl_params.rate[Params::DX].i;
+    converted_params.rate_gains[Params::DX][Params::D] = ctrl_params.rate[Params::DX].d;
+
+    converted_params.rate_gains[Params::DY][Params::P] = ctrl_params.rate[Params::DY].p;
+    converted_params.rate_gains[Params::DY][Params::I] = ctrl_params.rate[Params::DY].i;
+    converted_params.rate_gains[Params::DY][Params::D] = ctrl_params.rate[Params::DY].d;
+
+    converted_params.rate_gains[Params::DZ][Params::P] = ctrl_params.rate[Params::DZ].p;
+    converted_params.rate_gains[Params::DZ][Params::I] = ctrl_params.rate[Params::DZ].i;
+    converted_params.rate_gains[Params::DZ][Params::D] = ctrl_params.rate[Params::DZ].d;
+
+    converted_params.rate_gains[Params::DYAW][Params::P] = ctrl_params.rate[Params::DYAW].p;
+    converted_params.rate_gains[Params::DYAW][Params::I] = ctrl_params.rate[Params::DYAW].i;
+    converted_params.rate_gains[Params::DYAW][Params::D] = ctrl_params.rate[Params::DYAW].d;
+
+    converted_params.angle_limits[0] = {ctrl_params.roll_limits[0], ctrl_params.roll_limits[1]};
+    converted_params.angle_limits[1] = {ctrl_params.pitch_limits[0], ctrl_params.pitch_limits[1]};
+
+    return converted_params;
+}
+
 }  // namespace gnc
 }  // namespace maav

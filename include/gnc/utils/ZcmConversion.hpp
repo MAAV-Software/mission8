@@ -4,11 +4,13 @@
 
 #include <Eigen/Eigen>
 
+#include <common/messages/ctrl_params_t.hpp>
 #include <common/messages/global_update_t.hpp>
 #include <common/messages/groundtruth_inertial_t.hpp>
 #include <common/messages/imu_t.hpp>
 #include <common/messages/lidar_t.hpp>
 #include <common/messages/matrix_t.hpp>
+#include <common/messages/path_t.hpp>
 #include <common/messages/plane_fit_t.hpp>
 #include <common/messages/quaternion_t.hpp>
 #include <common/messages/state_t.hpp>
@@ -17,14 +19,16 @@
 #include <common/messages/vector3_t.hpp>
 #include <common/messages/vector4_t.hpp>
 #include <common/messages/waypoint_t.hpp>
-#include <common/messages/path_t.hpp>
+
 #include <gnc/State.hpp>
+#include <gnc/control/Controller.hpp>
 #include <gnc/measurements/GlobalUpdateMeasurement.hpp>
 #include <gnc/measurements/ImuMeasurement.hpp>
 #include <gnc/measurements/LidarMeasurement.hpp>
 #include <gnc/measurements/PlaneFitMeasurement.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 #include <gnc/planner/Path.hpp>
+
 namespace maav
 {
 namespace gnc
@@ -96,5 +100,8 @@ void convertMatrix(Eigen::MatrixBase<EigenDerived>& mat, const matrix_t& zcm_mat
         }
     }
 }
+
+control::Controller::Parameters convertControlParams(const ctrl_params_t& ctrl_params);
+
 }  // namespace gnc
 }  // namespace maav

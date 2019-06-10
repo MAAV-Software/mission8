@@ -9,20 +9,28 @@
 #ifndef __pid_error_t_hpp__
 #define __pid_error_t_hpp__
 
+#include "vector3_t.hpp"
+#include "vector3_t.hpp"
+#include "vector1_t.hpp"
+#include "vector1_t.hpp"
+#include "vector1_t.hpp"
+#include "vector1_t.hpp"
 
 
 class pid_error_t
 {
     public:
-        double     pos_error[3];
+        vector3_t  pos_error;
 
-        double     vel_error[3];
+        vector3_t  vel_error;
 
-        double     roll;
+        vector1_t  yaw_error;
 
-        double     pitch;
+        vector1_t  roll;
 
-        double     thrust;
+        vector1_t  pitch;
+
+        vector1_t  thrust;
 
         int64_t    utime;
 
@@ -130,19 +138,22 @@ int pid_error_t::_encodeNoHash(void* buf, uint32_t offset, uint32_t maxlen) cons
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->pos_error[0], 3);
+    thislen = this->pos_error._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->vel_error[0], 3);
+    thislen = this->vel_error._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->roll, 1);
+    thislen = this->yaw_error._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->pitch, 1);
+    thislen = this->roll._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->thrust, 1);
+    thislen = this->pitch._encodeNoHash(buf, offset + pos, maxlen - pos);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = this->thrust._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
     thislen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
@@ -156,19 +167,22 @@ int pid_error_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen
     uint32_t pos = 0;
     int thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->pos_error[0], 3);
+    thislen = this->pos_error._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->vel_error[0], 3);
+    thislen = this->vel_error._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->roll, 1);
+    thislen = this->yaw_error._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->pitch, 1);
+    thislen = this->roll._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
-    thislen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->thrust, 1);
+    thislen = this->pitch._decodeNoHash(buf, offset + pos, maxlen - pos);
+    if(thislen < 0) return thislen; else pos += thislen;
+
+    thislen = this->thrust._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(thislen < 0) return thislen; else pos += thislen;
 
     thislen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
@@ -180,18 +194,32 @@ int pid_error_t::_decodeNoHash(const void* buf, uint32_t offset, uint32_t maxlen
 uint32_t pid_error_t::_getEncodedSizeNoHash() const
 {
     uint32_t enc_size = 0;
-    enc_size += __double_encoded_array_size(NULL, 3);
-    enc_size += __double_encoded_array_size(NULL, 3);
-    enc_size += __double_encoded_array_size(NULL, 1);
-    enc_size += __double_encoded_array_size(NULL, 1);
-    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += this->pos_error._getEncodedSizeNoHash();
+    enc_size += this->vel_error._getEncodedSizeNoHash();
+    enc_size += this->yaw_error._getEncodedSizeNoHash();
+    enc_size += this->roll._getEncodedSizeNoHash();
+    enc_size += this->pitch._getEncodedSizeNoHash();
+    enc_size += this->thrust._getEncodedSizeNoHash();
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t pid_error_t::_computeHash(const __zcm_hash_ptr*)
+uint64_t pid_error_t::_computeHash(const __zcm_hash_ptr* p)
 {
-    uint64_t hash = (uint64_t)0x1cc2f8d05dd5266cLL;
+    const __zcm_hash_ptr* fp;
+    for(fp = p; fp != NULL; fp = fp->parent)
+        if(fp->v == pid_error_t::getHash)
+            return 0;
+    const __zcm_hash_ptr cp = { p, (void*)pid_error_t::getHash };
+
+    uint64_t hash = (uint64_t)0xe39fc54d5787c1d7LL +
+         vector3_t::_computeHash(&cp) +
+         vector3_t::_computeHash(&cp) +
+         vector1_t::_computeHash(&cp) +
+         vector1_t::_computeHash(&cp) +
+         vector1_t::_computeHash(&cp) +
+         vector1_t::_computeHash(&cp);
+
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -15,20 +15,28 @@
 #include <common/messages/localization_status_t.hpp>
 #include <common/messages/path_t.hpp>
 #include <common/utils/GetOpt.hpp>
+#include <gnc/Constants.hpp>
 #include <gnc/measurements/Waypoint.hpp>
 
-using YAML::Node;
 using maav::gnc::Waypoint;
 using std::cin;
 using std::cout;
 using std::string;
 using std::stringstream;
-using std::this_thread::sleep_for;
 using std::to_string;
 using std::vector;
+using std::this_thread::sleep_for;
+using YAML::Node;
 using namespace std::chrono;
 
+void printHelp();
+
+path_t create_figure_eight(double a);
+path_t create_circle(double a);
 path_t create_test_path(const YAML::Node& path_file);
+
+constexpr double NUM_LOOPS = 5;
+constexpr double DIAMETER = 5;
 
 int main(int argc, char** argv)
 {
@@ -88,18 +96,18 @@ int main(int argc, char** argv)
             path_file = YAML::LoadFile(gopt.getString("test-path"));
             path = create_test_path(path_file);
             zcm.publish(maav::PATH_CHANNEL, &path);
-            // try
-            // {
-            //     path_file = YAML::LoadFile(gopt.getString("test-path"));
-            //     path = create_test_path(path_file);
-            //     zcm.publish(maav::PATH_CHANNEL, &path);
-            // }
-            // catch (...)
-            // {
-            //     cout << "Path file not found\nProvide command line option \"-p
-            //     <path-to-file>\"\n";
-            //     continue;
-            // }
+        }
+
+        else if (current_command == "fig8")
+        {
+            path_t fig_8_path = create_figure_eight(DIAMETER);
+            zcm.publish(maav::PATH_CHANNEL, &fig_8_path);
+        }
+
+        else if (current_command == "circle")
+        {
+            path_t circle_path = create_circle(DIAMETER);
+            zcm.publish(maav::PATH_CHANNEL, &circle_path);
         }
 
         else if (current_command == "clear")
@@ -157,6 +165,11 @@ int main(int argc, char** argv)
             break;
         }
 
+        else if (current_command == "help")
+        {
+            printHelp();
+        }
+
         else
         {
             try
@@ -170,6 +183,7 @@ int main(int argc, char** argv)
                     ++i;
                 }
                 if (i != 4 || ss >> wpt_in[3]) throw 1;
+                wpt.pose[3] *= maav::gnc::constants::DEG_TO_RAD;
                 path_t wpt_path;
                 wpt_path.NUM_WAYPOINTS = 1;
                 wpt_path.waypoints.push_back(wpt);
@@ -216,6 +230,44 @@ int main(int argc, char** argv)
 //     return path;
 // }
 
+path_t create_circle(double a)
+{
+    double dt = 0.05;
+    path_t path;
+    path.NUM_WAYPOINTS = 0;
+    for (double t = 0; t <= NUM_LOOPS * 2 * M_PI; t += dt)
+    {
+        waypoint_t waypoint;
+        waypoint.pose[0] = a * std::sin(t);
+        waypoint.pose[1] = a * std::cos(t);
+        waypoint.pose[2] = -1;
+        waypoint.pose[3] = 0;
+        path.waypoints.push_back(waypoint);
+        path.NUM_WAYPOINTS++;
+    }
+
+    return path;
+}
+
+path_t create_figure_eight(double a)
+{
+    double dt = 0.05;
+    path_t path;
+    path.NUM_WAYPOINTS = 0;
+    for (double t = 0; t <= NUM_LOOPS * 2 * M_PI; t += dt)
+    {
+        waypoint_t waypoint;
+        waypoint.pose[0] = a * std::sin(t);
+        waypoint.pose[1] = a * std::sin(t) * std::cos(t);
+        waypoint.pose[2] = -1;
+        waypoint.pose[3] = 0;
+        path.waypoints.push_back(waypoint);
+        path.NUM_WAYPOINTS++;
+    }
+
+    return path;
+}
+
 path_t create_test_path(const Node& path_file)
 {
     path_t path;
@@ -237,4 +289,26 @@ path_t create_test_path(const Node& path_file)
     path.NUM_WAYPOINTS = waypoint_count;
 
     return path;
+}
+
+void printHelp()
+{
+    std::cout << std::endl;
+    std::cout << "==============================================================" << std::endl;
+    std::cout << "X Y Z YAW - Moves quad to this position and heading. Yaw is in degrees."
+              << std::endl;
+    std::cout << "help      - This message." << std::endl;
+    std::cout << "quit      - Quits program." << std::endl;
+    std::cout << "takeoff   - Takes off to configured takeoff altitude." << std::endl;
+    std::cout << "land      - Descends and lands wherever the quad is currently." << std::endl;
+    std::cout << "fig8      - Flys in a predefined figure 8 path." << std::endl;
+    std::cout << "circle    - Flys in a predefined circular path." << std::endl;
+    std::cout
+        << "gains     - Uploads the gains from the config file. Gains can be set in mid flight."
+        << std::endl;
+    std::cout << "arm       - Arms the quad, but doesn't take off. Can only be done on the ground"
+              << std::endl;
+    std::cout << "disarm    - Disarms quad. Can only be done when on the ground." << std::endl;
+    std::cout << "==============================================================" << std::endl;
+    std::cout << std::endl;
 }

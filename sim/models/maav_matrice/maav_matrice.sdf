@@ -23,7 +23,7 @@
     <model name="SLAM Camera">
       <include>
         <uri>model://t265</uri>
-        <pose>0.125 0 0.05 3.1415 -0.6 0</pose>
+        <pose>0.155 0 0.05 0 0 0</pose>
       </include>
     </model>
 
@@ -35,7 +35,7 @@
     <model name="Forward Camera">
       <include>
         <uri>model://d435</uri>
-        <pose>0.125 0 0.0 3.1415 0 0</pose>
+        <pose>0.155 0 0.02 0 0.523 0</pose>
       </include>
     </model>
 
@@ -47,7 +47,7 @@
     <model name="Downward Camera">
       <include>
         <uri>model://d435</uri>
-        <pose>0.04 0.08 -0.0125 0 1.57 1.57</pose>
+        <pose>0.12 0 0.005 0 1.57 0</pose>
       </include>
       <plugin name='planefit_plugin' filename='libMaavPlanefitPlugin.so'></plugin>
     </model>
