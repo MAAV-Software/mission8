@@ -71,6 +71,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     unordered_map<int, shared_ptr<Node> > visitedNodes;
     // TODO: Add faults
     bool foundGoal = false;
+    try {
     while (!openNodes.empty())
     {
         auto n = openNodes.top();
@@ -87,18 +88,19 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // check if node is the goal node
         if (n->id() == goal_id)
         {
-        	foundGoal = true;
-            std::cout << "Found goal" << std::endl;
+            foundGoal = true;
+            std::cout << "Found goal" << foundGoal << std::endl;
             break;
         }
 
         point3d n_coord = tree->keyToCoord(n->key());
         double x = n_coord.x(), y = n_coord.y(), z = n_coord.z();
 
+        double tolerance = tree->getResolution() * 3;
         // test 8 moves in 2d plane
-        for (int j = y - 1; j < y + 2; ++j)
+        for (int j = y - tolerance; j < y + 2*tolerance; j += tolerance)
         {
-            for(int i = x - 1; i < x + 2; ++i)
+            for(int i = x - tolerance; i < x + 2*tolerance; i += tolerance)
             {
                 // Is node the same as parent
                 if(i == x && j == y) {
@@ -116,14 +118,15 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                         Node(currKey, (int) getId(currKey), n->id(),
                         (curr_coord - start_coord).norm(),
                         (curr_coord - goal_coord).norm()));
-                    // check for the coordinate in the correct tolerance to be 
-                	// considered finding our goal
-                    if ((curr_coord - goal_coord).norm() < 0.1)
+                    // check for the coordinate in the correct tolerance to be
+                    // considered finding our goal
+                    if ((curr_coord - goal_coord).norm() < tolerance)
                     {
-                    	new_ptr.setId(goal_id);
+                        new_ptr->setId(goal_id);
                         visitedNodes[goal_id] = new_ptr;
+                        std::cout << "found goal" << std::endl;
                         foundGoal = true;
-                        break;
+                        throw 15;
                     }
 
                     openNodes.push(new_ptr);
@@ -146,7 +149,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             }
         }
         */
-    }
+    }}
+    catch(int e) {}
     std::cout << "Computed path." << std::endl;
 
     vector<shared_ptr<Node> > node_path;
@@ -161,7 +165,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     }
     std::cout << "Path is in list now." << std::endl;
     vector<Waypoint> waypoints;
-    for(size_t i = node_path.size() - 2; i > 0; --i)
+    for(int i = node_path.size() - 2; i > 0; --i)
     {
         shared_ptr<Node> n = node_path[i];
         // translates to globalFrame
@@ -169,7 +173,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         tmp_pos += map_origin;
         Eigen::Vector3d pos = Eigen::Vector3d(tmp_pos.x(), tmp_pos.y(),
             tmp_pos.z());
-        if(i == node_path.size() - 2)
+        if(i == (int)node_path.size() - 2)
         {
             // handles first waypoint past the start
             // TODO: Calculate Rates when controller has implemented it
