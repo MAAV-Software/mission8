@@ -40,11 +40,13 @@ using maav::STATE_CHANNEL;
 using maav::PATH_CHANNEL;
 using maav::GOAL_WAYPOINT_CHANNEL;
 using maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL;
+using maav::GT_INERTIAL_CHANNEL;
 using maav::gnc::Planner;
 using maav::vision::zcmTypeToOctomap;
 using maav::vision::zcmTypeToPCLPointCloud;
 using maav::gnc::State;
 using maav::gnc::ConvertState;
+using maav::gnc::ConvertGroundTruthState;
 using maav::gnc::Waypoint;
 
 using std::atomic;
@@ -159,16 +161,23 @@ public:
     void handle(const zcm::ReceiveBuffer*, const std::string&,
         const state_t* message)
     {
+        latest_state_ = ConvertState(*message);
+        handle_impl();
+    }
+    void handle_impl()
+    {
         unique_lock<mutex> lck(mtx_);
         run_ = true;
-        latest_state_ = ConvertState(*message);
         // TODO Use config to set the value of distance before considered to
         // have reached the destination
         // TODO compute the distance from the goal
-        float distance = 5;
         lck.unlock();
-        if (distance < 3)
-            astar_manager_.try_compute();
+    }
+    void handleGTState(const zcm::ReceiveBuffer*, const std::string&,
+        const groundtruth_inertial_t* message)
+    {
+        latest_state_ = ConvertGroundTruthState(*message);
+        handle_impl();
     }
     // Returns the state in a thread safe manner
     State getState()
@@ -237,6 +246,7 @@ private:
 // from the Handler classes
 void AStarManager::compute(AStarManager* self, bool* running)
 {
+    std::cout << "Started compute thread" << std::endl;
     // Used make sure that running is set to false once this is exited
     class FalseRAI
     {
@@ -262,6 +272,7 @@ void AStarManager::compute(AStarManager* self, bool* running)
     // Run at least once, keep running while the goal has been updated
     do
     {
+        std::cout << "About to run astar." << std::endl;
         self->updated_goal_ = false;
         lck.unlock();
         self->planner_.update_map(self->map_handler_->getMap());
@@ -269,8 +280,10 @@ void AStarManager::compute(AStarManager* self, bool* running)
         self->planner_.update_target(self->goal_handler_->getGoal());
         path_t path = maav::gnc::ConvertPath(self->planner_.get_path());
         self->zcm_->publish(PATH_CHANNEL, &path);
+        std::cout << "Published path" << std::endl;
         lck.lock();
     } while (self->updated_goal_ == true);
+    std::cout << "Finished compute thread" << std::endl;
 }
 
 // Keeps track of whether the kill signal has been received
@@ -310,9 +323,12 @@ int main(int argc, char** argv)
     MapHandler map_handler(astar_manager);
     GoalHandler goal_handler(astar_manager);
     PointCloudHandler point_cloud_handler(astar_manager);
+    astar_manager.setHandlers(&goal_handler, &map_handler, &state_handler);
 
     zcm.subscribe(OCCUPANCY_MAP_CHANNEL, &MapHandler::handle, &map_handler);
-    zcm.subscribe(STATE_CHANNEL, &StateHandler::handle, &state_handler);
+    // TODO Use when not testing with sim
+    // zcm.subscribe(STATE_CHANNEL, &StateHandler::handle, &state_handler);
+    zcm.subscribe(GT_INERTIAL_CHANNEL, &StateHandler::handleGTState, &state_handler);
     zcm.subscribe(GOAL_WAYPOINT_CHANNEL, &GoalHandler::handle, &goal_handler);
     zcm.subscribe(FORWARD_CAMERA_POINT_CLOUD_CHANNEL, &PointCloudHandler::handle,
         &point_cloud_handler);
