@@ -62,7 +62,7 @@ public:
         this->updateConnection =
             this->parentSensor->ConnectUpdated(std::bind(&MaavLidarPlugin::OnUpdate, this));
 
-        std::cout << "Lidar plugin loaded!" << std::endl;
+        std::cout << "[Lidar Plugin] loaded!" << std::endl;
     }
 
     void add_noise()

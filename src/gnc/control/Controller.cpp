@@ -12,6 +12,8 @@
 #include <gnc/utils/LoadParameters.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
+#include <sophus/so2.hpp>
+
 using maav::gnc::utils::LoadParametersFromYAML;
 using maav::mavlink::InnerLoopSetpoint;
 using std::cout;
@@ -81,8 +83,6 @@ void Controller::set_path(const path_t& _path)
     path = _path;
     path_counter = 0;
 }
-
-void Controller::set_yaw_north() { yaw_north = get_heading(current_state); }
 
 void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
 
@@ -212,11 +212,18 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     const Eigen::Vector3d& position = current_state.position();
     const Eigen::Vector3d& velocity = current_state.velocity();
 
-    Eigen::Vector3d position_error = target_position - position;
-    Eigen::Vector3d target_acceleration = {x_position_pid.run(position_error.x(), -velocity.x()),
-        y_position_pid.run(position_error.y(), -velocity.y()),
+    const Eigen::Vector3d position_error = target_position - position;
+    const Eigen::Vector2d lateral_error = position_error.topRows<2>();
+    const Eigen::Vector2d lateral_velocity = velocity.topRows<2>();
+
+    const Sophus::SO2d rotation(current_state.attitude().angleZ());
+    const Eigen::Vector2d body_frame_lateral_error = rotation.inverse() * lateral_error;
+    const Eigen::Vector2d body_frame_lateral_velocity = rotation.inverse() * lateral_velocity;
+
+    const Eigen::Vector3d target_acceleration = {
+        x_position_pid.run(body_frame_lateral_error.x(), -body_frame_lateral_velocity.x()),
+        y_position_pid.run(body_frame_lateral_error.y(), -body_frame_lateral_velocity.y()),
         z_position_pid.run(position_error.z(), -velocity.z())};
-    // TODO: add rate limits
 
     float roll = static_cast<float>(target_acceleration.y());
     float pitch = -static_cast<float>(target_acceleration.x());
@@ -244,7 +251,11 @@ mavlink::InnerLoopSetpoint Controller::move_to_current_target()
     Eigen::Quaternionf q_pitch(Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY()));
     Eigen::Quaternionf q_yaw(Eigen::AngleAxisf(internal_yaw_, Eigen::Vector3f::UnitZ()));
 
-    new_setpoint.q = q_roll * q_pitch * q_yaw;
+    new_setpoint.roll = roll;
+    new_setpoint.pitch = pitch;
+    new_setpoint.yaw = internal_yaw_;
+
+    new_setpoint.q = q_yaw * q_pitch * q_roll;
 
     if (position_error.norm() < veh_params.setpoint_tol)
     {

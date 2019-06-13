@@ -7,12 +7,14 @@
 #include <random>
 
 #include <Eigen/Dense>
+#include <sophus/se3.hpp>
 
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/global_update_t.hpp>
 #include <common/messages/visual_odometry_t.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 #include <zcm/zcm-cpp.hpp>
+#include "common.hpp"
 
 using ignition::math::Pose3d;
 using zcm::ZCM;
@@ -28,12 +30,18 @@ public:
     {
         world_ = model->GetWorld();
         model_ = model;
-        link_ = model_->GetLinks()[0];
+        link_ = model_->GetLink("T265::link");
+
+        if (!link_)
+        {
+            std::cout << "[T265 Plugin] No link!" << std::endl;
+        }
 
         name_ = model_->GetName();
 
-        starting_pose_ = link_->WorldPose();
-        starting_pose_inv_ = starting_pose_.Inverse();
+        starting_pose_ = convertPoseToNED(link_->WorldPose());
+        starting_pose_inverse_ = starting_pose_.inverse();
+        last_pose_ = starting_pose_;
 
         last_time_ = world_->SimTime();
 
@@ -43,49 +51,44 @@ public:
         std::cout << "[T265 Plugin] Loaded!" << std::endl;
     }
 
-    void add_noise() {}
+    void add_noise()
+    {
+        // TODO: add noise
+    }
 
     void OnUpdate()
     {
-        auto current_time = world_->SimTime();
+        const auto current_time = world_->SimTime();
         uint64_t usec = current_time.sec * 1000000;
         usec += current_time.nsec / 1000;
-        double dt = (current_time - last_time_).Double();
+        const double dt = (current_time - last_time_).Double();
 
-        bool should_publish = dt >= 1 / frequency;
-
-        if (should_publish)
+        if (dt >= 1.0 / frequency)
         {
             // Get perfect faked pose
-            Pose3d current_pose = link_->WorldPose();
+            const Sophus::SE3d current_sim_pose = convertPoseToNED(link_->WorldPose());
 
-            Pose3d measured_odom = last_pose_.Inverse() * current_pose;
-            Pose3d measured_pose = starting_pose_inv_ * current_pose;
+            // Get global pose relative to start
+            const Sophus::SE3d pose = starting_pose_inverse_ * current_sim_pose;
+            const Eigen::Vector3d position = pose.translation();
+            const Sophus::SO3d attitude = pose.so3();
+
+            // Get visual odometry measurement
+            const Sophus::SE3d measured_odom = last_pose_.inverse() * current_sim_pose;
+            const Eigen::Vector3d odom_translation = measured_odom.translation();
+            const Sophus::SO3d odom_rotation = measured_odom.so3();
 
             // Set times
             visual_odom_msg_.utime = usec;
             global_update_msg_.utime = usec;
 
-            // Convert to NED
             // Convert Visual Odometry
-            visual_odom_msg_.rotation.data[0] = measured_odom.Rot().W();
-            visual_odom_msg_.rotation.data[1] = measured_odom.Rot().Y();
-            visual_odom_msg_.rotation.data[2] = measured_odom.Rot().X();
-            visual_odom_msg_.rotation.data[3] = -measured_odom.Rot().Z();
-
-            visual_odom_msg_.translation.data[0] = measured_odom.Pos().Y();
-            visual_odom_msg_.translation.data[1] = measured_odom.Pos().X();
-            visual_odom_msg_.translation.data[2] = -measured_odom.Pos().Z();
+            visual_odom_msg_.rotation = maav::gnc::convertQuaternion(odom_rotation);
+            visual_odom_msg_.translation = maav::gnc::convertVector3d(odom_translation);
 
             // Convert Global Update
-            global_update_msg_.attitude.data[0] = measured_pose.Rot().W();
-            global_update_msg_.attitude.data[1] = measured_pose.Rot().Y();
-            global_update_msg_.attitude.data[2] = measured_pose.Rot().X();
-            global_update_msg_.attitude.data[3] = -measured_pose.Rot().Z();
-
-            global_update_msg_.position.data[0] = measured_pose.Pos().Y();
-            global_update_msg_.position.data[1] = measured_pose.Pos().X();
-            global_update_msg_.position.data[2] = -measured_pose.Pos().Z();
+            global_update_msg_.attitude = maav::gnc::convertQuaternion(attitude);
+            global_update_msg_.position = maav::gnc::convertVector3d(position);
 
             zcm.publish(maav::SIM_VISUAL_ODOMETRY_CHANNEL, &visual_odom_msg_);
             zcm.publish(maav::SIM_GLOBAL_UPDATE_CHANNEL, &global_update_msg_);
@@ -95,7 +98,7 @@ public:
             zcm.publish(maav::VISUAL_ODOMETRY_CHANNEL, &visual_odom_msg_);
             zcm.publish(maav::GLOBAL_UPDATE_CHANNEL, &global_update_msg_);
 
-            last_pose_ = current_pose;
+            last_pose_ = current_sim_pose;
             last_time_ = current_time;
         }
     }
@@ -106,9 +109,9 @@ private:
     physics::LinkPtr link_;
     std::string name_;
 
-    Pose3d starting_pose_;
-    Pose3d starting_pose_inv_;
-    Pose3d last_pose_;
+    Sophus::SE3d starting_pose_;
+    Sophus::SE3d starting_pose_inverse_;
+    Sophus::SE3d last_pose_;
 
     event::ConnectionPtr updateConnection;
 

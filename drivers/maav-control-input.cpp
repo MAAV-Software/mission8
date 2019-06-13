@@ -200,36 +200,6 @@ int main(int argc, char** argv)
     }
 }
 
-/*
- *	    Test path for testing tests
- *      Reads from yaml file (path can be provided)
- *      Make sure that the waypoints in yaml are named
- *      sequentially with integer values starting at 0
- */
-// path_t create_test_path(const Node& path_file)
-// {
-//     path_t path;
-//     waypoint_t wpt;
-//     int waypoint_count = 0;
-//     string waypoint_key;
-
-//     const Node& path_node = path_file["path"];
-//     for (auto it = path_node.begin(); it != path_file["path"].end(); ++it)
-//     {
-//         waypoint_key = to_string(waypoint_count);
-//         wpt.pose[0] = path_node[waypoint_key][0].as<double>();
-//         wpt.pose[1] = path_node[waypoint_key][1].as<double>();
-//         wpt.pose[2] = path_node[waypoint_key][2].as<double>();
-//         wpt.pose[3] = path_node[waypoint_key][3].as<double>();
-//         path.waypoints.push_back(wpt);
-//         ++waypoint_count;
-//     }
-
-//     path.NUM_WAYPOINTS = waypoint_count;
-
-//     return path;
-// }
-
 path_t create_circle(double a)
 {
     double dt = 0.05;
@@ -237,11 +207,23 @@ path_t create_circle(double a)
     path.NUM_WAYPOINTS = 0;
     for (double t = 0; t <= NUM_LOOPS * 2 * M_PI; t += dt)
     {
+        const double x = a * std::sin(t);
+        const double y = a * std::cos(t);
+
+        const double dx = a * std::cos(t);
+        const double dy = -a * std::sin(t);
+        Eigen::Vector2d velocity{dx, dy};
+        velocity.normalize();
+
+        const double yaw = std::atan2(velocity.y(), velocity.x());
+
+        constexpr double altitude = -1;
+
         waypoint_t waypoint;
-        waypoint.pose[0] = a * std::sin(t);
-        waypoint.pose[1] = a * std::cos(t);
-        waypoint.pose[2] = -1;
-        waypoint.pose[3] = 0;
+        waypoint.pose[0] = x;
+        waypoint.pose[1] = y;
+        waypoint.pose[2] = altitude;
+        waypoint.pose[3] = yaw;
         path.waypoints.push_back(waypoint);
         path.NUM_WAYPOINTS++;
     }
@@ -256,11 +238,23 @@ path_t create_figure_eight(double a)
     path.NUM_WAYPOINTS = 0;
     for (double t = 0; t <= NUM_LOOPS * 2 * M_PI; t += dt)
     {
+        const double x = a * std::sin(t);
+        const double y = a * std::sin(t) * std::cos(t);
+
+        const double dx = a * std::cos(t);
+        const double dy = -a * (std::cos(t) * std::cos(t) - std::sin(t) * std::sin(t));
+        Eigen::Vector2d velocity{dx, dy};
+        velocity.normalize();
+
+        const double yaw = -std::atan2(velocity.y(), velocity.x());
+
+        constexpr double altitude = -1;
+
         waypoint_t waypoint;
-        waypoint.pose[0] = a * std::sin(t);
-        waypoint.pose[1] = a * std::sin(t) * std::cos(t);
-        waypoint.pose[2] = -1;
-        waypoint.pose[3] = 0;
+        waypoint.pose[0] = x;
+        waypoint.pose[1] = y;
+        waypoint.pose[2] = altitude;
+        waypoint.pose[3] = yaw;
         path.waypoints.push_back(waypoint);
         path.NUM_WAYPOINTS++;
     }
@@ -293,22 +287,20 @@ path_t create_test_path(const Node& path_file)
 
 void printHelp()
 {
+    // clang-format off
     std::cout << std::endl;
-    std::cout << "==============================================================" << std::endl;
-    std::cout << "X Y Z YAW - Moves quad to this position and heading. Yaw is in degrees."
-              << std::endl;
-    std::cout << "help      - This message." << std::endl;
-    std::cout << "quit      - Quits program." << std::endl;
-    std::cout << "takeoff   - Takes off to configured takeoff altitude." << std::endl;
-    std::cout << "land      - Descends and lands wherever the quad is currently." << std::endl;
-    std::cout << "fig8      - Flys in a predefined figure 8 path." << std::endl;
-    std::cout << "circle    - Flys in a predefined circular path." << std::endl;
-    std::cout
-        << "gains     - Uploads the gains from the config file. Gains can be set in mid flight."
-        << std::endl;
-    std::cout << "arm       - Arms the quad, but doesn't take off. Can only be done on the ground"
-              << std::endl;
-    std::cout << "disarm    - Disarms quad. Can only be done when on the ground." << std::endl;
-    std::cout << "==============================================================" << std::endl;
+    std::cout << "============================================================================"        << std::endl;
+    std::cout << "X Y Z YAW - Moves quad to this position and heading. Yaw is in degrees."             << std::endl;
+    std::cout << "help      - This message."                                                           << std::endl;
+    std::cout << "quit      - Quits program."                                                          << std::endl;
+    std::cout << "takeoff   - Takes off to configured takeoff altitude."                               << std::endl;
+    std::cout << "land      - Descends and lands wherever the quad is currently."                      << std::endl;
+    std::cout << "fig8      - Flys in a predefined figure 8 path."                                     << std::endl;
+    std::cout << "circle    - Flys in a predefined circular path."                                     << std::endl;
+    std::cout << "gains     - Uploads the gains from the config file. Gains can be set in mid flight." << std::endl;
+    std::cout << "arm       - Arms the quad, but doesn't take off. Can only be done on the ground."    << std::endl;
+    std::cout << "disarm    - Disarms quad. Can only be done when on the ground."                      << std::endl;
+    std::cout << "============================================================================"        << std::endl;
     std::cout << std::endl;
+    // clang-format on
 }

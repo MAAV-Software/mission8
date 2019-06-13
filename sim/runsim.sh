@@ -34,7 +34,7 @@ else
 	# gzserver needs to be running to avoid a race. Since the launch
 	# is putting it into the background we need to avoid it by backing off
 	sleep 3
-	nice -n 20 gzclient &
+	nice -n 20 gzclient -g libMaavClientPlugin.so &
 	GUI_PID=`echo $!`
 fi
 

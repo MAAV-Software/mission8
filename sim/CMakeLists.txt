@@ -29,6 +29,7 @@ set(PLUGIN_NAMES
     MaavPlanefitPlugin
     MaavVehiclePlugin
     RealsenseT265Plugin
+    MaavClientPlugin
 )
 
 

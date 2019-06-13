@@ -57,7 +57,7 @@ public:
         depth_image.size = 640 * 480;
         depth_image.raw_image = std::vector<int16_t>(depth_image.size, 0);
 
-        std::cout << "Camera plugin loaded!" << std::endl;
+        std::cout << "[Camera Plugin] loaded!" << std::endl;
     }
 
     void OnNewDepthFrame(const float* _image, unsigned int _width, unsigned int _height,

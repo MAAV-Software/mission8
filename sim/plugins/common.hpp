@@ -23,9 +23,28 @@
 #include <Eigen/Dense>
 #include <gazebo/gazebo.hh>
 #include <ignition/math.hh>
+#include <sophus/se3.hpp>
 
 namespace gazebo
 {
+/***
+ * \brief Converts from ENU ignition pose to NED sophus pose
+ */
+Sophus::SE3d convertPoseToNED(const ignition::math::Pose3d& enu)
+{
+    Sophus::SE3d ned;
+    const ignition::math::Vector3d p_enu = enu.Pos();
+    const ignition::math::Quaterniond r_enu = enu.Rot();
+    ned.translation() = {p_enu.X(), -p_enu.Y(), -p_enu.Z()};
+    ned.setQuaternion({r_enu.W(), r_enu.X(), -r_enu.Y(), -r_enu.Z()});
+    return ned;
+}
+
+Eigen::Vector3d convertVectorToNED(const ignition::math::Vector3d& enu)
+{
+    return {enu.X(), -enu.Y(), -enu.Z()};
+}
+
 /**
  * \brief Obtains a parameter from sdf.
  * \param[in] sdf Pointer to the sdf object.

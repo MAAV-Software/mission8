@@ -149,6 +149,9 @@ enum class CommunicationType
 struct InnerLoopSetpoint
 {
     Eigen::Quaternion<float> q{1, 0, 0, 0};
+    float roll = 0;
+    float pitch = 0;
+    float yaw = 0;
     float thrust = 0;      // 0 <= thrust <= 1
     float roll_rate = 0;   // rad/s
     float pitch_rate = 0;  // rad/s

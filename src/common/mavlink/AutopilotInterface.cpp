@@ -51,6 +51,8 @@
 //   Includes
 // ------------------------------------------------------------------------------
 
+#define MAVLINK_HELPER static inline
+#include <mavlink/v2.0/mavlink_conversions.h>
 #include <common/mavlink/AutopilotInterface.hpp>
 
 #include <chrono>
@@ -251,10 +253,7 @@ void AutopilotInterface::update_setpoint(InnerLoopSetpoint &setpoint)
     current_setpoint.target_component = autopilot_id;
     current_setpoint.type_mask = 0;  // default typemask ignores nothing
 
-    current_setpoint.q[0] = setpoint.q.w();
-    current_setpoint.q[1] = setpoint.q.x();
-    current_setpoint.q[2] = setpoint.q.y();
-    current_setpoint.q[3] = setpoint.q.z();
+    mavlink_euler_to_quaternion(setpoint.roll, setpoint.pitch, setpoint.yaw, current_setpoint.q);
     current_setpoint.body_roll_rate = setpoint.roll_rate;
     current_setpoint.body_pitch_rate = setpoint.pitch_rate;
     current_setpoint.body_yaw_rate = setpoint.yaw_rate;

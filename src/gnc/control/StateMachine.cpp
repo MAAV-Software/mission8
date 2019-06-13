@@ -408,9 +408,18 @@ void StateMachine::setControlState(const ControlState new_control_state)
             std::cout << "TAKEOFF";
             break;
         case ControlState::LAND:
+        {
+            // Clear path
+            path_t empty_path;
+            empty_path.NUM_WAYPOINTS = 0;
+            empty_path.waypoints.clear();
+            controller_.set_path(empty_path);
+
+            // Set landing state
             land_detector_.setAir();
             std::cout << "LAND";
             break;
+        }
         case ControlState::STANDBY:
             std::cout << "STANDBY";
             break;

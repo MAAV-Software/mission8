@@ -24,9 +24,12 @@
 
 #include <common/messages/MsgChannels.hpp>
 #include <common/messages/groundtruth_inertial_t.hpp>
+#include <gnc/utils/ZcmConversion.hpp>
 #include <zcm/zcm-cpp.hpp>
+#include "common.hpp"
 
 #include <Eigen/Eigen>
+#include <sophus/se3.hpp>
 #include <sophus/so3.hpp>
 
 namespace gazebo
@@ -44,24 +47,94 @@ public:
     {
         parent_ = model;
         name_ = parent_->GetName();
+        auto world = model->GetWorld();
 
-        auto imu = sdf->GetElement("imu");
-        if (imu)
+        // clang-format off
+        std::cout << "===============================================================================" << std::endl;
+        std::cout << "============================== *** EXTRINSICS *** =============================" << std::endl;
+        std::cout << "===============================================================================" << std::endl;
+        fuselage_link_ = parent_->GetLink("fuselage");
+        Sophus::SE3d matrice_pose = convertPoseToNED(fuselage_link_->WorldPose());
+        std::cout << "Matrice Pose" << std::endl;
+        std::cout << matrice_pose.matrix() << std::endl << std::endl;
+
+        physics::LinkPtr forward_camera =
+            world->ModelByName("MaavMatrice::Forward Camera")->GetLink("D435::link");
+        if (forward_camera)
         {
-            std::string imu_model_name = imu->Get<std::string>("model_name");
-            physics::ModelPtr imu_model = parent_->NestedModel(imu_model_name);
-
-            if (imu_model)
-                std::cout << "[VehiclePlugin] Found IMU at " << imu_model->GetName() << std::endl;
+            std::cout << "============================" << std::endl;
+            std::cout << "=== ** Forward Camera ** ===" << std::endl;
+            std::cout << "============================" << std::endl;
+            Sophus::SE3d pose = convertPoseToNED(forward_camera->WorldPose());
+            Sophus::SE3d extrinsics = matrice_pose.inverse() * pose;
+            std::cout << "Extrinsics ----------------------" << std::endl;
+            std::cout << extrinsics.matrix() << std::endl;
+            std::cout << "Extrinsics Log ------------------" << std::endl;
+            std::cout << extrinsics.log().transpose() << std::endl;
         }
+        std::cout << std::endl;
+
+        physics::LinkPtr downward_camera =
+            world->ModelByName("MaavMatrice::Downward Camera")->GetLink("D435::link");
+        if (downward_camera)
+        {
+            std::cout << "============================" << std::endl;
+            std::cout << "=== ** Downward Camera ** ==" << std::endl;
+            std::cout << "============================" << std::endl;
+            Sophus::SE3d pose = convertPoseToNED(downward_camera->WorldPose());
+            Sophus::SE3d extrinsics = matrice_pose.inverse() * pose;
+            std::cout << "Extrinsics ----------------------" << std::endl;
+            std::cout << extrinsics.matrix() << std::endl;
+            std::cout << "Extrinsics Log ------------------" << std::endl;
+            std::cout << extrinsics.log().transpose() << std::endl;
+        }
+        std::cout << std::endl;
+
+        physics::LinkPtr slam_camera =
+            world->ModelByName("MaavMatrice::SLAM Camera")->GetLink("T265::link");
+        if (slam_camera)
+        {
+            std::cout << "============================" << std::endl;
+            std::cout << "===== ** SLAM Camera ** ====" << std::endl;
+            std::cout << "============================" << std::endl;
+            Sophus::SE3d pose = convertPoseToNED(slam_camera->WorldPose());
+            Sophus::SE3d extrinsics = matrice_pose.inverse() * pose;
+            std::cout << "Extrinsics ----------------------" << std::endl;
+            std::cout << extrinsics.matrix() << std::endl;
+            std::cout << "Extrinsics Log ------------------" << std::endl;
+            std::cout << extrinsics.log().transpose() << std::endl;
+        }
+        std::cout << std::endl;
+
+        physics::LinkPtr lidar =
+            world->ModelByName("MaavMatrice::Height Lidar")->GetLink("LidarLite::link");
+        if (lidar)
+        {
+            std::cout << "============================" << std::endl;
+            std::cout << "======= ** Lidar ** ========" << std::endl;
+            std::cout << "============================" << std::endl;
+            Sophus::SE3d pose = convertPoseToNED(lidar->WorldPose());
+            Sophus::SE3d extrinsics = matrice_pose.inverse() * pose;
+            std::cout << "Extrinsics ----------------------" << std::endl;
+            std::cout << extrinsics.matrix() << std::endl;
+            std::cout << "Extrinsics Log ------------------" << std::endl;
+            std::cout << extrinsics.log().transpose() << std::endl;
+        }
+        std::cout << std::endl;
+
+        std::cout << "===============================================================================" << std::endl;
+        std::cout << "===============================================================================" << std::endl;
+        std::cout << "===============================================================================" << std::endl;
+
+        // clang-format on
 
         updateConnection =
             event::Events::ConnectWorldUpdateBegin(std::bind(&MaavVehiclePlugin::OnUpdate, this));
 
-        starting_pose_ = parent_->WorldPose();
-        inverse_rot_ = starting_pose_.Inverse().Rot();
+        starting_pose_ = matrice_pose;
+        starting_pose_inverse_ = starting_pose_.inverse();
 
-        std::cout << "[VehiclePlugin] Loaded!" << std::endl;
+        std::cout << "[Vehicle Plugin] Loaded!" << std::endl;
     }
 
 public:
@@ -78,7 +151,7 @@ public:
         usec += time.nsec / 1000;
 
         double dt = static_cast<double>(usec - last_time_) / USEC_PER_SEC;
-        if (dt >= 1 / UPDATE_RATE)
+        if (dt >= 1.0 / UPDATE_RATE)
         {
             // Update previous time
             last_time_ = usec;
@@ -87,33 +160,20 @@ public:
             msg_.utime = usec;
 
             // Get and convert pose/velocity/accel/angvel
-            ignition::math::Pose3d pose = starting_pose_.Inverse() * parent_->WorldPose();
-            ignition::math::Quaterniond attitude = pose.Rot();
-            ignition::math::Vector3d position = pose.Pos();
-            ignition::math::Vector3d velocity = inverse_rot_ * parent_->WorldLinearVel();
-            ignition::math::Vector3d acceleration = inverse_rot_ * parent_->WorldLinearAccel();
-            ignition::math::Vector3d angular_velocity = inverse_rot_ * parent_->WorldAngularVel();
+            const Sophus::SE3d current_sim_pose = convertPoseToNED(fuselage_link_->WorldPose());
+            const Sophus::SE3d pose = starting_pose_inverse_ * current_sim_pose;
 
-            msg_.attitude.data[0] = attitude.W();
-            msg_.attitude.data[1] = attitude.Y();
-            msg_.attitude.data[2] = attitude.X();
-            msg_.attitude.data[3] = -attitude.Z();
+            const Eigen::Vector3d position = pose.translation();
+            const Eigen::Vector3d velocity = convertVectorToNED(parent_->WorldLinearVel());
+            const Eigen::Vector3d acceleration = convertVectorToNED(parent_->WorldLinearAccel());
+            const Eigen::Vector3d angular_velocity = convertVectorToNED(parent_->WorldAngularVel());
 
-            msg_.position.data[0] = position.Y();
-            msg_.position.data[1] = position.X();
-            msg_.position.data[2] = -position.Z();
-
-            msg_.velocity.data[0] = velocity.Y();
-            msg_.velocity.data[1] = velocity.X();
-            msg_.velocity.data[2] = -velocity.Z();
-
-            msg_.acceleration.data[0] = acceleration.Y();
-            msg_.acceleration.data[1] = acceleration.X();
-            msg_.acceleration.data[2] = -acceleration.Z();
-
-            msg_.angular_velocity.data[0] = angular_velocity.Y();
-            msg_.angular_velocity.data[1] = angular_velocity.X();
-            msg_.angular_velocity.data[2] = -angular_velocity.Z();
+            const Sophus::SO3d attitude = pose.so3();
+            msg_.attitude = maav::gnc::convertQuaternion(attitude);
+            msg_.position = maav::gnc::convertVector3d(position);
+            msg_.velocity = maav::gnc::convertVector3d(velocity);
+            msg_.acceleration = maav::gnc::convertVector3d(acceleration);
+            msg_.angular_velocity = maav::gnc::convertVector3d(angular_velocity);
 
             zcm_.publish(maav::GT_INERTIAL_CHANNEL, &msg_);
         }
@@ -124,6 +184,7 @@ public:
 
 private:
     physics::ModelPtr parent_;
+    physics::LinkPtr fuselage_link_;
     std::string name_;
 
     zcm::ZCM zcm_;
@@ -132,8 +193,8 @@ private:
 
     event::ConnectionPtr updateConnection;
 
-    ignition::math::Pose3d starting_pose_;
-    ignition::math::Quaterniond inverse_rot_;
+    Sophus::SE3d starting_pose_;
+    Sophus::SE3d starting_pose_inverse_;
 };
 
 GZ_REGISTER_MODEL_PLUGIN(MaavVehiclePlugin)

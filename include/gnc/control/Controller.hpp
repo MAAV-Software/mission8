@@ -79,7 +79,6 @@ public:
     maav::mavlink::InnerLoopSetpoint run_xbox(const XboxController& xbox_controller);
 
     bool at_takeoff_alt();
-    void set_yaw_north();
 
     void set_control_params(const Parameters& params);
     void set_control_params(const ctrl_params_t& ctrl_params);

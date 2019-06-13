@@ -35,7 +35,7 @@
     <model name="Forward Camera">
       <include>
         <uri>model://d435</uri>
-        <pose>0.155 0 0.02 0 0.523 0</pose>
+        <pose>0.155 0 0.0 0 0.4 0</pose>
       </include>
     </model>
 
@@ -47,7 +47,7 @@
     <model name="Downward Camera">
       <include>
         <uri>model://d435</uri>
-        <pose>0.12 0 0.005 0 1.57 0</pose>
+        <pose>0.1 0.0 -0.0125 0 1.57 0</pose>
       </include>
       <plugin name='planefit_plugin' filename='libMaavPlanefitPlugin.so'></plugin>
     </model>
