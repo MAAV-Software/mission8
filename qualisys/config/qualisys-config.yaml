@@ -1,0 +1,23 @@
+---
+
+ZCM:
+    channel: "GT_INTERTIAL"
+    url: "udpm://239.255.76.67:7667?ttl=1"
+
+ZMQ:
+    pub_ip: "*"
+    sub_ip: "169.254.250.236"
+    port: 4242
+
+Qualisys:
+    server_address: "192.168.254.1"
+    base_port: 22222
+    udp_port: 0
+    major_version: 1
+    minor_version: 7
+
+Info:
+    position: true           # Print position
+    velocity: true           # Print velocity
+    angular_velocity: false  # Print angular velocity
+    period: 50               # Print every n sample
