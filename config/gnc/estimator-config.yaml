@@ -1,4 +1,4 @@
-  # Configuration file for the kalman filter
+# Configuration file for the kalman filter
 # All covariance matrices are diagonal
 
 history:
@@ -43,9 +43,7 @@ updates:
     # Sensor noise covariance
     R: [0.01]
     # Pose relative to IMU
-    extrinsics:
-      rot: [1, 0, 0, 0]
-      pos: [-0.04, 0.07, 0.07]
+    extrinsics: [-0.0176875, 0.15, 0.0451484, -3.87759e-17,  -1.57,  2.44469e-17]
     # Calibrated
     lidar_bias: 0.075
 
@@ -60,9 +58,7 @@ updates:
     # Sensor noise covariance
     R: [0.000001, 0.000001, 0.000001, 0.000001]
     # Pose relative to IMU
-    extrinsics:
-      rot: [1, 0, 0, 0]
-      pos: [0.04, -0.07, 0.06]
+    extrinsics: [0.088375, 2.21068e-16, -0.0686797, -3.87759e-17, -1.57, 2.44469e-17]
 
   global_update:
     enabled: true
@@ -75,9 +71,7 @@ updates:
     # Sensor noise covariance
     R: [0.00001, 0.00001, 0.00001, 0.0003, 0.0003, 0.0003]
     # Pose relative to IMU
-    extrinsics:
-      rot: [1, 0, 0, 0]
-      pos: [0.12, 0, 0]
+    extrinsics: [0.155, 1.3093e-19, -0.05, 0, 0, -1.68942e-18]
 
 sim_imu: false
 sim_lidar: false

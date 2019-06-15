@@ -95,6 +95,20 @@ Sophus::SO3d convertQuaternion(const quaternion_t& zcm_att)
     return Sophus::SO3d(quat);
 }
 
+void convertPose(const Sophus::SE3d& pose, quaternion_t& rotation, vector3_t& position)
+{
+    rotation = convertQuaternion(pose.so3());
+    position = convertVector3d(pose.translation());
+}
+
+Sophus::SE3d convertPose(const quaternion_t& rotation, const vector3_t& position)
+{
+    Sophus::SE3d pose;
+    pose.so3() = convertQuaternion(rotation);
+    pose.translation() = convertVector3d(position);
+    return pose;
+}
+
 state_t ConvertState(const State& state)
 {
     state_t zcm_state;
@@ -247,9 +261,7 @@ std::shared_ptr<GlobalUpdateMeasurement> convertGlobalUpdate(const global_update
     std::shared_ptr<GlobalUpdateMeasurement> global_update(new GlobalUpdateMeasurement());
 
     global_update->setTime(zcm_global.utime);
-
-    global_update->position() = convertVector3d(zcm_global.position);
-    global_update->attitude() = convertQuaternion(zcm_global.attitude);
+    global_update->pose() = convertPose(zcm_global.attitude, zcm_global.position);
 
     return global_update;
 }

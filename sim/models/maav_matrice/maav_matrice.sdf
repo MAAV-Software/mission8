@@ -39,6 +39,7 @@
       </include>
     </model>
 
+
     <joint name="Forward Camera Joint" type="fixed">
       <parent>fuselage</parent>
       <child>MaavMatrice::Forward Camera::D435::link</child>
@@ -73,14 +74,14 @@
       <robotNamespace></robotNamespace>
       <linkName>fuselage</linkName>
       <imuTopic>/imu</imuTopic>
-      <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
-      <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+      <gyroscopeNoiseDensity>0.005235987756</gyroscopeNoiseDensity>
+      <gyroscopeRandomWalk>0.00000002424068406</gyroscopeRandomWalk>
       <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
-      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
-      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
-      <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+      <gyroscopeTurnOnBiasSigma>0.00436332313</gyroscopeTurnOnBiasSigma>
+      <accelerometerNoiseDensity>0.00784532</accelerometerNoiseDensity>
+      <accelerometerRandomWalk>0.0000001089627778</accelerometerRandomWalk>
       <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
-      <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+      <accelerometerTurnOnBiasSigma>0.0196133</accelerometerTurnOnBiasSigma>
       <frequency>200</frequency>
 
       <!-- <gyroscopeNoiseDensity>2.74155677808038e-05</gyroscopeNoiseDensity> -->

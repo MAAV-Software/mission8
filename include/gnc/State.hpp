@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include <Eigen/Dense>
+#include <sophus/se3.hpp>
 #include <sophus/so3.hpp>
 
 namespace maav
@@ -117,6 +118,9 @@ public:
 
     uint64_t timeUSec() const;
     double timeSec() const;
+
+    Sophus::SE3d getPose() const;
+    void setPose(const Sophus::SE3d& pose);
 
 private:
     uint64_t time_usec_;

@@ -73,6 +73,9 @@ Eigen::Vector4d convertVector4d(const vector4_t& zcm_vec);
 quaternion_t convertQuaternion(const Sophus::SO3d& att);
 Sophus::SO3d convertQuaternion(const quaternion_t& zcm_att);
 
+void convertPose(const Sophus::SE3d& pose, quaternion_t& rotation, vector3_t& position);
+Sophus::SE3d convertPose(const quaternion_t& rotation, const vector3_t& position);
+
 template <class EigenDerived>
 void convertMatrix(const Eigen::MatrixBase<EigenDerived>& mat, matrix_t& zcm_mat)
 {

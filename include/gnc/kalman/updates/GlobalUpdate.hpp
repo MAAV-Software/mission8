@@ -2,6 +2,7 @@
 #define GLOBAL_UPDATE_HPP
 
 #include <yaml-cpp/yaml.h>
+#include <sophus/se3.hpp>
 
 #include <gnc/kalman/BaseUpdate.hpp>
 #include <gnc/measurements/GlobalUpdateMeasurement.hpp>
@@ -46,6 +47,10 @@ public:
 
 private:
     using BaseUpdate<measurements::GlobalUpdateMeasurement>::correct;
+
+    bool initialized_pose_;
+    Sophus::SE3d starting_pose_;
+    Sophus::SE3d starting_pose_inverse_;
 };
 }  // namespace kalman
 }  // namespace gnc

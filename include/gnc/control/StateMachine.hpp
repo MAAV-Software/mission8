@@ -64,7 +64,10 @@ public:
     void run(const std::atomic<bool>& kill);
 
 private:
-    void readZcm();
+    /***
+     * Returns true if a zcm message was read
+     */
+    bool readZcm();
     void initializeRun(const std::atomic<bool>& kill);
     void setControlState(const ControlState new_control_state);
     float armedThrust(float thrust);

@@ -2,6 +2,7 @@
 #define EXTRINSICS_HPP
 
 #include <yaml-cpp/yaml.h>
+#include <sophus/se3.hpp>
 #include <sophus/so3.hpp>
 
 #include <gnc/State.hpp>
@@ -24,6 +25,11 @@ public:
     explicit Extrinsics(YAML::Node config);
 
     /**
+     * @brief Relative pose of the sensor to the IMU
+     */
+    const Sophus::SE3d& pose() const;
+
+    /**
      * @brief Relative attitude of the sensor to the IMU
      */
     const Sophus::SO3d& rotation() const;
@@ -37,20 +43,16 @@ public:
      * @brief Computes the state (world frame) of the sensor given the state of the IMU
      * @param state IMU state
      */
-    State sensorState(const State& state) const;
-
-    /**
-     * @brief Computes the state (world frame) of the IMU given the state of the sensor
-     * @param state Sensor state
-     */
-    State imuState(const State& state) const;
+    State operator()(const State& state) const;
 
 private:
+    const Sophus::SE3d::Tangent twist_;
+    const Sophus::SE3d pose_;
     const Sophus::SO3d rot_;
     const Eigen::Vector3d pos_;
 };
-}
-}
-}
+}  // namespace kalman
+}  // namespace gnc
+}  // namespace maav
 
 #endif

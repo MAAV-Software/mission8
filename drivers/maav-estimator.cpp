@@ -183,8 +183,10 @@ int main(int argc, char **argv)
 
     Eigen::Vector3d true_accel = {0, 0, -maav::gnc::constants::STANDARD_GRAVITY};
     Eigen::Vector3d accel_bias = avg_acceleration - true_accel;
+    accel_bias = Eigen::Vector3d::Zero();
     Eigen::Vector3d true_ang_rate = Eigen::Vector3d::Zero();
     Eigen::Vector3d gyro_bias = avg_angular_rate - true_ang_rate;
+    gyro_bias = Eigen::Vector3d::Zero();
 
     cout << "Calibrated. Starting biases:\n";
     cout << "Gyro: " << gyro_bias.transpose() << std::endl;

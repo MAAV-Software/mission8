@@ -11,12 +11,22 @@ namespace kalman
 GlobalUpdate::GlobalUpdate(YAML::Node config) : BaseUpdate(config["global_update"]) {}
 GlobalUpdateMeasurement GlobalUpdate::predicted(const State& state)
 {
+    if (!initialized_pose_)
+    {
+        starting_pose_ = state.getPose();
+        starting_pose_inverse_ = starting_pose_.inverse();
+        initialized_pose_ = true;
+    }
+
+    Sophus::SE3d pose = starting_pose_inverse_ * state.getPose();
+
     /*
     Here, we predict the position and attitude of our quadcopter
     */
+
     GlobalUpdateMeasurement predicted_measurement;
-    predicted_measurement.attitude() = state.attitude();
-    predicted_measurement.position() = state.position();
+    predicted_measurement.pose() = pose;
+
     return predicted_measurement;
 }
 

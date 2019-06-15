@@ -235,7 +235,7 @@ def generate_ZcmLoop(dict):
 
             # Check if we need to convert to a gaussian type
             cov_indices = dict[channel]['vars'][var]['cov_indices']
-            if cov_indices:
+            if cov_indices and not type_name == 'quaternion_t':
                 # Check that we have found a covariance matrix
                 if not foundCovMat:
                     print('Covariance indices when there is no covariance matrix')

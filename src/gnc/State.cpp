@@ -103,9 +103,9 @@ State& State::operator+=(const State::ErrorStateVector& e_state)
     const Eigen::Vector3d gyro_bias_err = e_state.segment<3>(9);
     const Eigen::Vector3d accel_bias_err = e_state.segment<3>(12);
 
+    position() += attitude() * position_err;
+    velocity() += attitude() * velocity_err;
     attitude() *= attitude_err;
-    position() += position_err;
-    velocity() += velocity_err;
     gyroBias() += gyro_bias_err;
     accelBias() += accel_bias_err;
 
@@ -115,13 +115,27 @@ State& State::operator+=(const State::ErrorStateVector& e_state)
 State::ErrorStateVector State::operator-(const State& other) const
 {
     ErrorStateVector difference;
-    difference.segment<3>(0) = (attitude() * other.attitude().inverse()).log();
-    difference.segment<3>(3) = position() - other.position();
-    difference.segment<3>(6) = velocity() - other.velocity();
+    difference.segment<3>(0) = (other.attitude().inverse() * attitude()).log();
+    difference.segment<3>(3) = other.attitude().inverse() * (position() - other.position());
+    difference.segment<3>(6) = other.attitude().inverse() * (velocity() - other.velocity());
     difference.segment<3>(9) = gyroBias() - other.gyroBias();
     difference.segment<3>(12) = accelBias() - other.accelBias();
 
     return difference;
+}
+
+Sophus::SE3d State::getPose() const
+{
+    Sophus::SE3d pose;
+    pose.so3() = attitude();
+    pose.translation() = position();
+    return pose;
+}
+
+void State::setPose(const Sophus::SE3d& pose)
+{
+    attitude() = pose.so3();
+    position() = pose.translation();
 }
 
 const Sophus::SO3d& State::attitude() const { return attitude_; }

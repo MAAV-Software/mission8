@@ -4,6 +4,7 @@
 #include <ostream>
 
 #include <Eigen/Dense>
+#include <sophus/se3.hpp>
 #include <sophus/so3.hpp>
 
 #include <gnc/State.hpp>
@@ -50,16 +51,12 @@ public:
     /**
      * @return Const reference to the measured value
      */
-    const Sophus::SO3d& attitude() const;
+    const Sophus::SE3d& pose() const;
 
     /**
      * @return Mutable reference to the measured value
      */
-    Sophus::SO3d& attitude();
-
-    const Eigen::Vector3d& position() const;
-
-    Eigen::Vector3d& position();
+    Sophus::SE3d& pose();
 
     /**
      * @brief Computes the mean and covariance of a set of SensorMeasurements
@@ -73,10 +70,10 @@ public:
         const std::array<double, State::N>& c_weights)
     {
         GlobalUpdateMeasurement gaussian;
-        gaussian.attitude() = points[0].attitude();
+        gaussian.pose().so3() = points[0].pose().so3();
         for (size_t i = 0; i < State::N; i++)
         {
-            gaussian.position() += m_weights[i] * points[i].position();
+            gaussian.pose().translation() += m_weights[i] * points[i].pose().translation();
         }
 
         gaussian.covariance() = CovarianceMatrix::Zero();
@@ -93,8 +90,7 @@ public:
     void setTime(uint64_t time_usec);
 
 private:
-    Eigen::Vector3d position_;
-    Sophus::SO3d attitude_;
+    Sophus::SE3d pose_;
     uint64_t time_usec_;
     CovarianceMatrix covariance_;
 };

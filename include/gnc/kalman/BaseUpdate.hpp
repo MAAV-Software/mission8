@@ -46,6 +46,7 @@ public:
     }
 
     bool enabled() { return enabled_; }
+
 protected:
     /**
      * Nonlinear h function.
@@ -76,7 +77,7 @@ protected:
 
         State& state = snapshot.state;
 
-        const TargetSpace predicted_meas = unscented_transform_(state);
+        const TargetSpace predicted_meas = unscented_transform_(extrinsics_(state));
         const TargetSpace measured_mes = measured(snapshot.measurement);
         ErrorStateVector residual = measured_mes - predicted_meas;
         const CovarianceMatrix S = predicted_meas.covariance() + R_;

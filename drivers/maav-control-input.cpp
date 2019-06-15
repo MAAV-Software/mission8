@@ -31,8 +31,8 @@ using namespace std::chrono;
 
 void printHelp();
 
-path_t create_figure_eight(double a);
-path_t create_circle(double a);
+path_t create_figure_eight(double a, bool should_yaw);
+path_t create_circle(double a, bool should_yaw);
 path_t create_test_path(const YAML::Node& path_file);
 
 constexpr double NUM_LOOPS = 5;
@@ -98,15 +98,27 @@ int main(int argc, char** argv)
             zcm.publish(maav::PATH_CHANNEL, &path);
         }
 
+        else if (current_command == "fig8_no_yaw")
+        {
+            path_t fig_8_path = create_figure_eight(DIAMETER, false);
+            zcm.publish(maav::PATH_CHANNEL, &fig_8_path);
+        }
+
+        else if (current_command == "circle_no_yaw")
+        {
+            path_t circle_path = create_circle(DIAMETER, false);
+            zcm.publish(maav::PATH_CHANNEL, &circle_path);
+        }
+
         else if (current_command == "fig8")
         {
-            path_t fig_8_path = create_figure_eight(DIAMETER);
+            path_t fig_8_path = create_figure_eight(DIAMETER, true);
             zcm.publish(maav::PATH_CHANNEL, &fig_8_path);
         }
 
         else if (current_command == "circle")
         {
-            path_t circle_path = create_circle(DIAMETER);
+            path_t circle_path = create_circle(DIAMETER, true);
             zcm.publish(maav::PATH_CHANNEL, &circle_path);
         }
 
@@ -200,7 +212,7 @@ int main(int argc, char** argv)
     }
 }
 
-path_t create_circle(double a)
+path_t create_circle(double a, bool should_yaw)
 {
     double dt = 0.05;
     path_t path;
@@ -215,7 +227,7 @@ path_t create_circle(double a)
         Eigen::Vector2d velocity{dx, dy};
         velocity.normalize();
 
-        const double yaw = std::atan2(velocity.y(), velocity.x());
+        const double yaw = should_yaw ? std::atan2(velocity.y(), velocity.x()) : 0;
 
         constexpr double altitude = -1;
 
@@ -231,7 +243,7 @@ path_t create_circle(double a)
     return path;
 }
 
-path_t create_figure_eight(double a)
+path_t create_figure_eight(double a, bool should_yaw)
 {
     double dt = 0.05;
     path_t path;
@@ -246,7 +258,7 @@ path_t create_figure_eight(double a)
         Eigen::Vector2d velocity{dx, dy};
         velocity.normalize();
 
-        const double yaw = -std::atan2(velocity.y(), velocity.x());
+        const double yaw = should_yaw ? -std::atan2(velocity.y(), velocity.x()) : 0;
 
         constexpr double altitude = -1;
 
@@ -290,16 +302,18 @@ void printHelp()
     // clang-format off
     std::cout << std::endl;
     std::cout << "============================================================================"        << std::endl;
-    std::cout << "X Y Z YAW - Moves quad to this position and heading. Yaw is in degrees."             << std::endl;
-    std::cout << "help      - This message."                                                           << std::endl;
-    std::cout << "quit      - Quits program."                                                          << std::endl;
-    std::cout << "takeoff   - Takes off to configured takeoff altitude."                               << std::endl;
-    std::cout << "land      - Descends and lands wherever the quad is currently."                      << std::endl;
-    std::cout << "fig8      - Flys in a predefined figure 8 path."                                     << std::endl;
-    std::cout << "circle    - Flys in a predefined circular path."                                     << std::endl;
-    std::cout << "gains     - Uploads the gains from the config file. Gains can be set in mid flight." << std::endl;
-    std::cout << "arm       - Arms the quad, but doesn't take off. Can only be done on the ground."    << std::endl;
-    std::cout << "disarm    - Disarms quad. Can only be done when on the ground."                      << std::endl;
+    std::cout << "X Y Z YAW     - Moves quad to this position and heading. Yaw is in degrees."             << std::endl;
+    std::cout << "help          - This message."                                                           << std::endl;
+    std::cout << "quit          - Quits program."                                                          << std::endl;
+    std::cout << "takeoff       - Takes off to configured takeoff altitude."                               << std::endl;
+    std::cout << "land          - Descends and lands wherever the quad is currently."                      << std::endl;
+    std::cout << "fig8          - Flys in a predefined figure 8 path. Always points forward."              << std::endl;
+    std::cout << "fig8_no_yaw   - Flys in a predefined figure 8 path without yawing."                      << std::endl;
+    std::cout << "circle        - Flys in a predefined circular path. Always points forward."              << std::endl;
+    std::cout << "circle_no_yaw - Flys in a predefined circular path without yawing."                      << std::endl;
+    std::cout << "gains         - Uploads the gains from the config file. Gains can be set in mid flight." << std::endl;
+    std::cout << "arm           - Arms the quad, but doesn't take off. Can only be done on the ground."    << std::endl;
+    std::cout << "disarm        - Disarms quad. Can only be done when on the ground."                      << std::endl;
     std::cout << "============================================================================"        << std::endl;
     std::cout << std::endl;
     // clang-format on

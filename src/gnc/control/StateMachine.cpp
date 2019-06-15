@@ -64,47 +64,48 @@ void StateMachine::run(const std::atomic<bool>& kill)
         /*
          *  Read in all new messages and handle commands
          */
-        readZcm();
-
-        switch (current_control_state_)
+        if (readZcm())
         {
-            case ControlState::STANDBY:
-                inner_loop_setpoint = runStandby();
-                break;
-            case ControlState::TAKEOFF:
-                inner_loop_setpoint = runTakeoff();
-                break;
-            case ControlState::LAND:
-                inner_loop_setpoint = runLand();
-                break;
-            case ControlState::FLIGHT:
-                inner_loop_setpoint = runFlight();
-                break;
-            case ControlState::ARMING:
-                inner_loop_setpoint = runArming();
-                break;
-            case ControlState::SOFT_ARM:
-                inner_loop_setpoint = runSoftArm();
-                break;
-            case ControlState::DISARMING:
-                inner_loop_setpoint = runDisarming();
-                break;
-            case ControlState::KILLSWITCH:
-                inner_loop_setpoint = runKillswitch();
-                break;
-            default:
-                assert(false);
-                break;
-        }
+            switch (current_control_state_)
+            {
+                case ControlState::STANDBY:
+                    inner_loop_setpoint = runStandby();
+                    break;
+                case ControlState::TAKEOFF:
+                    inner_loop_setpoint = runTakeoff();
+                    break;
+                case ControlState::LAND:
+                    inner_loop_setpoint = runLand();
+                    break;
+                case ControlState::FLIGHT:
+                    inner_loop_setpoint = runFlight();
+                    break;
+                case ControlState::ARMING:
+                    inner_loop_setpoint = runArming();
+                    break;
+                case ControlState::SOFT_ARM:
+                    inner_loop_setpoint = runSoftArm();
+                    break;
+                case ControlState::DISARMING:
+                    inner_loop_setpoint = runDisarming();
+                    break;
+                case ControlState::KILLSWITCH:
+                    inner_loop_setpoint = runKillswitch();
+                    break;
+                default:
+                    assert(false);
+                    break;
+            }
 
-        if (current_control_state_ != ControlState::STANDBY &&
-            current_control_state_ != ControlState::ARMING &&
-            current_control_state_ != ControlState::DISARMING)
-        {
-            inner_loop_setpoint.thrust = armedThrust(inner_loop_setpoint.thrust);
-        }
+            if (current_control_state_ != ControlState::STANDBY &&
+                current_control_state_ != ControlState::ARMING &&
+                current_control_state_ != ControlState::DISARMING)
+            {
+                inner_loop_setpoint.thrust = armedThrust(inner_loop_setpoint.thrust);
+            }
 
-        autopilot_interface_->update_setpoint(inner_loop_setpoint);
+            autopilot_interface_->update_setpoint(inner_loop_setpoint);
+        }
 
         while (!commands_.empty())
         {
@@ -143,6 +144,14 @@ void StateMachine::initializeRun(const std::atomic<bool>& kill)
     if (counter > 1)
     {
         std::cout << "Initial state established" << std::endl;
+        if (sim_state_)
+        {
+            std::cout << "Using SIM STATE" << std::endl;
+        }
+        else
+        {
+            std::cout << "Using KALMAN FILTER STATE" << std::endl;
+        }
     }
     else
     {
@@ -151,8 +160,10 @@ void StateMachine::initializeRun(const std::atomic<bool>& kill)
     return;
 }
 
-void StateMachine::readZcm()
+bool StateMachine::readZcm()
 {
+    bool read_zcm = false;
+
     while (path_handler_.ready())
     {
         if (!path_handler_.msg().waypoints.empty())
@@ -165,6 +176,7 @@ void StateMachine::readZcm()
             }
         }
         path_handler_.pop();
+        read_zcm = true;
     }
 
     while (!sim_state_ && state_handler_.ready())
@@ -172,6 +184,7 @@ void StateMachine::readZcm()
         controller_.add_state(ConvertState(state_handler_.msg()));
         land_detector_.setState(ConvertState(state_handler_.msg()));
         state_handler_.pop();
+        read_zcm = true;
     }
 
     while (sim_state_ && sim_state_handler_.ready())
@@ -179,6 +192,7 @@ void StateMachine::readZcm()
         controller_.add_state(ConvertGroundTruthState(sim_state_handler_.msg()));
         land_detector_.setState(ConvertGroundTruthState(sim_state_handler_.msg()));
         sim_state_handler_.pop();
+        read_zcm = true;
     }
 
     while (command_handler_.ready())
@@ -215,12 +229,16 @@ void StateMachine::readZcm()
             }
         }
         command_handler_.pop();
+        read_zcm = true;
     }
 
     while (killswitch_handler_.ready())
     {
         killswitch_handler_.pop();
+        read_zcm = true;
     }
+
+    return read_zcm;
 }
 
 bool StateMachine::checkCommand(const ControlCommands command)

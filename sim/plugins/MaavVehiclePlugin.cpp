@@ -164,9 +164,12 @@ public:
             const Sophus::SE3d pose = starting_pose_inverse_ * current_sim_pose;
 
             const Eigen::Vector3d position = pose.translation();
-            const Eigen::Vector3d velocity = convertVectorToNED(parent_->WorldLinearVel());
-            const Eigen::Vector3d acceleration = convertVectorToNED(parent_->WorldLinearAccel());
-            const Eigen::Vector3d angular_velocity = convertVectorToNED(parent_->WorldAngularVel());
+            const Eigen::Vector3d velocity =
+                starting_pose_inverse_.so3() * convertVectorToNED(parent_->WorldLinearVel());
+            const Eigen::Vector3d acceleration =
+                starting_pose_inverse_.so3() * convertVectorToNED(parent_->WorldLinearAccel());
+            const Eigen::Vector3d angular_velocity =
+                starting_pose_inverse_.so3() * convertVectorToNED(parent_->WorldAngularVel());
 
             const Sophus::SO3d attitude = pose.so3();
             msg_.attitude = maav::gnc::convertQuaternion(attitude);
