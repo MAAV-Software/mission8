@@ -36,6 +36,12 @@ public:
 	  	  heuristic_cost_{heuristic_cost} {}
 	
 	/**
+	 * @brief eqaul to operator for this node
+	 * @param rhs	Node object being compared to this object
+	 */
+	bool operator==(const Node& rhs) const { return id_ == rhs.id(); }
+
+	/**
 	 * @brief Less than comparison operator for this node
 	 * @param rhs	Node object being compared to this object on the right-hand-side
 	 *				of the < symbol (e.g., this_object < rhs)
@@ -53,6 +59,8 @@ public:
 	 * @brief Returns cost of this node used for planning
 	 */
 	double cost() const { return path_cost_ + heuristic_cost_; }
+
+	double getPathCost() const { return path_cost_ ; }
 		
 	/**
 	 * @brief Returns node id (liner index into occupancy map)
@@ -72,7 +80,7 @@ private:
 	octomap::OcTreeKey key_;
 	int id_;					//< this node's linear index into occupancy map
 	int parent_;				//< parent's linear index into occupancy map (-1 for root)
-	double path_cost_;			//< cost from start node
+	double path_cost_;			//< moving cost from the parent
 	double heuristic_cost_;		//< heuristic cost to goal
 };
 

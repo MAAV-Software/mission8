@@ -1,11 +1,12 @@
 #include <vector>
-#include <queue>
 #include <unordered_map>
 #include <chrono>
 #include <functional>
 #include <Eigen/Dense>
 #include <cassert>
 #include <iostream>
+#include <set>
+#include <cmath>
 #include <memory>
 #include "common/math/math.hpp"
 #include "gnc/planner/Astar.hpp"
@@ -13,7 +14,7 @@
 
 using std::vector;
 using std::shared_ptr;
-using std::priority_queue;
+using std::set;
 using std::unordered_map;
 using std::cerr;
 
@@ -26,8 +27,9 @@ namespace gnc
 namespace planner
 {
 
-// static double pnorm(const Eigen::VectorXd& v, bool l1 = false);
+double l1norm(const point3d& a, const point3d& b);
 
+// static double pnorm(const Eigen::VectorXd& v, bool l1 = false);
 bool isCollision(const point3d& query, const OcTree* tree)
 {
     // probability that cell is obstacle is less than 67%
@@ -38,10 +40,17 @@ bool isCollision(const point3d& query, const OcTree* tree)
 
 }
 
+// operator overload for priority queue
 bool operator>(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
 {
     return *lhs > *rhs;
 }
+
+bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
+{
+    return *lhs == *rhs;
+}
+
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {
@@ -54,105 +63,91 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     start_coord -= map_origin;
     goal_coord  -= map_origin;
 
-    const OcTreeKey start_key = tree->coordToKey(start_coord);
-    const OcTreeKey goal_key = tree->coordToKey(goal_coord);
-    const auto getId = OcTreeKey::KeyHash();
+    // keys are used to iterate through voxels
+    // a higher depth is smaller resolution 
+    // key[0] + 1 is equivalent to coord[0] + res
+    unsigned level = 2; // TODO: add to config
+    unsigned max_depth = 16; // TODO: check that this is true
+    unsigned depth = max_depth - level;
+    const OcTreeKey start_key = tree->coordToKey(start_coord, depth);
+    const OcTreeKey goal_key = tree->coordToKey(goal_coord, depth);
+
+    const auto getId = OcTreeKey::KeyHash(); // used for hashtable
     const int start_id = (int) getId(start_key);
     const int goal_id = (int) getId(goal_key);
-
-    // construct priority queue on nodes and add start node
-    // top element has least cost
-    priority_queue<shared_ptr<Node>, vector<shared_ptr<Node> >,
-        std::greater<shared_ptr<Node> > > openNodes;
-    openNodes.emplace(new Node(start_key, start_id, -1, 0,
-        (goal_coord - start_coord).norm()));
-
     // keep track of visited nodes based on their id
     unordered_map<int, shared_ptr<Node> > visitedNodes;
+    // construct priority queue on nodes and add start node
+    // top element has least cost
+    set<shared_ptr<Node>, std::greater<shared_ptr<Node> > > openNodes;
+    openNodes.emplace(new Node(start_key, start_id, -1, 0,
+        l1norm(goal_coord, start_coord)));
+
+    double stepSize = pow(2.0, level); // size to search the next key
+    //double searchTolerance = tree->getResolution() * 10;
     // TODO: Add faults
     bool foundGoal = false;
-    try {
+    // algorithmic step
+    auto searchStep = [&](const OcTreeKey& currKey, shared_ptr<Node> parent) {
+        // check for have we visited the node 
+        auto itClosed = visitedNodes.find((int) getId(currKey));
+        if(itClosed != visitedNodes.end()) { return; }
+        // Check for collisions on node
+        point3d currCoord = tree->keyToCoord(currKey, depth);
+        if(!isCollision(currCoord, tree.get()))
+        {
+            shared_ptr<Node> new_ptr = shared_ptr<Node>(new
+                Node(currKey, (int) getId(currKey), parent->id(),
+                parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
+                l1norm(currCoord, goal_coord))); // TODO: add support for pnorm
+
+            auto itOpen = openNodes.find(new_ptr);    
+            if(itOpen != openNodes.end() &&
+                new_ptr->getPathCost() > (*itOpen)->getPathCost()) 
+            { 
+                return; 
+            }
+            openNodes.insert(new_ptr);
+        }
+        else 
+        {
+            // store collision as visited already so we never revisit
+            visitedNodes[getId(currKey)] = shared_ptr<Node>(new Node());
+        }
+    };
     while (!openNodes.empty())
     {
-        auto n = openNodes.top();
-        openNodes.pop();
-
+        auto n = *openNodes.begin();
+        openNodes.erase(openNodes.begin());
+        // check for the coordinate in the correct tolerance to be
+        // considered finding our goal
+        if(n->id() == goal_id) {
+            foundGoal = true;
+            break;
+        }
         // check if we've already visited the node
         if (visitedNodes.find(n->id()) != visitedNodes.end())
         {
             continue;
         }
-
+        // add that we have visited node
         visitedNodes[n->id()] = n;
-
-        // check if node is the goal node
-        if (n->id() == goal_id)
-        {
-            foundGoal = true;
-            std::cout << "Found goal" << foundGoal << std::endl;
-            break;
-        }
-
-        point3d n_coord = tree->keyToCoord(n->key());
-        double x = n_coord.x(), y = n_coord.y(), z = n_coord.z();
-
-        double tolerance = tree->getResolution() * 3;
-        // test 8 moves in 2d plane
-        for (int j = y - tolerance; j < y + 2*tolerance; j += tolerance)
-        {
-            for(int i = x - tolerance; i < x + 2*tolerance; i += tolerance)
-            {
-                // Is node the same as parent
-                if(i == x && j == y) {
-                    continue;
-                }
-
-                // Check for collisions on node
-                OcTreeKey currKey;
-                point3d curr_coord(i, j, z);
-
-                if(tree->coordToKeyChecked(curr_coord, currKey) &&
-                    !isCollision(curr_coord, tree.get()))
-                {
-                    shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-                        Node(currKey, (int) getId(currKey), n->id(),
-                        (curr_coord - start_coord).norm(),
-                        (curr_coord - goal_coord).norm()));
-                    // check for the coordinate in the correct tolerance to be
-                    // considered finding our goal
-                    if ((curr_coord - goal_coord).norm() < tolerance)
-                    {
-                        new_ptr->setId(goal_id);
-                        visitedNodes[goal_id] = new_ptr;
-                        std::cout << "found goal" << std::endl;
-                        foundGoal = true;
-                        throw 15;
-                    }
-
-                    openNodes.push(new_ptr);
-                }
-            }
-        }
-
-        // test move up or down
-        /*
-        for (int k = z - 1; k < z + 2; k += 2)
-        {
-            OcTreeKey currKey;
-            point3d curr_coord(x, y, k);
-            if(tree->coordToKeyChecked(curr_coord, currKey) &&
-                !isCollision(curr_coord, tree.get()))
-            {
-                openNodes.push({currKey, (int) getId(currKey), n.id(),
-                    (curr_coord - start_coord).norm(),
-                    (curr_coord - goal_coord).norm() });
-            }
-        }
-        */
-    }}
-    catch(int e) {}
-    std::cout << "Computed path." << std::endl;
-
+        OcTreeKey curr_key = n->key();
+        // Move forward, back, left, right
+        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1], 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1], 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0], curr_key[1] + stepSize, 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
+            curr_key[2]), n);
+    }
+    if(!foundGoal) {
+        // TODO: Add handling for not found goal
+        assert(false);
+    }
+    // backtrack the found path
     vector<shared_ptr<Node> > node_path;
     shared_ptr<Node> current_node = visitedNodes[goal_id];
     std::cout << "Got current_node from goal id" << std::endl;
@@ -188,7 +183,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         }
     }
     std::cout << "Path object created." << std::endl;
-
     Path path;
     path.waypoints = waypoints;
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
@@ -196,6 +190,11 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     return path;
 }
 
+double l1norm(const point3d& a, const point3d& b)
+{
+    point3d c = a - b;
+    return abs(c.x()) + abs(c.y()) + abs(c.z());
+}
 /*
 double pnorm(const Eigen::VectorXd& v, bool l1)
 {
