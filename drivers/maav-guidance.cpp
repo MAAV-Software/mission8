@@ -273,12 +273,13 @@ void AStarManager::compute(AStarManager* self, bool* running)
     // Run at least once, keep running while the goal has been updated
     do
     {
-        std::cout << "About to run astar." << std::endl;
+        std::cout << "about to update" << std::endl;
         self->updated_goal_ = false;
         lck.unlock();
         self->planner_.update_map(self->map_handler_->getMap());
         self->planner_.update_state(self->state_handler_->getState());
         self->planner_.update_target(self->goal_handler_->getGoal());
+        std::cout << "about to run astar" << std::endl;
         Path p = self->planner_.get_path();
         self->planner_.print_path(p);
         path_t path = maav::gnc::ConvertPath(p);

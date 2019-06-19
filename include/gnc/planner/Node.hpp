@@ -3,6 +3,10 @@
 
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 namespace maav
 {
@@ -18,9 +22,9 @@ class Node
 {
 public:
 	/**
-	 * @brief Default constructs Node with id and parent of -1
+	 * @brief Default constructs Node with id and parent of 0
 	 */
-	Node() : id_{-1}, parent_{-1}, path_cost_{0}, heuristic_cost_{0} {}
+	Node() : id_{0}, parent_{0}, path_cost_{0}, heuristic_cost_{0} {}
 	
 	/**
 	 * @brief Constructs a node with given parameters
@@ -31,7 +35,7 @@ public:
 	 * @param path_cost	running path cost (usually L1 or L2 norm) from start/root
 	 * @param heuristic_cost cost to goal node
 	 */
-	Node(octomap::OcTreeKey key, int id, int parent, double path_cost, double heuristic_cost) 
+	Node(octomap::OcTreeKey key, size_t id, size_t parent, double path_cost, double heuristic_cost) 
 		: key_{key}, id_{id}, parent_{parent}, path_cost_{path_cost}, 
 	  	  heuristic_cost_{heuristic_cost} {}
 	
@@ -65,11 +69,20 @@ public:
 	/**
 	 * @brief Returns node id (liner index into occupancy map)
 	 */
-	int id() const { return id_; }
+	size_t id() const { return id_; }
 
-	void setId(int id) { id_ = id; }
+	void setId(size_t id) { id_ = id; }
 	
 	octomap::OcTreeKey key() const { return key_; }
+
+	void printNode()
+	{
+		cout << "cost: " << cost() << endl;
+		cout << "path: " << path_cost_ << endl;
+		cout << "heuristic: " << heuristic_cost_<< endl;
+		cout << "parent: " << parent_ << endl;
+		cout << "id: " << id_ << endl;
+	}
 
 	/**
 	 * @brief Returns parent id (liner index into occupancy map)
@@ -78,8 +91,8 @@ public:
 	
 private:
 	octomap::OcTreeKey key_;
-	int id_;					//< this node's linear index into occupancy map
-	int parent_;				//< parent's linear index into occupancy map (-1 for root)
+	size_t id_;					//< this node's linear index into occupancy map
+	size_t parent_;				//< parent's linear index into occupancy map (-1 for root)
 	double path_cost_;			//< moving cost from the parent
 	double heuristic_cost_;		//< heuristic cost to goal
 };

@@ -46,6 +46,12 @@ bool operator>(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
     return *lhs > *rhs;
 }
 
+// operator overload for priority queue
+bool operator<(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
+{
+    return *lhs < *rhs;
+}
+
 bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
 {
     return *lhs == *rhs;
@@ -54,6 +60,7 @@ bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {
+    cerr << "starting A*\n";
     // TODO: GET MAP ORIGIN FROM DZ
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
@@ -72,15 +79,22 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     const OcTreeKey start_key = tree->coordToKey(start_coord, depth);
     const OcTreeKey goal_key = tree->coordToKey(goal_coord, depth);
 
+    // update coordinates to be in the same depth
+    start_coord = tree->keyToCoord(start_key, depth);
+    goal_coord = tree->keyToCoord(goal_key, depth);
+
+    cerr << "start: " << start_coord << "\n";
+    cerr << "goal: " << goal_coord << "\n";
+
     const auto getId = OcTreeKey::KeyHash(); // used for hashtable
-    const int start_id = (int) getId(start_key);
-    const int goal_id = (int) getId(goal_key);
+    const size_t start_id = getId(start_key);
+    const size_t goal_id = getId(goal_key);
     // keep track of visited nodes based on their id
     unordered_map<int, shared_ptr<Node> > visitedNodes;
     // construct priority queue on nodes and add start node
     // top element has least cost
-    set<shared_ptr<Node>, std::greater<shared_ptr<Node> > > openNodes;
-    openNodes.emplace(new Node(start_key, start_id, -1, 0,
+    set<shared_ptr<Node> >  openNodes;
+    openNodes.emplace(new Node(start_key, start_id, start_id, 0,
         l1norm(goal_coord, start_coord)));
 
     double stepSize = pow(2.0, level); // size to search the next key
@@ -90,14 +104,14 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // algorithmic step
     auto searchStep = [&](const OcTreeKey& currKey, shared_ptr<Node> parent) {
         // check for have we visited the node 
-        auto itClosed = visitedNodes.find((int) getId(currKey));
+        auto itClosed = visitedNodes.find( getId(currKey) );
         if(itClosed != visitedNodes.end()) { return; }
         // Check for collisions on node
         point3d currCoord = tree->keyToCoord(currKey, depth);
         if(!isCollision(currCoord, tree.get()))
         {
             shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-                Node(currKey, (int) getId(currKey), parent->id(),
+                Node(currKey, getId(currKey), parent->id(),
                 parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
                 l1norm(currCoord, goal_coord))); // TODO: add support for pnorm
 
@@ -115,6 +129,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             visitedNodes[getId(currKey)] = shared_ptr<Node>(new Node());
         }
     };
+    unsigned long counter = 0;
     while (!openNodes.empty())
     {
         auto n = *openNodes.begin();
@@ -123,6 +138,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // considered finding our goal
         if(n->id() == goal_id) {
             foundGoal = true;
+            visitedNodes[n->id()] = n;
             break;
         }
         // check if we've already visited the node
@@ -142,7 +158,22 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
             curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0], curr_key[1], 
+            curr_key[2] + stepSize), n);
+        searchStep(OcTreeKey(curr_key[0], curr_key[1], 
+            curr_key[2] - stepSize), n);
+        
+
+        counter++;
+        if(counter < 5)
+        {
+            cerr << "round done " << counter << "\n";
+            n->printNode();
+            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+        }
     }
+    cerr << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
         // TODO: Add handling for not found goal
         assert(false);
@@ -151,12 +182,9 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     vector<shared_ptr<Node> > node_path;
     shared_ptr<Node> current_node = visitedNodes[goal_id];
     std::cout << "Got current_node from goal id" << std::endl;
-    while(current_node->parent() != -1){
+    while(current_node->id() != start_id){
         node_path.push_back(current_node);
-        std::cout << "Current node pushed back" << std::endl;
-        std::cout << current_node->parent() << std::endl;
         current_node = visitedNodes[current_node->parent()];
-        std::cout << "Got current_node from parent." << std::endl;
     }
     std::cout << "Path is in list now." << std::endl;
     vector<Waypoint> waypoints;
