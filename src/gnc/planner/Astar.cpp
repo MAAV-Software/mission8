@@ -76,7 +76,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // keys are used to iterate through voxels
     // a higher depth is smaller resolution 
     // key[0] + 1 is equivalent to coord[0] + res
-    unsigned level = 2; // TODO: add to config
+    unsigned level = 1; // TODO: add to config
     unsigned max_depth = 16; // TODO: check that this is true
     unsigned depth = max_depth - level;
     const OcTreeKey start_key = tree->coordToKey(start_coord, depth);
@@ -161,6 +161,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
             curr_key[2]), n);
+
         searchStep(OcTreeKey(curr_key[0], curr_key[1], 
             curr_key[2] + stepSize), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1], 
@@ -169,13 +170,13 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 
         counter++;
         // Helpful debugging info to ensure the first moves are correct
-        // if(counter < 5)
-        // {
-        //     cerr << "round done " << counter << "\n";
-        //     n->printNode();
-        //     cerr << tree->keyToCoord(curr_key, depth) << std::endl;
-        //     cerr << tree->keyToCoord(curr_key, depth) << std::endl;
-        // }
+        if(counter < 5)
+        {
+            cerr << "round done " << counter << "\n";
+            n->printNode();
+            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+        }
     }
     cout << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
@@ -202,14 +203,17 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         {
             // handles first waypoint past the start
             // TODO: Calculate Rates when controller has implemented it
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-                rad_to_deg(yaw_between(pos, start.position)));
+            // waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
+            //     rad_to_deg(yaw_between(pos, start.position)));
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
         }
         else
         {
             // TODO: Calculate Rates when controller has implemented it
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-                rad_to_deg(yaw_between(pos, waypoints.back().position)));
+            // waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
+            //     rad_to_deg(yaw_between(pos, waypoints.back().position)));
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
+            
         }
     }
     Path path;
