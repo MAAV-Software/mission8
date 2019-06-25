@@ -16,7 +16,11 @@ using std::vector;
 using std::shared_ptr;
 using std::set;
 using std::unordered_map;
+
+//TODO: remove after debugging
 using std::cerr;
+using std::cout;
+using std::endl;
 
 using namespace octomap;
 
@@ -60,7 +64,6 @@ bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {
-    cerr << "starting A*\n";
     // TODO: GET MAP ORIGIN FROM DZ
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
@@ -83,8 +86,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     start_coord = tree->keyToCoord(start_key, depth);
     goal_coord = tree->keyToCoord(goal_key, depth);
 
-    cerr << "start: " << start_coord << "\n";
-    cerr << "goal: " << goal_coord << "\n";
+    cout << "start: " << start_coord << "\n";
+    cout << "goal: " << goal_coord << "\n";
 
     const auto getId = OcTreeKey::KeyHash(); // used for hashtable
     const size_t start_id = getId(start_key);
@@ -165,15 +168,16 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         
 
         counter++;
-        if(counter < 5)
-        {
-            cerr << "round done " << counter << "\n";
-            n->printNode();
-            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
-            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
-        }
+        // Helpful debugging info to ensure the first moves are correct
+        // if(counter < 5)
+        // {
+        //     cerr << "round done " << counter << "\n";
+        //     n->printNode();
+        //     cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+        //     cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+        // }
     }
-    cerr << "took " << counter << " iterations until path found\n";
+    cout << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
         // TODO: Add handling for not found goal
         assert(false);
@@ -181,12 +185,10 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // backtrack the found path
     vector<shared_ptr<Node> > node_path;
     shared_ptr<Node> current_node = visitedNodes[goal_id];
-    std::cout << "Got current_node from goal id" << std::endl;
     while(current_node->id() != start_id){
         node_path.push_back(current_node);
         current_node = visitedNodes[current_node->parent()];
     }
-    std::cout << "Path is in list now." << std::endl;
     vector<Waypoint> waypoints;
     for(int i = node_path.size() - 2; i > 0; --i)
     {
@@ -210,7 +212,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                 rad_to_deg(yaw_between(pos, waypoints.back().position)));
         }
     }
-    std::cout << "Path object created." << std::endl;
     Path path;
     path.waypoints = waypoints;
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
