@@ -31,7 +31,10 @@ namespace gnc
 namespace planner
 {
 
+const unsigned int ARENA_SIZE = 30; // in meters 
+
 double l1norm(const point3d& a, const point3d& b);
+double l2norm(const point3d& a, const point3d& b);
 
 // static double pnorm(const Eigen::VectorXd& v, bool l1 = false);
 bool isCollision(const point3d& query, const OcTree* tree)
@@ -40,7 +43,7 @@ bool isCollision(const point3d& query, const OcTree* tree)
     //return map.cellOdds(x, y) > 2.0;
     OcTreeNode* result = tree->search(query);
     if(!result) { return false; } // TODO: This means it was unknown. Handle later
-    return result->getOccupancy() > 0.67;
+    return result->getOccupancy() > 0.5;
 
 }
 
@@ -61,9 +64,47 @@ bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
     return *lhs == *rhs;
 }
 
+// gets the linear index from a 2D grid. Counts N/W/S/E
+struct GetId
+{
+    GetId(double resolution) : resolution_(resolution) {}
+    // return linear index from the 2d grid
+    size_t operator()(const point3d& a)
+    {
+        point3d map_origin(0, 0, a.z());
+        if(map_origin == a)
+        {
+            return 0;
+        }
+        unsigned ringNum = l1norm(a, map_origin) / resolution_;
+        unsigned ringSize = ringNum * 4;
+        // arithmetic sum
+        unsigned prevBlocks = ((8 + (ringNum - 1) * 4) * ((double)ringNum/2)) - ringSize;
+        point3d corner;
+        unsigned prevRingBlocks = 0;
+        if( a.x() > 0 && a.y() >= 0) {
+            corner = point3d(ringNum, 0, a.z());
+            prevRingBlocks = ringSize * 0.75;
+        }   
+        else if( a.x() <= 0 && a.y() > 0) {
+            corner = point3d(0.0, ringNum, a.z());
+            prevRingBlocks = 0;
+        }
+        else if( a.x() < 0 && a.y() <= 0 ) {
+            corner = point3d(-1.0 * ringNum, 0.0, a.z());
+            prevRingBlocks = ringSize * 0.25;
+        }
+        else {
+            corner = point3d(0.0, -1.0 * ringNum, a.z());
+            prevRingBlocks = ringSize * 0.5;
+        }
+        return 1 + (prevBlocks + prevRingBlocks + l2norm(a, corner) / resolution_);
+    }
+    double resolution_;
+};
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
-{
+{   
     // TODO: GET MAP ORIGIN FROM DZ
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
@@ -76,7 +117,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // keys are used to iterate through voxels
     // a higher depth is smaller resolution 
     // key[0] + 1 is equivalent to coord[0] + res
-    unsigned level = 1; // TODO: add to config
+    unsigned level = 2; // TODO: add to config
     unsigned max_depth = 16; // TODO: check that this is true
     unsigned depth = max_depth - level;
     const OcTreeKey start_key = tree->coordToKey(start_coord, depth);
@@ -89,16 +130,17 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     cout << "start: " << start_coord << "\n";
     cout << "goal: " << goal_coord << "\n";
 
-    const auto getId = OcTreeKey::KeyHash(); // used for hashtable
-    const size_t start_id = getId(start_key);
-    const size_t goal_id = getId(goal_key);
+    GetId getId(tree->getResolution());
+
+    const size_t start_id = getId(start_coord);
+    const size_t goal_id = getId(goal_coord);
     // keep track of visited nodes based on their id
     unordered_map<int, shared_ptr<Node> > visitedNodes;
     // construct priority queue on nodes and add start node
     // top element has least cost
     set<shared_ptr<Node> >  openNodes;
     openNodes.emplace(new Node(start_key, start_id, start_id, 0,
-        l1norm(goal_coord, start_coord)));
+        l2norm(goal_coord, start_coord)));
 
     double stepSize = pow(2.0, level); // size to search the next key
     //double searchTolerance = tree->getResolution() * 10;
@@ -107,16 +149,17 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // algorithmic step
     auto searchStep = [&](const OcTreeKey& currKey, shared_ptr<Node> parent) {
         // check for have we visited the node 
-        auto itClosed = visitedNodes.find( getId(currKey) );
+        point3d currCoord = tree->keyToCoord(currKey, depth);
+        size_t currId = getId(currCoord);
+        auto itClosed = visitedNodes.find(currId);
         if(itClosed != visitedNodes.end()) { return; }
         // Check for collisions on node
-        point3d currCoord = tree->keyToCoord(currKey, depth);
         if(!isCollision(currCoord, tree.get()))
         {
             shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-                Node(currKey, getId(currKey), parent->id(),
+                Node(currKey, currId, parent->id(),
                 parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
-                l1norm(currCoord, goal_coord))); // TODO: add support for pnorm
+                l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
 
             auto itOpen = openNodes.find(new_ptr);    
             if(itOpen != openNodes.end() &&
@@ -129,13 +172,16 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         else 
         {
             // store collision as visited already so we never revisit
-            visitedNodes[getId(currKey)] = shared_ptr<Node>(new Node());
+            visitedNodes[currId] = shared_ptr<Node>(new Node());
         }
     };
     unsigned long counter = 0;
     while (!openNodes.empty())
     {
-        auto n = *openNodes.begin();
+        // assert cost of the beginning node is less than the last node
+        assert(*openNodes.begin() < *openNodes.rbegin() ||  
+            openNodes.begin()->cost() == openNodes.rbegin()->cost());
+        shared_ptr<Node> n = *openNodes.begin();
         openNodes.erase(openNodes.begin());
         // check for the coordinate in the correct tolerance to be
         // considered finding our goal
@@ -161,12 +207,11 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
             curr_key[2]), n);
-
+        // Move up and down
         searchStep(OcTreeKey(curr_key[0], curr_key[1], 
             curr_key[2] + stepSize), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1], 
             curr_key[2] - stepSize), n);
-        
 
         counter++;
         // Helpful debugging info to ensure the first moves are correct
@@ -174,7 +219,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         {
             cerr << "round done " << counter << "\n";
             n->printNode();
-            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
             cerr << tree->keyToCoord(curr_key, depth) << std::endl;
         }
     }
@@ -227,6 +271,12 @@ double l1norm(const point3d& a, const point3d& b)
 {
     point3d c = a - b;
     return abs(c.x()) + abs(c.y()) + abs(c.z());
+}
+
+double l2norm(const point3d& a, const point3d& b)
+{
+    point3d c = a - b;
+    return c.norm();
 }
 /*
 double pnorm(const Eigen::VectorXd& v, bool l1)
