@@ -233,11 +233,19 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
             curr_key[2]), n);
+        // searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] + stepSize, 
+        //     curr_key[2]), n);
+        // searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] + stepSize, 
+        //     curr_key[2]), n);
+        // searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] - stepSize, 
+        //     curr_key[2]), n);
+        // searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] - stepSize, 
+        //     curr_key[2]), n);
         // Move up and down
-        searchStep(OcTreeKey(curr_key[0], curr_key[1], 
-            curr_key[2] + stepSize), n);
-        searchStep(OcTreeKey(curr_key[0], curr_key[1], 
-            curr_key[2] - stepSize), n);
+        // searchStep(OcTreeKey(curr_key[0], curr_key[1], 
+        //     curr_key[2] + stepSize), n);
+        // searchStep(OcTreeKey(curr_key[0], curr_key[1], 
+        //     curr_key[2] - stepSize), n);
 
         counter++;
         // Helpful debugging info to ensure the first moves are correct
