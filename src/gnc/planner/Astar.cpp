@@ -275,7 +275,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
                      (std::chrono::system_clock::now().time_since_epoch()).count();
         return path;
     }
-    // backtrack the found path
+    // backtrack the found path. node_path[0] is the goal
     vector<shared_ptr<Node> > node_path;
     shared_ptr<Node> current_node = visitedNodes[goal_id];
     while(current_node->id() != start_id){
@@ -283,7 +283,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         current_node = visitedNodes[current_node->parent()];
     }
     vector<Waypoint> waypoints;
-    for(int i = node_path.size() - 2; i > 0; --i)
+    for(int i = node_path.size() - 1; i > 0; --i)
     {
         shared_ptr<Node> n = node_path[i];
         // translates to globalFrame
@@ -291,19 +291,18 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         tmp_pos += map_origin;
         Eigen::Vector3d pos = Eigen::Vector3d(tmp_pos.x(), tmp_pos.y(),
             tmp_pos.z());
-        if(i == (int)node_path.size() - 2)
+        if(i == (int)node_path.size() - 1)
         {
-            // handles first waypoint past the start
+            // handles start waypoint
             // TODO: Calculate Rates when controller has implemented it
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-                rad_to_deg(yaw_between(pos, start.position)));
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), start.yaw);
             //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
         }
         else
         {
             // TODO: Calculate Rates when controller has implemented it
             waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-                rad_to_deg(yaw_between(pos, waypoints.back().position)));
+                rad_to_deg(yaw_between(waypoints.back().position, pos)));
             //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
             
         }

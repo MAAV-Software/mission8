@@ -66,7 +66,7 @@ void Controller::set_path(const path_t& _path)
 {
     converged_on_waypoint = true;  // so that path will choose first waypoint in flight()
     path = _path;
-    // Find the nearest point to the current position in the path and start there
+    // Find the nearest point to the current position in the path and start one past it
     Eigen::Vector3d current_position = current_state.position();
     size_t bestIndex = 0;
     double bestDist = std::numeric_limits<double>::max();
@@ -82,7 +82,8 @@ void Controller::set_path(const path_t& _path)
             bestIndex = i;
         }
     }
-    path_counter = bestIndex;
+    // Make sure that one past the nearest waypoint is within the path
+    path_counter = bestIndex >= (path.waypoints.size() - 1) ? bestIndex : bestIndex + 1;
 }
 
 void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
