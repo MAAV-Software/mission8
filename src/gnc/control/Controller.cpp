@@ -57,6 +57,38 @@ Controller::Controller(const YAML::Node& control_config, float starting_yaw)
 Controller::~Controller() {}
 
 /*
+<<<<<<< HEAD
+=======
+ *      Sets current path and sets up class to move
+ *      through path
+ */
+void Controller::set_path(const path_t& _path)
+{
+    converged_on_waypoint = true;  // so that path will choose first waypoint in flight()
+    path = _path;
+    // Find the nearest point to the current position in the path and start there
+    Eigen::Vector3d current_position = current_state.position();
+    size_t bestIndex = 0;
+    double bestDist = std::numeric_limits<double>::max();
+    for (size_t i = 0; i < path.waypoints.size(); ++i)
+    {
+        Eigen::Vector3d point = ConvertWaypoint(path.waypoints[i]).position;
+        Eigen::Vector3d diff = point - current_position;
+        // Squared distance, but is fine, sqrt would waste time
+        double dist = diff.dot(diff);
+        if (dist < bestDist) 
+        {
+            bestDist = dist;
+            bestIndex = i;
+        }
+    }
+    path_counter = bestIndex;
+}
+
+void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
+
+/*
+>>>>>>> Controller will start at nearest waypoint in path.
  *      Control parameters set from message and vehicle
  *      parameters set from struct.  Vehicle parametes should
  *      not change once the vehicle is in flight but control
@@ -98,8 +130,66 @@ void Controller::set_control_params(const ctrl_params_t& ctrl_params)
 /*
  *      Runs flight mode and controller mode
  */
-InnerLoopSetpoint Controller::operator()(
-    const State& current_state, const ContinuousPath::Waypoint& target)
+InnerLoopSetpoint Controller::flight()
+{
+    if (!path.waypoints.empty() && converged_on_waypoint && path_counter < path.NUM_WAYPOINTS)
+    {
+        set_current_target(ConvertWaypoint(path.waypoints[path_counter++]));
+        converged_on_waypoint = false;
+
+        total_distance_to_target = (current_target.position - current_state.position()).norm();
+        origin_yaw = get_heading(current_state);
+    }
+
+    return move_to_current_target();
+}
+
+/*
+ *      Run method that controlls vehicle with xbox controller input
+ *      to use run "maav-controller -x"
+ */
+InnerLoopSetpoint Controller::run_xbox(const XboxController& xbox_controller)
+{
+    InnerLoopSetpoint setpoint;
+    controller_run_loop_1 = controller_run_loop_2;
+    controller_run_loop_2 = high_resolution_clock::now();
+    auto dt = duration_cast<duration<double>>(controller_run_loop_2 - controller_run_loop_1);
+
+    setpoint.thrust = (static_cast<float>(xbox_controller.left_joystick_y) / 32767 + 1) / 2;
+    float y_acc = (static_cast<float>(xbox_controller.right_joystick_x) / 32767) * M_PI * 20 / 180;
+    float x_acc = (-static_cast<float>(xbox_controller.right_joystick_y) / 32767) * M_PI * 20 / 180;
+    if (xbox_controller.left_trigger > 50)
+    {
+        xbox_yaw = xbox_yaw - dt.count() * veh_params.rate_limits[3].first;
+        if (xbox_yaw < 0) xbox_yaw = xbox_yaw + 2 * M_PI;
+    }
+    if (xbox_controller.right_trigger > 50)
+    {
+        xbox_yaw = xbox_yaw + dt.count() * veh_params.rate_limits[3].first;
+        if (xbox_yaw > 2 * M_PI) xbox_yaw = xbox_yaw - 2 * M_PI;
+    }
+
+    std::cout << xbox_yaw << '\n';
+
+    // Todo: add pid controls, very hard to use as is (but it werks tho?!)
+
+    Eigen::Quaterniond q_roll = {
+        cos(y_acc / 2), cos(xbox_yaw) * sin(y_acc / 2), sin(xbox_yaw) * sin(y_acc / 2), 0};
+    Eigen::Quaterniond q_pitch = {
+        cos(x_acc / 2), -sin(xbox_yaw) * sin(x_acc / 2), cos(xbox_yaw) * sin(x_acc / 2), 0};
+    Eigen::Quaterniond q_yaw = {cos(xbox_yaw / 2), 0, 0, sin(xbox_yaw / 2)};
+
+    setpoint.q = static_cast<Eigen::Quaternion<float>>(q_roll * q_pitch * q_yaw);
+    return setpoint;
+}
+
+/*
+ *      Main control function
+ *      Takes current position and current
+ *      current_position and provides inner loop setpoint
+ *      to move to that current_position
+ */
+mavlink::InnerLoopSetpoint Controller::move_to_current_target()
 {
     InnerLoopSetpoint new_setpoint;
 
@@ -126,9 +216,13 @@ InnerLoopSetpoint Controller::operator()(
 
     double yaw_error = eecs467::angle_diff(target.heading, current_state.attitude().angleZ());
 
-    double yaw_velocity = current_state.angularVelocity().z();
-    double yaw_rate = yaw_velocity_pid.run(yaw_error, yaw_velocity);
-    yaw_rate = bounded(yaw_rate, veh_params.rate_limits[3]);
+    // Only rotate yaw if close enough to current_position OR we have completed enough of the trajectory
+    if (position_error.norm() < 1 ||
+        (total_distance_to_target != 0 && position_error.norm() / total_distance_to_target < 0.85))
+    {
+        double yaw_velocity = current_state.angularVelocity().z();
+        double yaw_rate = yaw_velocity_pid.run(yaw_error, yaw_velocity);
+        yaw_rate = bounded(yaw_rate, veh_params.rate_limits[3]);
 
     // TODO: don't make this constant
     if (!time_initialized_)
