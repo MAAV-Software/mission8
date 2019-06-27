@@ -57,6 +57,38 @@ Controller::Controller(const YAML::Node& control_config, float starting_yaw)
 Controller::~Controller() {}
 
 /*
+<<<<<<< HEAD
+=======
+ *      Sets current path and sets up class to move
+ *      through path
+ */
+void Controller::set_path(const path_t& _path)
+{
+    converged_on_waypoint = true;  // so that path will choose first waypoint in flight()
+    path = _path;
+    // Find the nearest point to the current position in the path and start there
+    Eigen::Vector3d current_position = current_state.position();
+    size_t bestIndex = 0;
+    double bestDist = std::numeric_limits<double>::max();
+    for (size_t i = 0; i < path.waypoints.size(); ++i)
+    {
+        Eigen::Vector3d point = ConvertWaypoint(path.waypoints[i]).position;
+        Eigen::Vector3d diff = point - current_position;
+        // Squared distance, but is fine, sqrt would waste time
+        double dist = diff.dot(diff);
+        if (dist < bestDist) 
+        {
+            bestDist = dist;
+            bestIndex = i;
+        }
+    }
+    path_counter = bestIndex;
+}
+
+void Controller::set_current_target(const Waypoint& new_target) { current_target = new_target; }
+
+/*
+>>>>>>> Controller will start at nearest waypoint in path.
  *      Control parameters set from message and vehicle
  *      parameters set from struct.  Vehicle parametes should
  *      not change once the vehicle is in flight but control
