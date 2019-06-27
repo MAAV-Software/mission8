@@ -36,7 +36,12 @@ const unsigned int ARENA_SIZE = 30; // in meters
 double l1norm(const point3d& a, const point3d& b);
 double l2norm(const point3d& a, const point3d& b);
 
-// static double pnorm(const Eigen::VectorXd& v, bool l1 = false);
+/*
+* A point has no collision if it is a safe distance away from the nearest
+* obstacle.
+* TODO: Config for distance between obstacles
+* TODO: Support for moving obstacles
+*/
 bool isCollision(const point3d& query, const OcTree* tree)
 {
     // TODO: What to do with unknown nodes?
@@ -134,7 +139,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // TODO: GET MAP ORIGIN FROM DZ
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
-    const point3d map_origin(0.0,0.,0.);
+    const point3d map_origin(0.0, 0.0, 0.0);
     point3d start_coord(start.position.x(), start.position.y(), start.position.z());
     point3d goal_coord(goal.position.x(), goal.position.y(), goal.position.z());
     start_coord -= map_origin;
@@ -189,7 +194,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 
             auto itOpen = openNodes.find(new_ptr);    
             if(itOpen != openNodes.end() &&
-                new_ptr->getPathCost() > (*itOpen)->getPathCost()) 
+                new_ptr->getPathCost() >= (*itOpen)->getPathCost()) 
             { 
                 return; 
             }
@@ -233,14 +238,17 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
         searchStep(OcTreeKey(curr_key[0], curr_key[1] - stepSize, 
             curr_key[2]), n);
-        // searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] + stepSize, 
-        //     curr_key[2]), n);
-        // searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] + stepSize, 
-        //     curr_key[2]), n);
-        // searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] - stepSize, 
-        //     curr_key[2]), n);
-        // searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] - stepSize, 
-        //     curr_key[2]), n);
+
+        // Add diagnols
+        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] + stepSize, 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] + stepSize, 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] - stepSize, 
+            curr_key[2]), n);
+        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] - stepSize, 
+            curr_key[2]), n);
+
         // Move up and down
         // searchStep(OcTreeKey(curr_key[0], curr_key[1], 
         //     curr_key[2] + stepSize), n);
@@ -249,18 +257,23 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
 
         counter++;
         // Helpful debugging info to ensure the first moves are correct
-        if(counter < 5)
-        {
-            cerr << "round done " << counter << "\n";
-            n->printNode();
-            cerr << tree->keyToCoord(curr_key, depth) << std::endl;
-        }
+        // if(counter < 5)
+        // {
+        //     cerr << "round done " << counter << "\n";
+        //     n->printNode();
+        //     cerr << tree->keyToCoord(curr_key, depth) << std::endl;
+        // }
     }
     cout << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
-        // TODO: Add handling for not found goal
+        // TODO: handle a goal that was not found
+        // Returns a path with only the starting waypoint
         cout << "Did not find a goal" << endl;
-        assert(false);
+        Path path;
+        path.waypoints.push_back(start);
+        path.utime = std::chrono::duration_cast<std::chrono::microseconds>
+                     (std::chrono::system_clock::now().time_since_epoch()).count();
+        return path;
     }
     // backtrack the found path
     vector<shared_ptr<Node> > node_path;
@@ -282,16 +295,16 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         {
             // handles first waypoint past the start
             // TODO: Calculate Rates when controller has implemented it
-            // waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-            //     rad_to_deg(yaw_between(pos, start.position)));
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
+                rad_to_deg(yaw_between(pos, start.position)));
+            //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
         }
         else
         {
             // TODO: Calculate Rates when controller has implemented it
-            // waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-            //     rad_to_deg(yaw_between(pos, waypoints.back().position)));
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
+                rad_to_deg(yaw_between(pos, waypoints.back().position)));
+            //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
             
         }
     }
@@ -313,26 +326,6 @@ double l2norm(const point3d& a, const point3d& b)
     point3d c = a - b;
     return c.norm();
 }
-/*
-double pnorm(const Eigen::VectorXd& v, bool l1)
-{
-    return l1 ? v.lpNorm<1>() : v.norm();
-}
-*/
-
-/*
-double Astar::dist(const octomap::OcTreeNode* a, const octomap::OcTreeNode* b,
-    const std::shared_ptr<octomap::OcTree> tree, bool l1)
-
-{
-    // TODO: Let the A* search use something other than L2
-    assert(false);
-    return 0.0;
-    // const auto d = map.lin2coord(a.id()) - map.lin2coord(b.id());
-    const auto d = Eigen::Vector3d(0,0,0);
-    return pnorm(d, l1);
-}
-*/
 
 } // close planner namespace
 } // close gnc namespace
