@@ -39,12 +39,38 @@ double l2norm(const point3d& a, const point3d& b);
 // static double pnorm(const Eigen::VectorXd& v, bool l1 = false);
 bool isCollision(const point3d& query, const OcTree* tree)
 {
-    // probability that cell is obstacle is less than 67%
-    //return map.cellOdds(x, y) > 2.0;
+    // TODO: What to do with unknown nodes?
     OcTreeNode* result = tree->search(query);
-    if(!result) { return false; } // TODO: This means it was unknown. Handle later
-    return result->getOccupancy() > 0.5;
-
+    if(result && result->getOccupancy() > 0.5)
+        return true;
+    
+    // Cast a ray in 8 directions and see if there is any obstacle within 0.5m
+    point3d hitPt;
+    if(tree->castRay(query, point3d(0.0, 1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(1.0, 0.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(0.0, -1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(-1.0, 0.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(1.0, 1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(-1.0, 1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(1.0, -1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    else if(tree->castRay(query, point3d(-1.0, -1.0, 0.0), hitPt, true, 0.7)) {
+        return true;
+    }
+    return false;
 }
 
 // operator overload for priority queue
@@ -108,7 +134,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // TODO: GET MAP ORIGIN FROM DZ
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
-    const point3d map_origin(0,0,0);
+    const point3d map_origin(0.0,0.,0.);
     point3d start_coord(start.position.x(), start.position.y(), start.position.z());
     point3d goal_coord(goal.position.x(), goal.position.y(), goal.position.z());
     start_coord -= map_origin;
@@ -225,6 +251,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     cout << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
         // TODO: Add handling for not found goal
+        cout << "Did not find a goal" << endl;
         assert(false);
     }
     // backtrack the found path
