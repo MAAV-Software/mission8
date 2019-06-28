@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "angle_functions.hpp"
 /**
  * @file math.hpp
  * @brief Convenience math functions
@@ -252,11 +253,8 @@ inline std::array<uint8_t, 6> make_thresh(const std::string &csv)
 inline double yaw_between(const Eigen::Vector3d &start, const Eigen::Vector3d &end)
 {
     Eigen::Vector3d diff = end - start;
-    
     double heading = atan2(diff(1), diff(0));
-    heading = -1 * heading + maav::PI / 2; // transform to yaw heading
-
-    return (heading < 0) ? (heading + 2 * maav::PI) : heading;
+    return eecs467::wrap_to_2pi(heading);
 }
 
 /**
