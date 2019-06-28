@@ -37,7 +37,8 @@ set(TEST_SRCS
         PlaneFitTest.cpp
         ZcmConversionTest.cpp
         GlobalUpdateTest.cpp
-        MagnetometerTest.cpp)
+        MagnetometerTest.cpp
+        PlannerUtilsTest.cpp)
 
 foreach (testSrc ${TEST_SRCS})
     #Extract the filename without an extension (NAME_WE)

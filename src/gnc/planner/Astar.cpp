@@ -11,6 +11,7 @@
 #include "common/math/math.hpp"
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Node.hpp"
+#include "gnc/planner/plannerUtils.hpp"
 
 using std::vector;
 using std::shared_ptr;
@@ -32,9 +33,6 @@ namespace planner
 {
 
 const unsigned int ARENA_SIZE = 30; // in meters 
-
-double l1norm(const point3d& a, const point3d& b);
-double l2norm(const point3d& a, const point3d& b);
 
 /*
 * A point has no collision if it is a safe distance away from the nearest
@@ -94,45 +92,6 @@ bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
 {
     return *lhs == *rhs;
 }
-
-// gets the linear index from a 2D grid. Counts N/W/S/E
-struct GetId
-{
-    GetId(double resolution) : resolution_(resolution) {}
-    // return linear index from the 2d grid
-    size_t operator()(const point3d& a)
-    {
-        point3d map_origin(0, 0, a.z());
-        if(map_origin == a)
-        {
-            return 0;
-        }
-        unsigned ringNum = l1norm(a, map_origin) / resolution_;
-        unsigned ringSize = ringNum * 4;
-        // arithmetic sum
-        unsigned prevBlocks = ((8 + (ringNum - 1) * 4) * ((double)ringNum/2)) - ringSize;
-        point3d corner;
-        unsigned prevRingBlocks = 0;
-        if( a.x() > 0 && a.y() >= 0) {
-            corner = point3d(ringNum, 0, a.z());
-            prevRingBlocks = ringSize * 0.75;
-        }   
-        else if( a.x() <= 0 && a.y() > 0) {
-            corner = point3d(0.0, ringNum, a.z());
-            prevRingBlocks = 0;
-        }
-        else if( a.x() < 0 && a.y() <= 0 ) {
-            corner = point3d(-1.0 * ringNum, 0.0, a.z());
-            prevRingBlocks = ringSize * 0.25;
-        }
-        else {
-            corner = point3d(0.0, -1.0 * ringNum, a.z());
-            prevRingBlocks = ringSize * 0.5;
-        }
-        return 1 + (prevBlocks + prevRingBlocks + l2norm(a, corner) / resolution_);
-    }
-    double resolution_;
-};
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {   
@@ -312,18 +271,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
                  (std::chrono::system_clock::now().time_since_epoch()).count();
     return path;
-}
-
-double l1norm(const point3d& a, const point3d& b)
-{
-    point3d c = a - b;
-    return abs(c.x()) + abs(c.y()) + abs(c.z());
-}
-
-double l2norm(const point3d& a, const point3d& b)
-{
-    point3d c = a - b;
-    return c.norm();
 }
 
 } // close planner namespace
