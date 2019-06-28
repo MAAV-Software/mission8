@@ -12,3 +12,6 @@
 	path = thirdparty/Firmware
 	url = https://github.com/PX4/Firmware.git
 	ignore=dirty
+[submodule "thirdparty/rapidjson"]
+	path = thirdparty/rapidjson
+	url = https://github.com/Tencent/rapidjson
