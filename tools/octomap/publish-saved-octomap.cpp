@@ -71,7 +71,7 @@ void runHeartbeat(zcm::ZCM* zcm)
     }
 }
 // Sends saved map over zcm every 2 seconds
-void publishMap(zcm::ZCM* zcm, const string &filename)
+void publishMap(zcm::ZCM* zcm, const string &filename, size_t between_publish_time)
 {
     shared_ptr<const octomap::OcTree> octree((octomap::OcTree*)octomap::AbstractOcTree::read(filename));
     octomap_t message;
@@ -83,7 +83,7 @@ void publishMap(zcm::ZCM* zcm, const string &filename)
         );
         message.utime = utime.count();
         zcm->publish(maav::OCCUPANCY_MAP_CHANNEL, &message);
-        std::this_thread::sleep_for(milliseconds(2000));
+        std::this_thread::sleep_for(milliseconds(between_publish_time));
     }
 }
 
@@ -95,20 +95,22 @@ int main(int argc, char** argv)
     signal(SIGSEGV, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    if(argc != 2)
+    if(argc < 2)
     {
-        std::cerr << "USAGE: publish-load-map <filepath>\n";
+        std::cerr << "USAGE: publish-load-map <filepath> -w <time-between-publishes>\n";
         return -1;
     }
 
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
+    gopt.addInt('w', "wait", "2000", "Time to wait between publishing maps.");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
         gopt.printHelp();
         return 1;
     }
+    size_t wait_between = static_cast<size_t>(gopt.getInt("wait"));
 
     string filename = argv[1];
 
@@ -117,7 +119,7 @@ int main(int argc, char** argv)
     zcm::ZCM zcm {"ipc"};
     // start threads
     thread heartbeat(runHeartbeat, &zcm);
-    thread publishmap(publishMap, &zcm, filename);
+    thread publishmap(publishMap, &zcm, filename, wait_between);
     // Wait until the kill signal is received
     unique_lock<mutex> lck(mtx);
     while (!KILL)
