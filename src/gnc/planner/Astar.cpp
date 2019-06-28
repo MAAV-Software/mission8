@@ -240,14 +240,14 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             curr_key[2]), n);
 
         // Add diagnols
-        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] + stepSize, 
-            curr_key[2]), n);
-        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] + stepSize, 
-            curr_key[2]), n);
-        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] - stepSize, 
-            curr_key[2]), n);
-        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] - stepSize, 
-            curr_key[2]), n);
+//        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] + stepSize, 
+//            curr_key[2]), n);
+//        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] + stepSize, 
+//            curr_key[2]), n);
+//        searchStep(OcTreeKey(curr_key[0] + stepSize, curr_key[1] - stepSize, 
+//            curr_key[2]), n);
+//        searchStep(OcTreeKey(curr_key[0] - stepSize, curr_key[1] - stepSize, 
+//            curr_key[2]), n);
 
         // Move up and down
         // searchStep(OcTreeKey(curr_key[0], curr_key[1], 
@@ -302,7 +302,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         {
             // TODO: Calculate Rates when controller has implemented it
             waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
-                rad_to_deg(yaw_between(waypoints.back().position, pos)));
+                yaw_between(waypoints.back().position, pos));
             //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
             
         }
