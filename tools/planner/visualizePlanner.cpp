@@ -33,6 +33,10 @@ using Eigen::Vector3d;
 using cv::Mat;
 using cv::rectangle;
 
+// The number of columns and rows in the Mat used for rendering
+constexpr int MAT_WIDTH = 1920;
+constexpr int MAT_HEIGHT = 1080;
+
 // Used to extract the pairs of 3d points that represent the walls from the JSON dom
 vector<pair<Vector3d, Vector3d> > extractWalls(Document& doc)
 {
@@ -58,10 +62,6 @@ void renderWall(Mat& arena, pair<Vector3d, Vector3d>& wall)
     rectangle(arena, cv::Point2d(wall.first[1], wall.first[0]), cv::Point2d(wall.second[1], 
         wall.second[0]), cv::Scalar(250), CV_FILLED);
 }
-
-// The number of columns and rows in the Mat used for rendering
-constexpr int MAT_WIDTH = 1920;
-constexpr int MAT_HEIGHT = 1080;
 
 int main(int argc, char** argv) {
     GetOpt gopt;
@@ -112,20 +112,18 @@ int main(int argc, char** argv) {
     // TODO this needs to be in its own function so that it can be done to any point I pass in
     // TODO this actually can't be shared because for some reason the rectangles are opposite
     // Correct the eigen wall entries with the scaling and offset
+    for (auto& wall: eigen_walls)
     {
-        for (auto& wall: eigen_walls)
-        {
-            // Correct the scaling
-            wall.first[0] *= scaling;
-            wall.first[1] *= scaling;
-            wall.second[0] *= scaling;
-            wall.second[1] *= scaling;
-            // Correct the offset
-            wall.first[0] += MAT_HEIGHT / 2;
-            wall.first[1] += MAT_WIDTH / 2;
-            wall.second[0] += MAT_HEIGHT / 2;
-            wall.second[1] += MAT_WIDTH / 2;
-        }
+        // Correct the scaling
+        wall.first[0] *= scaling;
+        wall.first[1] *= scaling;
+        wall.second[0] *= scaling;
+        wall.second[1] *= scaling;
+        // Correct the offset
+        wall.first[0] += MAT_HEIGHT / 2;
+        wall.first[1] += MAT_WIDTH / 2;
+        wall.second[0] += MAT_HEIGHT / 2;
+        wall.second[1] += MAT_WIDTH / 2;
     }
 
     // The Mat which rendering is done on
@@ -137,9 +135,6 @@ int main(int argc, char** argv) {
     for (auto& wall: eigen_walls)
     {
         renderWall(arena, wall);
-        // rectangle(arena, cv::Point2d(wall.first[0], wall.first[1]), cv::Point2d(wall.second[0], 
-        //    wall.second[1]), cv::Scalar(250), CV_FILLED);
-        // Display the rendered walls
     }
     // Display the rendered walls
     cv::namedWindow("A* Test Rendering", cv::WINDOW_AUTOSIZE);
