@@ -172,10 +172,9 @@ void CameraDriverHelper::posPublish()
 
     update.position = gnc::convertVector3d(position);
     update.attitude = gnc::convertQuaternion(Sophus::SO3d{attitude});
-
     update.utime = message.utime;
 
-    zcm_.publish(GLOBAL_UPDATE_CHANNEL, &message);
+    zcm_.publish(GLOBAL_UPDATE_CHANNEL, &update);
 }
 
 }  // namespace maav::vision
