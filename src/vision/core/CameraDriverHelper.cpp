@@ -168,13 +168,14 @@ void CameraDriverHelper::posPublish()
 
     const Eigen::Vector3d position{-data.z_translation_, data.x_translation_, -data.y_translation_};
     const Eigen::Quaterniond attitude{
-        data.Qr_rotation_, -data.Qk_rotation_, data.Qi_rotation_, data.Qj_rotation_};
+        data.Qr_rotation_, data.Qk_rotation_, data.Qi_rotation_, data.Qj_rotation_};
 
     update.position = gnc::convertVector3d(position);
     update.attitude = gnc::convertQuaternion(Sophus::SO3d{attitude});
+
     update.utime = message.utime;
 
-    zcm_.publish(GLOBAL_UPDATE_CHANNEL, &update);
+    zcm_.publish(GLOBAL_UPDATE_CHANNEL, &message);
 }
 
 }  // namespace maav::vision
