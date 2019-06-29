@@ -65,6 +65,8 @@ int main(int argc, char** argv) {
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
     gopt.addString('m', "map", "NO DEFAULT", "Path to the map json file to use in the render.");
+    gopt.addString('f', "octreeFile", "test-octree-file.ot", "Path to save octomap file to.");
+    gopt.addBool('s', "save", false, "Causes the generated octomap to be saved to file");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -195,10 +197,14 @@ int main(int argc, char** argv) {
         Vector3d& pt2 = path[i];
         arrowedLine(arena, Point(pt1[1], pt1[0]), Point(pt2[1], pt2[0]), Scalar(200, 100, 200), 3);
     }
-    
+
     // Display the end result
     cv::namedWindow("A* Test Rendering", cv::WINDOW_AUTOSIZE);
     imshow("A* Test Rendering", arena);
+
+    // Save the octomap to the specified file path if the save flag was passed
+    if (gopt.getBool("save")) tree->write(gopt.getString("octreeFile"));
+
     cv::waitKey(0);
 
 }

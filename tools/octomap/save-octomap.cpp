@@ -77,7 +77,6 @@ public:
             KILL = true;
             std::cerr << "Saved: " << filename << "\n";
             cond_var.notify_one();
-            
         }
     }
 private:
