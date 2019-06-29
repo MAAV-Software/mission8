@@ -32,6 +32,10 @@ using Eigen::Vector3d;
 
 using cv::Mat;
 using cv::rectangle;
+using cv::circle;
+using cv::Point;
+using cv::Scalar;
+using cv::arrowedLine;
 
 // The number of columns and rows in the Mat used for rendering
 constexpr int MAT_WIDTH = 1920;
@@ -55,7 +59,22 @@ vector<pair<Vector3d, Vector3d> > extractWalls(Document& doc)
     return eigen_walls;
 }
 
+<<<<<<< 01c184ca8945e647efa6c842e54f320e2303bbdd
 // TODO Just put all of rywunder's code here
+=======
+// Used for testing, extracts the path from the map spec
+vector<Vector3d> extractPath(Document& doc)
+{
+    GenericArray path = doc["path"].GetArray();
+    vector<Vector3d> extracted;
+    extracted.reserve(path.Size());
+    for (auto& point : path) 
+    {
+        extracted.emplace_back(point[0].GetDouble(), point[1].GetDouble(), point[2].GetDouble());
+    }
+    return extracted;
+}
+>>>>>>> Wrote planner path and obstacle visualizer.
 
 void renderWall(Mat& arena, pair<Vector3d, Vector3d>& wall)
 {
@@ -136,7 +155,39 @@ int main(int argc, char** argv) {
     {
         renderWall(arena, wall);
     }
-    // Display the rendered walls
+
+    // For testing purposes read in a path from the config
+    vector<Vector3d> path = extractPath(doc);
+    // Adjust the path astar spit out with the scaling and offset
+    for (auto& point : path)
+    {
+        // Correct the scaling
+        point[0] *= scaling;
+        point[1] *= scaling;
+        // Correct the offset
+        point[0] += MAT_HEIGHT / 2;
+        point[1] += MAT_WIDTH / 2;
+    }
+    // Render the path that astar spit out
+    // Render the starting point as a green dot
+    {
+        cv::Point first(path.front()[1], path.front()[0]);
+        cv::circle(arena, first, 10, cv::Scalar(0, 250, 0), CV_FILLED);
+    }
+    // Render the ending point as a red dot
+    {
+        cv::Point last(path.back()[1], path.back()[0]);
+        cv::circle(arena, last, 10, cv::Scalar(0, 0, 250), CV_FILLED);
+    }
+    cout << path.size() << endl;
+    // Render the path as a series of connected line segments
+    for (size_t i = 1; i < path.size(); ++i)
+    {
+        Vector3d& pt1 = path[i - 1];
+        Vector3d& pt2 = path[i];
+        arrowedLine(arena, Point(pt1[1], pt1[0]), Point(pt2[1], pt2[0]), Scalar(200, 100, 200), 3);
+    }
+    // Display the end result
     cv::namedWindow("A* Test Rendering", cv::WINDOW_AUTOSIZE);
     imshow("A* Test Rendering", arena);
     cv::waitKey(0);
