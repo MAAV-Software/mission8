@@ -79,7 +79,7 @@ void CameraDriverHelper::publish()
             if (publish_pc_) pointcloudPublish();
             if (publish_pose_) posPublish();
         }
-        std::this_thread::sleep_for(5ms);  // Maybe make this time configurable?
+        std::this_thread::sleep_for(33ms);  // Maybe make this time configurable?
     }
 }
 

@@ -10,7 +10,7 @@
 # 845412110102
 
 forward:
-  enabled: true
+  enabled: false
   width: 640
   height: 480
   fps: 15                # 15, 30, or 60
