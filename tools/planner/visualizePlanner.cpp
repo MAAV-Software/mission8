@@ -90,7 +90,8 @@ int main(int argc, char** argv) {
 
     // create an octomap from the config specifications
     shared_ptr<OcTree> tree = createOctomap(doc);
-    cout << "octree created" << endl;
+    tree->write("octomap.ot");
+    cout << "octree saved to octomap.ot" <<  endl;
 
     GenericArray point1 = doc["start"].GetArray();
     GenericArray point2 = doc["goal"].GetArray();
