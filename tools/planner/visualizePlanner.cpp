@@ -236,18 +236,21 @@ shared_ptr<OcTree> createOctomap(Document& blueprint)
     }
 
     // adds the object to the tree using a bbx_iterator
-    auto addObject = [&tree](const point3d& min, const point3d& max)
+    auto addObject = [&tree, &resolution](const point3d& min, const point3d& max)
     {
-        for(OcTree::leaf_bbx_iterator it = tree->begin_leafs_bbx(min,max),
-           end=tree->end_leafs_bbx(); it!= end; ++it)
-        {
-          tree->updateNode(it.getCoordinate(), true);
+        for (float x=min.x(); x < max.x(); x+=resolution ) {
+            for (float y=min.y(); y < max.y(); y+=resolution) {
+                for (float z=min.z(); z < max.z(); z+=resolution) {
+                    point3d endpoint ((float) x, (float) y, (float) z);
+                    tree->updateNode(point3d(x, y, z), true);  
+                }
+            }
         }
     };
 
     // create the floor
-    addObject(point3d(-dims[0]/2, -dims[1]/2, 0), 
-              point3d(dims[0]/2, dims[1]/2, 0.01));
+    addObject(point3d(-dims[0]/2, -dims[1]/2, -0.1), 
+              point3d(dims[0]/2, dims[1]/2, 0));
 
     // create the walls
     vector<pair<Vector3d, Vector3d> > walls = extractWalls(blueprint);
