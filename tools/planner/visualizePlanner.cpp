@@ -91,11 +91,17 @@ int main(int argc, char** argv) {
     // create an octomap from the config specifications
     shared_ptr<OcTree> tree = createOctomap(doc);
     cout << "octree created" << endl;
+
+    GenericArray point1 = doc["start"].GetArray();
+    GenericArray point2 = doc["goal"].GetArray();
+    auto initPt = Vector3d(point1[0].GetDouble(), point1[1].GetDouble(), point1[2].GetDouble());
+    auto goalPt = Vector3d(point2[0].GetDouble(), point2[1].GetDouble(), point2[2].GetDouble());
+
     // generate a path with astar
     Planner planner(""); //TODO add config for planner
-    planner.update_target(Waypoint(Vector3d(4,4,-1), Vector3d(0,0,0), 0));
+    planner.update_target(Waypoint(goalPt, Vector3d(0,0,0), 0));
     State initial = State::zero(0);
-    initial.position() = Vector3d(-4,-4,-1);
+    initial.position() = initPt;
     planner.update_state(initial);
     planner.update_map(tree);
     // run A*
