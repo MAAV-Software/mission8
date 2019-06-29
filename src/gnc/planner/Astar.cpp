@@ -169,8 +169,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     while (!openNodes.empty())
     {
         // assert cost of the beginning node is less than the last node
-        assert(*openNodes.begin() < *openNodes.rbegin() ||  
-            openNodes.begin()->cost() == openNodes.rbegin()->cost());
+        // assert(*openNodes.begin() < *openNodes.rbegin() ||  
+        //     openNodes.begin()->cost() == openNodes.rbegin()->cost());
         shared_ptr<Node> n = *openNodes.begin();
         openNodes.erase(openNodes.begin());
         // check for the coordinate in the correct tolerance to be

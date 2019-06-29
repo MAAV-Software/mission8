@@ -20,24 +20,16 @@ include_directories(
     ${Octomap_INCLUDE_DIRS}
 )
 
-add_executable(tool-octomap-creation createOctomap.cpp)
+add_executable(tool-planner-visualization visualizePlanner.cpp)
 
-# add_executable(tool-planner-visualization visualizePlanner.cpp)
-
-target_link_libraries(tool-octomap-creation
-    maav-utils
-    maav-msg
-    VisionUtils
-    ${ZCM_LIBRARIES}
-    ${YAMLCPP_LIBRARY}
-    ${Octomap_LIBRARIES}
-)
-
-# target_link_libraries(tool-planner-visualization
-#     maav-utils
-#     maav-msg
-#     VisionUtils
-#     ${ZCM_LIBRARIES}
-#     ${YAMLCPP_LIBRARY}
-#     ${Octomap_LIBRARIES}
-# )
+target_link_libraries(tool-planner-visualization
+     maav-state
+     maav-utils
+     maav-msg
+     maav-guidance
+     maav-path-planner
+     VisionUtils
+     ${ZCM_LIBRARIES}
+     ${YAMLCPP_LIBRARY}
+     ${Octomap_LIBRARIES}
+ )
