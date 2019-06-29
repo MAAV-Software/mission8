@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 #include <zcm/zcm-cpp.hpp>
+#include <algorithm>
 
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Path.hpp"
@@ -30,6 +31,8 @@ using std::vector;
 using std::pair;
 using std::shared_ptr;
 using std::make_shared;
+using std::min;
+using std::max;
 
 using octomap::OcTree;
 using octomap::point3d;
@@ -244,13 +247,18 @@ shared_ptr<OcTree> createOctomap(Document& blueprint)
 
     // create the floor
     addObject(point3d(-dims[0]/2, -dims[1]/2, 0), 
-              point3d(-dims[0]/2, -dims[1]/2, dims[2]));
+              point3d(dims[0]/2, dims[1]/2, 0.01));
 
     // create the walls
-    vector<pair<Vector3d, Vector3d>> walls = extractWalls(blueprint);
+    vector<pair<Vector3d, Vector3d> > walls = extractWalls(blueprint);
     for(auto &wall: walls)
     {
-        addObject(VecToPoint3d(wall.first), VecToPoint3d(wall.second));
+        // Compute the min point and max point of the walls from the points given
+        point3d minPoint(min(wall.first[0], wall.second[0]), min(wall.first[1], wall.second[1]),
+            min(wall.first[2], wall.second[2]));
+        point3d maxPoint(max(wall.first[0], wall.second[0]), max(wall.first[1], wall.second[1]),
+            max(wall.first[2], wall.second[2]));
+        addObject(minPoint, maxPoint);
     }
 
     return tree;
