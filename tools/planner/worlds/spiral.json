@@ -1,0 +1,15 @@
+{
+    "documentation": "Creates a spiral with the starting poin the center and end outside",
+    "resolution": 0.1,
+    "arena-size": [30, 30, -2],
+    "walls": 
+    [ 
+        [[2, 2, 0], [-2, 2.1, -2]],
+        [[2, 2, 0], [2.1, -2, -2]],
+        [[-2, 2, 0], [-2.1, -2, -2]],
+        [[-2, -2, 0], [-2.1, -4, -2]],
+        [[-2, -4, 0], [4, -4.1, -2]]
+    ],
+    "start": [0, 0, -1],
+    "goal":  [10, 10, -1] 
+}

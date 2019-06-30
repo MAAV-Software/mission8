@@ -140,15 +140,14 @@ int main(int argc, char** argv) {
 
     cout << "Scaling: " << scaling << endl;
 
-    // TODO this needs to be in its own function so that it can be done to any point I pass in
-    // TODO this actually can't be shared because for some reason the rectangles are opposite
     // Correct the eigen wall entries with the scaling and offset
+    double x_scaling = scaling * -1;
     for (auto& wall: eigen_walls)
     {
         // Correct the scaling
-        wall.first[0] *= scaling;
+        wall.first[0] *= x_scaling;
         wall.first[1] *= scaling;
-        wall.second[0] *= scaling;
+        wall.second[0] *= x_scaling;
         wall.second[1] *= scaling;
         // Correct the offset
         wall.first[0] += MAT_HEIGHT / 2;
@@ -175,7 +174,7 @@ int main(int argc, char** argv) {
     auto adjust_point = [&scaling](Vector3d& point)
     {
         // Correct the scaling
-        point[0] *= scaling;
+        point[0] *= scaling * -1;
         point[1] *= scaling;
         // Correct the offset
         point[0] += MAT_HEIGHT / 2;
