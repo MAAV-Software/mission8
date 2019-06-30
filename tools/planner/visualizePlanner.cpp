@@ -70,6 +70,7 @@ int main(int argc, char** argv) {
     gopt.addString('m', "map", "NO DEFAULT", "Path to the map json file to use in the render.");
     gopt.addString('f', "octreeFile", "test-octree-file.ot", "Path to save octomap file to.");
     gopt.addBool('s', "save", false, "Causes the generated octomap to be saved to file");
+    gopt.addString('w', "renderFile", "path-img.png", "Path to save render file to");
 
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -213,13 +214,15 @@ int main(int argc, char** argv) {
     }
 
     // Display the end result
-    cv::namedWindow("A* Test Rendering", cv::WINDOW_AUTOSIZE);
-    imshow("A* Test Rendering", arena);
+    // cv::namedWindow("A* Test Rendering", cv::WINDOW_AUTOSIZE);
+    // imshow("A* Test Rendering", arena);
+    cout << "Wrote render to " << gopt.getString("renderFile") << endl;
+    imwrite(gopt.getString("renderFile"), arena);
 
     // Save the octomap to the specified file path if the save flag was passed
     if (gopt.getBool("save")) tree->write(gopt.getString("octreeFile"));
 
-    cv::waitKey(0);
+    // cv::waitKey(0);
 
 }
 
