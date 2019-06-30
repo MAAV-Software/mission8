@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
     // vector<Vector3d> path = extractPath(doc);
 
     // Adjust the path astar spit out with the scaling and offset
-    for (auto& point : path)
+    auto adjust_point = [&scaling](Vector3d& point)
     {
         // Correct the scaling
         point[0] *= scaling;
@@ -180,16 +180,28 @@ int main(int argc, char** argv) {
         // Correct the offset
         point[0] += MAT_HEIGHT / 2;
         point[1] += MAT_WIDTH / 2;
+    };
+    for (auto& point : path)
+    {
+        adjust_point(point);
     }
     // Render the path that astar spit out
     // Render the starting point as a green dot
     {
-        cv::Point first(path.front()[1], path.front()[0]);
+        auto startArray = doc["start"].GetArray();
+        Vector3d start(startArray[0].GetDouble(), startArray[1].GetDouble(), 
+            startArray[2].GetDouble());
+        adjust_point(start);
+        cv::Point first(start[1], start[0]);
         cv::circle(arena, first, 10, cv::Scalar(0, 250, 0), CV_FILLED);
     }
     // Render the ending point as a red dot
     {
-        cv::Point last(path.back()[1], path.back()[0]);
+        auto endArray = doc["goal"].GetArray();
+        Vector3d goal(endArray[0].GetDouble(), endArray[1].GetDouble(), 
+            endArray[2].GetDouble());
+        adjust_point(goal);
+        cv::Point last(goal[1], goal[0]);
         cv::circle(arena, last, 10, cv::Scalar(0, 0, 250), CV_FILLED);
     }
     cout << path.size() << endl;
