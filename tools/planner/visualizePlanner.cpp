@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     // The Mat which rendering is done on
     Mat arena(MAT_HEIGHT, MAT_WIDTH, CV_8UC3);
     // Fill the entire thing so that there is contrast
-    rectangle(arena, cv::Point2d(0, 0), cv::Point2d(1079, 1919), cv::Scalar(0.0), CV_FILLED);
+    rectangle(arena, cv::Point2d(0, 0), cv::Point2d(1919, 1079), cv::Scalar(0.0), CV_FILLED);
 
     // Render the walls onto the arena
     for (auto& wall: eigen_walls)
