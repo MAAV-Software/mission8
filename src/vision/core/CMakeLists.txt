@@ -55,6 +55,7 @@ target_link_libraries(CameraInterface realsense2)
 target_link_libraries(CameraDriverHelper
     CameraInterface
     VisionUtils
+    maav-gnc-utils
 )
 
 target_link_libraries(PlaneFitter

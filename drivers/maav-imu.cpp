@@ -37,6 +37,7 @@ void sigHandler(int) { RUNNING = 0; }
 std::unique_ptr<maav::ImuDevice> getDevice(const std::string& device_name);
 void calibrateMagnetometer(
     std::unique_ptr<maav::ImuDevice>& device, const std::string& imu_calib_file);
+std::pair<double, size_t> getAxis(const string& str);
 
 int main(int argc, char** argv)
 {
@@ -62,6 +63,21 @@ int main(int argc, char** argv)
 
     bool verbose = gopt.getBool("verbose");
     YAML::Node config = YAML::LoadFile(gopt.getString("config"));
+
+    const std::string x_str = config["x"].as<std::string>();
+    auto x_axis = getAxis(x_str);
+    const double x_sign = x_axis.first;
+    const size_t x_index = x_axis.second;
+
+    const std::string y_str = config["y"].as<std::string>();
+    auto y_axis = getAxis(y_str);
+    const double y_sign = y_axis.first;
+    const size_t y_index = y_axis.second;
+
+    const std::string z_str = config["z"].as<std::string>();
+    auto z_axis = getAxis(z_str);
+    const double z_sign = z_axis.first;
+    const size_t z_index = z_axis.second;
 
     cout << fixed << setprecision(4) << setw(4);
 
@@ -99,7 +115,6 @@ int main(int argc, char** argv)
 
     imu_t msg;
     constexpr auto period = 10000us;
-    // constexpr auto period = 1000000us;
     if (verbose)
     {
         ios::sync_with_stdio(false);
@@ -111,19 +126,30 @@ int main(int argc, char** argv)
         auto start_time = duration_cast<microseconds>(system_clock::now().time_since_epoch());
 
         device->read(msg);
+        imu_t msg_corrected = msg;
+        msg_corrected.angular_rates.data[0] = x_sign * msg.angular_rates.data[x_index];
+        msg_corrected.angular_rates.data[1] = y_sign * msg.angular_rates.data[y_index];
+        msg_corrected.angular_rates.data[2] = z_sign * msg.angular_rates.data[z_index];
 
-        zcm.publish(maav::IMU_CHANNEL, &msg);
-        zcm_udp.publish(maav::IMU_CHANNEL, &msg);
+        msg_corrected.acceleration.data[0] = x_sign * msg.acceleration.data[x_index];
+        msg_corrected.acceleration.data[1] = y_sign * msg.acceleration.data[y_index];
+        msg_corrected.acceleration.data[2] = z_sign * msg.acceleration.data[z_index];
+
+        zcm.publish(maav::IMU_CHANNEL, &msg_corrected);
+        zcm_udp.publish(maav::IMU_CHANNEL, &msg_corrected);
 
         if (verbose)
         {
             cout << "Time: " << msg.utime << '\n';
-            cout << "Acceleration: x: " << msg.acceleration.data[0] << ", y: " << msg.acceleration.data[1]
-                 << ", z: " << msg.acceleration.data[2] << '\n';
-            cout << "AngularRates: x: " << msg.angular_rates.data[0] << ", y: " << msg.angular_rates.data[1]
-                 << ", z: " << msg.angular_rates.data[2] << endl;
-            cout << "Magnetometer: x: " << msg.magnetometer.data[0] << ", y: " << msg.magnetometer.data[1]
-                 << ", z: " << msg.magnetometer.data[2] << endl;
+            cout << "Acceleration: x: " << msg.acceleration.data[0]
+                 << ", y: " << msg.acceleration.data[1] << ", z: " << msg.acceleration.data[2]
+                 << '\n';
+            cout << "AngularRates: x: " << msg.angular_rates.data[0]
+                 << ", y: " << msg.angular_rates.data[1] << ", z: " << msg.angular_rates.data[2]
+                 << endl;
+            cout << "Magnetometer: x: " << msg.magnetometer.data[0]
+                 << ", y: " << msg.magnetometer.data[1] << ", z: " << msg.magnetometer.data[2]
+                 << endl;
         }
 
         this_thread::sleep_for(
@@ -146,7 +172,7 @@ std::unique_ptr<maav::ImuDevice> getDevice(const std::string& device_name)
     }
     else if (device_name == "BNO055")
     {
-        return nullptr;
+        throw runtime_error("BNO055 IMU has not been implemented yet");
     }
     else
     {
@@ -169,8 +195,8 @@ void calibrateMagnetometer(
     while (RUNNING)
     {
         device->read(msg);
-        magvals.push_back(
-            vector<double>{msg.magnetometer.data[0], msg.magnetometer.data[1], msg.magnetometer.data[2]});
+        magvals.push_back(vector<double>{
+            msg.magnetometer.data[0], msg.magnetometer.data[1], msg.magnetometer.data[2]});
         if ((duration_cast<seconds>(system_clock::now().time_since_epoch()) - start) >= 60s) break;
         std::this_thread::sleep_for(1ms);
     }
@@ -204,4 +230,30 @@ void calibrateMagnetometer(
     fout.close();
 
     cout << "Magnetometer calibration completed.\n";
+}
+
+std::pair<double, size_t> getAxis(const string& str)
+{
+    if (str.size() > 2 || str.empty() ||
+        (str.find('x') == std::string::npos && str.find('y') == std::string::npos &&
+            str.find('z') == std::string::npos))
+    {
+        throw runtime_error("Bad config. Needs to be in the form of \"<axis>\" or \"-<axis>\"");
+    }
+
+    std::pair<double, size_t> axis{1, 0};
+
+    if (str.find('-') != std::string::npos)
+    {
+        axis.first = -1;
+    }
+
+    if (str.find('x') != std::string::npos)
+        axis.second = 0;
+    else if (str.find('y') != std::string::npos)
+        axis.second = 1;
+    else if (str.find('z') != std::string::npos)
+        axis.second = 2;
+
+    return axis;
 }

@@ -9,6 +9,10 @@ std::vector<double> convertQuaternion(double time, const quaternion_t& quat)
     double yaw =
         -atan2(2 * q.z() * q.w() - 2 * q.x() * q.y(), 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
 
+    if (!std::isfinite(roll)) roll = 0;
+    if (!std::isfinite(pitch)) pitch = 0;
+    if (!std::isfinite(yaw)) yaw = 0;
+
     return {time, roll, pitch, yaw};
 }
 
@@ -19,7 +23,7 @@ Eigen::MatrixXd convertMatrix(const matrix_t& mat)
     {
         for (int j = 0; j < mat.cols; j++)
         {
-            convertedMat(i, j) = mat.data[i][j];
+            convertedMat(i, j) = std::isfinite(mat.data[i][j]) ? mat.data[i][j] : 0;
         }
     }
     return convertedMat;

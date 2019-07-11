@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -22,7 +23,7 @@ std::vector<double> convertVector(double time, const ZcmVector& vec)
     converted[0] = time;
     for (size_t i = 0; i < vec.dim; i++)
     {
-        converted[i + 1] = vec.data[i];
+        converted[i + 1] = std::isfinite(vec.data[i]) ? vec.data[i] : 0;
     }
     return converted;
 }

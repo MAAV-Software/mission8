@@ -1,10 +1,13 @@
 #include "vision/core/CameraDriverHelper.hpp"
 
+#include <common/messages/MsgChannels.hpp>
+#include <gnc/utils/ZcmConversion.hpp>
+#include "common/messages/camera_pose_t.hpp"
 #include "common/messages/depth_image_t.hpp"
+#include "common/messages/global_update_t.hpp"
 #include "common/messages/point_cloud_t.hpp"
 #include "common/messages/point_t.hpp"
 #include "common/messages/rgb_image_t.hpp"
-#include "common/messages/camera_pose_t.hpp"
 
 #include "vision/core/utilities.hpp"
 
@@ -130,7 +133,6 @@ void CameraDriverHelper::posPublish()
     CameraPoseData data = camera_.getPoseData();
 
     camera_pose_t message;
-
     // Set everything in the message to what is in the retrieved data
     message.x_translation_ = data.x_translation_;
     message.y_translation_ = data.y_translation_;
@@ -162,7 +164,17 @@ void CameraDriverHelper::posPublish()
 
     message.utime = camera_.getUTime();
 
-    zcm_.publish(pose_channel_, &message);
+    global_update_t update;
+
+    const Eigen::Vector3d position{-data.z_translation_, data.x_translation_, -data.y_translation_};
+    const Eigen::Quaterniond attitude{
+        data.Qr_rotation_, -data.Qk_rotation_, data.Qi_rotation_, data.Qj_rotation_};
+
+    update.position = gnc::convertVector3d(position);
+    update.attitude = gnc::convertQuaternion(Sophus::SO3d{attitude});
+    update.utime = message.utime;
+
+    zcm_.publish(GLOBAL_UPDATE_CHANNEL, &update);
 }
 
 }  // namespace maav::vision
