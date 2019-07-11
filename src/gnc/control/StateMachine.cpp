@@ -12,6 +12,18 @@ using maav::mavlink::InnerLoopSetpoint;
 
 using namespace std::chrono_literals;
 
+namespace
+{
+path_t get_empty_path()
+{
+    path_t empty_path;
+    empty_path.NUM_WAYPOINTS = 0;
+    empty_path.utime = std::numeric_limits<int64_t>::infinity();
+    return empty_path;
+}
+
+}  // namespace
+
 namespace maav
 {
 namespace gnc
@@ -27,8 +39,17 @@ StateMachine::StateMachine(
       land_detector_(control_config_),
       current_control_state_(ControlState::STANDBY),
       zcm_(control_config_["zcm-url"].as<std::string>()),
+      convergence_tolerance_(control_config_["tol"].as<double>()),
+      takeoff_altitude_(-control_config_["takeoff-alt"].as<double>()),
+      takeoff_speed_(control_config_["takeoff-speed"].as<double>()),
+      landing_speed_(control_config_["landing-speed"].as<double>()),
+      flight_speed_(control_config_["flight-speed"].as<double>()),
+      valid_path(false),
+      takeoff_path_(new LinearlyInterpolatedPath(get_empty_path(), takeoff_speed_)),
+      landing_path_(new LinearlyInterpolatedPath(get_empty_path(), landing_speed_)),
+      path_(new LinearlyInterpolatedPath(get_empty_path(), flight_speed_)),
+      reset_path_time_(control_config_["reset-path-starts"].as<bool>()),
       sim_state_(control_config_["sim-state"].as<bool>())
-
 {
     /*
      *  ZCM initialize
@@ -51,10 +72,6 @@ StateMachine::StateMachine(
 
 void StateMachine::run(const std::atomic<bool>& kill)
 {
-    /*
-     *  Check vehicle active and connect to offboard control,
-     *  perform this prior to trying to control the vehicle
-     */
     initializeRun(kill);
 
     InnerLoopSetpoint inner_loop_setpoint = InnerLoopSetpoint::zero();
@@ -118,9 +135,6 @@ void StateMachine::run(const std::atomic<bool>& kill)
 
 void StateMachine::initializeRun(const std::atomic<bool>& kill)
 {
-    /*
-     *      Establish the initial state of the vehicle
-     */
     std::cout << "Establishing initial state..." << std::endl;
     int counter = 0;
     auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(10);
@@ -130,13 +144,13 @@ void StateMachine::initializeRun(const std::atomic<bool>& kill)
         autopilot_interface_->update_setpoint(zero_setpoint);
         if (!sim_state_ && state_handler_.ready())
         {
-            controller_.add_state(ConvertState(state_handler_.msg()));
+            current_state_ = ConvertState(state_handler_.msg());
             state_handler_.pop();
             ++counter;
         }
         if (sim_state_ && sim_state_handler_.ready())
         {
-            controller_.add_state(ConvertGroundTruthState(sim_state_handler_.msg()));
+            current_state_ = ConvertGroundTruthState(sim_state_handler_.msg());
             sim_state_handler_.pop();
             ++counter;
         }
@@ -168,11 +182,22 @@ bool StateMachine::readZcm()
     {
         if (!path_handler_.msg().waypoints.empty())
         {
-            std::cout << "Path received\n";
-            controller_.set_path(path_handler_.msg());
-            if (current_control_state_ == ControlState::STANDBY)
+            path_t path_msg = path_handler_.msg();
+
+            if (reset_path_time_)
             {
-                setControlState(ControlState::ARMING);
+                path_msg.utime = current_state_.timeUSec();
+            }
+
+            if (!path_msg.waypoints.empty())
+            {
+                valid_path = true;
+                std::cout << "Path received\n";
+                path_->updatePath(path_msg);
+                if (current_control_state_ == ControlState::STANDBY)
+                {
+                    setControlState(ControlState::ARMING);
+                }
             }
         }
         path_handler_.pop();
@@ -181,7 +206,7 @@ bool StateMachine::readZcm()
 
     while (!sim_state_ && state_handler_.ready())
     {
-        controller_.add_state(ConvertState(state_handler_.msg()));
+        current_state_ = ConvertState(state_handler_.msg());
         land_detector_.setState(ConvertState(state_handler_.msg()));
         state_handler_.pop();
         read_zcm = true;
@@ -189,7 +214,7 @@ bool StateMachine::readZcm()
 
     while (sim_state_ && sim_state_handler_.ready())
     {
-        controller_.add_state(ConvertGroundTruthState(sim_state_handler_.msg()));
+        current_state_ = ConvertGroundTruthState(sim_state_handler_.msg());
         land_detector_.setState(ConvertGroundTruthState(sim_state_handler_.msg()));
         sim_state_handler_.pop();
         read_zcm = true;
@@ -262,6 +287,21 @@ InnerLoopSetpoint StateMachine::runStandby()
     {
         if (checkCommand(ControlCommands::TAKEOFF))
         {
+            path_t takeoff_path;
+            takeoff_path.NUM_WAYPOINTS = 1;
+            takeoff_path.utime = current_state_.timeUSec();
+            takeoff_path.waypoints.reserve(1);
+
+            waypoint_t takeoff_waypoint;
+            takeoff_waypoint.pose[0] = current_state_.position().x();
+            takeoff_waypoint.pose[1] = current_state_.position().y();
+            takeoff_waypoint.pose[2] = takeoff_altitude_;
+            takeoff_waypoint.pose[3] = current_state_.attitude().angleZ();
+            takeoff_path.waypoints.push_back(takeoff_waypoint);
+
+            valid_path = true;
+            path_->updatePath(takeoff_path);
+
             setControlState(ControlState::ARMING);
         }
 
@@ -284,7 +324,7 @@ InnerLoopSetpoint StateMachine::runTakeoff()
         setControlState(ControlState::LAND);
     }
 
-    if (controller_.at_takeoff_alt())
+    if (atTakeoffAltitude())
     {
         setControlState(ControlState::FLIGHT);
         std::cout << "switching to flight in takeoff" << std::endl;
@@ -293,11 +333,13 @@ InnerLoopSetpoint StateMachine::runTakeoff()
 
     if (print_takeoff)
     {
-        std::cout << "Taking off to alt: " << control_config_["takeoff-alt"].as<double>()
-                  << std::endl;
         print_takeoff = false;
     }
-    return controller_.takeoff(control_config_["takeoff-alt"].as<double>());
+
+    const uint64_t time = current_state_.timeUSec();
+    ContinuousPath::Waypoint target = takeoff_path_->sample(time);
+    // std::cout << "Takeoff path start time: " << takeoff_path_->getStartTime() << std::endl;
+    return controller_(current_state_, target);
 }
 
 InnerLoopSetpoint StateMachine::runLand()
@@ -313,10 +355,10 @@ InnerLoopSetpoint StateMachine::runLand()
         setControlState(ControlState::DISARMING);
     }
 
-    auto setpoint = controller_.land();
-    land_detector_.setThrust(setpoint.thrust);
+    const uint64_t time = current_state_.timeUSec();
+    ContinuousPath::Waypoint target = landing_path_->sample(time);
 
-    return setpoint;
+    return controller_(current_state_, target);
 }
 
 InnerLoopSetpoint StateMachine::runFlight()
@@ -325,7 +367,11 @@ InnerLoopSetpoint StateMachine::runFlight()
     {
         setControlState(ControlState::LAND);
     }
-    return controller_.flight();
+
+    const uint64_t time = current_state_.timeUSec();
+    ContinuousPath::Waypoint target = path_->sample(time);
+
+    return controller_(current_state_, target);
 }
 
 InnerLoopSetpoint StateMachine::runArming()
@@ -355,7 +401,15 @@ InnerLoopSetpoint StateMachine::runArming()
         }
         else
         {
-            setControlState(ControlState::TAKEOFF);
+            if (valid_path)
+            {
+                setControlState(ControlState::TAKEOFF);
+            }
+            else
+            {
+                std::cout << "No valid path to fly" << std::endl;
+                setControlState(ControlState::DISARMING);
+            }
         }
         print_message = true;  // print message on next disarm
     }
@@ -366,9 +420,12 @@ InnerLoopSetpoint StateMachine::runArming()
 
 InnerLoopSetpoint StateMachine::runSoftArm()
 {
-    if (checkCommand(ControlCommands::TAKEOFF))
+    if (valid_path)
     {
-        setControlState(ControlState::TAKEOFF);
+        if (checkCommand(ControlCommands::TAKEOFF))
+        {
+            setControlState(ControlState::TAKEOFF);
+        }
     }
     if (checkCommand(ControlCommands::DISARM))
     {
@@ -423,15 +480,56 @@ void StateMachine::setControlState(const ControlState new_control_state)
             std::cout << "DISARMING";
             break;
         case ControlState::TAKEOFF:
+        {
             std::cout << "TAKEOFF";
+            std::cout << std::endl;
+            std::cout << "Taking off to alt: " << -takeoff_altitude_ << "m.";
+
+            path_t takeoff_path;
+            takeoff_path.NUM_WAYPOINTS = 2;
+            takeoff_path.utime = current_state_.timeUSec();
+            takeoff_path.waypoints.reserve(2);
+
+            waypoint_t current_waypoint;
+            current_waypoint.pose[0] = current_state_.position().x();
+            current_waypoint.pose[1] = current_state_.position().y();
+            current_waypoint.pose[2] = current_state_.position().z();
+            current_waypoint.pose[3] = current_state_.attitude().angleZ();
+            takeoff_path.waypoints.push_back(current_waypoint);
+
+            waypoint_t takeoff_waypoint;
+            takeoff_waypoint.pose[0] = current_state_.position().x();
+            takeoff_waypoint.pose[1] = current_state_.position().y();
+            takeoff_waypoint.pose[2] = takeoff_altitude_;
+            current_waypoint.pose[3] = current_state_.attitude().angleZ();
+            takeoff_path.waypoints.push_back(takeoff_waypoint);
+
+            takeoff_path_->updatePath(takeoff_path);
+
             break;
+        }
         case ControlState::LAND:
         {
-            // Clear path
-            path_t empty_path;
-            empty_path.NUM_WAYPOINTS = 0;
-            empty_path.waypoints.clear();
-            controller_.set_path(empty_path);
+            path_t landing_path;
+            landing_path.NUM_WAYPOINTS = 2;
+            landing_path.utime = current_state_.timeUSec();
+            landing_path.waypoints.reserve(2);
+
+            waypoint_t current_waypoint;
+            current_waypoint.pose[0] = current_state_.position().x();
+            current_waypoint.pose[1] = current_state_.position().y();
+            current_waypoint.pose[2] = current_state_.position().z();
+            current_waypoint.pose[3] = current_state_.attitude().angleZ();
+            landing_path.waypoints.push_back(current_waypoint);
+
+            waypoint_t landed_waypoint;
+            landed_waypoint.pose[0] = current_state_.position().x();
+            landed_waypoint.pose[1] = current_state_.position().y();
+            landed_waypoint.pose[2] = 1;
+            landed_waypoint.pose[3] = current_state_.attitude().angleZ();
+            landing_path.waypoints.push_back(landed_waypoint);
+
+            landing_path_->updatePath(landing_path);
 
             // Set landing state
             land_detector_.setAir();
@@ -460,6 +558,14 @@ float StateMachine::armedThrust(float thrust)
 {
     constexpr float min_thrust = 0.12;
     return std::max(thrust, min_thrust);
+}
+
+bool StateMachine::atTakeoffAltitude() const
+{
+    bool low_velocity = current_state_.velocity().norm() <= convergence_tolerance_;
+    bool at_altitude =
+        std::abs(takeoff_altitude_ - current_state_.position().z()) <= convergence_tolerance_;
+    return low_velocity && at_altitude;
 }
 
 }  // namespace control

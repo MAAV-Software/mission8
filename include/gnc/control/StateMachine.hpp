@@ -19,6 +19,7 @@
 #include <common/utils/ZCMHandler.hpp>
 #include <gnc/control/Controller.hpp>
 #include <gnc/control/LandDetector.hpp>
+#include <gnc/control/LinearlyInterpolatedPath.hpp>
 
 namespace maav
 {
@@ -26,6 +27,10 @@ namespace gnc
 {
 namespace control
 {
+/**
+ * The State Machine handles all high level control operations including switching between the
+ * various flight modes and handling the path.
+ */
 class StateMachine
 {
 private:
@@ -64,16 +69,24 @@ public:
     void run(const std::atomic<bool>& kill);
 
 private:
-    /***
-     * Returns true if a zcm message was read
+    /**
+     *  Check vehicle active and connect to offboard control,
+     *  perform this prior to trying to control the vehicle
+     */
+    void initializeRun(const std::atomic<bool>& kill);
+
+    /**
+     * Returns true if a zcm message was read.
      */
     bool readZcm();
-    void initializeRun(const std::atomic<bool>& kill);
+
+    bool checkCommand(const ControlCommands command);
     void setControlState(const ControlState new_control_state);
     float armedThrust(float thrust);
     void detectLanding();
-    bool checkCommand(const ControlCommands command);
+    bool atTakeoffAltitude() const;
 
+    // Use these functions to specify how the controller acts in various control modes
     maav::mavlink::InnerLoopSetpoint runStandby();
     maav::mavlink::InnerLoopSetpoint runTakeoff();
     maav::mavlink::InnerLoopSetpoint runLand();
@@ -88,6 +101,7 @@ private:
     const YAML::Node control_config_;
 
     maav::mavlink::AutopilotInterface* const autopilot_interface_;
+    State current_state_;
     Controller controller_;
     LandDetector land_detector_;
     ControlState current_control_state_;
@@ -101,6 +115,18 @@ private:
     ZCMHandler<control_commands_t> command_handler_;
     ZCMHandler<killswitch_t> killswitch_handler_;
 
+    const double convergence_tolerance_;
+    const double takeoff_altitude_;
+    const double takeoff_speed_;
+    const double landing_speed_;
+    const double flight_speed_;
+
+    bool valid_path;
+    std::unique_ptr<ContinuousPath> takeoff_path_;
+    std::unique_ptr<ContinuousPath> landing_path_;
+    std::unique_ptr<ContinuousPath> path_;
+
+    bool reset_path_time_;
     bool sim_state_;
     bool soft_arm_ = false;
 };

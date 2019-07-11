@@ -3,7 +3,7 @@ pid-gains:
   pos-ctrl:
     x: [0.2, 0.000, 0.05]
     y: [0.2, 0.000, 0.05]
-    z: [1.5, 0.01, 0.3]
+    z: [1, 0.01, 0.3]
     yaw: [0.3, 0, 0.01]
   rate-ctrl:
     x: [0, 0, 0]
@@ -28,15 +28,19 @@ limits:
   thrust: [1, 0]
   
 # vehicle params that won't be tuned
-tol: 0.25                    # convergence tolerance (norm of [x, y, z, yaw])
 uart-path: "/dev/ttyACM1"
+#true - Sets the incoming path start time to current state time, false - Uses time in path_t message
+reset-path-starts: true
 sim-state: false             #true - state comes from sim, false - state comes from kalman filter
-takeoff-alt: 1              #meters
 ff-thrust: 0                
 arming-delay: 1             #seconds
 land-detect-dur: 0.5
-takeoff-speed: 0.5
-landing-speed: 0.5
+
+tol: 0.25                    # convergence tolerance (norm of [x, y, z, yaw])
+takeoff-alt: 1              #meters
+takeoff-speed: 0.3
+landing-speed: 0.3
+flight-speed: 0.5
 
 
 # ZCM publish url
