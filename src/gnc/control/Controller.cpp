@@ -136,7 +136,7 @@ InnerLoopSetpoint Controller::operator()(
         previous_time_ = current_state.timeSec();
         time_initialized_ = true;
     }
-    const double dt = previous_time_ - current_state.timeSec();
+    const double dt = current_state.timeSec() - previous_time_;
     previous_time_ = current_state.timeSec();
 
     internal_yaw_ = eecs467::wrap_to_pi(internal_yaw_ + yaw_rate * dt);
