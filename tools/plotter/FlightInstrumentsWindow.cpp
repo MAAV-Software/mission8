@@ -85,8 +85,8 @@ void FlightInstrumentsWindow::recv(
         double roll =
             atan2(2 * q.w() * q.x() + q.y() * q.z(), 1 - 2 * (q.x() * q.x() + 2 * q.y() * q.y()));
         double pitch = asin(2 * (q.w() * q.y() - q.z() * q.x()));
-        double heading = -atan2(
-            2 * q.z() * q.w() - 2 * q.x() * q.y(), 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+        double heading =
+            atan2(2 * q.z() * q.w() - 2 * q.x() * q.y(), 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
         m_ADI->setRoll(roll * 180 / M_PI);
         m_ADI->setPitch(pitch * 180 / M_PI);
         m_Compass->setYaw(heading * 180 / M_PI);

@@ -332,24 +332,25 @@ void QCompass::paintEvent(QPaintEvent *)
 
                 painter.setFont(QFont("", fontSize * 1.3));
             }
-            else if (i == 9)
+            else if (i == nyawLines / 4)
+            {
+                s = "E";
+                painter.setPen(blackPen);
+
+                painter.setFont(QFont("", fontSize * 1.3));
+            }
+
+            else if (i == (3 * nyawLines) / 4)
             {
                 s = "W";
                 painter.setPen(blackPen);
 
                 painter.setFont(QFont("", fontSize * 1.3));
             }
-            else if (i == 18)
+            else if (i == nyawLines / 2)
             {
                 s = "S";
                 painter.setPen(redPen);
-
-                painter.setFont(QFont("", fontSize * 1.3));
-            }
-            else if (i == 27)
-            {
-                s = "E";
-                painter.setPen(blackPen);
 
                 painter.setFont(QFont("", fontSize * 1.3));
             }
@@ -379,7 +380,7 @@ void QCompass::paintEvent(QPaintEvent *)
                 painter.drawLine(QPointF(fx1, fy1), QPointF(fx2, fy2));
             }
 
-            painter.rotate(-rotAng);
+            painter.rotate(rotAng);
         }
     }
 
@@ -413,27 +414,6 @@ void QCompass::paintEvent(QPaintEvent *)
         painter.drawPolygon(pointsS, 3);
     }
 
-    // draw yaw marker
-    {
-        int yawMarkerSize = m_size / 12;
-        double fx1, fy1, fx2, fy2, fx3, fy3;
-
-        painter.rotate(-m_yaw);
-        painter.setBrush(QBrush(QColor(0xFF, 0x00, 0x00, 0xE0)));
-
-        fx1 = 0;
-        fy1 = -m_size / 2 + m_offset;
-        fx2 = fx1 - yawMarkerSize / 2;
-        fy2 = fy1 + yawMarkerSize;
-        fx3 = fx1 + yawMarkerSize / 2;
-        fy3 = fy1 + yawMarkerSize;
-
-        QPointF points[3] = {QPointF(fx1, fy1), QPointF(fx2, fy2), QPointF(fx3, fy3)};
-        painter.drawPolygon(points, 3);
-
-        painter.rotate(m_yaw);
-    }
-
     // draw altitude
     {
         int altFontSize = 13;
@@ -461,6 +441,27 @@ void QCompass::paintEvent(QPaintEvent *)
         sprintf(buf, "H: %6.1f m", m_h);
         s = buf;
         painter.drawText(QRectF(fx, fy + h / 2, w, h / 2), Qt::AlignCenter, s);
+    }
+
+    // draw yaw marker
+    {
+        int yawMarkerSize = m_size / 12;
+        double fx1, fy1, fx2, fy2, fx3, fy3;
+
+        painter.rotate(m_yaw);
+        painter.setBrush(QBrush(QColor(0xFF, 0x00, 0x00, 0xE0)));
+
+        fx1 = 0;
+        fy1 = -m_size / 2 + m_offset;
+        fx2 = fx1 - yawMarkerSize / 2;
+        fy2 = fy1 + yawMarkerSize;
+        fx3 = fx1 + yawMarkerSize / 2;
+        fy3 = fy1 + yawMarkerSize;
+
+        QPointF points[3] = {QPointF(fx1, fy1), QPointF(fx2, fy2), QPointF(fx3, fy3)};
+        painter.drawPolygon(points, 3);
+
+        painter.rotate(m_yaw);
     }
 }
 
