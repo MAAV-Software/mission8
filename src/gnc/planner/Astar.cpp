@@ -42,7 +42,7 @@ const unsigned int ARENA_SIZE = 30; // in meters
 */
 bool isCollision(const point3d& query, const OcTree* tree)
 {
-    // TODO: What to do with unknown nodes?
+    // TODO: What to do with unknown nodes (null result)?
     OcTreeNode* result = tree->search(query);
     if(result && result->getOccupancy() > 0.5)
         return true;
@@ -146,10 +146,15 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // Check for collisions on node
         if(!isCollision(currCoord, tree.get()))
         {
+            // shared_ptr<Node> new_ptr = shared_ptr<Node>(new
+            //     Node(currKey, currId, parent->id(),
+            //     parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
+            //     l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
+
             shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-                Node(currKey, currId, parent->id(),
-                parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
-                l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
+            Node(currKey, currId, parent->id(),
+            parent->getPathCost() + l2norm(tree->keyToCoord(parent->key(), depth), currCoord),
+            l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
 
             auto itOpen = openNodes.find(new_ptr);    
             if(itOpen != openNodes.end() &&
