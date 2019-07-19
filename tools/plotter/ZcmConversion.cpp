@@ -7,7 +7,7 @@ std::vector<double> convertQuaternion(double time, const quaternion_t& quat)
         atan2(2 * q.w() * q.x() + q.y() * q.z(), 1 - 2 * (q.x() * q.x() + 2 * q.y() * q.y()));
     double pitch = asin(2 * (q.w() * q.y() - q.z() * q.x()));
     double yaw =
-        -atan2(2 * q.z() * q.w() - 2 * q.x() * q.y(), 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
+        atan2(2 * q.z() * q.w() - 2 * q.x() * q.y(), 1 - 2 * q.y() * q.y() - 2 * q.z() * q.z());
 
     if (!std::isfinite(roll)) roll = 0;
     if (!std::isfinite(pitch)) pitch = 0;
