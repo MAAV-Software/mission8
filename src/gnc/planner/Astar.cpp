@@ -134,24 +134,31 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // Check for collisions on node
         if(!isCollision(currCoord, tree.get()))
         {
-            shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-            Node(currKey, currId, parent->id(),
-            parent->getPathCost() + l2norm(tree->keyToCoord(parent->key(), depth), currCoord),
-            l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
+            shared_ptr<Node> new_ptr = make_shared<Node>(currKey, currId, 
+                parent->id(), parent->getPathCost() + 
+                l2norm(tree->keyToCoord(parent->key(), depth), currCoord),
+                l2norm(currCoord, goal_coord)); // TODO: add support for pnorm
 
             auto itOpen = find_if(openNodes.cbegin(), openNodes.cend(), 
                 [&new_ptr](const auto &b) {return *new_ptr == *b;} );    
             if(itOpen != openNodes.end() &&
                 new_ptr->getPathCost() >= (*itOpen)->getPathCost()) 
-            { 
+            {
                 return; 
+            }
+            else if(itOpen != openNodes.end() &&
+                new_ptr->getPathCost() < (*itOpen)->getPathCost())
+            {
+                openNodes.erase(itOpen);
+                openNodes.insert(new_ptr);
+                return;
             }
             openNodes.insert(new_ptr);
         }
         else 
         {
             // store collision as visited already so we never revisit
-            visitedNodes[currId] = shared_ptr<Node>(new Node());
+            visitedNodes[currId] = make_shared<Node>();
         }
     };
     unsigned long counter = 0;
