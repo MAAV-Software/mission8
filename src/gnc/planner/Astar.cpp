@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <vector>
 #include <unordered_map>
 #include <chrono>
@@ -17,6 +18,8 @@ using std::vector;
 using std::shared_ptr;
 using std::set;
 using std::unordered_map;
+using std::make_shared;
+using std::find_if;
 
 //TODO: remove after debugging
 using std::cerr;
@@ -76,23 +79,6 @@ bool isCollision(const point3d& query, const OcTree* tree)
     return false;
 }
 
-// operator overload for priority queue
-bool operator>(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
-{
-    return *lhs > *rhs;
-}
-
-// operator overload for priority queue
-bool operator<(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
-{
-    return *lhs < *rhs;
-}
-
-bool operator==(shared_ptr<Node> lhs, shared_ptr<Node> rhs)
-{
-    return *lhs == *rhs;
-}
-
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {   
     // TODO: GET MAP ORIGIN FROM DZ
@@ -121,14 +107,16 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     cout << "goal: " << goal_coord << "\n";
 
     GetId getId(tree->getResolution());
+    //auto getId = OcTreeKey::KeyHash();
 
     const size_t start_id = getId(start_coord);
     const size_t goal_id = getId(goal_coord);
     // keep track of visited nodes based on their id
-    unordered_map<int, shared_ptr<Node> > visitedNodes;
+    unordered_map<size_t, shared_ptr<Node> > visitedNodes;
     // construct priority queue on nodes and add start node
     // top element has least cost
-    set<shared_ptr<Node> >  openNodes;
+    auto comp = [](const auto &a, const auto &b) { return *a < *b; };
+    set<shared_ptr<Node>, decltype(comp) >  openNodes(comp);
     openNodes.emplace(new Node(start_key, start_id, start_id, 0,
         l2norm(goal_coord, start_coord)));
 
@@ -146,17 +134,13 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         // Check for collisions on node
         if(!isCollision(currCoord, tree.get()))
         {
-            // shared_ptr<Node> new_ptr = shared_ptr<Node>(new
-            //     Node(currKey, currId, parent->id(),
-            //     parent->getPathCost() + (tree->keyToCoord(parent->key(), depth) - currCoord).norm(),
-            //     l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
-
             shared_ptr<Node> new_ptr = shared_ptr<Node>(new
             Node(currKey, currId, parent->id(),
             parent->getPathCost() + l2norm(tree->keyToCoord(parent->key(), depth), currCoord),
             l2norm(currCoord, goal_coord))); // TODO: add support for pnorm
 
-            auto itOpen = openNodes.find(new_ptr);    
+            auto itOpen = find_if(openNodes.cbegin(), openNodes.cend(), 
+                [&new_ptr](const auto &b) {return *new_ptr == *b;} );    
             if(itOpen != openNodes.end() &&
                 new_ptr->getPathCost() >= (*itOpen)->getPathCost()) 
             { 
@@ -173,9 +157,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     unsigned long counter = 0;
     while (!openNodes.empty())
     {
-        // assert cost of the beginning node is less than the last node
-        // assert(*openNodes.begin() < *openNodes.rbegin() ||  
-        //     openNodes.begin()->cost() == openNodes.rbegin()->cost());
         shared_ptr<Node> n = *openNodes.begin();
         openNodes.erase(openNodes.begin());
         // check for the coordinate in the correct tolerance to be
@@ -251,7 +232,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     {
         shared_ptr<Node> n = node_path[i];
         // translates to globalFrame
-        auto tmp_pos = tree->keyToCoord(n->key());
+        auto tmp_pos = tree->keyToCoord(n->key(), depth);
         tmp_pos += map_origin;
         Eigen::Vector3d pos = Eigen::Vector3d(tmp_pos.x(), tmp_pos.y(),
             tmp_pos.z());

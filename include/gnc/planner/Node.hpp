@@ -24,7 +24,7 @@ public:
 	/**
 	 * @brief Default constructs Node with id and parent of 0
 	 */
-	Node() : id_{0}, parent_{0}, path_cost_{0}, heuristic_cost_{0} {}
+	Node() : id_{0}, parent_{0}, path_cost_{0.}, heuristic_cost_{0.} {}
 	
 	/**
 	 * @brief Constructs a node with given parameters

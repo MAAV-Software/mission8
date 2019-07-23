@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 
     // Every point is multiplied by this scaling such that the space of the
     // rendering is most effectively used while not allowing the arena to bleed outside the frame
-    double scaling;
+    double scaling = 0.0;
     {
         GenericArray arena_size = doc["arena-size"].GetArray();
         double arena_height = arena_size[0].GetDouble();
