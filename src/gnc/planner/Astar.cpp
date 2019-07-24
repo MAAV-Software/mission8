@@ -35,43 +35,45 @@ namespace gnc
 namespace planner
 {
 
+Astar::Astar(const YAML::Node& config) : 
+    min_obstacle_dist_(config["min_dist_to_obstacle"].as<double>()), 
+    occupancy_thresh_(config["occupancy_thresh"].as<double>()),
+    tree_level_(config["tree_resolution_level"].as<unsigned int>()) {}
 /*
 * A point has no collision if it is a safe distance away from the nearest
 * obstacle.
-* TODO: Config for distance between obstacles
 * TODO: Support for moving obstacles
 */
-bool isCollision(const point3d& query, const OcTree* tree)
+bool Astar::isCollision(const point3d& query, const OcTree* tree)
 {
-    // TODO: What to do with unknown nodes (null result)?
     OcTreeNode* result = tree->search(query);
-    if(result && result->getOccupancy() > 0.5)
+    if(result && result->getOccupancy() > occupancy_thresh_)
         return true;
     
     // Cast a ray in 8 directions and see if there is any obstacle within 0.5m
     point3d hitPt;
-    if(tree->castRay(query, point3d(0.0, 1.0, 0.0), hitPt, true, 0.7)) {
+    if(tree->castRay(query, point3d(0.0, 1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(1.0, 0.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(1.0, 0.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(0.0, -1.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(0.0, -1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(-1.0, 0.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(-1.0, 0.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(1.0, 1.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(1.0, 1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(-1.0, 1.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(-1.0, 1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(1.0, -1.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(1.0, -1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
-    else if(tree->castRay(query, point3d(-1.0, -1.0, 0.0), hitPt, true, 0.7)) {
+    else if(tree->castRay(query, point3d(-1.0, -1.0, 0.0), hitPt, true, min_obstacle_dist_)) {
         return true;
     }
     return false;
@@ -79,7 +81,7 @@ bool isCollision(const point3d& query, const OcTree* tree)
 
 Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::shared_ptr<octomap::OcTree> tree)
 {   
-    // TODO: GET MAP ORIGIN FROM DZ
+    // TODO: GET MAP ORIGIN
     // adjust start and goal coordinates with the map's origin in the world frame
     //const point3d map_origin  =  map.originInGlobalFrame().cast<double>();
     const point3d map_origin(0.0, 0.0, 0.0);
@@ -91,9 +93,8 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     // keys are used to iterate through voxels
     // a higher depth is smaller resolution 
     // key[0] + 1 is equivalent to coord[0] + res
-    unsigned level = 2; // TODO: add to config
     unsigned max_depth = 16; // TODO: check that this is true
-    unsigned depth = max_depth - level;
+    unsigned depth = max_depth - tree_level_;
     const OcTreeKey start_key = tree->coordToKey(start_coord, depth);
     const OcTreeKey goal_key = tree->coordToKey(goal_coord, depth);
 
@@ -118,9 +119,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     openNodes.emplace(new Node(start_key, start_id, start_id, 0,
         l2norm(goal_coord, start_coord)));
 
-    double stepSize = pow(2.0, level); // size to search the next key
-    //double searchTolerance = tree->getResolution() * 10;
-    // TODO: Add faults
+    double stepSize = pow(2.0, tree_level_); // size to search the next key
     bool foundGoal = false;
     // algorithmic step
     auto searchStep = [&](const OcTreeKey& currKey, shared_ptr<Node> parent) {
@@ -135,7 +134,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             shared_ptr<Node> new_ptr = make_shared<Node>(currKey, currId, 
                 parent->id(), parent->getPathCost() + 
                 l2norm(tree->keyToCoord(parent->key(), depth), currCoord),
-                l2norm(currCoord, goal_coord)); // TODO: add support for pnorm
+                l2norm(currCoord, goal_coord));
 
             auto itOpen = find_if(openNodes.cbegin(), openNodes.cend(), 
                 [&new_ptr](const auto &b) {return *new_ptr == *b;} );    
@@ -216,7 +215,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     }
     cout << "took " << counter << " iterations until path found\n";
     if(!foundGoal) {
-        // TODO: handle a goal that was not found
         // Returns a path with only the starting waypoint
         cout << "Did not find a goal" << endl;
         Path path;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <common/utils/GetOpt.hpp>
 #include <Eigen/Core>
 #include <fstream>
@@ -13,8 +14,8 @@
 #include <streambuf>
 #include <utility>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
-#include <algorithm>
 
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Path.hpp"
@@ -105,7 +106,7 @@ int main(int argc, char** argv) {
     auto goalPt = Vector3d(point2[0].GetDouble(), point2[1].GetDouble(), point2[2].GetDouble());
 
     // generate a path with astar
-    Planner planner(""); //TODO add config for planner
+    Planner planner(YAML::LoadFile("../config/gnc/guidance-config.yaml"));
     planner.update_target(Waypoint(goalPt, Vector3d(0,0,0), 0));
     State initial = State::zero(0);
     initial.position() = initPt;

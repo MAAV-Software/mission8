@@ -4,6 +4,8 @@
 #include <gnc/State.hpp>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
+#include <yaml-cpp/yaml.h>
+
 #include "gnc/planner/Astar.hpp"
 #include "gnc/planner/Path.hpp"
 
@@ -14,7 +16,7 @@ namespace gnc
 class Planner
 {
 public:
-    Planner(const std::string& path_config);
+    Planner(const YAML::Node& config);
 
     // returns the path
     Path get_path();
@@ -28,7 +30,6 @@ public:
     void update_map(const std::shared_ptr<octomap::OcTree> tree);
 
 private:
-    std::string config_file;
     planner::Astar astar;
     std::shared_ptr<octomap::OcTree> tree_ = nullptr;
     Waypoint target_;

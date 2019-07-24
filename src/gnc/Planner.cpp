@@ -5,8 +5,8 @@ namespace maav
 {
 namespace gnc
 {
-Planner::Planner(const std::string& config_path)
-	: config_file(config_path) {}
+Planner::Planner(const YAML::Node& config)
+	: astar(config["astar"]) {}
 
 Path Planner::get_path() {
 	if(!tree_) { return Path(); }

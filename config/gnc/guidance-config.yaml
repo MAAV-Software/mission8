@@ -1,0 +1,5 @@
+# parameters for guidance
+astar:
+  min_dist_to_obstacle: 0.7
+  occupancy_thresh: 0.5
+  tree_resolution_level: 2

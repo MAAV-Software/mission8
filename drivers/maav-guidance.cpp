@@ -34,6 +34,7 @@
 #include <pcl/point_types.h>
 #include <thread>
 #include <vision/core/utilities.hpp>
+#include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
 
 using maav::OCCUPANCY_MAP_CHANNEL;
@@ -304,7 +305,7 @@ int main(int argc, char** argv)
     // Set up getopt
     GetOpt gopt;
     gopt.addBool('h', "help", false, "This message");
-    gopt.addString('c', "config", "", "Path to config.");
+    gopt.addString('c', "config", "../config/gnc/guidance-config.yaml", "Path to config.");
     // Parse getopt and check for help flag being passed
     if (!gopt.parse(argc, argv, 1) || gopt.getBool("help"))
     {
@@ -314,7 +315,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Planner planner(gopt.getString("config"));
+    Planner planner(YAML::LoadFile(gopt.getString("config")));
 
     // Set up zcm
 
