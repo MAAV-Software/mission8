@@ -253,20 +253,6 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
             
         }
     }
-    // If the path contains any unknown waypoints, then resize the path to 
-    // right before the unknown waypoint. This ensures the quad doesn't 
-    // fly into unknown territory.
-    auto itUnknown = find_if(waypoints.begin(), waypoints.end(), 
-                [&tree, depth](const auto &w) { 
-                    return !tree->search(w.position.x(), 
-                                         w.position.y(), 
-                                         w.position.z(), depth);
-                });
-    if(itUnknown != waypoints.end())
-    {
-        cerr << "unknown location\n";
-        waypoints.resize(itUnknown - waypoints.begin());
-    }
 
     Path path;
     path.waypoints = waypoints;
