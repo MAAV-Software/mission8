@@ -35,8 +35,6 @@ namespace gnc
 namespace planner
 {
 
-const unsigned int ARENA_SIZE = 30; // in meters 
-
 /*
 * A point has no collision if it is a safe distance away from the nearest
 * obstacle.
@@ -246,23 +244,35 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         if(i == (int)node_path.size() - 1)
         {
             // handles start waypoint
-            // TODO: Calculate Rates when controller has implemented it
             waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), start.yaw);
-            //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
         }
         else
         {
-            // TODO: Calculate Rates when controller has implemented it
             waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),
                 yaw_between(waypoints.back().position, pos));
-            //waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0),0);
             
         }
     }
+    // If the path contains any unknown waypoints, then resize the path to 
+    // right before the unknown waypoint. This ensures the quad doesn't 
+    // fly into unknown territory.
+    auto itUnknown = find_if(waypoints.begin(), waypoints.end(), 
+                [&tree, depth](const auto &w) { 
+                    return !tree->search(w.position.x(), 
+                                         w.position.y(), 
+                                         w.position.z(), depth);
+                });
+    if(itUnknown != waypoints.end())
+    {
+        cerr << "unknown location\n";
+        waypoints.resize(itUnknown - waypoints.begin());
+    }
+
     Path path;
     path.waypoints = waypoints;
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
                  (std::chrono::system_clock::now().time_since_epoch()).count();
+
     return path;
 }
 

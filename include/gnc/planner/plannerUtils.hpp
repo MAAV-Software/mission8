@@ -25,24 +25,30 @@ double l2norm(const point3d& a, const point3d& b)
     return c.norm();
 }
 
-// gets the linear index from a 2D grid. Counts N/W/S/E
-// TODO: Fix the special way
 struct GetId
 {
-    GetId(double resolution) : resolution_(resolution) {}
+    GetId(double resolution) : resolution_(resolution)
+        {
+            size_t units = std::round((double) MAX_ARENA_SIZE / resolution_);
+            if (units % 2 == 0) { units += 1; }
+            arena_grid_row_units_ = units;
+            size_t midpt = ceil((double) units / 2.0);
+            translation_ = point3d(midpt, midpt, 0.0);
+        }
     // return linear index from the 2d grid
     size_t operator()(const point3d& a)
     {
-        // Assume the arena size is 601 x 601 gridunits at 0.05 res. 301,301 is middle
-        // scaline
         // X is row, Y is col
         point3d scaled = (a * (1. / resolution_));
-        scaled += point3d(301.0, 301.0, 0.0);
+        scaled += translation_;
         assert(scaled.x() > 0);
         assert(scaled.y() > 0);
-        return std::round((scaled.x()*601.0 + scaled.y()));
+        return std::round((scaled.x()*arena_grid_row_units_ + scaled.y()));
     }
     double resolution_;
+    point3d translation_;
+    size_t arena_grid_row_units_;
+    const unsigned int MAX_ARENA_SIZE = 60; // in meters
 };
 
 }
