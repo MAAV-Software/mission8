@@ -1,8 +1,8 @@
 #include <gnc/Constants.hpp>
 #include <gnc/control/LinearlyInterpolatedPath.hpp>
 
+#include <algorithm>
 #include <iostream>
-
 #include <stdexcept>
 
 namespace maav
@@ -29,7 +29,8 @@ void LinearlyInterpolatedPath::updatePath(const path_t& path)
 
         const Eigen::Vector3d difference = curr_waypoint.position - prev_waypoint.position;
         const double distance = difference.norm();
-        const double segment_duration = distance / speed_;
+        const double heading_difference = next_waypoint.heading - previous_waypoint.heading;
+        const double segment_duration = max(distance / speed_, heading_difference / speed_);
 
         if (segment_duration > 0)
         {
