@@ -242,7 +242,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
         if(i == (int)node_path.size() - 1)
         {
             // handles start waypoint
-            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), start.yaw);
+            waypoints.emplace_back(pos, Eigen::Vector3d(0,0,0), yaw_between(start.position, pos));
         }
         else
         {
@@ -253,7 +253,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     }
 
     Path path;
-    path.waypoints = waypoints;
+    path.waypoints = newWaypoints;
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
                  (std::chrono::system_clock::now().time_since_epoch()).count();
 
