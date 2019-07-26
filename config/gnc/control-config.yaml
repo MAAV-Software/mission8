@@ -41,6 +41,7 @@ takeoff-alt: 1              #meters
 takeoff-speed: 0.3
 landing-speed: 0.3
 flight-speed: 0.5
+yaw_speed: 30                 # deg/second
 
 
 # ZCM publish url
