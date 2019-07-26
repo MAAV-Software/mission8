@@ -32,11 +32,11 @@ uart-path: "/dev/ttyACM1"
 #true - Sets the incoming path start time to current state time, false - Uses time in path_t message
 reset-path-starts: true
 sim-state: false             #true - state comes from sim, false - state comes from kalman filter
-ff-thrust: 0                
+ff-thrust: 0.0                
 arming-delay: 1             #seconds
 land-detect-dur: 0.5
 
-tol: 0.25                    # convergence tolerance (norm of [x, y, z, yaw])
+tol: 0.10                   # convergence tolerance (norm of [x, y, z, yaw])
 takeoff-alt: 1              #meters
 takeoff-speed: 0.3
 landing-speed: 0.3
