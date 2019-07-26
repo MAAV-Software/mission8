@@ -327,7 +327,6 @@ InnerLoopSetpoint StateMachine::runTakeoff()
     if (atTakeoffAltitude())
     {
         setControlState(ControlState::FLIGHT);
-        std::cout << "switching to flight in takeoff" << std::endl;
         print_takeoff = true;
     }
 
