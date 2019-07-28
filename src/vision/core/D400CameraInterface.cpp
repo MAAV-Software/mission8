@@ -175,33 +175,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr D400CameraInterface::getPointCloudBasic() co
     return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr D400CameraInterface::convertToCloud(cv::Mat depth_img) const
-{
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
-    for (int dy{0}; dy < depth_intrinsics_.height; ++dy)
-    {
-        for (int dx{0}; dx < depth_intrinsics_.width; ++dx)
-        {
-            uint16_t* raw_depth_image = (uint16_t*)(depth_img.data);
-            // Retrieve depth value and map it to more "real" coordinates
-            uint16_t depth_value = raw_depth_image[(dy * depth_intrinsics_.width) + dx];
-            float depth_in_meters = depth_value * scale_;
-            // Skip over values with a depth of zero (not found depth)
-            if (depth_value == 0) continue;
-            // For mapping color to depth
-            // Map from pixel coordinates in the depth image to pixel
-            // coordinates in the color image
-            float depth_pixel[2] = {static_cast<float>(dx), static_cast<float>(dy)};
-            // Projects the depth value into 3-D space
-            float depth_point[3];
-            rs2_deproject_pixel_to_point(
-                depth_point, &depth_intrinsics_, depth_pixel, depth_in_meters);
-            cloud->push_back(pcl::PointXYZ(depth_point[0], depth_point[1], depth_point[2]));
-        }
-    }
-    return cloud;
-}
-
 pcl::PointCloud<pcl::PointXYZ>::Ptr D400CameraInterface::getMappedPointCloud() const
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());

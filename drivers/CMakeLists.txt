@@ -221,14 +221,3 @@ add_executable(maav-obstacle-test maav-obstacle-test.cpp)
 target_link_libraries(maav-obstacle-test
                         ${PCL_LIBRARIES}
 )
-
-add_executable(maav-depth-to-point-cloud maav-depth-to-point-cloud.cpp)
-
-target_link_libraries(maav-depth-to-point-cloud
-                        ${PCL_LIBRARIES}
-                        ${OpenCV_LIBS}
-                        ${YAMLCPP_LIBRARY}
-                        ${LIBREALSENSE2_LIBRARIES}
-                        ${LIBUSB_1_LIBRARIES}
-                        CameraInterface
-)

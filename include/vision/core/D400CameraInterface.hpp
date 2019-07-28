@@ -55,8 +55,6 @@ public:
 
     virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getMappedPointCloud() const override;
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr convertToCloud(cv::Mat depth_img) const;
-
     virtual void disableAutoExposure() override;
 
     /**
