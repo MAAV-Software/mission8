@@ -219,5 +219,10 @@ endif()
 add_executable(maav-obstacle-test maav-obstacle-test.cpp)
 
 target_link_libraries(maav-obstacle-test
+                        maav-msg
+                        ${PCL_LIBRARIES}
+                        VisionUtils
+                        NaiveObstacleDetection
+                        ${ZCM_LIBRARIES}
                         ${PCL_LIBRARIES}
 )
