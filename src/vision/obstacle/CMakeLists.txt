@@ -18,11 +18,11 @@ include_directories(SYSTEM
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(NaiveObstacle SHARED
+add_library(NaiveObstacleDetection SHARED
     NaiveObstacle.cpp
 )
 
-target_link_libraries(NaiveObstacle
+target_link_libraries(NaiveObstacleDetection
     ${OpenCV_LIBS}
     ${ZCM_LIBRARIES}
     ${PCL_LIBRARIES}

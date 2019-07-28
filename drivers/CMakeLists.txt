@@ -2,6 +2,7 @@ find_package(LibRealSense2)
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(LibRealSense2 REQUIRED)
+find_package(libusb-1.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Octomap REQUIRED)
 
@@ -214,3 +215,20 @@ if(BUILD_GNC)
         VisionUtils
         ${ZCM_LIBRARIES})
 endif()
+
+add_executable(maav-obstacle-test maav-obstacle-test.cpp)
+
+target_link_libraries(maav-obstacle-test
+                        ${PCL_LIBRARIES}
+)
+
+add_executable(maav-depth-to-point-cloud maav-depth-to-point-cloud.cpp)
+
+target_link_libraries(maav-depth-to-point-cloud
+                        ${PCL_LIBRARIES}
+                        ${OpenCV_LIBS}
+                        ${YAMLCPP_LIBRARY}
+                        ${LIBREALSENSE2_LIBRARIES}
+                        ${LIBUSB_1_LIBRARIES}
+                        CameraInterface
+)

@@ -1,5 +1,11 @@
+#ifndef ___NAIVE_OBSTACLE__HPP___
+#define ___NAIVE_OBSTACLE__HPP___
+
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+
+#include <vector>
+#include <Eigen/Core>
 
 /* Using the depth image:
  * 1.1. Threshold the image to only include the pixels that represent points
@@ -37,9 +43,16 @@
  * 2. Compute the centroid of the threatening points, and return that as the
  * threatening obstacle.
  */
-
+namespace maav
+{
+namespace vision
+{
 class NaiveObstacle
 {
 public:
-private:
+    std::vector<Eigen::Vector3d> detectObstacles(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 };
+}
+}
+
+#endif
