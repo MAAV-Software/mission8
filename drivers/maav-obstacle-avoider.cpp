@@ -144,7 +144,7 @@ private:
     void exitEmergency()
     {
         // then is no longer in emergency and
-        // Can move forward 2 meters, therefore, send and set new goal waypoint 2 meters 
+        // Can move forward 2 meters, therefore, send and set new goal waypoint 2 meters
         // forward
         double yaw = get_heading(maav::gnc::ConvertState(current_state_));
         Eigen::Vector2d posChange;
@@ -163,7 +163,7 @@ private:
     void emergency()
     {
         // If not close enough to goal yaw, do nothing
-        double diff = angle_diff_abs(get_heading(maav::gnc::ConvertState(current_state_)), 
+        double diff = angle_diff_abs(get_heading(maav::gnc::ConvertState(current_state_)),
             current_target_.pose[3]);
         if (diff > (PI / 26))
         {
@@ -208,10 +208,10 @@ private:
 class PointCloudHandler
 {
 public:
-    PointCloudHandler(StateMachine& state_machine) : obstacle_detector_ {NaiveObstacle()}, 
+    PointCloudHandler(StateMachine& state_machine) : obstacle_detector_ {NaiveObstacle()},
         state_machine_ {state_machine} {}
     void handle(const zcm::ReceiveBuffer*, const std::string&,
-        const point_cloud_t* message) 
+        const point_cloud_t* message)
     {
         if (!running)
         {
