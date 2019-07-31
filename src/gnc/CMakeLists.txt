@@ -71,8 +71,6 @@ add_library(maav-control SHARED
     control/Controller.cpp
     control/StateMachine.cpp
     control/LandDetector.cpp
-    control/ContinuousPath.cpp
-    control/LinearlyInterpolatedPath.cpp
 )
 
 target_include_directories(maav-control PUBLIC
