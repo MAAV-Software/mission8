@@ -23,6 +23,8 @@
 #include <common/messages/state_t.hpp>
 #include <common/messages/point_cloud_t.hpp>
 #include <common/messages/point_t.hpp>
+#include <common/messages/groundtruth_inertial_t.hpp>
+#include <common/math/math.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
 #include <vision/obstacle/NaiveObstacle.hpp>
@@ -44,15 +46,17 @@ using std::unique_lock;
 using std::deque;
 using maav::GOAL_WAYPOINT_CHANNEL;
 using maav::STATE_CHANNEL;
+using maav::GT_INERTIAL_CHANNEL;
 using maav::FORWARD_CAMERA_POINT_CLOUD_CHANNEL;
 using maav::gnc::State;
+using maav::deg_to_rad;
+using maav::rad_to_deg;
+using maav::PI;
 using namespace std::chrono;
 
 using pcl::PointXYZ;
 using pcl::PointCloud;
 using maav::vision::NaiveObstacle;
-
-constexpr double PI = 3.14159;
 
 class StateMachine
 {
@@ -73,6 +77,7 @@ public:
         current_target_.mode = 0;
 
         memset(&current_state_, 0, sizeof(state_t));
+        current_state_.attitude.data[2] = 1;
     }
     void updatedCurrentState(state_t new_state)
     {
@@ -84,18 +89,21 @@ public:
         unique_lock<mutex> lck(mtx_);
         if (obstacle_exists)
         {
+            cout << "in emergency!!!" << endl;
             emergency();
             history_.push_back(obstacle_exists ? 1 : 0);
             history_.pop_front();
         }
         else if (internalSummarizeHistory() > 0)
         {
+            cout << "could leave emergency!!!" << endl;
             history_.push_back(obstacle_exists ? 1 : 0);
             history_.pop_front();
             int after = internalSummarizeHistory();
             // Check history, if before greater than zero and after equal to zero
             if (after == 0)
             {
+                cout << "Leaving emergency!!!" << endl;
                 exitEmergency();
             }
         }
@@ -115,9 +123,7 @@ public:
         current_target_.pose[1] = 0;
         current_target_.pose[2] = -1;
         current_target_.pose[3] = 0;
-        path_t wpt_path;
-        wpt_path.NUM_WAYPOINTS = 1;
-        wpt_path.waypoints.push_back(current_target_);
+        path_t wpt_path = packageInPath(current_target_);
         zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
     }
 private:
@@ -146,14 +152,22 @@ private:
         current_target_.pose[0] = posChange.x();
         current_target_.pose[1] = posChange.y();
         current_target_.pose[3] = yaw;
-        zcm_->publish(maav::GOAL_WAYPOINT_CHANNEL, &current_target_);
+        path_t wpt_path = packageInPath(current_target_);
+        zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
     }
     void emergency()
     {
         // If not close enough to goal yaw, do nothing
         if (abs(get_heading(maav::gnc::ConvertState(current_state_)) - current_target_.pose[3]) > 
-            (PI / 12)) 
+            (PI / 12) &&
+            abs(get_heading(maav::gnc::ConvertState(current_state_)) - (current_target_.pose[3] - 
+                (2 * PI))) > (PI / 12))
         {
+            cout << "Difference: " << abs(get_heading(maav::gnc::ConvertState(current_state_)) - 
+                current_target_.pose[3]) << endl;
+            cout << "Not close enough to heading yet." << endl;
+            cout << get_heading(maav::gnc::ConvertState(current_state_)) << endl;
+            cout << current_target_.pose[3] << " is the current target heading." << endl;
             return;
         }
         // Yaw and send new yawed goal
@@ -161,7 +175,8 @@ private:
         current_target_.pose[0] = current_state_.position.data[0];
         current_target_.pose[1] = current_state_.position.data[1];
         current_target_.pose[3] += (PI / 6);
-        zcm_->publish(maav::GOAL_WAYPOINT_CHANNEL, &current_target_);
+        path_t wpt_path = packageInPath(current_target_);
+        zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
     }
     // Helper to get heading out of state
     static double get_heading(const State& state)
@@ -171,6 +186,22 @@ private:
         double q2 = state.attitude().unit_quaternion().y();
         double q3 = state.attitude().unit_quaternion().z();
         return atan2((q1 * q2) + (q0 * q3), 0.5 - (q2 * q2) - (q3 * q3));
+    }
+    static path_t packageInPath(waypoint_t wpt)
+    {
+        wpt.pose[3] = rad_to_deg(wpt.pose[3]);
+        path_t wpt_path;
+        wpt_path.NUM_WAYPOINTS = 1;
+        wpt_path.waypoints.push_back(wpt);
+        return wpt_path;
+    }
+    static double mode2PI(double rads)
+    {
+        if (rads >= 2 * PI)
+        {
+            return rads - (2 * PI);
+        }
+        return rads;
     }
     deque<int> history_;
     zcm::ZCM* zcm_;
@@ -202,7 +233,14 @@ public:
     void handle(const zcm::ReceiveBuffer*, const std::string&,
         const state_t* message)
     {
+        cout << "Got state update" << endl;
         state_machine_.updatedCurrentState(*message);
+    }
+    void handleInertial(const zcm::ReceiveBuffer*, const std::string&,
+        const groundtruth_inertial_t* message)
+    {
+        state_machine_.updatedCurrentState(
+            maav::gnc::ConvertState(maav::gnc::ConvertGroundTruthState(*message)));
     }
 private:
     StateMachine& state_machine_;
@@ -219,13 +257,18 @@ int main(int argc, char** argv)
     StateMachine state_machine(&zcm);
     PointCloudHandler point_cloud_handler(state_machine);
     StateHandler state_handler(state_machine);
+    /* 
     for (size_t i = 0; i < 5; ++i)
     {
         state_machine.takeoff();
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    */
     zcm.subscribe(FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
         &PointCloudHandler::handle, &point_cloud_handler);
     zcm.subscribe(STATE_CHANNEL, &StateHandler::handle, &state_handler);
+    zcm.subscribe(GT_INERTIAL_CHANNEL, &StateHandler::handleInertial, &state_handler);
     zcm.run();
 }
+
+// TODO MAKE SURE TO UNCOMMENT THE TAKEOFF PART WHEN DONE DEBUGGING
