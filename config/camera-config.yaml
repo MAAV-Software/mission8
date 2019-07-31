@@ -14,7 +14,7 @@ forward:
   width: 640
   height: 480
   fps: 15                # 15, 30, or 60
-  serial: "749512060038" # 12 digit number on bottom of realsense camera
+  serial: "819112070694" # 12 digit number on bottom of realsense camera
   publish_rgbd: true
   publish_pointcloud: true
   enable_autoexposure: false
@@ -66,7 +66,7 @@ downward:
     - 0
 
 other-forward: # To accomodate the t265 in use with the other cameras
-  enabled: true
+  enabled: false
   width: 640
   height: 480
   fps: 30                # 15, 30, or 60

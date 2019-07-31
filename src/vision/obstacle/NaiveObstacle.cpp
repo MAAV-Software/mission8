@@ -12,9 +12,9 @@ using pcl::PointXYZ;
 using pcl::euclideanDistance;
 using pcl::CentroidPoint;
 
-constexpr float maxPointDist = 1.5; // Maximum distance of points from zero point
+constexpr float maxPointDist = 1.0; // Maximum distance of points from zero point
 constexpr float maxObstacleDist = 0.5; // Maximum distance of points from main obstacle point
-constexpr size_t minPointsInObstacle = 50;
+constexpr size_t minPointsInObstacle = 200;
 
 // Simple class used to bin points into obstacles
 // and then retrieve the list of obstacles compiled here
@@ -28,33 +28,35 @@ public:
         {
             if (euclideanDistance<PointXYZ, PointXYZ>(obstacles_[i], point) < maxObstacleDist)
             {
-                centroids_[i]->add(point);
+                // centroids_[i]->add(point);
+                ocurrences[i] += 1;
                 return;
             }
         }
         // Could not fit into any already present obstacles, put here
         obstacles_.push_back(point);
-        centroids_.emplace_back();
-        centroids_.back()->add(point);
+        ocurrences.push_back(1);
+        // centroids_.emplace_back();
+        // centroids_.back()->add(point);
     }
     vector<Vector3d> getObstacles()
     {
         vector<Vector3d> eigenObstacles;
         eigenObstacles.reserve(obstacles_.size());
-        for (auto& centroid : centroids_)
+        for (auto& ocurrence : ocurrences)
         {
-            if (centroid->getSize() >= minPointsInObstacle)
+            if (ocurrence >= minPointsInObstacle)
             {
-                PointXYZ center;
-                centroid->get(center);
-                eigenObstacles.emplace_back(center.x, center.y, center.z);
+                eigenObstacles.emplace_back(0, 0, 0);
+                return eigenObstacles;
             }
         }
         return eigenObstacles;
     }
 private:
     vector<PointXYZ> obstacles_;
-    vector<shared_ptr<CentroidPoint<PointXYZ>>> centroids_;
+    // vector<shared_ptr<CentroidPoint<PointXYZ>>> centroids_;
+    vector<size_t> ocurrences;
 };
 
 vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXYZ>::Ptr cloud)
@@ -62,6 +64,7 @@ vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXY
     // Traverse the point cloud keeping only points that are within 1.5m of the camera
     PointXYZ zeroPoint(0, 0, 0);
     PointCloud<PointXYZ>::Ptr filteredCloud = PointCloud<PointXYZ>::Ptr(new PointCloud<PointXYZ>());
+    // TODO ALSO FILTER OUT THE POINTS THAT ARE LIKELY TO BE PROP GAURDS OR ELSEWHERE ON THE VEHICLE
     for (auto& point : *cloud)
     {
         if (euclideanDistance<PointXYZ, PointXYZ>(zeroPoint, point) < maxPointDist)
