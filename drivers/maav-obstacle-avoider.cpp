@@ -91,21 +91,18 @@ public:
         unique_lock<mutex> lck(mtx_);
         if (obstacle_exists)
         {
-            cout << "in emergency!!!" << endl;
             emergency();
             history_.push_back(obstacle_exists ? 1 : 0);
             history_.pop_front();
         }
         else if (internalSummarizeHistory() > 0)
         {
-            cout << "could leave emergency!!!" << endl;
             history_.push_back(obstacle_exists ? 1 : 0);
             history_.pop_front();
             int after = internalSummarizeHistory();
             // Check history, if before greater than zero and after equal to zero
             if (after == 0)
             {
-                cout << "Leaving emergency!!!" << endl;
                 exitEmergency();
             }
         }
@@ -168,12 +165,8 @@ private:
         // If not close enough to goal yaw, do nothing
         double diff = angle_diff_abs(get_heading(maav::gnc::ConvertState(current_state_)), 
             current_target_.pose[3]);
-        cout << "Difference: " << diff << endl;
         if (diff > (PI / 26))
         {
-            cout << "Not close enough to heading yet." << endl;
-            cout << get_heading(maav::gnc::ConvertState(current_state_)) << endl;
-            cout << current_target_.pose[3] << " is the current target heading." << endl;
             return;
         }
         // Yaw and send new yawed goal
@@ -247,7 +240,6 @@ public:
     void handle(const zcm::ReceiveBuffer*, const std::string&,
         const state_t* message)
     {
-        cout << "Got state update" << endl;
         state_machine_.updatedCurrentState(*message);
     }
     void handleInertial(const zcm::ReceiveBuffer*, const std::string&,
@@ -276,12 +268,10 @@ int main(int argc, char** argv)
         state_machine.takeoff();
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    state_machine.approachObstacle();
+    // state_machine.approachObstacle();
     zcm.subscribe(FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
         &PointCloudHandler::handle, &point_cloud_handler);
     zcm.subscribe(STATE_CHANNEL, &StateHandler::handle, &state_handler);
     zcm.subscribe(GT_INERTIAL_CHANNEL, &StateHandler::handleInertial, &state_handler);
     zcm.run();
 }
-
-// TODO MAKE SURE TO UNCOMMENT THE TAKEOFF PART WHEN DONE DEBUGGING
