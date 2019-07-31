@@ -253,7 +253,7 @@ Path Astar::operator()(const Waypoint& start, const Waypoint& goal, const std::s
     }
 
     Path path;
-    path.waypoints = newWaypoints;
+    path.waypoints = waypoints;
     path.utime = std::chrono::duration_cast<std::chrono::microseconds>
                  (std::chrono::system_clock::now().time_since_epoch()).count();
 
