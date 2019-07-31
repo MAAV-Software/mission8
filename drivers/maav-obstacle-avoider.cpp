@@ -25,6 +25,7 @@
 #include <common/messages/point_t.hpp>
 #include <common/messages/groundtruth_inertial_t.hpp>
 #include <common/math/math.hpp>
+#include <common/math/angle_functions.hpp>
 #include <gnc/utils/ZcmConversion.hpp>
 
 #include <vision/obstacle/NaiveObstacle.hpp>
@@ -53,6 +54,7 @@ using maav::deg_to_rad;
 using maav::rad_to_deg;
 using maav::PI;
 using namespace std::chrono;
+using namespace eecs467;
 
 using pcl::PointXYZ;
 using pcl::PointCloud;
@@ -126,6 +128,12 @@ public:
         path_t wpt_path = packageInPath(current_target_);
         zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
     }
+    void approachObstacle()
+    {
+        current_target_.pose[0] = 1;
+        path_t wpt_path = packageInPath(current_target_);
+        zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
+    }
 private:
     int internalSummarizeHistory()
     {
@@ -158,13 +166,11 @@ private:
     void emergency()
     {
         // If not close enough to goal yaw, do nothing
-        if (abs(get_heading(maav::gnc::ConvertState(current_state_)) - current_target_.pose[3]) > 
-            (PI / 12) &&
-            abs(get_heading(maav::gnc::ConvertState(current_state_)) - (current_target_.pose[3] - 
-                (2 * PI))) > (PI / 12))
+        double diff = angle_diff_abs(get_heading(maav::gnc::ConvertState(current_state_)), 
+            current_target_.pose[3]);
+        cout << "Difference: " << diff << endl;
+        if (diff > (PI / 26))
         {
-            cout << "Difference: " << abs(get_heading(maav::gnc::ConvertState(current_state_)) - 
-                current_target_.pose[3]) << endl;
             cout << "Not close enough to heading yet." << endl;
             cout << get_heading(maav::gnc::ConvertState(current_state_)) << endl;
             cout << current_target_.pose[3] << " is the current target heading." << endl;
@@ -175,6 +181,7 @@ private:
         current_target_.pose[0] = current_state_.position.data[0];
         current_target_.pose[1] = current_state_.position.data[1];
         current_target_.pose[3] += (PI / 6);
+        current_target_.pose[3] = wrap_to_2pi(current_target_.pose[3]);
         path_t wpt_path = packageInPath(current_target_);
         zcm_->publish(maav::PATH_CHANNEL, &wpt_path);
     }
@@ -185,11 +192,10 @@ private:
         double q1 = state.attitude().unit_quaternion().x();
         double q2 = state.attitude().unit_quaternion().y();
         double q3 = state.attitude().unit_quaternion().z();
-        return atan2((q1 * q2) + (q0 * q3), 0.5 - (q2 * q2) - (q3 * q3));
+        return wrap_to_2pi(atan2((q1 * q2) + (q0 * q3), 0.5 - (q2 * q2) - (q3 * q3)));
     }
-    static path_t packageInPath(waypoint_t wpt)
+    static path_t packageInPath(waypoint_t& wpt)
     {
-        wpt.pose[3] = rad_to_deg(wpt.pose[3]);
         path_t wpt_path;
         wpt_path.NUM_WAYPOINTS = 1;
         wpt_path.waypoints.push_back(wpt);
@@ -197,11 +203,7 @@ private:
     }
     static double mode2PI(double rads)
     {
-        if (rads >= 2 * PI)
-        {
-            return rads - (2 * PI);
-        }
-        return rads;
+        return wrap_to_2pi(rads);
     }
     deque<int> history_;
     zcm::ZCM* zcm_;
@@ -216,14 +218,26 @@ public:
     PointCloudHandler(StateMachine& state_machine) : obstacle_detector_ {NaiveObstacle()}, 
         state_machine_ {state_machine} {}
     void handle(const zcm::ReceiveBuffer*, const std::string&,
-        const point_cloud_t* message)
+        const point_cloud_t* message) 
     {
-        PointCloud<PointXYZ>::Ptr cloud = maav::vision::zcmTypeToPCLPointCloud(*message);
-        state_machine_.updatedHistory(!obstacle_detector_.detectObstacles(cloud).empty());
+        if (!running)
+        {
+            running = true;
+            std::thread handleThread(handleImpl, *message, this);
+            handleThread.detach();
+        }
+    }
+    static void handleImpl(const point_cloud_t message, PointCloudHandler* handler)
+    {
+        PointCloud<PointXYZ>::Ptr cloud = maav::vision::zcmTypeToPCLPointCloud(message);
+        auto obstacles = handler->obstacle_detector_.detectObstacles(cloud);
+        handler->state_machine_.updatedHistory(!obstacles.empty());
+        handler->running = false;
     }
 private:
     NaiveObstacle obstacle_detector_;
     StateMachine& state_machine_;
+    std::atomic_bool running = false;
 };
 
 class StateHandler
@@ -257,13 +271,12 @@ int main(int argc, char** argv)
     StateMachine state_machine(&zcm);
     PointCloudHandler point_cloud_handler(state_machine);
     StateHandler state_handler(state_machine);
-    /* 
     for (size_t i = 0; i < 5; ++i)
     {
         state_machine.takeoff();
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    */
+    state_machine.approachObstacle();
     zcm.subscribe(FORWARD_CAMERA_POINT_CLOUD_CHANNEL,
         &PointCloudHandler::handle, &point_cloud_handler);
     zcm.subscribe(STATE_CHANNEL, &StateHandler::handle, &state_handler);
