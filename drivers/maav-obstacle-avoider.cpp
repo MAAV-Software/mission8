@@ -9,6 +9,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
+#include <math.h>
 
 #include <yaml-cpp/yaml.h>
 #include <zcm/zcm-cpp.hpp>
@@ -149,6 +150,12 @@ private:
     }
     void emergency()
     {
+        // If not close enough to goal yaw, do nothing
+        if (abs(get_heading(maav::gnc::ConvertState(current_state_)) - current_target_.pose[3]) > 
+            (PI / 12)) 
+        {
+            return;
+        }
         // Yaw and send new yawed goal
         // Also make sure stops moving forward
         current_target_.pose[0] = current_state_.position.data[0];
