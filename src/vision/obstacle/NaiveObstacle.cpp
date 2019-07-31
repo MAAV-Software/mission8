@@ -12,7 +12,7 @@ using pcl::PointXYZ;
 using pcl::euclideanDistance;
 using pcl::CentroidPoint;
 
-constexpr float maxPointDist = 1.0; // Maximum distance of points from zero point
+constexpr float maxPointDist = 1.3; // Maximum distance of points from zero point
 constexpr float maxObstacleDist = 0.5; // Maximum distance of points from main obstacle point
 constexpr size_t minPointsInObstacle = 200;
 
@@ -43,12 +43,12 @@ public:
     {
         vector<Vector3d> eigenObstacles;
         eigenObstacles.reserve(obstacles_.size());
-        for (auto& ocurrence : ocurrences)
+        for (size_t i = 0; i < ocurrences.size(); ++i)
         {
+            auto& ocurrence = ocurrences[i];
             if (ocurrence >= minPointsInObstacle)
             {
-                eigenObstacles.emplace_back(0, 0, 0);
-                return eigenObstacles;
+                eigenObstacles.emplace_back(obstacles_[i].x, obstacles_[i].y, obstacles_[i].z);
             }
         }
         return eigenObstacles;
@@ -59,6 +59,12 @@ private:
     vector<size_t> ocurrences;
 };
 
+bool isDirectlyForward(PointXYZ& point)
+{
+    return ((point.x < 0.7 && point.y > -0.7) && (point.y < 0.3 && point.y > -0.3) && 
+        point.z > 0.5);
+}
+
 vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXYZ>::Ptr cloud)
 {
     // Traverse the point cloud keeping only points that are within 1.5m of the camera
@@ -67,7 +73,8 @@ vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXY
     // TODO ALSO FILTER OUT THE POINTS THAT ARE LIKELY TO BE PROP GAURDS OR ELSEWHERE ON THE VEHICLE
     for (auto& point : *cloud)
     {
-        if (euclideanDistance<PointXYZ, PointXYZ>(zeroPoint, point) < maxPointDist)
+        if (euclideanDistance<PointXYZ, PointXYZ>(zeroPoint, point) < maxPointDist &&
+            !isOnVehicle(point) && isDirectlyForward(point))
         {
             filteredCloud->push_back(point);
         }
@@ -78,4 +85,10 @@ vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXY
         obstacles.addPoint(point);
     }
     return obstacles.getObstacles();
+}
+
+bool maav::vision::NaiveObstacle::isOnVehicle(PointXYZ& point)
+{
+    return ((point.x < 0.6 && point.y > -0.6) && (point.y < 0.5 && point.y > 0) && 
+        point.z < 0.6);
 }

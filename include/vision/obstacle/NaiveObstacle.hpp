@@ -51,6 +51,8 @@ class NaiveObstacle
 {
 public:
     std::vector<Eigen::Vector3d> detectObstacles(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+private:
+    bool isOnVehicle(pcl::PointXYZ& point);
 };
 }
 }

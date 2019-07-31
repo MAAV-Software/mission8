@@ -13,6 +13,7 @@ include_directories(
         ${SW_INCLUDE_DIR}
         ${OPENCV_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIR}
+        ${SOPHUS_INCLUDE_DIR}
 )
 
 include_directories(
@@ -220,6 +221,18 @@ add_executable(maav-obstacle-test maav-obstacle-test.cpp)
 
 target_link_libraries(maav-obstacle-test
                         maav-msg
+                        ${PCL_LIBRARIES}
+                        VisionUtils
+                        NaiveObstacleDetection
+                        ${ZCM_LIBRARIES}
+                        ${PCL_LIBRARIES}
+)
+
+add_executable(maav-obstacle-avoider maav-obstacle-avoider.cpp)
+
+target_link_libraries(maav-obstacle-avoider
+                        maav-msg
+                        maav-gnc-utils
                         ${PCL_LIBRARIES}
                         VisionUtils
                         NaiveObstacleDetection

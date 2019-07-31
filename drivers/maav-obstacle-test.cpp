@@ -32,9 +32,14 @@ public:
         const point_cloud_t* message)
     {
         PointCloud<PointXYZ>::Ptr cloud = maav::vision::zcmTypeToPCLPointCloud(*message);
-        if (!obstacle_detector_.detectObstacles(cloud).empty())
+        auto obstacles = obstacle_detector_.detectObstacles(cloud);
+        if (!obstacles.empty())
         {
             cout << "There is an obstacle directly ahead!" << endl;
+            for (auto& obstacle : obstacles)
+            {
+                cout << obstacle.x() << ' ' << obstacle.y() << ' ' << obstacle.z() << endl;
+            }
         }
     }
 private:
