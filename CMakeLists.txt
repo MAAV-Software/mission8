@@ -19,7 +19,7 @@ option(BUILD_MISSION_PLANNING "Build the mission planning module" ON)
 option(BUILD_GCS_CLIENT "Build the ground control station client" ON)
 option(BUILD_TANFAN "Build the TivA nuc Network Forwarding ApplicatioN (TANFAN)" ON)
 option(BUILD_IMU "Build the IMU driver" ON)
-option(BUILD_TESTS "Build test cases" ON)
+option(BUILD_TESTS "Build test cases" OFF)
 option(BUILD_OBSTACLES "Build obstacle detector" OFF)
 option(BUILD_PLOTTER "Build plotting tool" ON)
 option(BUILD_VISUALIZER "Build localization visualization tool" OFF)
@@ -35,6 +35,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 find_package(YAMLCPP REQUIRED)
 find_package(ZCM REQUIRED)
 find_package(libusb-1.0 REQUIRED)
+find_package(Eigen3 3.3.5)
+if(NOT EIGEN3_VERSION_OK)
+    message("You don't have the eigen submodule, prepare for a bad time.")
+    message("Don't compile with -Werror.")
+    message("Looking for an older version of Eigen (3.3.5 recommended)")
+    find_package(Eigen3 REQUIRED)
+endif()
 
 # Include generated zcm messages and mavlink headers
 include_directories(SYSTEM
@@ -73,7 +80,6 @@ endif()
 if(BUILD_VISUALIZER OR BUILD_PLOTTER)
     add_subdirectory(tools)
 endif()
-
 
 # Setup testing options
 if(BUILD_TESTS)

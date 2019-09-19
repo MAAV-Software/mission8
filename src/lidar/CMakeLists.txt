@@ -1,7 +1,7 @@
 find_package(OpenCV REQUIRED)
 
 include_directories(
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIR}
 )
 

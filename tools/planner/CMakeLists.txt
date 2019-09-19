@@ -12,7 +12,7 @@ include_directories(
     ${SW_INCLUDE_DIR}
     ${OPENCV_INCLUDE_DIRS}
     ${RAPID_JSON_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
 )
 
 include_directories(

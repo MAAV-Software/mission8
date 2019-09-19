@@ -1,10 +1,10 @@
-find_path(APRILTAGS_INCLUDE_DIRS NAMES apriltag apriltag.h
-    PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty/apriltags/include
-    NO_DEFAULT_PATH)
+find_path(APRILTAGS_INCLUDE_DIRS NAMES apriltag.h
+    PATHS /usr/local/include/apriltag
+)
 
 find_library(APRILTAGS_LIBRARIES NAMES libapriltag apriltag
-    PATHS ${SOFTWARE_SOURCE_DIR}/thirdparty/apriltags/lib
-    NO_DEFAULT_PATH)
+    /usr/local/lib
+)
 
 set(APRILTAGS_LIBRARIES ${APRILTAGS_LIBRARIES} CACHE STRING "")
 set(APRILTAGS_INCLUDE_DIRS ${APRILTAGS_INCLUDE_DIRS} CACHE STRING "")

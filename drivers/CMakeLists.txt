@@ -12,7 +12,7 @@ include_directories(
         ${ZCM_INCLUDE_DIRS}
         ${SW_INCLUDE_DIR}
         ${OPENCV_INCLUDE_DIRS}
-        ${EIGEN3_INCLUDE_DIR}
+        ${EIGEN_INCLUDE_DIRS}
         ${SOPHUS_INCLUDE_DIR}
 )
 

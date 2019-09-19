@@ -25,7 +25,7 @@ add_library(maav-state SHARED
 target_include_directories(maav-state PUBLIC
     ${SW_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
 )
 
 add_subdirectory(xbox-controller)
@@ -40,7 +40,7 @@ add_library(maav-measurements SHARED
 
 include_directories(maav-gnc-utils
     ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${SOPHUS_INCLUDE_DIR}
 )
 
@@ -58,7 +58,7 @@ target_link_libraries(maav-gnc-utils
 target_include_directories(maav-measurements PUBLIC
     ${SW_INCLUDE_DIR}
     ${SOPHUS_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
 )
 
 target_link_libraries(maav-measurements
@@ -97,7 +97,7 @@ add_library(maav-kalman SHARED
 
 target_include_directories(maav-kalman PUBLIC
     ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${SOPHUS_INCLUDE_DIR}
     ${YAMLCPP_INCLUDE_DIRS}
 )
@@ -132,7 +132,7 @@ target_link_libraries(maav-kalman
 
 # target_include_directories(maav-slam PUBLIC
 #     ${SW_INCLUDE_DIR}
-#     ${EIGEN3_INCLUDE_DIR}
+#     ${EIGEN_INCLUDE_DIRS}
 #     ${Pangolin_INCLUDE_DIRS}
 #     ${DBOW2_INCLUDE_DIR}
 #     ${G2O_INCLUDE_DIR}
@@ -154,7 +154,7 @@ add_library(maav-guidance SHARED
 
 target_include_directories(maav-guidance PUBLIC
     ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${SOPHUS_INCLUDE_DIR}
 )
 
@@ -174,7 +174,7 @@ add_library(maav-point-mapper PointMapper.cpp)
 target_include_directories(maav-point-mapper SYSTEM PUBLIC
     ${Octomap_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${SOPHUS_INCLUDE_DIR}
 )
 
@@ -195,7 +195,7 @@ add_library(maav-mapping SHARED
 
 target_include_directories(maav-mapping PUBLIC
     ${SW_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${SOPHUS_INCLUDE_DIR}
     ${YAMLCPP_INCLUDE_DIRS}
 )

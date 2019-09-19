@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 
 include_directories(
     ${OPENCV_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
     ${ZCM_INCLUDE_DIR}
 )
 

@@ -53,7 +53,7 @@ target_include_directories(${EXECUTABLE} PUBLIC
     ${ZCM_INCLUDE_DIRS}
     ${SW_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIRS}
 )
 
 # Use the Widgets module from Qt 5
