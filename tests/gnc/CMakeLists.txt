@@ -11,7 +11,7 @@ include_directories(
         ${GNC_SRC_DIR}
         ${Boost_INCLUDE_DIRS}
         ${OPENCV_INCLUDE_DIR}
-        ${EIGEN3_INCLUDE_DIR}
+        ${EIGEN_INCLUDE_DIRS}
         ${SOPHUS_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIRS}
         ${PCL_INCLUDE_DIRS}

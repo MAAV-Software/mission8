@@ -3,14 +3,14 @@ if(NOT Octomap_FOUND)
 
     set(Octomap_FOUND true CACHE STRING "")
 
-    set(Octomap_INCLUDE_DIRS "${SOFTWARE_SOURCE_DIR}/thirdparty/octomap/include")
+    set(Octomap_INCLUDE_DIRS "/usr/local/include/octomap")
     set(Octomap_INCLUDE_DIRS ${Octomap_INCLUDE_DIRS} CACHE STRING "")
 
 
-    set(OctomapLibs ${SOFTWARE_SOURCE_DIR}/thirdparty/octomap/lib/liboctomap.so
-                                        ${SOFTWARE_SOURCE_DIR}/thirdparty/octomap/lib/liboctovis.so
-                                        ${SOFTWARE_SOURCE_DIR}/thirdparty/octomap/lib/libdynamicedt3d.so
-                                        ${SOFTWARE_SOURCE_DIR}/thirdparty/octomap/lib/liboctomath.so)
+    set(OctomapLibs /usr/local/lib/liboctomap.so
+                    /usr/local/lib/liboctovis.so
+                    /usr/local/lib/libdynamicedt3d.so
+                    /usr/local/lib/liboctomath.so)
 
     # Find library
     set(Octomap_LIBRARIES ${OctomapLibs})

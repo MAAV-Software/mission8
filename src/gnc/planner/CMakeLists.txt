@@ -9,7 +9,7 @@ target_include_directories(maav-path-planner PUBLIC
 )
 
 target_include_directories(maav-path-planner SYSTEM PUBLIC
-${EIGEN3_INCLUDE_DIR}
+${EIGEN_INCLUDE_DIRS}
 ${Octomap_INCLUDE_DIRS}
 )
 

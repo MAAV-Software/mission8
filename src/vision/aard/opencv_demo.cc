@@ -30,7 +30,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "opencv2/opencv.hpp"
 
 extern "C" {
-#include "apriltag.h"
+#include <apriltag.h>
 #include "common/getopt.h"
 #include "tag16h5.h"
 #include "tag25h9.h"

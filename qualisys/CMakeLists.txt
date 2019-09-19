@@ -20,7 +20,7 @@ find_package(ZCM REQUIRED)
 find_package(ZMQ REQUIRED)
 
 # If Eigen was not found globally, try finding Eigen in software/thirdparty
-if (NOT ${EIGEN3_INCLUDE_DIR})
+if (NOT ${EIGEN_INCLUDE_DIRS})
     find_package(Eigen3 REQUIRED)
 endif()
 
@@ -34,7 +34,7 @@ include_directories(
   ${YAMLCPP_INCLUDE_DIRS}
   ${ZCM_INCLUDE_DIRS}
   ${ZMQ_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIR}
+  ${EIGEN_INCLUDE_DIRS}
 )
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wall -Wextra -pedantic -Werror")

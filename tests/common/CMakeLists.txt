@@ -7,7 +7,7 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(
         ${SW_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${EIGEN3_INCLUDE_DIR}
+        ${EIGEN_INCLUDE_DIRS}
 )
 
 set(TEST_SRCS
