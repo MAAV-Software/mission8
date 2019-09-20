@@ -26,19 +26,7 @@ using namespace Eigen;
 
 BOOST_AUTO_TEST_CASE(MagnetometerTest)
 {
-    if (system("pwd > tmp")) {
-        BOOST_CHECK(false);
-    }
-    ifstream fin("tmp");
-    string path;
-    fin >> path;
-    if (system("rm tmp")) {
-        BOOST_CHECK(false);
-    }
-    path = path.substr(0, path.find("software") + 9);
-    path += "tests/gnc/test_files/EllipsoidPointCloud.txt";
-
-    ifstream file(path);
+    ifstream file("../../tests/gnc/test_files/EllipsoidPointCloud.txt");
 
     vector<vector<double>> vals;
 
