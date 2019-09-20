@@ -146,11 +146,11 @@ BOOST_AUTO_TEST_CASE(GlobalUpdateConversionTest)
 
     BOOST_CHECK_EQUAL(g1.utime, g2->timeUSec());
 
-    BOOST_CHECK_EQUAL(g1.position.data[0], g2->position().x());
-    BOOST_CHECK_EQUAL(g1.position.data[1], g2->position().y());
-    BOOST_CHECK_EQUAL(g1.position.data[2], g2->position().z());
+    BOOST_CHECK_EQUAL(g1.position.data[0], g2->pose().translation()[0]); // x
+    BOOST_CHECK_EQUAL(g1.position.data[1], g2->pose().translation()[1]); // y
+    BOOST_CHECK_EQUAL(g1.position.data[2], g2->pose().translation()[2]); // z
 
-    const Eigen::Quaterniond& q = g2->attitude().unit_quaternion();
+    const Eigen::Quaterniond& q = g2->pose().unit_quaternion();
     BOOST_CHECK_EQUAL(g1.attitude.data[0], q.w());
     BOOST_CHECK_EQUAL(g1.attitude.data[1], q.x());
     BOOST_CHECK_EQUAL(g1.attitude.data[2], q.y());

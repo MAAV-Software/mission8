@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(SimpleSensorModelTest)
         "    rot: [1, 0, 0, 0]\n      pos: [0, 0, 0]"));
 
     auto pred = update.predicted(state);
-    BOOST_CHECK_LE((pred.position() - state.position()).norm(), 0.000001);
-    BOOST_CHECK_LE(diff(pred.attitude(), state.attitude()), 0.000001);
+    BOOST_CHECK_LE((pred.pose().translation() - state.position()).norm(), 0.000001);
+    BOOST_CHECK_LE(diff(pred.pose().so3(), state.attitude()), 0.000001);
 }
 
 BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
@@ -60,6 +60,6 @@ BOOST_AUTO_TEST_CASE(AdvancedSensorModelTest)
                    "0.0000001]\n    extrinsics:\n      rot: [1, 0, 0, 0]\n      pos: [0, 0, 0]"));
 
     auto pred = update.predicted(state);
-    BOOST_CHECK_LE((pred.position() - state.position()).norm(), 0.000001);
-    BOOST_CHECK_LE(diff(pred.attitude(), state.attitude()), 0.000001);
+    BOOST_CHECK_LE((pred.pose().translation() - state.position()).norm(), 0.000001);
+    BOOST_CHECK_LE(diff(pred.pose().so3(), state.attitude()), 0.000001);
 }
