@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_CASE(MagnetometerTest)
 
     vector<vector<double>> vals;
 
-    double xx, yy, zz;
-    while (file >> xx >> yy >> zz)
+    double x_in, y_in, z_in;
+    while (file >> x_in >> y_in >> z_in)
     {
-        vals.push_back(vector<double>{xx, yy, zz});
+        vals.push_back(vector<double>{x_in, y_in, z_in});
     }
 
     VectorXd x(vals.size());
