@@ -61,7 +61,7 @@ private:
 
 bool isDirectlyForward(PointXYZ& point)
 {
-    return ((point.x < 0.7 && point.y > -0.7) && (point.y < 0.3 && point.y > -0.3) && 
+    return ((point.x < 0.7 && point.x > -0.7) && (point.y < 0.3 && point.y > -0.3) && 
         point.z > 0.5);
 }
 
@@ -89,6 +89,6 @@ vector<Vector3d> maav::vision::NaiveObstacle::detectObstacles(PointCloud<PointXY
 
 bool maav::vision::NaiveObstacle::isOnVehicle(PointXYZ& point)
 {
-    return ((point.x < 0.6 && point.y > -0.6) && (point.y < 0.5 && point.y > 0) && 
+    return ((point.x < 0.6 && point.x > -0.6) && (point.y < 0.5 && point.y > 0) && 
         point.z < 0.6);
 }
